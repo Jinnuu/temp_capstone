@@ -11,11 +11,13 @@
         <div class="container">
             <a class="navbar-brand me-4" href="/">Capstone</a>
 
-            <div class="d-flex gap-3 align-items-center">
+            <div class="d-flex gap-3 align-items-center flex-wrap">
                 <a class="nav-link text-white" href="/">홈</a>
-                <a class="nav-link text-white" href="/inventory/ingredients/">식재료 목록</a>
+                <a class="nav-link text-white" href="/inventory/ingredients/">식재료</a>
+                <a class="nav-link text-white" href="/meals/">식단</a>
+                <a class="nav-link text-white" href="/forecasting/">예측</a>
+                <a class="nav-link text-white" href="/procurement/">발주</a>
                 <a class="nav-link text-white" href="/admin/">관리자</a>
-
                 {% if user.is_authenticated %}
                     <span class="text-white">{{ user.username }} 님</span>
                     <form method="post" action="/accounts/logout/" class="d-inline">

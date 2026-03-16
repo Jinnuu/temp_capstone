@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}메뉴 등록 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border">
+    <h1 class="h3 mb-3">메뉴 등록</h1>
+    <p class="text-muted">급식 메뉴를 등록하는 화면입니다.</p>
+
+    <form>
+        <div class="mb-3">
+            <label class="form-label">메뉴명</label>
+            <input type="text" class="form-control" placeholder="예: 김치찌개">
+        </div>
+        <button type="button" class="btn btn-dark">등록</button>
+    </form>
+</div>
+{% endblock %}

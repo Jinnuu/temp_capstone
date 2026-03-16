@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-*qplgcb@*-h$x*yz9hto^djl%8mp-y48)b1^6j0c#%m4x*8z+m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -81,9 +81,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'foodsense_db',
+        'NAME': '',
         'USER': 'root',
-        'PASSWORD': 'wlsdngur12@',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
@@ -128,3 +128,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+# CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']

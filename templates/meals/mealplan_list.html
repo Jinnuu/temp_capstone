@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}식단 조회 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border">
+    <h1 class="h3 mb-3">식단 조회</h1>
+    <p class="text-muted">날짜별 식단을 조회하는 화면입니다.</p>
+
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>날짜</th>
+                <th>끼니</th>
+                <th>메뉴</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2026-03-17</td>
+                <td>점심</td>
+                <td>김치찌개</td>
+            </tr>
+            <tr>
+                <td>2026-03-17</td>
+                <td>저녁</td>
+                <td>제육볶음</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

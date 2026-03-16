@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}메뉴 목록 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border">
+    <h1 class="h3 mb-3">메뉴 목록 조회</h1>
+    <p class="text-muted">등록된 메뉴를 확인하는 화면입니다.</p>
+
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>메뉴명</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>김치찌개</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>제육볶음</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

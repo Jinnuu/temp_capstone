@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}식단 입력 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border">
+    <h1 class="h3 mb-3">날짜별 식단 입력</h1>
+    <p class="text-muted">날짜와 끼니 기준으로 식단을 입력하는 화면입니다.</p>
+
+    <form>
+        <div class="mb-3">
+            <label class="form-label">날짜</label>
+            <input type="date" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">끼니</label>
+            <select class="form-select">
+                <option>아침</option>
+                <option>점심</option>
+                <option>저녁</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">메뉴 선택</label>
+            <select class="form-select">
+                <option>김치찌개</option>
+                <option>제육볶음</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-dark">저장</button>
+    </form>
+</div>
+{% endblock %}
