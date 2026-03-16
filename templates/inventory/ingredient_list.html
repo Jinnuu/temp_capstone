@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}식재료 목록 | FoodSense{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">식재료 목록</h2>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>이름</th>
+            <th>단위</th>
+            <th>단가</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ingredient in ingredients %}
+        <tr>
+            <td>{{ ingredient.id }}</td>
+            <td>{{ ingredient.name }}</td>
+            <td>{{ ingredient.unit }}</td>
+            <td>{{ ingredient.unit_price }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">등록된 식재료가 없습니다.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

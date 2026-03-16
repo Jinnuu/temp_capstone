@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}홈 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3">
+    <h1 class="display-6">Capstone Prototype</h1>
+    <p class="lead">
+        식단, 재고, 예측, 발주를 연결하는 급식 운영 지원 시스템 프로토타입입니다.
+    </p>
+    <hr>
+    <p>현재 구현된 기능</p>
+    <ul>
+        <li>사용자(role) 기반 계정 구조</li>
+        <li>식재료(Ingredient) 모델</li>
+        <li>관리자(admin) 등록</li>
+        <li>MySQL 연동</li>
+    </ul>
+</div>
+{% endblock %}
