@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}회원가입 | Capstone{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="mb-4">회원가입</h2>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-dark w-100">회원가입</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}월간 식단 조회 | Capstone{% endblock %}
+
+{% block content %}
+<style>
+    /* 1. 달력 칸 설정 */
+    .table td {
+        height: 140px;
+        vertical-align: top;
+        position: relative;
+    }
+
+    /* 2. 메뉴 배지 설정 */
+    .meal-badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: help;
+        display: block !important;
+        padding: 6px 8px;
+        position: relative !important; 
+        overflow: visible !important; 
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    /* 3. 툴팁 본체 (Hover 시 나타남) */
+    .meal-badge:hover::after {
+        content: attr(data-full-menu);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        white-space: normal;
+        min-width: 200px;
+        max-width: 300px;
+        z-index: 99999 !important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        display: block !important;
+    }
+
+    /* 4. 화살표 설정 */
+    .meal-badge:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #212529 !important;
+        z-index: 99999 !important;
+        display: block !important;
+    }
+
+    /* 5. [추가] 선택 영역 스타일 */
+    .date-selector {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="p-4 bg-white rounded-3 shadow-sm border">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0">📅 월간 식단표</h1>
+            
+            <form class="d-flex gap-2 align-items-center date-selector">
+                <select class="form-select form-select-sm fw-bold" style="width: 100px;">
+                    <option value="2025">2025년</option>
+                    <option value="2026" selected>2026년</option>
+                    <option value="2027">2027년</option>
+                </select>
+                
+                <select class="form-select form-select-sm fw-bold" style="width: 80px;">
+                    <option value="1">1월</option>
+                    <option value="2">2월</option>
+                    <option value="3" selected>3월</option>
+                    <option value="4">4월</option>
+                    <option value="5">5월</option>
+                    <option value="6">6월</option>
+                    <option value="7">7월</option>
+                    <option value="8">8월</option>
+                    <option value="9">9월</option>
+                    <option value="10">10월</option>
+                    <option value="11">11월</option>
+                    <option value="12">12월</option>
+                </select>
+                
+                <button type="button" class="btn btn-primary btn-sm px-3">이동</button>
+            </form>
+
+            <button class="btn btn-dark btn-sm shadow-sm">오늘로 이동</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered border-secondary-subtle mb-0">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th class="text-danger" style="width: 14.28%;">일</th>
+                        <th style="width: 14.28%;">월</th>
+                        <th style="width: 14.28%;">화</th>
+                        <th style="width: 14.28%;">수</th>
+                        <th style="width: 14.28%;">목</th>
+                        <th style="width: 14.28%;">금</th>
+                        <th class="text-primary" style="width: 14.28%;">토</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-1">
+                            <div class="text-danger fw-bold ms-1">15</div>
+                            <div class="meal-content p-1">
+                                <span class="badge bg-light text-muted border w-100 text-start mb-1">데이터 없음</span>
+                            </div>
+                        </td>
+
+                        <td class="p-1 bg-light-subtle">
+                            <div class="fw-bold ms-1">16</div>
+                            <div class="meal-content p-1 text-truncate">
+                                <span class="badge meal-badge bg-info-subtle text-dark border-info-subtle w-100 text-start mb-1" 
+                                      data-full-menu="샌드위치, 우유, 삶은달걀, 사과">
+                                    B: 샌드위치, 우유, 삶은...
+                                </span>
+                                <span class="badge meal-badge bg-primary-subtle text-dark border-primary-subtle w-100 text-start mb-1" 
+                                      data-full-menu="돈까스, 스프, 양배추샐러드, 깍두기, 밥">
+                                    L: 돈까스, 스프, 양배추...
+                                </span>
+                                <span class="badge meal-badge bg-success-subtle text-dark border-success-subtle w-100 text-start mb-1" 
+                                      data-full-menu="비빔밥, 된장국, 약고추장, 계란후라이, 식혜">
+                                    D: 비빔밥, 된장국, 약고...
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="p-1 border-primary border-2 shadow-sm">
+                            <div class="fw-bold ms-1 text-primary">17 <small>(오늘)</small></div>
+                            <div class="meal-content p-1">
+                                <span class="badge meal-badge bg-info-subtle text-dark border-info-subtle w-100 text-start mb-1" 
+                                      data-full-menu="북어국, 김구이, 콩자반, 쌀밥, 김치">
+                                    B: 북어국, 김구이, 콩자...
+                                </span>
+                                <span class="badge meal-badge bg-primary-subtle text-dark border-primary-subtle w-100 text-start mb-1" 
+                                      data-full-menu="김치찌개, 고등어구이, 무생채, 밥, 요구르트">
+                                    L: 김치찌개, 고등어구이...
+                                </span>
+                                <span class="badge meal-badge bg-success-subtle text-dark border-success-subtle w-100 text-start mb-1" 
+                                      data-full-menu="제육볶음, 상추쌈, 마늘장아찌, 된장찌개, 밥">
+                                    D: 제육볶음, 상추쌈, 마...
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="p-1"><div class="fw-bold ms-1">18</div></td>
+                        <td class="p-1"><div class="fw-bold ms-1">19</div></td>
+                        <td class="p-1"><div class="fw-bold ms-1">20</div></td>
+                        <td class="p-1"><div class="text-primary fw-bold ms-1">21</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-3 d-flex gap-3 justify-content-end align-items-center">
+            <span class="text-muted small">※ 메뉴에 마우스를 올리면 전체 식단을 볼 수 있습니다.</span>
+            <div class="vr"></div>
+            <small><span class="badge bg-info-subtle text-dark border">B</span> 아침</small>
+            <small><span class="badge bg-primary-subtle text-dark border">L</span> 점심</small>
+            <small><span class="badge bg-success-subtle text-dark border">D</span> 저녁</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

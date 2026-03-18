@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}주간 식단 입력 | Capstone{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="p-4 bg-white rounded-3 shadow-sm border">
+        <div class="mb-4">
+            <h1 class="h3 fw-bold text-dark">📅 주간 식단 설정</h1>
+            <p class="text-muted">시작 날짜를 선택하면 일주일치 식단표가 생성됩니다.</p>
+        </div>
+
+        <form id="weekly-diet-form">
+            <div class="row align-items-end mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">주간 시작 날짜 (월요일 권장)</label>
+                    <input type="date" id="start-date" class="form-control" onchange="generateWeeklyTable()">
+                </div>
+                <div class="col-md-8 text-end">
+                    <button type="button" class="btn btn-dark px-4">주간 식단 전체 저장</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 15%;">날짜 (요일)</th>
+                            <th style="width: 28%;">아침 (Breakfast)</th>
+                            <th style="width: 28%;">점심 (Lunch)</th>
+                            <th style="width: 28%;">저녁 (Dinner)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="diet-table-body">
+                        <tr>
+                            <td colspan="4" class="py-5 text-muted">날짜를 선택하면 식단표가 나타납니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 날짜를 선택하면 일주일치 행을 만드는 함수
+    function generateWeeklyTable() {
+        const startDateInput = document.getElementById('start-date').value;
+        if (!startDateInput) return;
+
+        const tbody = document.getElementById('diet-table-body');
+        tbody.innerHTML = ''; // 기존 내용 삭제
+
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const startDate = new Date(startDateInput);
+
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const dateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+            const dayName = days[currentDate.getDay()];
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="bg-light fw-bold">
+                    ${dateStr}<br><span class="text-muted small">(${dayName})</span>
+                </td>
+                <td>${createMenuSelect()}</td>
+                <td>${createMenuSelect()}</td>
+                <td>${createMenuSelect()}</td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+
+    // 메뉴 선택 셀렉트 박스를 생성하는 함수
+    function createMenuSelect() {
+        return `
+            <select class="form-select form-select-sm mb-1">
+                <option selected disabled>메인 메뉴 선택</option>
+                <option>김치찌개</option>
+                <option>제육볶음</option>
+                <option>안동찜닭</option>
+                <option>돈까스</option>
+            </select>
+            <select class="form-select form-select-sm mb-1">
+                <option selected disabled>국/찌개 선택</option>
+                <option>된장찌개</option>
+                <option>미역국</option>
+                <option>콩나물국</option>
+            </select>
+            <div class="text-start">
+                <small class="text-primary" style="cursor:pointer;" onclick="alert('멀티 선택 기능은 추후 구현 가능합니다.')">+ 반찬 추가</small>
+            </div>
+        `;
+    }
+</script>
+{% endblock %}

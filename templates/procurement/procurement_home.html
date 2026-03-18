@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}발주 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border mb-4">
+    <h1 class="h3 mb-2">발주 관리</h1>
+    <p class="mb-0">예측 결과와 재고를 바탕으로 발주 리스트를 생성하는 화면입니다.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">계산 흐름</h2>
+                <ul class="mb-0">
+                    <li>예측 식수 불러오기</li>
+                    <li>레시피 기반 필요량 계산</li>
+                    <li>현재 재고와 비교</li>
+                    <li>부족량 산출</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">발주 결과 예시</h2>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>식재료</th>
+                            <th>부족량</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>쌀</td>
+                            <td>20kg</td>
+                        </tr>
+                        <tr>
+                            <td>감자</td>
+                            <td>8kg</td>
+                        </tr>
+                        <tr>
+                            <td>양파</td>
+                            <td>5kg</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-dark btn-sm">발주 리스트 생성</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}레시피 수정 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-white rounded-3 shadow-sm border">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold text-dark">📝 레시피 수정 및 관리</h1>
+        <p class="text-muted">등록된 메뉴를 선택하여 식재료와 사용량을 수정합니다.</p>
+    </div>
+
+    <form>
+        <div class="mb-4 p-3 bg-light rounded border">
+            <label class="form-label fw-bold">수정할 메뉴 선택</label>
+            <select class="form-select form-select-lg">
+                <option selected disabled>메뉴를 선택하세요...</option>
+                <option>김치찌개</option>
+                <option>제육볶음</option>
+                <option>된장국</option>
+            </select>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 40%;">식재료</th>
+                        <th style="width: 25%;">사용량</th>
+                        <th style="width: 20%;">단위</th>
+                        <th style="width: 15%; text-align: center;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="recipe-table-body">
+                    <tr>
+                        <td><input type="text" class="form-control" value="돼지고기"></td>
+                        <td><input type="number" class="form-control" value="10"></td>
+                        <td>
+                            <select class="form-select">
+                                <option value="kg" selected>kg</option>
+                                <option value="g">g</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()">삭제</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="form-control" value="배추김치"></td>
+                        <td><input type="number" class="form-control" value="5"></td>
+                        <td>
+                            <select class="form-select">
+                                <option value="kg" selected>kg</option>
+                                <option value="g">g</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()">삭제</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addNewRow()">
+                + 식재료 추가
+            </button>
+            <div>
+                <button type="button" class="btn btn-light border px-4">취소</button>
+                <button type="button" class="btn btn-dark px-5">수정 내용 저장</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 수정 화면에서도 새로운 식재료를 추가할 수 있도록 하는 기능
+    function addNewRow() {
+        const tbody = document.getElementById('recipe-table-body');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" class="form-control" placeholder="새 식재료"></td>
+            <td><input type="number" class="form-control" placeholder="0"></td>
+            <td>
+                <select class="form-select">
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                </select>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()">삭제</button>
+            </td>
+        `;
+        tbody.appendChild(newRow);
+    }
+</script>
+{% endblock %}
