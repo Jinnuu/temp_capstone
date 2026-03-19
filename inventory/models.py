@@ -3,6 +3,7 @@ from django.conf import settings
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
+    spec = models.CharField(max_length=100, null=True, blank=True, verbose_name='규격')
     unit = models.CharField(max_length=20, help_text="예: kg, g, EA")
     unit_price = models.IntegerField(default=0)
     safe_stock_level = models.DecimalField(max_digits=10, decimal_places=2)
@@ -13,6 +14,11 @@ class Ingredient(models.Model):
         null=True, 
         related_name='supplied_ingredients'
     )
+    
+    # ✨ 새롭게 추가된 엑셀 데이터 3줄 (여기에 쏙 들어갑니다!)
+    category = models.CharField(max_length=50, null=True, blank=True, verbose_name='대분류')
+    yearly_demand = models.IntegerField(null=True, blank=True, verbose_name='연간예상소요량')
+    total_amount = models.IntegerField(null=True, blank=True, verbose_name='금액')
 
     def __str__(self):
         return self.name
