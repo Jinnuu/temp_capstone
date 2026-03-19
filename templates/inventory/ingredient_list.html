@@ -8,7 +8,12 @@
     <p class="mb-0">식재료 목록, 단위, 단가, 재고 관리의 기준이 되는 데이터입니다.</p>
 </div>
 
-<h2 class="mb-3">식재료 목록</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">식재료 목록</h2>
+    <a href="{% url 'inventory:inventory_log_create' %}" class="btn btn-outline-dark fw-bold">
+        ➕ 재고 입출고 등록
+    </a>
+</div>
 
 <div class="mb-4">
     <a href="?category=" class="btn btn-sm {% if not selected_category %}btn-dark{% else %}btn-outline-dark{% endif %} me-1 mb-2">전체보기</a>

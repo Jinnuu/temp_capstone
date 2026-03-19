@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from .models import Ingredient
+from django.shortcuts import redirect 
+from .forms import InventoryLogForm
 
 def ingredient_list(request):
     # 1. 주소창에서 사용자가 클릭한 '카테고리' 값 가져오기 (없으면 빈칸)
@@ -28,3 +30,18 @@ def ingredient_list(request):
         'selected_category': selected_category, # 현재 어떤 버튼이 눌려있는지 확인하는 용도
     }
     return render(request, 'inventory/ingredient_list.html', context)
+
+def inventory_log_create(request):
+    # 1. 사용자가 '저장' 버튼을 눌렀을 때 (POST 요청)
+    if request.method == 'POST':
+        form = InventoryLogForm(request.POST)
+        if form.is_valid():    # 입력한 데이터가 정상이라면?
+            form.save()        # DB에 바로 저장!
+            # 저장이 끝나면 다시 식재료 목록 화면으로 튕겨 보냅니다.
+            return redirect('inventory:ingredient_list') 
+            
+    # 2. 그냥 처음 주소창을 치고 들어왔을 때 (GET 요청)
+    else:
+        form = InventoryLogForm() # 빈 입력창을 준비합니다.
+        
+    return render(request, 'inventory/inventory_log_form.html', {'form': form})
