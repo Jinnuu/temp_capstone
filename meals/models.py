@@ -1,9 +1,11 @@
 from django.db import models
-from inventory.models import Ingredient  # inventory 앱의 식재료 모델 가져오기
+from inventory.models import Ingredient  # 식재료 모델 가져오기
 
 # 3. Menu (메뉴)
 class Menu(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name="메뉴명")
+    # ✨ 살짝 추가: 메뉴의 카테고리 (예: 한식, 일식, 중식)
+    category = models.CharField(max_length=50, blank=True, null=True, verbose_name="메뉴 분류")
 
     def __str__(self):
         return self.name
@@ -12,10 +14,9 @@ class Menu(models.Model):
 class Recipe(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='recipes')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='used_in_recipes')
-    required_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="1인분 소요량")
+    required_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="1인분 소요량 (예: 0.15)")
 
     class Meta:
-        # SQL: UNIQUE(menu_id, ingredient_id) 반영
         constraints = [
             models.UniqueConstraint(fields=['menu', 'ingredient'], name='unique_recipe_ingredient')
         ]
@@ -31,11 +32,10 @@ class DietPlan(models.Model):
         DINNER = '석식', '석식'
         OTHER = '기타', '기타'
 
-    target_date = models.DateField()
-    meal_type = models.CharField(max_length=10, choices=MealType.choices)
+    target_date = models.DateField(verbose_name="식단 날짜")
+    meal_type = models.CharField(max_length=10, choices=MealType.choices, verbose_name="끼니")
 
     class Meta:
-        # SQL: UNIQUE(target_date, meal_type) 반영
         constraints = [
             models.UniqueConstraint(fields=['target_date', 'meal_type'], name='unique_diet_plan')
         ]
@@ -49,7 +49,6 @@ class DietMenu(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
 
     class Meta:
-        # SQL: UNIQUE(diet_id, menu_id) 반영
         constraints = [
             models.UniqueConstraint(fields=['diet_plan', 'menu'], name='unique_diet_menu')
         ]
