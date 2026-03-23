@@ -1,40 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}메뉴 및 레시피 등록 | Capstone{% endblock %}
+{% block title %}메뉴 및 레시피 수정 | Capstone{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="p-5 bg-white rounded-3 shadow-sm border">
         <div class="mb-4 text-center">
-            <h1 class="h3 fw-bold text-dark">🍽️ 신규 메뉴 등록</h1>
-            <p class="text-muted">식단 구성을 위해 메뉴의 종류와 레시피를 입력해주세요.</p>
+            <h1 class="h3 fw-bold text-dark">📝 메뉴 상세 / 수정</h1>
+            <p class="text-muted">등록된 메뉴의 이름, 카테고리, 레시피를 수정합니다.</p>
         </div>
 
         <form id="recipe-form" method="POST">
             {% csrf_token %}
-            
             <div class="row g-4 mb-5">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">메뉴 이름</label>
-                    <input type="text" name="name" class="form-control form-control-lg" placeholder="예: 차돌박이 된장찌개" required>
+                    <input type="text" name="name" class="form-control form-control-lg" value="{{ menu.name }}" required>
                 </div>
                 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">메뉴 카테고리</label>
                     <div class="d-flex flex-wrap gap-2">
-                        <input type="radio" class="btn-check" name="category" id="type_main" value="메인" checked>
+                        <input type="radio" class="btn-check" name="category" id="type_main" value="메인" {% if menu.category == '메인' %}checked{% endif %}>
                         <label class="btn btn-outline-primary flex-fill" for="type_main">메인</label>
 
-                        <input type="radio" class="btn-check" name="category" id="type_soup" value="국/찌개">
+                        <input type="radio" class="btn-check" name="category" id="type_soup" value="국/찌개" {% if menu.category == '국/찌개' %}checked{% endif %}>
                         <label class="btn btn-outline-info flex-fill" for="type_soup">국/찌개</label>
 
-                        <input type="radio" class="btn-check" name="category" id="type_side" value="밑반찬">
+                        <input type="radio" class="btn-check" name="category" id="type_side" value="밑반찬" {% if menu.category == '밑반찬' %}checked{% endif %}>
                         <label class="btn btn-outline-secondary flex-fill" for="type_side">밑반찬</label>
 
-                        <input type="radio" class="btn-check" name="category" id="type_dessert" value="디저트">
+                        <input type="radio" class="btn-check" name="category" id="type_dessert" value="디저트" {% if menu.category == '디저트' %}checked{% endif %}>
                         <label class="btn btn-outline-warning flex-fill" for="type_dessert">디저트</label>
 
-                        <input type="radio" class="btn-check" name="category" id="type_etc" value="기타">
+                        <input type="radio" class="btn-check" name="category" id="type_etc" value="기타" {% if menu.category == '기타' %}checked{% endif %}>
                         <label class="btn btn-outline-dark flex-fill" for="type_etc">기타</label>
                     </div>
                 </div>
@@ -50,6 +49,24 @@
                     </button>
                 </div>
                 <div id="ingredient-list">
+                    {% for recipe in menu.recipes.all %}
+                    <div class="row g-3 mb-3 align-items-center ingredient-item">
+                        <div class="col-md-5">
+                            <input type="text" name="ing_name[]" class="form-control" value="{{ recipe.ingredient.name }}">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="ing_amount[]" class="form-control" value="{{ recipe.required_amount }}">
+                                <span class="input-group-text bg-white border-start-0 text-muted">kg</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)"><u>삭제</u></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not menu.recipes.all %}
                     <div class="row g-3 mb-3 align-items-center ingredient-item">
                         <div class="col-md-5">
                             <input type="text" name="ing_name[]" class="form-control" placeholder="식재료명 (예: 양파)">
@@ -64,11 +81,13 @@
                             <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)"><u>삭제</u></button>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                <button type="submit" class="btn btn-dark px-5">메뉴 등록 완료</button>
+                <a href="{% url 'meals:menu_list' %}" class="btn btn-light border px-4">취소</a>
+                <button type="submit" class="btn btn-dark px-5">메뉴 수정 완료</button>
             </div>
         </form>
     </div>
@@ -80,7 +99,6 @@
         const newItem = document.createElement('div');
         newItem.className = 'row g-3 mb-3 align-items-center ingredient-item';
         
-        // 💡 자바스크립트로 생기는 칸에도 name="..." 속성을 똑같이 넣어줍니다!
         newItem.innerHTML = `
             <div class="col-md-5">
                 <input type="text" name="ing_name[]" class="form-control" placeholder="식재료명 (예: 양파)">
@@ -103,7 +121,7 @@
         if (items.length > 1) {
             btn.closest('.ingredient-item').remove();
         } else {
-            alert("최소 하나의 식재료는 입력해야 합니다.");
+            alert("최소 하나의 식재료는 유지해야 합니다.");
         }
     }
 </script>

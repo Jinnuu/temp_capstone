@@ -10,7 +10,7 @@
                 <h1 class="h3 fw-bold text-dark">📋 등록 메뉴 관리</h1>
                 <p class="text-muted mb-0">시스템에 등록된 전체 메뉴를 카테고리별로 확인하고 수정할 수 있습니다.</p>
             </div>
-            <a href="{% url 'menu_create' %}" class="btn btn-primary shadow-sm">
+            <a href="{% url 'meals:menu_create' %}" class="btn btn-primary shadow-sm">
                 <i class="bi bi-plus-lg"></i> 새 메뉴 등록
             </a>
         </div>
@@ -25,10 +25,10 @@
             <div class="col-md-8 text-end">
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-outline-secondary btn-sm active">전체</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">메인</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">국/찌개</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">밑반찬</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">디저트</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">한식</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">일식</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">중식</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">양식</button>
                 </div>
             </div>
         </div>
@@ -39,70 +39,40 @@
                     <tr>
                         <th style="width: 8%;" class="text-center">ID</th>
                         <th style="width: 45%;">메뉴명</th>
-                        <th style="width: 22%;" class="text-center">카테고리</th>
+                        <th style="width: 22%;" class="text-center">메뉴 분류</th>
                         <th style="width: 25%;" class="text-center">관리</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for menu in menus %}
                     <tr>
-                        <td class="text-center text-muted">1</td>
-                        <td><span class="fw-bold text-dark">안동 찜닭</span></td>
+                        <td class="text-center text-muted">{{ menu.id }}</td>
+                        <td><span class="fw-bold text-dark">{{ menu.name }}</span></td>
                         <td class="text-center">
-                            <span class="badge bg-primary px-3 py-2" style="min-width: 80px;">메인</span>
+                            <span class="badge bg-secondary px-3 py-2" style="min-width: 80px;">
+                                {{ menu.category|default:"미분류" }}
+                            </span>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-dark me-1">레시피 수정</button>
-                            <button class="btn btn-sm btn-outline-danger">삭제</button>
+                            <a href="{% url 'meals:menu_update' menu.id %}" class="btn btn-sm btn-outline-dark me-1">
+                                         상세/수정
+                            </a>
+                            <form action="{% url 'meals:menu_delete' menu.id %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 이 메뉴를 삭제하시겠습니까?');">
+                                    삭제
+                                </button>
+                            </form>
                         </td>
                     </tr>
-
+                    {% empty %}
                     <tr>
-                        <td class="text-center text-muted">2</td>
-                        <td><span class="fw-bold text-dark">얼큰 소고기 무국</span></td>
-                        <td class="text-center">
-                            <span class="badge bg-info text-dark px-3 py-2" style="min-width: 80px;">국/찌개</span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-dark me-1">레시피 수정</button>
-                            <button class="btn btn-sm btn-outline-danger">삭제</button>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="bi bi-exclamation-circle fs-4 d-block mb-2"></i>
+                            등록된 메뉴가 없습니다.
                         </td>
                     </tr>
-
-                    <tr>
-                        <td class="text-center text-muted">3</td>
-                        <td><span class="fw-bold text-dark">배추 겉절이</span></td>
-                        <td class="text-center">
-                            <span class="badge bg-secondary px-3 py-2" style="min-width: 80px;">밑반찬</span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-dark me-1">레시피 수정</button>
-                            <button class="btn btn-sm btn-outline-danger">삭제</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="text-center text-muted">4</td>
-                        <td><span class="fw-bold text-dark">조각 수박</span></td>
-                        <td class="text-center">
-                            <span class="badge bg-warning text-dark px-3 py-2" style="min-width: 80px;">디저트</span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-dark me-1">레시피 수정</button>
-                            <button class="btn btn-sm btn-outline-danger">삭제</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="text-center text-muted">5</td>
-                        <td><span class="fw-bold text-dark">쌀밥 (백미)</span></td>
-                        <td class="text-center">
-                            <span class="badge bg-dark px-3 py-2" style="min-width: 80px;">기타</span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-dark me-1">레시피 수정</button>
-                            <button class="btn btn-sm btn-outline-danger">삭제</button>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

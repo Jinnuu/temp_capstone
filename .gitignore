@@ -1,15 +1,15 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
+﻿# Created by venv; see https://docs.python.org/3/library/venv.html
 
 # 캐시
-
 __pycache__/
 */__pycache__/
+*.pyc
 
-# 보안 및 충돌
+# 보안 및 환경
 .env
 .venv/
 venv/
 env/
 
-# 이건 쓸데 없음
+# 데이터베이스
 db.sqlite3

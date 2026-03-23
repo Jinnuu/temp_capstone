@@ -1,26 +1,39 @@
 from django.db import models
+from django.conf import settings
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
-    unit = models.CharField(max_length=20, default="ea")
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    spec = models.CharField(max_length=100, null=True, blank=True, verbose_name='규격')
+    unit = models.CharField(max_length=20, help_text="예: kg, g, EA")
+    unit_price = models.IntegerField(default=0)
+    safe_stock_level = models.DecimalField(max_digits=10, decimal_places=2)
+    # SQL: FOREIGN KEY (supplier_id) REFERENCES User(user_id) 
+    supplier = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='supplied_ingredients'
+    )
+    
+    # ✨ 새롭게 추가된 엑셀 데이터 3줄 (여기에 쏙 들어갑니다!)
+    category = models.CharField(max_length=50, null=True, blank=True, verbose_name='대분류')
+    yearly_demand = models.IntegerField(null=True, blank=True, verbose_name='연간예상소요량')
+    total_amount = models.IntegerField(null=True, blank=True, verbose_name='금액')
 
     def __str__(self):
         return self.name
 
-
-class StockTransaction(models.Model):
-    TRANSACTION_TYPES = [
-        ("IN", "In"),
-        ("OUT", "Out"),
-        ("ADJUST", "Adjust"),
-    ]
+class InventoryLog(models.Model):
+    class LogType(models.TextChoices):
+        IN = '입고', '입고'
+        OUT = '출고', '출고'
+        WASTE = '폐기', '폐기'
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    log_type = models.CharField(max_length=10, choices=LogType.choices)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    memo = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateField(null=True, blank=True)
+
     def __str__(self):
-        return f"{self.ingredient.name} - {self.transaction_type} - {self.quantity}"
+        return f"{self.ingredient.name} - {self.log_type}({self.quantity})"

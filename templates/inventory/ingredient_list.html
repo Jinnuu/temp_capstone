@@ -8,30 +8,77 @@
     <p class="mb-0">식재료 목록, 단위, 단가, 재고 관리의 기준이 되는 데이터입니다.</p>
 </div>
 
-<h2 class="mb-3">식재료 목록</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">식재료 목록</h2>
+    <a href="{% url 'inventory:inventory_log_create' %}" class="btn btn-outline-dark fw-bold">
+        ➕ 재고 입출고 등록
+    </a>
+</div>
 
-<table class="table table-bordered table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>이름</th>
-            <th>단위</th>
-            <th>단가</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for ingredient in ingredients %}
-        <tr>
-            <td>{{ ingredient.id }}</td>
-            <td>{{ ingredient.name }}</td>
-            <td>{{ ingredient.unit }}</td>
-            <td>{{ ingredient.unit_price }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4" class="text-center">등록된 식재료가 없습니다.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="mb-4">
+    <a href="?category=" class="btn btn-sm {% if not selected_category %}btn-dark{% else %}btn-outline-dark{% endif %} me-1 mb-2">전체보기</a>
+    
+    {% for cat in categories %}
+        <a href="?category={{ cat }}" class="btn btn-sm {% if selected_category == cat %}btn-primary{% else %}btn-outline-primary{% endif %} me-1 mb-2">
+            {{ cat }}
+        </a>
+    {% endfor %}
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover bg-white shadow-sm align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>대분류</th>
+                <th>품목명</th>      <th>규격</th>        <th>단위</th>
+                <th>연간소요량</th>
+                <th>단가</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ingredient in page_obj %}
+            <tr>
+                <td><span class="badge text-bg-secondary">{{ ingredient.category|default:"분류없음" }}</span></td>
+                
+                <td class="fw-bold">{{ ingredient.name }}</td>
+                <td class="text-muted">{{ ingredient.spec }}</td>
+                
+                <td>{{ ingredient.unit }}</td>
+                <td>{{ ingredient.yearly_demand|default:"0" }} {{ ingredient.unit }}</td>
+                <td>{{ ingredient.unit_price }}원</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4 text-muted">등록된 식재료가 없습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">이전</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">이전</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link text-dark fw-bold bg-light">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">다음</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">다음</span></li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}

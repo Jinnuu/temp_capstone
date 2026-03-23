@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}재고 입출고 등록 | FoodSense{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border mb-4">
+    <h1 class="h3 mb-2">📦 재고 입출고 등록</h1>
+    <p class="mb-0">창고에 들어오고 나가는 식재료의 수량을 꼼꼼하게 기록합니다.</p>
+</div>
+
+<div class="card shadow-sm mx-auto border-0" style="max-width: 600px;">
+    <div class="card-body p-4 p-md-5">
+        
+        <form method="POST">
+            {% csrf_token %} <div class="mb-4">
+                <label class="form-label fw-bold">{{ form.ingredient.label }}</label>
+                {{ form.ingredient }}
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label class="form-label fw-bold">{{ form.log_type.label }}</label>
+                    {{ form.log_type }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
+                    {{ form.quantity }}
+                </div>
+            </div>
+            
+            <div class="mb-5">
+                <label class="form-label fw-bold">{{ form.expiration_date.label }}</label>
+                {{ form.expiration_date }}
+                <div class="form-text text-muted"><i class="bi bi-info-circle"></i> 출고나 폐기 시에는 비워두셔도 됩니다.</div>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold">💾 기록 저장하기</button>
+                <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-light border">취소하고 목록으로 돌아가기</a>
+            </div>
+        </form>
+        
+    </div>
+</div>
+{% endblock %}
