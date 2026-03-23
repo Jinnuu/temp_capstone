@@ -2,7 +2,6 @@
 
 # 캐시
 __pycache__/
-*/__pycache__/
 *.pyc
 
 # 보안 및 환경
