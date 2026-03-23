@@ -1,47 +1,143 @@
-from django.shortcuts import render
+from decimal import Decimal
+
 from django.core.paginator import Paginator
-from .models import Ingredient
-from django.shortcuts import redirect 
-from .forms import InventoryLogForm
+from django.db.models import (
+    BooleanField,
+    Case,
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce
+from django.shortcuts import redirect, render
+
+from .forms import IngredientForm, InventoryLogForm
+from .models import Ingredient, InventoryLog
+
+
+DECIMAL_ZERO = Value(Decimal("0.00"), output_field=DecimalField(max_digits=12, decimal_places=2))
+
+
+def get_ingredient_stock_queryset():
+    return (
+        Ingredient.objects.all()
+        .annotate(
+            in_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.IN, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+            out_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.OUT, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+            waste_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.WASTE, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+        )
+        .annotate(
+            current_stock=ExpressionWrapper(
+                F("in_qty") - F("out_qty") - F("waste_qty"),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        )
+        .annotate(
+            is_low_stock=Case(
+                When(current_stock__lte=F("safe_stock_level"), then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+        .order_by("id")
+    )
+
+
+def get_current_stock(ingredient_id):
+    ingredient = get_ingredient_stock_queryset().get(pk=ingredient_id)
+    return ingredient.current_stock
+
 
 def ingredient_list(request):
-    # 1. 주소창에서 사용자가 클릭한 '카테고리' 값 가져오기 (없으면 빈칸)
-    selected_category = request.GET.get('category', '')
-    
-    # 2. 일단 모든 데이터를 다 가져옵니다.
-    ingredients = Ingredient.objects.all().order_by('id')
-    
-    # 3. ✨ 만약 카테고리가 선택되었다면? -> 그 카테고리만 필터링(조회)!
+    selected_category = request.GET.get("category", "").strip()
+
+    ingredients = get_ingredient_stock_queryset()
+
     if selected_category:
         ingredients = ingredients.filter(category=selected_category)
-        
-    # 4. 화면에 '버튼'을 만들기 위해, DB에 있는 고유한 대분류 이름들만 중복 없이 쏙쏙 뽑아옵니다.
-    categories = Ingredient.objects.exclude(category__isnull=True).exclude(category__exact='').values_list('category', flat=True).distinct()
-    
-    # 5. 페이지네이션 (10개씩 자르기)
+
+    categories = (
+        Ingredient.objects.exclude(category__isnull=True)
+        .exclude(category__exact="")
+        .values_list("category", flat=True)
+        .distinct()
+        .order_by("category")
+    )
+
     paginator = Paginator(ingredients, 10)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
-    
-    # 6. 화면으로 던져줄 보따리 싸기
+
     context = {
-        'page_obj': page_obj,
-        'categories': categories,             # 화면에 그릴 카테고리 버튼들 모음
-        'selected_category': selected_category, # 현재 어떤 버튼이 눌려있는지 확인하는 용도
+        "page_obj": page_obj,
+        "categories": categories,
+        "selected_category": selected_category,
     }
-    return render(request, 'inventory/ingredient_list.html', context)
+    return render(request, "inventory/ingredient_list.html", context)
+
+
+def ingredient_create(request):
+    if request.method == "POST":
+        form = IngredientForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("inventory:ingredient_list")
+    else:
+        form = IngredientForm()
+
+    return render(request, "inventory/ingredient_form.html", {"form": form})
+
 
 def inventory_log_create(request):
-    # 1. 사용자가 '저장' 버튼을 눌렀을 때 (POST 요청)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = InventoryLogForm(request.POST)
-        if form.is_valid():    # 입력한 데이터가 정상이라면?
-            form.save()        # DB에 바로 저장!
-            # 저장이 끝나면 다시 식재료 목록 화면으로 튕겨 보냅니다.
-            return redirect('inventory:ingredient_list') 
-            
-    # 2. 그냥 처음 주소창을 치고 들어왔을 때 (GET 요청)
+        if form.is_valid():
+            ingredient = form.cleaned_data["ingredient"]
+            log_type = form.cleaned_data["log_type"]
+            quantity = form.cleaned_data["quantity"]
+
+            if log_type in [InventoryLog.LogType.OUT, InventoryLog.LogType.WASTE]:
+                current_stock = get_current_stock(ingredient.id)
+                if quantity > current_stock:
+                    form.add_error(
+                        "quantity",
+                        f"현재 재고({current_stock})보다 많은 수량은 출고/폐기할 수 없습니다.",
+                    )
+
+            if form.is_valid():
+                form.save()
+                return redirect("inventory:ingredient_list")
     else:
-        form = InventoryLogForm() # 빈 입력창을 준비합니다.
-        
-    return render(request, 'inventory/inventory_log_form.html', {'form': form})
+        form = InventoryLogForm()
+
+    return render(request, "inventory/inventory_log_form.html", {"form": form})
