@@ -1,63 +1,223 @@
+from urllib import request
+import calendar
+from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Menu, Recipe # 💡 DB에서 메뉴 데이터를 꺼내오기 위해 모델을 불러옵니다!
-from .forms import MenuForm
+from .models import Menu, Recipe, DietPlan, DietMenu
+from .forms import MenuForm, MealPlanForm
 from inventory.models import Ingredient
-
+from django.urls import reverse
 
 def meal_home(request):
     return render(request, "meals/meal_home.html")
 
-def menu_create(request):
-    if request.method == 'POST':
-        # 1. 폼에서 날아온 메뉴 이름과 카테고리 낚아채기
-        menu_name = request.POST.get('name')
-        category = request.POST.get('category')
+def mealplan_create(request):
+    menus = Menu.objects.all().order_by("name")
 
-        # 2. 일단 메뉴(Menu) 방부터 하나 만듭니다!
-        menu = Menu.objects.create(name=menu_name, category=category)
+    if request.method == "POST":
+        meal_type_map = {
+            "breakfast": "조식",
+            "lunch": "중식",
+            "dinner": "석식",
+        }
 
-        # 3. 추가된 여러 개의 식재료 이름과 수량을 리스트 묶음으로 낚아챕니다!
-        ing_names = request.POST.getlist('ing_name[]')
-        ing_amounts = request.POST.getlist('ing_amount[]')
+        weekly_data = {}
 
-        # 4. 이름과 수량을 짝지어서 레시피(Recipe)로 저장합니다!
-        for name, amount in zip(ing_names, ing_amounts):
-            if name and amount: # 빈칸이 아닐 때만 실행
-                # 사용자가 적은 글씨(예: "양파")가 DB 식재료 이름에 포함된 녀석을 찾습니다.
-                ingredient = Ingredient.objects.filter(name__icontains=name.strip()).first()
-                
-                # 식재료를 찾았다면? -> 제육볶음 + 양파 레시피 연결!
-                if ingredient:
-                    Recipe.objects.create(
-                        menu=menu,
-                        ingredient=ingredient,
-                        required_amount=amount
+        for key, value in request.POST.items():
+            if key in ["csrfmiddlewaretoken", "start_date"]:
+                continue
+            if not value:
+                continue
+
+            parts = key.split("_")
+            if len(parts) != 3:
+                continue
+
+            date_str, meal_key, menu_kind = parts
+
+            if meal_key not in meal_type_map:
+                continue
+
+            weekly_data.setdefault((date_str, meal_key), [])
+            weekly_data[(date_str, meal_key)].append(value)
+
+        for (date_str, meal_key), menu_ids in weekly_data.items():
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            meal_type = meal_type_map[meal_key]
+
+            diet_plan, _ = DietPlan.objects.get_or_create(
+                target_date=target_date,
+                meal_type=meal_type,
+            )
+
+            diet_plan.diet_menus.all().delete()
+            unique_menu_ids = set(menu_ids)
+
+            for menu_id in unique_menu_ids:
+                if menu_id:
+                    DietMenu.objects.get_or_create(
+                        diet_plan=diet_plan,
+                        menu_id=menu_id,
                     )
 
-        # 저장이 모두 끝나면 예쁜 메뉴판 화면으로 튕겨냅니다.
-        return redirect('meals:menu_list')
+        start_date = request.POST.get("start_date")
+        if start_date:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            return redirect(
+                f"{reverse('meals:mealplan_list')}?year={start.year}&month={start.month}"
+            )
 
-    # 처음 들어왔을 때는 그냥 빈 화면을 보여줍니다.
+        return redirect("meals:mealplan_list")
+
+    return render(request, "meals/mealplan_create.html", {"menus": menus})
+
+def mealplan_list(request):
+    today = date.today()
+
+    selected_year = int(request.GET.get("year", today.year))
+    selected_month = int(request.GET.get("month", today.month))
+
+    plans = (
+        DietPlan.objects.filter(
+            target_date__year=selected_year,
+            target_date__month=selected_month,
+        )
+        .prefetch_related("diet_menus__menu")
+        .order_by("target_date", "meal_type")
+    )
+
+    meal_map = {}
+    for plan in plans:
+        day = plan.target_date.day
+
+        meal_map.setdefault(
+            day,
+            {
+                "breakfast": [],
+                "lunch": [],
+                "dinner": [],
+            },
+        )
+
+        menu_names = [item.menu.name for item in plan.diet_menus.all()]
+
+        if plan.meal_type == "조식":
+            meal_map[day]["breakfast"] = menu_names
+        elif plan.meal_type == "중식":
+            meal_map[day]["lunch"] = menu_names
+        elif plan.meal_type == "석식":
+            meal_map[day]["dinner"] = menu_names
+
+    calendar_weeks = []
+    for week in calendar.monthcalendar(selected_year, selected_month):
+        week_cells = []
+
+        for day_num in week:
+            if day_num == 0:
+                week_cells.append(None)
+                continue
+
+            week_cells.append(
+                {
+                    "day": day_num,
+                    "is_today": (
+                        today.year == selected_year
+                        and today.month == selected_month
+                        and today.day == day_num
+                    ),
+                    "meals": meal_map.get(
+                        day_num,
+                        {
+                            "breakfast": [],
+                            "lunch": [],
+                            "dinner": [],
+                        },
+                    ),
+                }
+            )
+
+        calendar_weeks.append(week_cells)
+
+    context = {
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "months": range(1, 13),
+        "calendar_weeks": calendar_weeks,
+        "today_year": today.year,
+        "today_month": today.month,
+    }
+    return render(request, "meals/mealplan_list.html", context)
+
+def recipe_create(request):
+    menus = Menu.objects.all().order_by("name")
+    ingredients = Ingredient.objects.all().order_by("name")
+
+    if request.method == "POST":
+        menu_id = request.POST.get("menu_id")
+        ingredient_ids = request.POST.getlist("ingredient_id[]")
+        required_amounts = request.POST.getlist("required_amount[]")
+
+        if menu_id:
+            menu = get_object_or_404(Menu, id=menu_id)
+
+            valid_rows = []
+            for ingredient_id, amount in zip(ingredient_ids, required_amounts):
+                if ingredient_id and amount:
+                    valid_rows.append((ingredient_id, amount))
+
+            if valid_rows:
+                menu.recipes.all().delete()
+
+                for ingredient_id, amount in valid_rows:
+                    Recipe.objects.create(
+                        menu=menu,
+                        ingredient_id=ingredient_id,
+                        required_amount=amount,
+                    )
+
+            return redirect("meals:menu_list")
+
+    context = {
+        "menus": menus,
+        "ingredients": ingredients,
+    }
+    return render(request, "meals/recipe_create.html", context)
+
+def menu_create(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        category = request.POST.get("category")
+
+        if name and category:
+            menu = Menu.objects.create(
+                name=name,
+                category=category,
+            )
+
+            ing_names = request.POST.getlist("ing_name[]")
+            ing_amounts = request.POST.getlist("ing_amount[]")
+
+            for ing_name, ing_amount in zip(ing_names, ing_amounts):
+                if ing_name and ing_amount:
+                    clean_name = ing_name.strip()
+
+                    ingredient = Ingredient.objects.filter(name=clean_name).first()
+                    if not ingredient:
+                        ingredient = Ingredient.objects.filter(name__icontains=clean_name).first()
+
+                    if ingredient:
+                        Recipe.objects.create(
+                            menu=menu,
+                            ingredient=ingredient,
+                            required_amount=ing_amount,
+                        )
+
+            return redirect("meals:menu_list")
+
     return render(request, "meals/menu_create.html")
 
 def menu_list(request):
-    # DB에 있는 모든 메뉴와, 그 메뉴에 딸린 레시피(식재료)들을 한 번에 싹 가져옵니다!
-    menus = Menu.objects.all().prefetch_related('recipes__ingredient')
-    
-    
-    context = {
-        'menus': menus
-    }
-    return render(request, "meals/menu_list.html", context)
-
-def recipe_create(request):
-    return render(request, "meals/recipe_create.html")
-
-def mealplan_create(request):
-    return render(request, "meals/mealplan_create.html")
-
-def mealplan_list(request):
-    return render(request, "meals/mealplan_list.html")
+    menus = Menu.objects.all().prefetch_related("recipes__ingredient")
+    return render(request, "meals/menu_list.html", {"menus": menus})
 
 def menu_delete(request, menu_id):
     menu = get_object_or_404(Menu, id=menu_id) # 삭제할 메뉴 콕 집어오기
