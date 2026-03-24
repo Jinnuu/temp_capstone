@@ -10,14 +10,14 @@
             <p class="text-muted">시작 날짜를 선택하면 일주일치 식단표가 생성됩니다.</p>
         </div>
 
-        <form id="weekly-diet-form">
+        <form id="weekly-diet-form" method="post">
+            {% csrf_token %}
             <div class="row align-items-end mb-4">
                 <div class="col-md-4">
                     <label class="form-label fw-bold">주간 시작 날짜 (월요일 권장)</label>
-                    <input type="date" id="start-date" class="form-control" onchange="generateWeeklyTable()">
-                </div>
+                    <input type="date" name="start_date" id="start-date" class="form-control" onchange="generateWeeklyTable()">                </div>
                 <div class="col-md-8 text-end">
-                    <button type="button" class="btn btn-dark px-4">주간 식단 전체 저장</button>
+                    <button type="submit" class="btn btn-dark px-4">주간 식단 전체 저장</button>
                 </div>
             </div>
 
@@ -43,6 +43,21 @@
 </div>
 
 <script>
+
+    const mainMenuOptions = `
+    <option value="" selected disabled>메인 메뉴 선택</option>
+    {% for menu in menus %}
+        <option value="{{ menu.id }}">{{ menu.name }}</option>
+    {% endfor %}
+    `;
+
+    const soupMenuOptions = `
+        <option value="" selected disabled>국/찌개 선택</option>
+        {% for menu in menus %}
+            <option value="{{ menu.id }}">{{ menu.name }}</option>
+        {% endfor %}
+    `;
+
     // 날짜를 선택하면 일주일치 행을 만드는 함수
     function generateWeeklyTable() {
         const startDateInput = document.getElementById('start-date').value;
@@ -66,34 +81,27 @@
                 <td class="bg-light fw-bold">
                     ${dateStr}<br><span class="text-muted small">(${dayName})</span>
                 </td>
-                <td>${createMenuSelect()}</td>
-                <td>${createMenuSelect()}</td>
-                <td>${createMenuSelect()}</td>
+                <td>${createMenuSelect(dateStr, 'breakfast')}</td>
+                <td>${createMenuSelect(dateStr, 'lunch')}</td>
+                <td>${createMenuSelect(dateStr, 'dinner')}</td>
             `;
             tbody.appendChild(row);
         }
     }
 
     // 메뉴 선택 셀렉트 박스를 생성하는 함수
-    function createMenuSelect() {
-        return `
-            <select class="form-select form-select-sm mb-1">
-                <option selected disabled>메인 메뉴 선택</option>
-                <option>김치찌개</option>
-                <option>제육볶음</option>
-                <option>안동찜닭</option>
-                <option>돈까스</option>
-            </select>
-            <select class="form-select form-select-sm mb-1">
-                <option selected disabled>국/찌개 선택</option>
-                <option>된장찌개</option>
-                <option>미역국</option>
-                <option>콩나물국</option>
-            </select>
-            <div class="text-start">
-                <small class="text-primary" style="cursor:pointer;" onclick="alert('멀티 선택 기능은 추후 구현 가능합니다.')">+ 반찬 추가</small>
-            </div>
-        `;
-    }
+    function createMenuSelect(dateStr, mealKey) {
+    return `
+        <select name="${dateStr}_${mealKey}_main" class="form-select form-select-sm mb-1">
+            ${mainMenuOptions}
+        </select>
+        <select name="${dateStr}_${mealKey}_soup" class="form-select form-select-sm mb-1">
+            ${soupMenuOptions}
+        </select>
+        <div class="text-start">
+            <small class="text-primary" style="cursor:pointer;" onclick="alert('멀티 선택 기능은 추후 구현 가능합니다.')">+ 반찬 추가</small>
+        </div>
+    `;
+}
 </script>
 {% endblock %}

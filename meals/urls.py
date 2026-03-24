@@ -19,7 +19,6 @@ urlpatterns = [
     path("recipe_create/", recipe_create, name="recipe_create"),
     path("mealplan_create/", mealplan_create, name="mealplan_create"),
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
-    path("meals/<int:menu_id>/edit/", menu_update, name="menu_update"),
-    # 💡 views. 를 빼고 깔끔하게 menu_delete만 적어줍니다!
+    path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
 ]
