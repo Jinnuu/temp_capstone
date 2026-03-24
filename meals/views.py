@@ -61,9 +61,6 @@ def mealplan_create(request):
 
         start_date = request.POST.get("start_date")
         if start_date:
-            return redirect(f"{reverse('meals:mealplan_list')}?target_date={start_date}")
-        start_date = request.POST.get("start_date")
-        if start_date:
             start = datetime.strptime(start_date, "%Y-%m-%d").date()
             return redirect(
                 f"{reverse('meals:mealplan_list')}?year={start.year}&month={start.month}"
@@ -151,7 +148,39 @@ def mealplan_list(request):
     return render(request, "meals/mealplan_list.html", context)
 
 def recipe_create(request):
-    return render(request, "meals/recipe_create.html")
+    menus = Menu.objects.all().order_by("name")
+    ingredients = Ingredient.objects.all().order_by("name")
+
+    if request.method == "POST":
+        menu_id = request.POST.get("menu_id")
+        ingredient_ids = request.POST.getlist("ingredient_id[]")
+        required_amounts = request.POST.getlist("required_amount[]")
+
+        if menu_id:
+            menu = get_object_or_404(Menu, id=menu_id)
+
+            valid_rows = []
+            for ingredient_id, amount in zip(ingredient_ids, required_amounts):
+                if ingredient_id and amount:
+                    valid_rows.append((ingredient_id, amount))
+
+            if valid_rows:
+                menu.recipes.all().delete()
+
+                for ingredient_id, amount in valid_rows:
+                    Recipe.objects.create(
+                        menu=menu,
+                        ingredient_id=ingredient_id,
+                        required_amount=amount,
+                    )
+
+            return redirect("meals:menu_list")
+
+    context = {
+        "menus": menus,
+        "ingredients": ingredients,
+    }
+    return render(request, "meals/recipe_create.html", context)
 
 def menu_create(request):
     if request.method == "POST":
