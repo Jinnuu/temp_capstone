@@ -1,10 +1,11 @@
 from urllib import request
-from datetime import datetime
+import calendar
+from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Menu, Recipe, DietPlan, DietMenu
 from .forms import MenuForm, MealPlanForm
 from inventory.models import Ingredient
-
+from django.urls import reverse
 
 def meal_home(request):
     return render(request, "meals/meal_home.html")
@@ -19,13 +20,11 @@ def mealplan_create(request):
             "dinner": "석식",
         }
 
-        # 1) POST 데이터에서 날짜/끼니별 메뉴를 모은다
         weekly_data = {}
 
         for key, value in request.POST.items():
             if key in ["csrfmiddlewaretoken", "start_date"]:
                 continue
-
             if not value:
                 continue
 
@@ -60,24 +59,94 @@ def mealplan_create(request):
                         menu_id=menu_id,
                     )
 
+        start_date = request.POST.get("start_date")
+        if start_date:
+            return redirect(f"{reverse('meals:mealplan_list')}?target_date={start_date}")
+        start_date = request.POST.get("start_date")
+        if start_date:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            return redirect(
+                f"{reverse('meals:mealplan_list')}?year={start.year}&month={start.month}"
+            )
+
         return redirect("meals:mealplan_list")
 
     return render(request, "meals/mealplan_create.html", {"menus": menus})
 
-
 def mealplan_list(request):
-    target_date = request.GET.get("target_date")
+    today = date.today()
 
-    plans = DietPlan.objects.prefetch_related("diet_menus__menu").order_by("meal_type")
+    selected_year = int(request.GET.get("year", today.year))
+    selected_month = int(request.GET.get("month", today.month))
 
-    if target_date:
-        plans = plans.filter(target_date=target_date)
-    else:
-        plans = plans.none()
+    plans = (
+        DietPlan.objects.filter(
+            target_date__year=selected_year,
+            target_date__month=selected_month,
+        )
+        .prefetch_related("diet_menus__menu")
+        .order_by("target_date", "meal_type")
+    )
+
+    meal_map = {}
+    for plan in plans:
+        day = plan.target_date.day
+
+        meal_map.setdefault(
+            day,
+            {
+                "breakfast": [],
+                "lunch": [],
+                "dinner": [],
+            },
+        )
+
+        menu_names = [item.menu.name for item in plan.diet_menus.all()]
+
+        if plan.meal_type == "조식":
+            meal_map[day]["breakfast"] = menu_names
+        elif plan.meal_type == "중식":
+            meal_map[day]["lunch"] = menu_names
+        elif plan.meal_type == "석식":
+            meal_map[day]["dinner"] = menu_names
+
+    calendar_weeks = []
+    for week in calendar.monthcalendar(selected_year, selected_month):
+        week_cells = []
+
+        for day_num in week:
+            if day_num == 0:
+                week_cells.append(None)
+                continue
+
+            week_cells.append(
+                {
+                    "day": day_num,
+                    "is_today": (
+                        today.year == selected_year
+                        and today.month == selected_month
+                        and today.day == day_num
+                    ),
+                    "meals": meal_map.get(
+                        day_num,
+                        {
+                            "breakfast": [],
+                            "lunch": [],
+                            "dinner": [],
+                        },
+                    ),
+                }
+            )
+
+        calendar_weeks.append(week_cells)
 
     context = {
-        "plans": plans,
-        "target_date": target_date,
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "months": range(1, 13),
+        "calendar_weeks": calendar_weeks,
+        "today_year": today.year,
+        "today_month": today.month,
     }
     return render(request, "meals/mealplan_list.html", context)
 
