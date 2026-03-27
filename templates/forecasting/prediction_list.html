@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}예측 결과 목록 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border mb-4">
+    <h1 class="h3 mb-2">예측 결과 목록</h1>
+    <p class="mb-0">저장된 식수 예측 결과를 조회할 수 있습니다.</p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if predictions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>날짜</th>
+                            <th>끼니</th>
+                            <th>예측 인원</th>
+                            <th>모델명</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prediction in predictions %}
+                            <tr>
+                                <td>{{ prediction.id }}</td>
+                                <td>{{ prediction.prediction_date }}</td>
+                                <td>{{ prediction.get_meal_type_display }}</td>
+                                <td>{{ prediction.predicted_count }}명</td>
+                                <td>{{ prediction.model_name }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'forecasting:prediction_result' prediction.id %}" class="btn btn-sm btn-outline-dark">
+                                        상세 보기
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mb-3">저장된 예측 결과가 없습니다.</p>
+        {% endif %}
+
+        <a href="{% url 'forecasting:prediction_create' %}" class="btn btn-dark">새 예측 실행</a>
+    </div>
+</div>
+{% endblock %}
