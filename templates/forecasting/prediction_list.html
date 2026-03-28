@@ -13,32 +13,36 @@
         {% if predictions %}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
-                    <thead>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>날짜</th>
+                        <th>끼니</th>
+                        <th>예측 인원</th>
+                        <th>모델명</th>
+                        <th class="text-end">작업</th> </tr>
+                </thead>
+                <tbody>
+                    {% for prediction in predictions %}
                         <tr>
-                            <th>ID</th>
-                            <th>날짜</th>
-                            <th>끼니</th>
-                            <th>예측 인원</th>
-                            <th>모델명</th>
-                            <th></th>
+                            <td>{{ prediction.id }}</td>
+                            <td>{{ prediction.prediction_date }}</td>
+                            <td>{{ prediction.get_meal_type_display }}</td>
+                            <td>{{ prediction.predicted_count }}명</td>
+                            <td>{{ prediction.model_name }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'forecasting:ingredient_requirement' %}?date={{ prediction.prediction_date|date:'Y-m-d' }}&meal_type={{ prediction.meal_type }}" 
+                                class="btn btn-sm btn-primary me-1">
+                                    식재료 산출
+                                </a>
+                                
+                                <a href="{% url 'forecasting:prediction_result' prediction.id %}" class="btn btn-sm btn-outline-dark">
+                                    상세 보기
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for prediction in predictions %}
-                            <tr>
-                                <td>{{ prediction.id }}</td>
-                                <td>{{ prediction.prediction_date }}</td>
-                                <td>{{ prediction.get_meal_type_display }}</td>
-                                <td>{{ prediction.predicted_count }}명</td>
-                                <td>{{ prediction.model_name }}</td>
-                                <td class="text-end">
-                                    <a href="{% url 'forecasting:prediction_result' prediction.id %}" class="btn btn-sm btn-outline-dark">
-                                        상세 보기
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
+                    {% endfor %}
+                </tbody>
                 </table>
             </div>
         {% else %}

@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     forecasting_home,
     prediction_create_view,
@@ -13,4 +14,5 @@ urlpatterns = [
     path("predict/", prediction_create_view, name="prediction_create"),
     path("results/", prediction_list_view, name="prediction_list"),
     path("results/<int:prediction_id>/", prediction_result_view, name="prediction_result"),
+    path('requirement/', views.ingredient_requirement_view, name='ingredient_requirement'),
 ]
