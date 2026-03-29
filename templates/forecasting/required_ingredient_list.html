@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}식재료 필요량 산출 | Capstone{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 border mb-4">
+    <h1 class="h3 mb-2">🍱 식재료 필요량 산출</h1>
+    <p class="mb-0">AI 예측 식수(<strong>{{ requirements.prediction_count|default:"-" }}명</strong>)를 기준으로 산출된 결과입니다.</p>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">날짜 선택</label>
+                <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">끼니 선택</label>
+                <select name="meal_type" class="form-select">
+                    <option value="breakfast" {% if selected_meal_type == 'breakfast' %}selected{% endif %}>조식</option>
+                    <option value="lunch" {% if selected_meal_type == 'lunch' %}selected{% endif %}>중식</option>
+                    <option value="dinner" {% if selected_meal_type == 'dinner' %}selected{% endif %}>석식</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-dark w-100">조회</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">산출 결과 리스트</h2>
+            <span class="badge bg-primary">{{ selected_date }} / {{ selected_meal_type }}</span>
+        </div>
+
+        {% if requirements.error %}
+            <div class="alert alert-warning mb-0">{{ requirements.error }}</div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border-top">
+                    <thead class="table-light">
+                        <tr>
+                            <th>식재료(포함 메뉴)</th>
+                            <th>필요량</th>
+                            <th>현재고</th>
+                            <th>안전재고</th>
+                            <th class="text-danger">부족분</th>
+                            <th>단위</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, data in requirements.items.items %}
+                        <tr {% if data.order_amount > 0 %}class="table-warning"{% endif %}>
+                            <td>
+                                <div class="fw-bold text-dark">{{ name }}</div>
+                                <div class="mt-1">
+                                    {% for menu in data.included_menus %}
+                                        <span class="badge rounded-pill bg-white text-muted border fw-normal" style="font-size: 0.7rem;">
+                                            {{ menu }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>{{ data.needed_amount|floatformat:1 }}</td>
+                            <td>{{ data.current_stock|floatformat:1 }}</td>
+                            <td>{{ data.safe_level|floatformat:1 }}</td>
+                            <td class="fw-bold {% if data.order_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                                {{ data.order_amount }}
+                            </td>
+                            <td><span class="badge bg-secondary text-white">{{ data.unit }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if requirements.has_shortage %}
+            <div class="alert alert-danger d-flex justify-content-between align-items-center mt-3 mb-0">
+                <span><i class="bi bi-cart-plus-fill me-2"></i> 부족한 식재료가 있습니다.</span>
+                <a href="#" class="btn btn-danger btn-sm disabled" onclick="alert('발주 기능 준비 중'); return false;">
+                    부족분 발주 신청
+                </a>
+            </div>
+            {% else %}
+            <div class="alert alert-success mt-3 mb-0">✨ 모든 재고가 충분합니다.</div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

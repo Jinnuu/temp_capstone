@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
+from datetime import date
+from .services.ingredient_calc import get_ingredient_requirements
 
 from .forms import AttendancePredictionForm
 from .models import AttendancePrediction
@@ -57,3 +59,16 @@ def prediction_list_view(request):
         "forecasting/prediction_list.html",
         {"predictions": predictions},
     )
+
+def ingredient_requirement_view(request):
+    target_date = request.GET.get('date', str(date.today()))
+    meal_type = request.GET.get('meal_type', 'lunch')
+
+    requirements = get_ingredient_requirements(target_date, meal_type)
+
+    context = {
+        'requirements': requirements,
+        'selected_date': target_date,
+        'selected_meal_type': meal_type,
+    }
+    return render(request, 'forecasting/required_ingredient_list.html', context)
