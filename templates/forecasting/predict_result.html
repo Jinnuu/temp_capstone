@@ -1,50 +1,70 @@
 {% extends "base.html" %}
 
-{% block title %}예측 결과 | Capstone{% endblock %}
+{% block title %}식수 예측 상세 | S&P{% endblock %}
 
 {% block content %}
-<div class="p-4 bg-light rounded-3 border mb-4">
-    <h1 class="h3 mb-2">예측 결과</h1>
-    <p class="mb-0">입력한 날짜와 끼니 기준으로 예측된 식수입니다.</p>
-</div>
+<section class="page-header">
+    <h1 class="page-header__title">식수 예측 상세</h1>
+    <p class="page-header__desc">
+        선택한 예측 결과의 기준 정보와 예측 결과를 상세하게 확인합니다.
+    </p>
+</section>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <div class="text-muted small">예측 날짜</div>
-                <div class="fw-semibold">{{ prediction.prediction_date }}</div>
+<section class="detail-grid">
+    <article class="detail-card">
+        <h2 class="detail-card__title">기본 정보</h2>
+        <dl class="detail-list">
+            <div>
+                <dt>ID</dt>
+                <dd>{{ prediction.id }}</dd>
             </div>
-            <div class="col-md-3">
-                <div class="text-muted small">끼니</div>
-                <div class="fw-semibold">{{ prediction.get_meal_type_display }}</div>
+            <div>
+                <dt>기준일</dt>
+                <dd>{{ prediction.prediction_date|date:"Y-m-d" }}</dd>
             </div>
-            <div class="col-md-3">
-                <div class="text-muted small">예측 인원</div>
-                <div class="fw-semibold">{{ prediction.predicted_count }}명</div>
+            <div>
+                <dt>끼니</dt>
+                <dd>{{ prediction.get_meal_type_display }}</dd>
             </div>
-            <div class="col-md-3">
-                <div class="text-muted small">모델명</div>
-                <div class="fw-semibold">{{ prediction.model_name }}</div>
+            <div>
+                <dt>모델명</dt>
+                <dd>{{ prediction.model_name }}</dd>
             </div>
-        </div>
+            <div>
+                <dt>생성일시</dt>
+                <dd>{{ prediction.created_at|date:"Y-m-d H:i" }}</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="detail-card">
+        <h2 class="detail-card__title">예측 결과</h2>
+        <dl class="detail-list">
+            <div>
+                <dt>예측 인원</dt>
+                <dd>{{ prediction.predicted_count }}명</dd>
+            </div>
+            <div>
+                <dt>입력 데이터</dt>
+                <dd>
+                    {% if prediction.input_features %}
+                        <pre style="margin:0; white-space:pre-wrap; font-family:inherit;">{{ prediction.input_features }}</pre>
+                    {% else %}
+                        입력 데이터 없음
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </article>
+</section>
+
+<section class="section-box section-box--tight">
+    <div class="page-actions">
+        <a href="{% url 'forecasting:prediction_list' %}" class="btn">목록으로</a>
+        <a href="{% url 'forecasting:ingredient_requirement' %}?date={{ prediction.prediction_date|date:'Y-m-d' }}&meal_type={{ prediction.meal_type }}"
+           class="btn btn--primary">
+            식재료 산출 보기
+        </a>
     </div>
-</div>
-
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h2 class="h5 mb-3">입력 feature</h2>
-        <pre class="mb-0">{{ prediction.input_features }}</pre>
-    </div>
-</div>
-
-<div class="d-flex gap-2 mt-4">
-    <a href="{% url 'forecasting:ingredient_requirement' %}?date={{ prediction.prediction_date|date:'Y-m-d' }}&meal_type={{ prediction.meal_type }}" 
-       class="btn btn-primary">
-        🥗 이 결과로 식재료 산출하기
-    </a>
-    
-    <a href="{% url 'forecasting:prediction_create' %}" class="btn btn-dark">다시 예측하기</a>
-    <a href="{% url 'forecasting:prediction_list' %}" class="btn btn-outline-secondary">결과 목록 보기</a>
-</div>
+</section>
 {% endblock %}

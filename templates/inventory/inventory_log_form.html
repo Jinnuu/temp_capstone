@@ -1,45 +1,95 @@
 {% extends "base.html" %}
-{% block title %}재고 입출고 등록 | FoodSense{% endblock %}
+
+{% block title %}재고 입출고 등록 | SnP{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <h1 class="mb-3">재고 입출고 등록</h1>
-  <p class="text-muted">창고에 들어오고 나가는 식재료의 수량을 기록합니다.</p>
+<section class="page-header">
+    <h1 class="page-header__title">재고 입출고 등록</h1>
+    <p class="page-header__desc">
+        창고에 들어오고 나가는 식재료 수량을 기록하여 현재 재고를 반영합니다.
+    </p>
+</section>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <form method="post">
+<section class="section-box">
+    <h2 class="section-title">입출고 정보 입력</h2>
+
+    <form method="post" class="form-panel">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-          <div class="alert alert-danger">
-            {{ form.non_field_errors }}
-          </div>
+            <div class="form-panel__field form-panel__field--wide">
+                <div class="alert alert--danger">
+                    {{ form.non_field_errors }}
+                </div>
+            </div>
         {% endif %}
 
-        <div class="row g-3">
-          {% for field in form %}
-            <div class="col-md-6">
-              <label class="form-label">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}
-                <div class="form-text">{{ field.help_text }}</div>
-              {% endif %}
-              {% if field.errors %}
-                <div class="text-danger small mt-1">{{ field.errors }}</div>
-              {% endif %}
+        {% if form.ingredient %}
+            <div class="form-panel__field form-panel__field--wide">
+                <label for="{{ form.ingredient.id_for_label }}">{{ form.ingredient.label }}</label>
+                {{ form.ingredient }}
+                {% if form.ingredient.help_text %}
+                    <div class="form-help">{{ form.ingredient.help_text }}</div>
+                {% endif %}
+                {% if form.ingredient.errors %}
+                    <div class="form-error">{{ form.ingredient.errors }}</div>
+                {% endif %}
             </div>
-          {% endfor %}
+        {% endif %}
+
+        {% if form.log_type %}
+            <div class="form-panel__field">
+                <label for="{{ form.log_type.id_for_label }}">{{ form.log_type.label }}</label>
+                {{ form.log_type }}
+                {% if form.log_type.errors %}
+                    <div class="form-error">{{ form.log_type.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.quantity %}
+            <div class="form-panel__field">
+                <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                {{ form.quantity }}
+                {% if form.quantity.errors %}
+                    <div class="form-error">{{ form.quantity.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.expiration_date %}
+            <div class="form-panel__field">
+                <label for="{{ form.expiration_date.id_for_label }}">{{ form.expiration_date.label }}</label>
+                {{ form.expiration_date }}
+                {% if form.expiration_date.help_text %}
+                    <div class="form-help">{{ form.expiration_date.help_text }}</div>
+                {% endif %}
+                {% if form.expiration_date.errors %}
+                    <div class="form-error">{{ form.expiration_date.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.note %}
+            <div class="form-panel__field form-panel__field--wide">
+                <label for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+                {{ form.note }}
+                {% if form.note.errors %}
+                    <div class="form-error">{{ form.note.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="form-panel__field form-panel__field--wide">
+            <div class="form-help">
+                출고 또는 폐기 등록 시에는 유통기한을 비워두어도 됩니다.
+            </div>
         </div>
 
-        <p class="text-muted mt-3 mb-0">출고나 폐기 시에는 유통기한을 비워두셔도 됩니다.</p>
-
-        <div class="mt-4 d-flex gap-2">
-          <button type="submit" class="btn btn-primary">기록 저장하기</button>
-          <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">목록으로 돌아가기</a>
+        <div class="form-panel__actions">
+            <button type="submit" class="btn btn--dark">기록 저장</button>
+            <a href="/inventory/ingredients/" class="btn">목록으로</a>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
+    </form>
+</section>
 {% endblock %}

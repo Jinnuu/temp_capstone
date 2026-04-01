@@ -1,57 +1,107 @@
 {% extends "base.html" %}
 
-{% block title %}발주 | Capstone{% endblock %}
+{% block title %}발주 관리 | SnP{% endblock %}
 
 {% block content %}
-<div class="p-4 bg-light rounded-3 border mb-4">
-    <h1 class="h3 mb-2">발주 관리</h1>
-    <p class="mb-0">예측 결과와 재고를 바탕으로 발주 리스트를 생성하는 화면입니다.</p>
-</div>
+<section class="page-header">
+    <h1 class="page-header__title">발주 관리</h1>
+    <p class="page-header__desc">
+        예측 결과와 재고 데이터를 바탕으로 발주 필요량을 검토하고 발주 업무 흐름을 확인합니다.
+    </p>
+</section>
 
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="h5">계산 흐름</h2>
-                <ul class="mb-0">
-                    <li>예측 식수 불러오기</li>
-                    <li>레시피 기반 필요량 계산</li>
-                    <li>현재 재고와 비교</li>
-                    <li>부족량 산출</li>
-                </ul>
-            </div>
-        </div>
+<section class="section-box">
+    <h2 class="section-title">발주 업무 흐름</h2>
+
+    <div class="detail-grid">
+        <article class="detail-card">
+            <h3 class="detail-card__title">산출 절차</h3>
+            <dl class="detail-list">
+                <div>
+                    <dt>1단계</dt>
+                    <dd>예측 식수 결과 확인</dd>
+                </div>
+                <div>
+                    <dt>2단계</dt>
+                    <dd>레시피 기준 식재료 필요량 계산</dd>
+                </div>
+                <div>
+                    <dt>3단계</dt>
+                    <dd>현재 재고와 비교하여 부족량 산출</dd>
+                </div>
+                <div>
+                    <dt>4단계</dt>
+                    <dd>발주 리스트 작성 및 저장</dd>
+                </div>
+            </dl>
+        </article>
+
+        <article class="detail-card">
+            <h3 class="detail-card__title">현재 상태</h3>
+            <dl class="detail-list">
+                <div>
+                    <dt>개발 단계</dt>
+                    <dd>Prototype</dd>
+                </div>
+                <div>
+                    <dt>연계 대상</dt>
+                    <dd>식수 예측, 레시피, 재고 데이터</dd>
+                </div>
+                <div>
+                    <dt>향후 확장</dt>
+                    <dd>발주 저장, 발주 조회, 문서화 기능</dd>
+                </div>
+            </dl>
+        </article>
+    </div>
+</section>
+
+<section class="section-box">
+    <div class="page-actions">
+        <h2 class="section-title" style="margin-bottom: 0;">발주 결과 예시</h2>
+        <span class="badge badge--neutral">예시 화면</span>
     </div>
 
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="h5">발주 결과 예시</h2>
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>식재료</th>
-                            <th>부족량</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>쌀</td>
-                            <td>20kg</td>
-                        </tr>
-                        <tr>
-                            <td>감자</td>
-                            <td>8kg</td>
-                        </tr>
-                        <tr>
-                            <td>양파</td>
-                            <td>5kg</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-dark btn-sm">발주 리스트 생성</button>
-            </div>
-        </div>
+    <div class="table-wrap">
+        <table class="table-system">
+            <thead>
+                <tr>
+                    <th>식재료</th>
+                    <th>필요량</th>
+                    <th>현재재고</th>
+                    <th>부족량</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>쌀</td>
+                    <td>100kg</td>
+                    <td>80kg</td>
+                    <td>20kg</td>
+                    <td>발주 필요</td>
+                </tr>
+                <tr>
+                    <td>감자</td>
+                    <td>18kg</td>
+                    <td>10kg</td>
+                    <td>8kg</td>
+                    <td>발주 필요</td>
+                </tr>
+                <tr>
+                    <td>양파</td>
+                    <td>12kg</td>
+                    <td>7kg</td>
+                    <td>5kg</td>
+                    <td>발주 필요</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-</div>
+
+    <div class="page-actions">
+        <a href="/forecasting/results/" class="btn">예측 결과 확인</a>
+        <a href="/" class="btn btn--dark">대시보드로</a>
+    </div>
+</section>
 {% endblock %}

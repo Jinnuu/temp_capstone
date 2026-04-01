@@ -1,128 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}메뉴 및 레시피 수정 | Capstone{% endblock %}
+{% block title %}메뉴 수정 | SnP{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="p-5 bg-white rounded-3 shadow-sm border">
-        <div class="mb-4 text-center">
-            <h1 class="h3 fw-bold text-dark">📝 메뉴 상세 / 수정</h1>
-            <p class="text-muted">등록된 메뉴의 이름, 카테고리, 레시피를 수정합니다.</p>
+<section class="page-header">
+    <h1 class="page-header__title">메뉴 수정</h1>
+    <p class="page-header__desc">
+        기존 메뉴 정보를 수정하고 운영 기준 데이터를 최신 상태로 유지합니다.
+    </p>
+</section>
+
+<section class="section-box">
+    <h2 class="section-title">메뉴 정보 수정</h2>
+
+    <form method="post" class="form-panel">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-panel__field form-panel__field--wide">
+                <div class="alert alert--danger">{{ form.non_field_errors }}</div>
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-panel__field {% if field.name == 'description' %}form-panel__field--wide{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.help_text %}
+                    <div class="form-help">{{ field.help_text }}</div>
+                {% endif %}
+
+                {% if field.errors %}
+                    <div class="form-error">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="form-panel__actions">
+            <button type="submit" class="btn btn--dark">수정 저장</button>
+            <a href="/meals/menu_list/" class="btn">목록으로</a>
         </div>
-
-        <form id="recipe-form" method="POST">
-            {% csrf_token %}
-            <div class="row g-4 mb-5">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">메뉴 이름</label>
-                    <input type="text" name="name" class="form-control form-control-lg" value="{{ menu.name }}" required>
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">메뉴 카테고리</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input type="radio" class="btn-check" name="category" id="type_main" value="메인" {% if menu.category == '메인' %}checked{% endif %}>
-                        <label class="btn btn-outline-primary flex-fill" for="type_main">메인</label>
-
-                        <input type="radio" class="btn-check" name="category" id="type_soup" value="국/찌개" {% if menu.category == '국/찌개' %}checked{% endif %}>
-                        <label class="btn btn-outline-info flex-fill" for="type_soup">국/찌개</label>
-
-                        <input type="radio" class="btn-check" name="category" id="type_side" value="밑반찬" {% if menu.category == '밑반찬' %}checked{% endif %}>
-                        <label class="btn btn-outline-secondary flex-fill" for="type_side">밑반찬</label>
-
-                        <input type="radio" class="btn-check" name="category" id="type_dessert" value="디저트" {% if menu.category == '디저트' %}checked{% endif %}>
-                        <label class="btn btn-outline-warning flex-fill" for="type_dessert">디저트</label>
-
-                        <input type="radio" class="btn-check" name="category" id="type_etc" value="기타" {% if menu.category == '기타' %}checked{% endif %}>
-                        <label class="btn btn-outline-dark flex-fill" for="type_etc">기타</label>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-            <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <label class="form-label fw-bold mb-0">식재료 및 사용량</label>
-                    <button type="button" class="btn btn-outline-success btn-sm" onclick="addIngredient()">
-                        + 식재료 추가
-                    </button>
-                </div>
-                <div id="ingredient-list">
-                    {% for recipe in menu.recipes.all %}
-                    <div class="row g-3 mb-3 align-items-center ingredient-item">
-                        <div class="col-md-5">
-                            <input type="text" name="ing_name[]" class="form-control" value="{{ recipe.ingredient.name }}">
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="number" step="0.01" name="ing_amount[]" class="form-control" value="{{ recipe.required_amount }}">
-                                <span class="input-group-text bg-white border-start-0 text-muted">kg</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)"><u>삭제</u></button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    {% if not menu.recipes.all %}
-                    <div class="row g-3 mb-3 align-items-center ingredient-item">
-                        <div class="col-md-5">
-                            <input type="text" name="ing_name[]" class="form-control" placeholder="식재료명 (예: 양파)">
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="number" step="0.01" name="ing_amount[]" class="form-control" placeholder="사용량">
-                                <span class="input-group-text bg-white border-start-0 text-muted">kg</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)"><u>삭제</u></button>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                <a href="{% url 'meals:menu_list' %}" class="btn btn-light border px-4">취소</a>
-                <button type="submit" class="btn btn-dark px-5">메뉴 수정 완료</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function addIngredient() {
-        const list = document.getElementById('ingredient-list');
-        const newItem = document.createElement('div');
-        newItem.className = 'row g-3 mb-3 align-items-center ingredient-item';
-        
-        newItem.innerHTML = `
-            <div class="col-md-5">
-                <input type="text" name="ing_name[]" class="form-control" placeholder="식재료명 (예: 양파)">
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <input type="number" step="0.01" name="ing_amount[]" class="form-control" placeholder="사용량">
-                    <span class="input-group-text bg-white border-start-0 text-muted">kg</span>
-                </div>
-            </div>
-            <div class="col-md-3 text-end">
-                <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)"><u>삭제</u></button>
-            </div>
-        `;
-        list.appendChild(newItem);
-    }
-
-    function removeIngredient(btn) {
-        const items = document.getElementsByClassName('ingredient-item');
-        if (items.length > 1) {
-            btn.closest('.ingredient-item').remove();
-        } else {
-            alert("최소 하나의 식재료는 유지해야 합니다.");
-        }
-    }
-</script>
+    </form>
+</section>
 {% endblock %}
