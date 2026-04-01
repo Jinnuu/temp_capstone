@@ -1119,3 +1119,17 @@ textarea:focus {
         font-size: 1.65rem;
     }
 }
+
+.forecast-calendar__status {
+    margin-bottom: 10px;
+}
+
+.forecast-calendar__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.forecast-calendar__actions .btn {
+    width: 100%;
+}

@@ -68,8 +68,8 @@
             </div>
 
             <div class="dashboard-card__actions">
-                <a href="/forecasting/predict/" class="btn btn--dark">바로가기</a>
-                <a href="/forecasting/results/" class="btn">결과 보기</a>
+                <a href="{% url 'forecasting:prediction_calendar' %}" class="btn btn--dark">바로가기</a>
+                <a href="{% url 'forecasting:prediction_list' %}" class="btn">결과 보기</a>    
             </div>
         </article>
 
