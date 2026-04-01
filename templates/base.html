@@ -30,14 +30,20 @@
 
                 <div class="topbar__right">
                     {% if user.is_authenticated %}
-                        <div class="userbox">
-                            <span class="userbox__label">사용자</span>
-                            <span class="userbox__name">{{ user.username }}</span>
+                        <div class="auth-chip">
+                            <div class="auth-chip__user">
+                                <span class="auth-chip__label">사용자</span>
+                                <span class="auth-chip__name">{{ user.username }}</span>
+                            </div>
+
+                            <form method="post" action="{% url 'logout' %}" class="auth-chip__form">
+                                {% csrf_token %}
+                                <button type="submit" class="auth-chip__button">로그아웃</button>
+                            </form>
                         </div>
                     {% else %}
-                        <div class="userbox">
-                            <span class="userbox__label">상태</span>
-                            <span class="userbox__name">Guest</span>
+                        <div class="auth-chip auth-chip--guest">
+                            <a href="{% url 'login' %}" class="auth-chip__action auth-chip__action--primary">로그인</a>
                         </div>
                     {% endif %}
                 </div>

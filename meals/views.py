@@ -73,8 +73,36 @@ def mealplan_create(request):
 def mealplan_list(request):
     today = date.today()
 
-    selected_year = int(request.GET.get("year", today.year))
-    selected_month = int(request.GET.get("month", today.month))
+    year_param = (request.GET.get("year") or "").strip()
+    month_param = (request.GET.get("month") or "").strip()
+
+    selected_year = today.year
+    selected_month = today.month
+
+    if month_param:
+        if "-" in month_param:
+            # ex) "2026-02"
+            try:
+                parsed_year, parsed_month = month_param.split("-", 1)
+                selected_year = int(parsed_year)
+                selected_month = int(parsed_month)
+            except ValueError:
+                selected_year = today.year
+                selected_month = today.month
+        else:
+            # ex) "2"
+            try:
+                selected_month = int(month_param)
+            except ValueError:
+                selected_month = today.month
+
+    if year_param:
+        try:
+            selected_year = int(year_param)
+        except ValueError:
+            selected_year = today.year
+    if not 1 <= selected_month <= 12:
+        selected_month = today.month
 
     plans = (
         DietPlan.objects.filter(

@@ -44,13 +44,36 @@
                 <dt>예측 인원</dt>
                 <dd>{{ prediction.predicted_count }}명</dd>
             </div>
+
             <div>
-                <dt>입력 데이터</dt>
+                <dt>평균 오차</dt>
                 <dd>
-                    {% if prediction.input_features %}
-                        <pre style="margin:0; white-space:pre-wrap; font-family:inherit;">{{ prediction.input_features }}</pre>
+                    {% if display_mae %}
+                        약 {{ display_mae }}명
                     {% else %}
-                        입력 데이터 없음
+                        정보 없음
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div>
+                <dt>예상 범위</dt>
+                <dd>
+                    {% if lower_bound and upper_bound %}
+                        {{ lower_bound }}명 ~ {{ upper_bound }}명
+                    {% else %}
+                        정보 없음
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div>
+                <dt>안내</dt>
+                <dd>
+                    {% if display_mae %}
+                        과거 검증 기준 평균적으로 약 {{ display_mae }}명 내외의 차이가 발생할 수 있습니다.
+                    {% else %}
+                        예측 오차 정보가 아직 제공되지 않습니다.
                     {% endif %}
                 </dd>
             </div>

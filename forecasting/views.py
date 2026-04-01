@@ -78,10 +78,31 @@ def prediction_create_view(request):
 
 def prediction_result_view(request, prediction_id):
     prediction = get_object_or_404(AttendancePrediction, id=prediction_id)
+
+    input_features = prediction.input_features or {}
+    raw_mae = input_features.get("test_mae")
+
+    display_mae = None
+    lower_bound = None
+    upper_bound = None
+    has_error_range = False
+
+    if raw_mae is not None:
+        display_mae = round(raw_mae)
+        lower_bound = max(0, round(prediction.predicted_count - raw_mae))
+        upper_bound = round(prediction.predicted_count + raw_mae)
+        has_error_range = True
+
     return render(
         request,
         "forecasting/predict_result.html",
-        {"prediction": prediction},
+        {
+            "prediction": prediction,
+            "display_mae": display_mae,
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound,
+            "has_error_range": has_error_range,
+        },
     )
 
 

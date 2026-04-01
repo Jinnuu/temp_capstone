@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}식단 입력 | SnP{% endblock %}
+{% block title %}식단 입력 | S&P{% endblock %}
 
 {% block content %}
 <section class="page-header">
@@ -9,38 +9,106 @@
         날짜와 끼니 기준으로 식단을 등록하여 예측 및 발주에 활용합니다.
     </p>
 </section>
-
 <section class="section-box">
     <h2 class="section-title">식단 정보 입력</h2>
 
-    <form method="post" class="form-panel">
+    <form method="post" class="form-panel" id="weekly-diet-form">
         {% csrf_token %}
 
-        {% if form.non_field_errors %}
-            <div class="form-panel__field form-panel__field--wide">
-                <div class="alert alert--danger">{{ form.non_field_errors }}</div>
+        <div class="form-panel__field form-panel__field--wide">
+            <label for="start-date">주간 시작 날짜 (월요일 권장)</label>
+            <input type="date" id="start-date" name="start_date" onchange="generateWeeklyTable()">
+        </div>
+
+        <div class="form-panel__field form-panel__field--wide">
+            <div class="table-wrap">
+                <table class="table-system">
+                    <thead>
+                        <tr>
+                            <th>날짜 (요일)</th>
+                            <th>아침</th>
+                            <th>점심</th>
+                            <th>저녁</th>
+                        </tr>
+                    </thead>
+                    <tbody id="diet-table-body">
+                        <tr>
+                            <td colspan="4" class="empty-state">날짜를 선택하면 식단표가 나타납니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        {% endif %}
-
-        {% for field in form %}
-            <div class="form-panel__field">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-
-                {% if field.help_text %}
-                    <div class="form-help">{{ field.help_text }}</div>
-                {% endif %}
-
-                {% if field.errors %}
-                    <div class="form-error">{{ field.errors }}</div>
-                {% endif %}
-            </div>
-        {% endfor %}
-
+        </div>
         <div class="form-panel__actions">
             <button type="submit" class="btn btn--dark">저장</button>
             <a href="/meals/mealplan_list/" class="btn">식단 조회</a>
         </div>
     </form>
 </section>
+
+<script>
+    const menuOptions = `
+        <option value="">선택 안 함</option>
+        {% for menu in menus %}
+            <option value="{{ menu.id }}">{{ menu.name|escapejs }}</option>
+        {% endfor %}
+    `;
+
+    function createMenuSelect(dateStr, mealKey, menuKind) {
+        return `
+            <select name="${dateStr}_${mealKey}_${menuKind}">
+                ${menuOptions}
+            </select>
+        `;
+    }
+
+    function generateWeeklyTable() {
+        const startDateInput = document.getElementById('start-date').value;
+        const tbody = document.getElementById('diet-table-body');
+
+        if (!startDateInput) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-state">날짜를 선택하면 식단표가 나타납니다.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        const startDate = new Date(startDateInput);
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            const dayName = days[currentDate.getDay()];
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${dateStr}</strong><br><span class="text-muted">(${dayName})</span></td>
+                <td>
+                    ${createMenuSelect(dateStr, 'breakfast', 'main')}
+                    ${createMenuSelect(dateStr, 'breakfast', 'side')}
+                </td>
+                <td>
+                    ${createMenuSelect(dateStr, 'lunch', 'main')}
+                    ${createMenuSelect(dateStr, 'lunch', 'side')}
+                </td>
+                <td>
+                    ${createMenuSelect(dateStr, 'dinner', 'main')}
+                    ${createMenuSelect(dateStr, 'dinner', 'side')}
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+</script>
+
 {% endblock %}

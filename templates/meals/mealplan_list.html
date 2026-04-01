@@ -15,13 +15,24 @@
 
     <form method="get" class="filter-bar">
         <div class="filter-field filter-field--span-3">
+            <label for="year">조회 연도</label>
+            <input type="number" name="year" id="year" value="{{ selected_year }}" min="2020" max="2100">
+        </div>
+
+        <div class="filter-field filter-field--span-3">
             <label for="month">조회 월</label>
-            <input type="month" name="month" id="month" value="{{ selected_month }}">
+            <select name="month" id="month">
+                {% for month in months %}
+                    <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>
+                        {{ month }}월
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <div class="filter-actions">
             <button type="submit" class="btn btn--dark">조회</button>
-            <a href="/meals/mealplan_list/" class="btn">초기화</a>
+            <a href="/meals/mealplan_list/?year={{ today_year }}&month={{ today_month }}" class="btn">이번 달</a>
             <a href="/meals/mealplan_create/" class="btn btn--primary">식단 입력</a>
         </div>
     </form>
@@ -30,34 +41,77 @@
 <section class="section-box">
     <div class="page-actions">
         <h2 class="section-title" style="margin-bottom: 0;">월별 식단표</h2>
-        {% if selected_month %}
-            <div class="badge badge--neutral">{{ selected_month }}</div>
-        {% endif %}
+        <div class="badge badge--neutral">{{ selected_year }}년 {{ selected_month }}월</div>
     </div>
 
-    {% if mealplans %}
-        <div class="table-wrap">
-            <table class="table-system">
-                <thead>
+    <p class="helper-text">
+    해당 월에 등록된 식단이 없는 날짜는 '-' 로 표시됩니다.
+    </p>
+
+    <div class="table-wrap">
+        <table class="table-system meal-calendar">
+            <thead>
+                <tr>
+                    <th>일</th>
+                    <th>월</th>
+                    <th>화</th>
+                    <th>수</th>
+                    <th>목</th>
+                    <th>금</th>
+                    <th>토</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in calendar_weeks %}
                     <tr>
-                        <th>날짜</th>
-                        <th>끼니</th>
-                        <th>메뉴명</th>
+                        {% for cell in week %}
+                            {% if cell %}
+                                <td class="meal-calendar__cell">
+                                    <div class="meal-calendar__day {% if cell.is_today %}meal-calendar__day--today{% endif %}">
+                                        {{ cell.day }}
+                                    </div>
+
+                                    <div class="meal-calendar__meal">
+                                        <strong>조</strong>
+                                        {% if cell.meals.breakfast %}
+                                            {% for menu_name in cell.meals.breakfast %}
+                                                <div>{{ menu_name }}</div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="meal-calendar__empty">-</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="meal-calendar__meal">
+                                        <strong>중</strong>
+                                        {% if cell.meals.lunch %}
+                                            {% for menu_name in cell.meals.lunch %}
+                                                <div>{{ menu_name }}</div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="meal-calendar__empty">-</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="meal-calendar__meal">
+                                        <strong>석</strong>
+                                        {% if cell.meals.dinner %}
+                                            {% for menu_name in cell.meals.dinner %}
+                                                <div>{{ menu_name }}</div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="meal-calendar__empty">-</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td class="meal-calendar__cell meal-calendar__cell--blank"></td>
+                            {% endif %}
+                        {% endfor %}
                     </tr>
-                </thead>
-                <tbody>
-                    {% for mealplan in mealplans %}
-                        <tr>
-                            <td>{{ mealplan.meal_date|date:"Y-m-d" }}</td>
-                            <td>{{ mealplan.get_meal_type_display }}</td>
-                            <td>{{ mealplan.menu.name }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="empty-state">등록된 식단이 없습니다.</div>
-    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </section>
 {% endblock %}
