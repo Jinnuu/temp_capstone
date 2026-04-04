@@ -1,11 +1,48 @@
 from decimal import Decimal
-
 from django import forms
-
 from .models import Ingredient, InventoryLog
 
-
 class IngredientForm(forms.ModelForm):
+    UNIT_CHOICES = [
+        ('', '--- 단위 선택 ---'),
+        ('kg', 'kg'),
+        ('g', 'g'),
+        ('EA', 'EA'),
+        ('병', '병'),
+        ('통', '통'),
+        ('팩', '팩'),
+        ('box','box'),
+
+    ]
+
+    CATEGORY_CHOICES = [
+        ('', '--- 대분류 선택 ---'),
+        ('과일류', '과일류'),
+        ('기타식품', '기타식품'),
+        ('김치/절임류', '김치/절임류'),
+        ('냉동식품/즉석식품', '냉동식품/즉석식품'),
+        ('병/통조림류', '병/통조림류'),
+        ('소모품', '소모품'),
+        ('수산/수산가공품', '수산/수산가공품'),
+        ('양곡/곡분가공품', '양곡/곡분가공품'),
+        ('양념/조미료류', '양념/조미료류'),
+        ('유가공/음료제품', '유가공/음료제품'),
+        ('채소/농가공품', '채소/농가공품'),
+        ('축산/축산가공품', '축산/축산가공품'),
+    ]
+
+    unit = forms.ChoiceField(
+        choices=UNIT_CHOICES,
+        label="단위",
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    category = forms.ChoiceField(
+        choices=CATEGORY_CHOICES,
+        label="대분류",
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
     class Meta:
         model = Ingredient
         fields = [
@@ -31,10 +68,8 @@ class IngredientForm(forms.ModelForm):
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "spec": forms.TextInput(attrs={"class": "form-control"}),
-            "unit": forms.TextInput(attrs={"class": "form-control", "placeholder": "예: kg, g, EA"}),
             "unit_price": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
             "safe_stock_level": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "category": forms.TextInput(attrs={"class": "form-control"}),
             "yearly_demand": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
             "total_amount": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
         }

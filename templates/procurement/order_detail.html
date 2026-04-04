@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
+    <div class="text-muted mb-4 fs-6">
+        주문요청 일시: <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong> 
+        <span class="mx-2">|</span> 
+        현재 배송 상태: <span class="badge bg-secondary">{{ order.status }}</span>
+    </div>
+    
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="table-responsive">
+            <table class="table table-bordered text-center align-middle m-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="py-3">No</th>
+                        <th class="py-3">품목명</th>
+                        <th class="py-3">단위</th>
+                        <th class="py-3 text-end pe-4">단가(원)</th>
+                        <th class="py-3">발주 주문량</th>
+                        <th class="py-3 text-end pe-4">공급가액(원)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="text-danger fw-bold text-start ps-4">{{ item.ingredient.name }}</td>
+                        <td>{{ item.ingredient.unit }}</td>
+                        <td class="text-end pe-4">{{ item.order_unit_price }}</td>
+                        <td class="fw-bold">{{ item.required_qty|floatformat:0 }}</td>
+                        <td class="text-end pe-4">{{ item.estimated_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-light fw-bold">
+                    <tr>
+                        <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">총 공급가액 (식재료액합계)</td>
+                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ subtotal }}원</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">부가가치세 (10%)</td>
+                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ vat }}원</td>
+                    </tr>
+                    <tr class="table-secondary">
+                        <td colspan="5" class="text-end pe-4 py-4 fs-4 text-dark">최종 결제 총액 (A+B+C)</td>
+                        <td class="text-end pe-4 py-4 fs-3 text-danger">{{ total }}원</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    
+    <div class="text-center pb-5">
+        <a href="{% url 'procurement_order_list' %}" class="btn btn-outline-secondary btn-lg px-5">목록으로 돌아가기</a>
+    </div>
+</div>
+{% endblock %}
