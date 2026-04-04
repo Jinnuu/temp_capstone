@@ -1,21 +1,68 @@
 {% extends "base.html" %}
 
-{% block title %}회원가입 | Capstone{% endblock %}
+{% block title %}회원가입 | S&P{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="mb-4">회원가입</h2>
+<section class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card__header">
+            <h1 class="auth-card__title">회원가입</h1>
+            <p class="auth-card__desc">
+                계정을 생성하고 S&amp;P 운영 시스템을 시작하세요.
+            </p>
+        </div>
 
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-dark w-100">회원가입</button>
-                </form>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            <div class="auth-form__field">
+                <label for="{{ form.username.id_for_label }}">아이디</label>
+                {{ form.username }}
+                {% comment %} {% if form.username.help_text %}
+                    <div class="form-help">{{ form.username.help_text }}</div>
+                {% endif %} {% endcomment %}
+                {% if form.username.errors %}
+                    <div class="form-error">{{ form.username.errors }}</div>
+                {% endif %}
             </div>
+
+            <div class="auth-form__field">
+                <label for="{{ form.password1.id_for_label }}">비밀번호</label>
+                {{ form.password1 }}
+                {% comment %} {% if form.password1.help_text %}
+                    <div class="form-help">{{ form.password1.help_text }}</div>
+                {% endif %} {% endcomment %}
+                {% if form.password1.errors %}
+                    <div class="form-error">{{ form.password1.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="auth-form__field">
+                <label for="{{ form.password2.id_for_label }}">비밀번호 확인</label>
+                {{ form.password2 }}
+                {% comment %} {% if form.password2.help_text %}
+                    <div class="form-help">{{ form.password2.help_text }}</div>
+                {% endif %} {% endcomment %}
+                {% if form.password2.errors %}
+                    <div class="form-error">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert--danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="auth-form__actions">
+                <button type="submit" class="btn btn--dark auth-form__submit">회원가입</button>
+            </div>
+        </form>
+
+        <div class="auth-helper">
+            이미 계정이 있으신가요?
+            <a href="{% url 'login' %}" class="auth-helper__link">로그인</a>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

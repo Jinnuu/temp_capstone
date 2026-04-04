@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}식재료 등록 | FoodSense{% endblock %}
+
+{% block title %}식재료 등록 | S&P{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -13,10 +14,101 @@
     </button>
   </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <form method="post">
+    <form method="post" class="form-panel">
         {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-panel__field form-panel__field--wide">
+                <div class="alert alert--danger">
+                    {{ form.non_field_errors }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if form.name %}
+            <div class="form-panel__field">
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="form-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.spec %}
+            <div class="form-panel__field">
+                <label for="{{ form.spec.id_for_label }}">{{ form.spec.label }}</label>
+                {{ form.spec }}
+                {% if form.spec.errors %}
+                    <div class="form-error">{{ form.spec.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.unit %}
+            <div class="form-panel__field">
+                <label for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
+                {{ form.unit }}
+            </div>
+        {% endif %}
+
+        {% if form.unit_price %}
+            <div class="form-panel__field">
+                <label for="{{ form.unit_price.id_for_label }}">{{ form.unit_price.label }}</label>
+                {{ form.unit_price }}
+                {% if form.unit_price.errors %}
+                    <div class="form-error">{{ form.unit_price.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.safe_stock_level %}
+            <div class="form-panel__field">
+                <label for="{{ form.safe_stock_level.id_for_label }}">{{ form.safe_stock_level.label }}</label>
+                {{ form.safe_stock_level }}
+                {% if form.safe_stock_level.errors %}
+                    <div class="form-error">{{ form.safe_stock_level.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.category %}
+            <div class="form-panel__field">
+                <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="form-error">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.yearly_demand %}
+            <div class="form-panel__field">
+                <label for="{{ form.yearly_demand.id_for_label }}">{{ form.yearly_demand.label }}</label>
+                {{ form.yearly_demand }}
+                {% if form.yearly_demand.errors %}
+                    <div class="form-error">{{ form.yearly_demand.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.amount %}
+            <div class="form-panel__field">
+                <label for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                    <div class="form-error">{{ form.amount.errors }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="form-panel__actions">
+            <button type="submit" class="btn btn--dark">저장</button>
+            <a href="/inventory/ingredients/" class="btn">취소</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
         <div class="row g-3">
           {% for field in form %}
             <div class="col-md-6">

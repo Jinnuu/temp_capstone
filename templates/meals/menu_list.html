@@ -1,90 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}메뉴 목록 조회 | Capstone{% endblock %}
+{% block title %}메뉴 목록 | S&P{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="p-4 bg-white rounded-3 shadow-sm border">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 fw-bold text-dark">📋 등록 메뉴 관리</h1>
-                <p class="text-muted mb-0">시스템에 등록된 전체 메뉴를 카테고리별로 확인하고 수정할 수 있습니다.</p>
-            </div>
-            <a href="{% url 'meals:menu_create' %}" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-lg"></i> 새 메뉴 등록
-            </a>
-        </div>
+<section class="page-header">
+    <h1 class="page-header__title">메뉴 목록</h1>
+    <p class="page-header__desc">
+        등록된 급식 메뉴를 조회하고 필요한 경우 수정합니다.
+    </p>
+</section>
 
-        <div class="row g-2 mb-3">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" placeholder="메뉴명 검색...">
-                </div>
-            </div>
-            <div class="col-md-8 text-end">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-secondary btn-sm active">전체</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">한식</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">일식</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">중식</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">양식</button>
-                </div>
-            </div>
-        </div>
+<section class="section-box">
+    <div class="page-actions">
+        <h2 class="section-title" style="margin-bottom: 0;">등록 메뉴</h2>
+        <a href="/meals/menu_create/" class="btn btn--primary">메뉴 등록</a>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle border-top">
-                <thead class="table-light">
+    {% if menus %}
+        <div class="table-wrap">
+            <table class="table-system">
+                <thead>
                     <tr>
-                        <th style="width: 8%;" class="text-center">ID</th>
-                        <th style="width: 45%;">메뉴명</th>
-                        <th style="width: 22%;" class="text-center">메뉴 분류</th>
-                        <th style="width: 25%;" class="text-center">관리</th>
+                        <th>ID</th>
+                        <th>메뉴명</th>
+                        <th>설명</th>
+                        <th class="text-right">작업</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for menu in menus %}
-                    <tr>
-                        <td class="text-center text-muted">{{ menu.id }}</td>
-                        <td><span class="fw-bold text-dark">{{ menu.name }}</span></td>
-                        <td class="text-center">
-                            <span class="badge bg-secondary px-3 py-2" style="min-width: 80px;">
-                                {{ menu.category|default:"미분류" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <a href="{% url 'meals:menu_update' menu.id %}" class="btn btn-sm btn-outline-dark me-1">
-                                         상세/수정
-                            </a>
-                            <form action="{% url 'meals:menu_delete' menu.id %}" method="POST" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 이 메뉴를 삭제하시겠습니까?');">
-                                    삭제
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
-                            <i class="bi bi-exclamation-circle fs-4 d-block mb-2"></i>
-                            등록된 메뉴가 없습니다.
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>{{ menu.id }}</td>
+                            <td>{{ menu.name }}</td>
+                            <td>{{ menu.description|default:"-" }}</td>
+                            <td class="text-right">
+                                <div class="inline-actions">
+                                    <a href="/meals/menu_update/{{ menu.id }}/" class="btn btn--sm">수정</a>
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled"><a class="page-link" href="#">이전</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">다음</a></li>
-            </ul>
-        </nav>
-    </div>
-</div>
+    {% else %}
+        <div class="empty-state">등록된 메뉴가 없습니다.</div>
+    {% endif %}
+</section>
 {% endblock %}

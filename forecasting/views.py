@@ -1,6 +1,8 @@
+import calendar
+import traceback
+from collections import Counter
 from datetime import date
 from urllib.parse import urlencode
-import traceback
 
 from django.contrib import messages
 from django.db.models import Case, When, Value, IntegerField
@@ -14,9 +16,93 @@ from .services.prediction_service import run_attendance_prediction
 
 
 def forecasting_home(request):
-    return redirect("forecasting:prediction_create")
+    return redirect("forecasting:prediction_calendar")
 
+def prediction_calendar_view(request):
+    today = date.today()
 
+    try:
+        selected_year = int(request.GET.get("year", today.year))
+    except (TypeError, ValueError):
+        selected_year = today.year
+
+    try:
+        selected_month = int(request.GET.get("month", today.month))
+    except (TypeError, ValueError):
+        selected_month = today.month
+
+    if not 1 <= selected_month <= 12:
+        selected_month = today.month
+
+    month_matrix = calendar.monthcalendar(selected_year, selected_month)
+
+    month_predictions = AttendancePrediction.objects.filter(
+        prediction_date__year=selected_year,
+        prediction_date__month=selected_month,
+    ).values_list("prediction_date", flat=True)
+
+    prediction_counts = Counter(month_predictions)
+
+    calendar_weeks = []
+    for week in month_matrix:
+        week_cells = []
+
+        for day in week:
+            if day == 0:
+                week_cells.append(None)
+                continue
+
+            cell_date = date(selected_year, selected_month, day)
+            count = prediction_counts.get(cell_date, 0)
+
+            create_url = (
+                reverse("forecasting:prediction_create")
+                + "?"
+                + urlencode({"prediction_date": cell_date.isoformat()})
+            )
+            result_url = (
+                reverse("forecasting:prediction_list")
+                + "?"
+                + urlencode({"target_date": cell_date.isoformat()})
+            )
+
+            if count >= 3:
+                status_label = "완료"
+                status_class = "badge--success"
+            elif count > 0:
+                status_label = "일부 생성"
+                status_class = "badge--warning"
+            else:
+                status_label = "예측 없음"
+                status_class = "badge--neutral"
+
+            week_cells.append({
+                "day": day,
+                "date": cell_date,
+                "is_today": cell_date == today,
+                "prediction_count": count,
+                "has_prediction": count > 0,
+                "status_label": status_label,
+                "status_class": status_class,
+                "create_url": create_url,
+                "result_url": result_url,
+            })
+
+        calendar_weeks.append(week_cells)
+
+    return render(
+        request,
+        "forecasting/prediction_calendar.html",
+        {
+            "calendar_weeks": calendar_weeks,
+            "selected_year": selected_year,
+            "selected_month": selected_month,
+            "today_year": today.year,
+            "today_month": today.month,
+            "months": range(1, 13),
+        },
+    )
+    
 def prediction_create_view(request):
     if request.method == "POST":
         form = AttendancePredictionForm(request.POST)
@@ -71,17 +157,47 @@ def prediction_create_view(request):
                     "실패한 끼니: " + ", ".join(failed_meals)
                 )
     else:
-        form = AttendancePredictionForm()
+        initial = {}
+        initial_prediction_date = request.GET.get("prediction_date")
+
+        if initial_prediction_date:
+            try:
+                initial["prediction_date"] = date.fromisoformat(initial_prediction_date)
+            except ValueError:
+                pass
+
+        form = AttendancePredictionForm(initial=initial)
 
     return render(request, "forecasting/predict_form.html", {"form": form})
 
 
 def prediction_result_view(request, prediction_id):
     prediction = get_object_or_404(AttendancePrediction, id=prediction_id)
+
+    input_features = prediction.input_features or {}
+    raw_mae = input_features.get("test_mae")
+
+    display_mae = None
+    lower_bound = None
+    upper_bound = None
+    has_error_range = False
+
+    if raw_mae is not None:
+        display_mae = round(raw_mae)
+        lower_bound = max(0, round(prediction.predicted_count - raw_mae))
+        upper_bound = round(prediction.predicted_count + raw_mae)
+        has_error_range = True
+
     return render(
         request,
         "forecasting/predict_result.html",
-        {"prediction": prediction},
+        {
+            "prediction": prediction,
+            "display_mae": display_mae,
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound,
+            "has_error_range": has_error_range,
+        },
     )
 
 
