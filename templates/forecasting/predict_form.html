@@ -5,14 +5,14 @@
 {% block content %}
 <div class="p-4 bg-light rounded-3 border mb-4">
     <h1 class="h3 mb-2">식수 예측 실행</h1>
-    <p class="mb-0">예측 날짜와 끼니를 입력한 뒤 예측을 실행하세요.</p>
+    <p class="mb-0">날짜를 선택하면 조식, 중식, 석식 예측을 한 번에 실행합니다.</p>
 </div>
 
 <div class="card shadow-sm">
     <div class="card-body">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-danger" role="alert">
+                <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -21,7 +21,7 @@
         <form method="post">
             {% csrf_token %}
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="{{ form.prediction_date.id_for_label }}" class="form-label">
                         {{ form.prediction_date.label }}
                     </label>
@@ -33,20 +33,8 @@
                     {% endif %}
                 </div>
 
-                <div class="col-md-4">
-                    <label for="{{ form.meal_type.id_for_label }}" class="form-label">
-                        {{ form.meal_type.label }}
-                    </label>
-                    {{ form.meal_type }}
-                    {% if form.meal_type.errors %}
-                        <div class="text-danger small mt-1">
-                            {{ form.meal_type.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-dark w-100">예측 실행</button>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100">해당 날짜 예측 실행</button>
                 </div>
             </div>
         </form>

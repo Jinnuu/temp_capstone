@@ -1,23 +1,20 @@
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
 from datetime import date
-from .services.ingredient_calc import get_ingredient_requirements
-
-from .forms import AttendancePredictionForm
-from .models import AttendancePrediction
-from .services.prediction_service import run_attendance_prediction
+from urllib.parse import urlencode
 import traceback
 
-from datetime import timedelta
-from django.utils import timezone
+from django.contrib import messages
+from django.db.models import Case, When, Value, IntegerField
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+
+from .forms import AttendancePredictionForm, PredictionFilterForm
+from .models import AttendancePrediction
+from .services.ingredient_calc import get_ingredient_requirements
+from .services.prediction_service import run_attendance_prediction
+
 
 def forecasting_home(request):
-    tomorrow = timezone.localdate() + timedelta(days=1)
-    return render(
-        request,
-        "forecasting/forecasting_home.html",
-        {"tomorrow": tomorrow},
-    )
+    return redirect("forecasting:prediction_create")
 
 
 def prediction_create_view(request):
@@ -25,18 +22,54 @@ def prediction_create_view(request):
         form = AttendancePredictionForm(request.POST)
         if form.is_valid():
             prediction_date = form.cleaned_data["prediction_date"]
-            meal_type = form.cleaned_data["meal_type"]
 
-            try:
-                prediction = run_attendance_prediction(
-                    prediction_date=prediction_date,
-                    meal_type=meal_type,
-                    menu_text=None,
+            meal_types = [
+                AttendancePrediction.MealType.BREAKFAST,
+                AttendancePrediction.MealType.LUNCH,
+                AttendancePrediction.MealType.DINNER,
+            ]
+
+            success_count = 0
+            failed_meals = []
+
+            for meal_type in meal_types:
+                try:
+                    run_attendance_prediction(
+                        prediction_date=prediction_date,
+                        meal_type=meal_type,
+                        menu_text=None,
+                    )
+                    success_count += 1
+                except Exception as e:
+                    traceback.print_exc()
+                    failed_meals.append(f"{meal_type}({e})")
+
+            if success_count:
+                messages.success(
+                    request,
+                    f"{prediction_date} 기준 예측 {success_count}건이 생성되었습니다."
                 )
-                return redirect("forecasting:prediction_result", prediction_id=prediction.id)
-            except Exception as e:
-                traceback.print_exc()
-                messages.error(request, f"예측 실행 중 오류가 발생했습니다: {e}")
+
+                if failed_meals:
+                    messages.warning(
+                        request,
+                        "일부 끼니 예측에 실패했습니다: " + ", ".join(failed_meals)
+                    )
+
+                url = reverse("forecasting:prediction_list")
+                query_string = urlencode({"target_date": prediction_date})
+                return redirect(f"{url}?{query_string}")
+
+            messages.error(
+                request,
+                "예측 실행에 실패했습니다. 로그를 확인해주세요."
+            )
+
+            if failed_meals:
+                messages.warning(
+                    request,
+                    "실패한 끼니: " + ", ".join(failed_meals)
+                )
     else:
         form = AttendancePredictionForm()
 
@@ -53,22 +86,58 @@ def prediction_result_view(request, prediction_id):
 
 
 def prediction_list_view(request):
-    predictions = AttendancePrediction.objects.all()
+    form = PredictionFilterForm(request.GET or None)
+
+    predictions = AttendancePrediction.objects.annotate(
+        meal_order=Case(
+            When(meal_type=AttendancePrediction.MealType.BREAKFAST, then=Value(1)),
+            When(meal_type=AttendancePrediction.MealType.LUNCH, then=Value(2)),
+            When(meal_type=AttendancePrediction.MealType.DINNER, then=Value(3)),
+            default=Value(99),
+            output_field=IntegerField(),
+        )
+    )
+
+    if form.is_valid():
+        target_date = form.cleaned_data.get("target_date")
+        start_date = form.cleaned_data.get("start_date")
+        end_date = form.cleaned_data.get("end_date")
+        order = form.cleaned_data.get("order") or "latest"
+
+        if target_date:
+            predictions = predictions.filter(prediction_date=target_date)
+        else:
+            if start_date:
+                predictions = predictions.filter(prediction_date__gte=start_date)
+            if end_date:
+                predictions = predictions.filter(prediction_date__lte=end_date)
+
+        if order == "oldest":
+            predictions = predictions.order_by("prediction_date", "meal_order", "created_at")
+        else:
+            predictions = predictions.order_by("-prediction_date", "meal_order", "-created_at")
+    else:
+        predictions = predictions.order_by("-prediction_date", "meal_order", "-created_at")
+
     return render(
         request,
         "forecasting/prediction_list.html",
-        {"predictions": predictions},
+        {
+            "predictions": predictions,
+            "form": form,
+        },
     )
 
+
 def ingredient_requirement_view(request):
-    target_date = request.GET.get('date', str(date.today()))
-    meal_type = request.GET.get('meal_type', 'lunch')
+    target_date = request.GET.get("date", str(date.today()))
+    meal_type = request.GET.get("meal_type", "lunch")
 
     requirements = get_ingredient_requirements(target_date, meal_type)
 
     context = {
-        'requirements': requirements,
-        'selected_date': target_date,
-        'selected_meal_type': meal_type,
+        "requirements": requirements,
+        "selected_date": target_date,
+        "selected_meal_type": meal_type,
     }
-    return render(request, 'forecasting/required_ingredient_list.html', context)
+    return render(request, "forecasting/required_ingredient_list.html", context)
