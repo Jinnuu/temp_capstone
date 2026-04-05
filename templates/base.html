@@ -53,6 +53,7 @@
             <div class="alert
                 {% if message.tags == 'success' %}alert-success
                 {% elif message.tags == 'error' or message.tags == 'danger' %}alert-danger
+                {% elif message.tags == 'warning' %}alert-warning
                 {% else %}alert-primary
                 {% endif %}
                 alert-dismissible fade show shadow-sm"
@@ -68,7 +69,7 @@
 
 <footer class="border-top bg-white mt-5">
     <div class="container py-4 d-flex flex-column flex-md-row justify-content-between gap-2 text-muted small">
-        <div><strong>S&amp;P</strong> · Capstone Prototype</div>
+        <div><strong>S&amp;P</strong> · S&P Prototype</div>
         <div>식자재 관리 · 식단 관리 · 식수 예측 · 발주 관리</div>
     </div>
 </footer>

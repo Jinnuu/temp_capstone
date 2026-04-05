@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}식수 예측 캘린더 | S&P{% endblock %}
+
+{% block content %}
+<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <span class="text-uppercase small fw-bold text-primary">Forecasting Calendar</span>
+        <h1 class="h2 fw-bold mb-2">식수 예측 캘린더</h1>
+        <p class="text-muted mb-0">날짜를 선택해 바로 예측을 실행하거나, 이미 생성된 결과 여부를 빠르게 확인할 수 있습니다.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'forecasting:prediction_create' %}" class="btn btn-outline-secondary">직접 입력</a>
+        <a href="{% url 'forecasting:prediction_list' %}" class="btn btn-outline-primary">전체 결과 보기</a>
+    </div>
+</section>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="year" class="form-label">조회 연도</label>
+                <input type="number" id="year" name="year" value="{{ selected_year }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="month" class="form-label">조회 월</label>
+                <select id="month" name="month" class="form-select">
+                    {% for month in months %}
+                    <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}월</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">조회</button>
+                <a href="{% url 'forecasting:prediction_calendar' %}" class="btn btn-outline-secondary w-100">이번 달</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 calendar-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>일</th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
+                        <th>토</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in calendar_weeks %}
+                    <tr>
+                        {% for cell in week %}
+                        <td class="calendar-cell {% if not cell %}calendar-cell-empty{% endif %}">
+                            {% if cell %}
+                            <button
+                                type="button"
+                                class="calendar-select-btn w-100 text-start border-0 bg-transparent p-0"
+                                data-date="{{ cell.date|date:'Y-m-d' }}"
+                                data-has-prediction="{% if cell.has_prediction %}true{% else %}false{% endif %}">
+                                <div class="calendar-day {% if cell.is_today %}is-today{% endif %}">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <strong>{{ cell.day }}</strong>
+                                        {% if cell.has_prediction %}
+                                        <span class="badge text-bg-primary rounded-pill">완료</span>
+                                        {% else %}
+                                        <span class="badge text-bg-light border text-muted rounded-pill">미생성</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="small text-muted">{{ cell.status_label }}</div>
+                                </div>
+                            </button>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="card border-0 shadow-sm rounded-4 mt-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="text-uppercase small fw-bold text-primary">Selected Date</span>
+                <h2 class="h5 fw-bold mb-1 mt-2">선택한 날짜</h2>
+                <p class="text-muted mb-0" id="selectedDateText">아직 선택된 날짜가 없습니다.</p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="#" id="calendarActionBtn" class="btn btn-primary disabled" aria-disabled="true">
+                    원하는 날짜를 선택하세요
+                </a>
+            </div>
+        </div>
+
+        <div id="calendarSelectAlert" class="alert alert-warning mt-3 mb-0 d-none" role="alert">
+            원하는 날짜를 캘린더에서 선택해주세요.
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const cells = document.querySelectorAll(".calendar-select-btn");
+    const selectedDateText = document.getElementById("selectedDateText");
+    const actionBtn = document.getElementById("calendarActionBtn");
+    const alertBox = document.getElementById("calendarSelectAlert");
+
+    let selectedButton = null;
+    let selectedDate = null;
+    let hasPrediction = false;
+
+    function clearSelection() {
+        document.querySelectorAll(".calendar-day").forEach(el => {
+            el.classList.remove("is-selected");
+        });
+    }
+
+    function updateAction() {
+        if (!selectedDate) {
+            actionBtn.classList.add("disabled");
+            actionBtn.setAttribute("aria-disabled", "true");
+            actionBtn.setAttribute("href", "#");
+            actionBtn.textContent = "원하는 날짜를 선택하세요";
+            selectedDateText.textContent = "아직 선택된 날짜가 없습니다.";
+            return;
+        }
+
+        actionBtn.classList.remove("disabled");
+        actionBtn.removeAttribute("aria-disabled");
+
+        selectedDateText.textContent = selectedDate;
+
+        if (hasPrediction) {
+            actionBtn.textContent = "결과 보기";
+            actionBtn.setAttribute("href", "{% url 'forecasting:prediction_list' %}?target_date=" + selectedDate);
+            actionBtn.classList.remove("btn-primary");
+            actionBtn.classList.add("btn-outline-primary");
+        } else {
+            actionBtn.textContent = "예측 실행";
+            actionBtn.setAttribute("href", "{% url 'forecasting:prediction_create' %}?date=" + selectedDate);
+            actionBtn.classList.remove("btn-outline-primary");
+            actionBtn.classList.add("btn-primary");
+        }
+    }
+
+    cells.forEach(btn => {
+        btn.addEventListener("click", function () {
+            selectedButton = btn;
+            selectedDate = btn.dataset.date;
+            hasPrediction = btn.dataset.hasPrediction === "true";
+
+            clearSelection();
+            btn.querySelector(".calendar-day").classList.add("is-selected");
+            alertBox.classList.add("d-none");
+            updateAction();
+        });
+    });
+
+    actionBtn.addEventListener("click", function (e) {
+        if (!selectedDate) {
+            e.preventDefault();
+            alertBox.classList.remove("d-none");
+        }
+    });
+
+    updateAction();
+});
+</script>
+{% endblock %}

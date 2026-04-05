@@ -35,3 +35,44 @@ body {
 .rounded-4 {
   border-radius: 1.25rem !important;
 }
+
+.calendar-table th,
+.calendar-table td {
+  min-width: 150px;
+}
+
+.calendar-cell {
+  vertical-align: top;
+  height: 180px;
+  background: #fff;
+}
+
+.calendar-cell-empty {
+  background: #f8f9fa;
+}
+
+.calendar-day {
+  min-height: 160px;
+  padding: 1rem;
+}
+
+.calendar-day.is-today {
+  background: rgba(13, 110, 253, 0.06);
+  outline: 2px solid rgba(13, 110, 253, 0.18);
+  border-radius: 1rem;
+}
+
+.calendar-select-btn {
+  display: block;
+}
+
+.calendar-select-btn:hover .calendar-day {
+  background: rgba(13, 110, 253, 0.04);
+  border-radius: 1rem;
+}
+
+.calendar-day.is-selected {
+  background: rgba(13, 110, 253, 0.12);
+  outline: 2px solid rgba(13, 110, 253, 0.35);
+  border-radius: 1rem;
+}

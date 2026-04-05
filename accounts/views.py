@@ -17,8 +17,28 @@ User=get_user_model()
 
 class SignUpForm(UserCreationForm):
     class Meta:
-        model=User
-        fields=("username",)
+        model = User
+        fields = ("username",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["username"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "아이디를 입력하세요",
+        })
+        self.fields["password1"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "비밀번호를 입력하세요",
+        })
+        self.fields["password2"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "비밀번호를 다시 입력하세요",
+        })
+
+        self.fields["username"].help_text = ""
+        self.fields["password1"].help_text = ""
+        self.fields["password2"].help_text = ""
 
 class SignUpView(CreateView):
     form_class=SignUpForm
