@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, datetime
+import calendar
 from urllib.parse import urlencode
 import traceback
 
@@ -71,10 +72,53 @@ def prediction_create_view(request):
                     "실패한 끼니: " + ", ".join(failed_meals)
                 )
     else:
-        form = AttendancePredictionForm()
+        initial = {}
+        selected_date = request.GET.get("date")
+        if selected_date:
+            initial["prediction_date"] = selected_date
+        form = AttendancePredictionForm(initial=initial)
 
     return render(request, "forecasting/predict_form.html", {"form": form})
 
+def prediction_calendar_view(request):
+    today = date.today()
+    selected_year = int(request.GET.get("year", today.year))
+    selected_month = int(request.GET.get("month", today.month))
+
+    cal = calendar.Calendar(firstweekday=6)
+    month_days = cal.monthdatescalendar(selected_year, selected_month)
+
+    predictions = AttendancePrediction.objects.filter(
+        prediction_date__year=selected_year,
+        prediction_date__month=selected_month,
+    )
+    predicted_dates = {p.prediction_date for p in predictions}
+
+    calendar_weeks = []
+    for week in month_days:
+        row = []
+        for day in week:
+            if day.month != selected_month:
+                row.append(None)
+                continue
+
+            has_prediction = day in predicted_dates
+            row.append({
+                "date": day,
+                "day": day.day,
+                "is_today": day == today,
+                "has_prediction": has_prediction,
+                "status_label": "결과 있음" if has_prediction else "미생성",
+            })
+        calendar_weeks.append(row)
+
+    context = {
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "months": range(1, 13),
+        "calendar_weeks": calendar_weeks,
+    }
+    return render(request, "forecasting/prediction_calendar.html", context)
 
 def prediction_result_view(request, prediction_id):
     prediction = get_object_or_404(AttendancePrediction, id=prediction_id)
