@@ -1,126 +1,149 @@
 {% extends "base.html" %}
 
-{% block title %}레시피 수정 | S&P{% endblock %}
+{% block title %}레시피 수정 및 관리 | S&P{% endblock %}
 
 {% block content %}
-<div class="p-4 bg-white rounded-3 shadow-sm border">
-    <div class="mb-4">
-        <h1 class="h3 fw-bold text-dark">📝 레시피 수정 및 관리</h1>
-        <p class="text-muted">등록된 메뉴를 선택하여 식재료와 사용량을 수정합니다.</p>
+<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <span class="text-uppercase small fw-bold text-primary">Recipe Management</span>
+        <h1 class="h2 fw-bold mb-2">레시피 수정 및 관리</h1>
+        <p class="text-muted mb-0">
+            등록된 메뉴를 선택하고, 식재료와 사용량을 수정할 수 있습니다.
+        </p>
     </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="mb-4 p-3 bg-light rounded border">
-            <label class="form-label fw-bold">수정할 메뉴 선택</label>
-            <select name="menu_id" class="form-select form-select-lg" required>
-                <option value="" selected disabled>메뉴를 선택하세요...</option>
-                {% for menu in menus %}
-                    <option value="{{ menu.id }}">{{ menu.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
+        <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 등록</a>
+    </div>
+</section>
 
-        <hr class="my-4">
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge text-bg-primary rounded-pill">Recipe Editor</span>
+                    <span class="text-muted small">메뉴별 식재료/사용량 설정</span>
+                </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th style="width: 40%;">식재료</th>
-                        <th style="width: 25%;">사용량</th>
-                        <th style="width: 20%;">단위</th>
-                        <th style="width: 15%; text-align: center;">관리</th>
-                    </tr>
-                </thead>
-                <tbody id="recipe-table-body">
-                    <tr>
-                        <td>
-                            <select name="ingredient_id[]" class="form-select ingredient-select" onchange="updateUnit(this)" required>
-                                <option value="" selected disabled>식재료를 선택하세요</option>
-                                {% for ingredient in ingredients %}
-                                    <option value="{{ ingredient.id }}" data-unit="{{ ingredient.unit }}">
-                                        {{ ingredient.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" step="0.01" min="0" name="required_amount[]" class="form-control" placeholder="사용량" required>
-                        </td>
-                        <td>
-                            <input type="text" class="form-control unit-input" value="" readonly>
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">삭제</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <h2 class="h4 fw-bold mb-2">레시피 입력</h2>
+                <p class="text-muted mb-4">
+                    수정할 메뉴를 고른 뒤 식재료와 사용량을 입력하고 저장하세요.
+                </p>
 
-        <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addNewRow()">
-                + 식재료 추가
-            </button>
-            <div>
-                <a href="{% url 'meals:menu_list' %}" class="btn btn-light border px-4">취소</a>
-                <button type="submit" class="btn btn-dark px-5">수정 내용 저장</button>
+                <form method="post" id="recipeForm">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="menu_id" class="form-label fw-semibold">수정할 메뉴 선택</label>
+                        <select name="menu_id" id="menu_id" class="form-select" required>
+                            <option value="">메뉴를 선택하세요...</option>
+                            {% for menu in menus %}
+                            <option value="{{ menu.id }}">{{ menu.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h5 fw-bold mb-0">식재료 사용량 단위 관리</h3>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addIngredientRow()">
+                            + 식재료 추가
+                        </button>
+                    </div>
+
+                    <div id="ingredientRows" class="d-flex flex-column gap-3">
+                        <div class="row g-2 align-items-end ingredient-row">
+                            <div class="col-md-6">
+                                <label class="form-label">식재료</label>
+                                <select name="ingredient_id[]" class="form-select">
+                                    <option value="">식재료를 선택하세요</option>
+                                    {% for ingredient in ingredients %}
+                                    <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">사용량</label>
+                                <input type="number" step="0.01" name="required_amount[]" class="form-control" placeholder="예: 2.5">
+                            </div>
+
+                            <div class="col-md-2 d-grid">
+                                <button type="button" class="btn btn-outline-danger" onclick="removeIngredientRow(this)">
+                                    삭제
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">수정 내용 저장</button>
+                        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary btn-lg">취소</a>
+                    </div>
+                </form>
             </div>
         </div>
-    </form>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 p-md-5">
+                <span class="text-uppercase small fw-bold text-primary">Quick Guide</span>
+                <h2 class="h4 fw-bold mt-2 mb-3">입력 흐름 안내</h2>
+
+                <div class="d-flex flex-column gap-3">
+                    <div class="p-3 rounded-4 bg-light border">
+                        <strong class="d-block mb-1">1. 메뉴 선택</strong>
+                        <span class="text-muted small">레시피를 수정할 메뉴를 먼저 선택합니다.</span>
+                    </div>
+
+                    <div class="p-3 rounded-4 bg-light border">
+                        <strong class="d-block mb-1">2. 식재료 추가</strong>
+                        <span class="text-muted small">필요한 식재료를 추가하고 사용량을 입력합니다.</span>
+                    </div>
+
+                    <div class="p-3 rounded-4 bg-light border">
+                        <strong class="d-block mb-1">3. 저장</strong>
+                        <span class="text-muted small">수정 내용을 저장하면 메뉴 목록에서 다시 확인할 수 있습니다.</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-grid gap-2">
+                    <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록 보기</a>
+                    <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">새 메뉴 등록</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    const ingredientOptions = `
-        <option value="" selected disabled>식재료를 선택하세요</option>
-        {% for ingredient in ingredients %}
-            <option value="{{ ingredient.id }}" data-unit="{{ ingredient.unit }}">
-                {{ ingredient.name }}
-            </option>
-        {% endfor %}
-    `;
+function addIngredientRow() {
+    const container = document.getElementById("ingredientRows");
+    const firstRow = container.querySelector(".ingredient-row");
+    const newRow = firstRow.cloneNode(true);
 
-    function updateUnit(selectElement) {
-        const selectedOption = selectElement.options[selectElement.selectedIndex];
-        const unit = selectedOption.getAttribute("data-unit") || "";
-        const row = selectElement.closest("tr");
-        row.querySelector(".unit-input").value = unit;
+    newRow.querySelectorAll("select, input").forEach(el => {
+        el.value = "";
+    });
+
+    container.appendChild(newRow);
+}
+
+function removeIngredientRow(button) {
+    const container = document.getElementById("ingredientRows");
+    const rows = container.querySelectorAll(".ingredient-row");
+
+    if (rows.length > 1) {
+        button.closest(".ingredient-row").remove();
+    } else {
+        rows[0].querySelectorAll("select, input").forEach(el => {
+            el.value = "";
+        });
     }
-
-    function removeRow(button) {
-        const tbody = document.getElementById("recipe-table-body");
-        const rows = tbody.querySelectorAll("tr");
-
-        if (rows.length > 1) {
-            button.closest("tr").remove();
-        } else {
-            alert("최소 한 개의 식재료는 남겨야 합니다.");
-        }
-    }
-
-    function addNewRow() {
-        const tbody = document.getElementById("recipe-table-body");
-        const newRow = document.createElement("tr");
-
-        newRow.innerHTML = `
-            <td>
-                <select name="ingredient_id[]" class="form-select ingredient-select" onchange="updateUnit(this)" required>
-                    ${ingredientOptions}
-                </select>
-            </td>
-            <td>
-                <input type="number" step="0.01" min="0" name="required_amount[]" class="form-control" placeholder="사용량" required>
-            </td>
-            <td>
-                <input type="text" class="form-control unit-input" value="" readonly>
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">삭제</button>
-            </td>
-        `;
-
-        tbody.appendChild(newRow);
-    }
+}
 </script>
 {% endblock %}

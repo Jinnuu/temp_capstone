@@ -102,7 +102,11 @@
                     <li>날짜별 식단표 확인</li>
                     <li>급식 운영 흐름 정리</li>
                 </ul>
-                <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-primary">바로가기</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-primary">식단표 보기</a>
+                    <a href="{% url 'meals:mealplan_create' %}" class="btn btn-primary">식단 등록</a>
+                    <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 관리</a>
+                </div>
             </div>
         </div>
     </div>

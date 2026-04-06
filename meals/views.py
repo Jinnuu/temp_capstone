@@ -1,74 +1,97 @@
-from urllib import request
 import calendar
 from datetime import datetime, date
+
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Menu, Recipe, DietPlan, DietMenu
-from .forms import MenuForm, MealPlanForm
-from inventory.models import Ingredient
 from django.urls import reverse
+
+from .models import Menu, Recipe, DietPlan, DietMenu
+from inventory.models import Ingredient
+
 
 def meal_home(request):
     return render(request, "meals/meal_home.html")
 
+
 def mealplan_create(request):
     menus = Menu.objects.all().order_by("name")
+    selected_date = request.GET.get("date") or request.POST.get("meal_date")
+
+    existing_meals = {
+        "breakfast": [],
+        "lunch": [],
+        "dinner": [],
+    }
+
+    if selected_date:
+        plans = (
+            DietPlan.objects.filter(target_date=selected_date)
+            .prefetch_related("diet_menus__menu")
+            .order_by("meal_type")
+        )
+
+        for plan in plans:
+            menu_ids = [item.menu_id for item in plan.diet_menus.all()]
+
+            if plan.meal_type == "조식":
+                existing_meals["breakfast"] = menu_ids
+            elif plan.meal_type == "중식":
+                existing_meals["lunch"] = menu_ids
+            elif plan.meal_type == "석식":
+                existing_meals["dinner"] = menu_ids
 
     if request.method == "POST":
+        meal_date = request.POST.get("meal_date")
+        breakfast_menu_ids = request.POST.getlist("breakfast_menu")
+        lunch_menu_ids = request.POST.getlist("lunch_menu")
+        dinner_menu_ids = request.POST.getlist("dinner_menu")
+
+        if not meal_date:
+            messages.error(request, "날짜를 선택해주세요.")
+            return redirect("meals:mealplan_create")
+
+        # 기존 식단 삭제 후 다시 생성
+        DietPlan.objects.filter(target_date=meal_date).delete()
+
+        created_count = 0
+
         meal_type_map = {
-            "breakfast": "조식",
-            "lunch": "중식",
-            "dinner": "석식",
+            "조식": breakfast_menu_ids,
+            "중식": lunch_menu_ids,
+            "석식": dinner_menu_ids,
         }
 
-        weekly_data = {}
+        for meal_type, menu_ids in meal_type_map.items():
+            valid_menu_ids = [menu_id for menu_id in menu_ids if menu_id]
 
-        for key, value in request.POST.items():
-            if key in ["csrfmiddlewaretoken", "start_date"]:
-                continue
-            if not value:
-                continue
+            if valid_menu_ids:
+                diet_plan = DietPlan.objects.create(
+                    target_date=meal_date,
+                    meal_type=meal_type,
+                )
 
-            parts = key.split("_")
-            if len(parts) != 3:
-                continue
-
-            date_str, meal_key, menu_kind = parts
-
-            if meal_key not in meal_type_map:
-                continue
-
-            weekly_data.setdefault((date_str, meal_key), [])
-            weekly_data[(date_str, meal_key)].append(value)
-
-        for (date_str, meal_key), menu_ids in weekly_data.items():
-            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            meal_type = meal_type_map[meal_key]
-
-            diet_plan, _ = DietPlan.objects.get_or_create(
-                target_date=target_date,
-                meal_type=meal_type,
-            )
-
-            diet_plan.diet_menus.all().delete()
-            unique_menu_ids = set(menu_ids)
-
-            for menu_id in unique_menu_ids:
-                if menu_id:
-                    DietMenu.objects.get_or_create(
+                for menu_id in valid_menu_ids:
+                    DietMenu.objects.create(
                         diet_plan=diet_plan,
                         menu_id=menu_id,
                     )
 
-        start_date = request.POST.get("start_date")
-        if start_date:
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()
-            return redirect(
-                f"{reverse('meals:mealplan_list')}?year={start.year}&month={start.month}"
-            )
+                created_count += 1
 
-        return redirect("meals:mealplan_list")
+        if created_count == 0:
+            messages.warning(request, "선택된 메뉴가 없어 빈 식단으로 저장되지 않았습니다.")
+        else:
+            messages.success(request, f"{meal_date} 식단이 저장되었습니다.")
 
-    return render(request, "meals/mealplan_create.html", {"menus": menus})
+        return redirect(f"{reverse('meals:mealplan_create')}?date={meal_date}")
+
+    context = {
+        "menus": menus,
+        "selected_date": selected_date,
+        "existing_meals": existing_meals,
+    }
+    return render(request, "meals/mealplan_create.html", context)
+
 
 def mealplan_list(request):
     today = date.today()
@@ -119,6 +142,7 @@ def mealplan_list(request):
             week_cells.append(
                 {
                     "day": day_num,
+                    "date": date(selected_year, selected_month, day_num),
                     "is_today": (
                         today.year == selected_year
                         and today.month == selected_month
@@ -146,6 +170,7 @@ def mealplan_list(request):
         "today_month": today.month,
     }
     return render(request, "meals/mealplan_list.html", context)
+
 
 def recipe_create(request):
     menus = Menu.objects.all().order_by("name")
@@ -182,6 +207,7 @@ def recipe_create(request):
     }
     return render(request, "meals/recipe_create.html", context)
 
+
 def menu_create(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -215,42 +241,40 @@ def menu_create(request):
 
     return render(request, "meals/menu_create.html")
 
+
 def menu_list(request):
     menus = Menu.objects.all().prefetch_related("recipes__ingredient")
     return render(request, "meals/menu_list.html", {"menus": menus})
 
+
 def menu_delete(request, menu_id):
-    menu = get_object_or_404(Menu, id=menu_id) # 삭제할 메뉴 콕 집어오기
-    menu.delete() # DB에서 흔적도 없이 날려버리기!
-    return redirect('meals:menu_list')
+    menu = get_object_or_404(Menu, id=menu_id)
+    menu.delete()
+    return redirect("meals:menu_list")
+
+
 def menu_update(request, menu_id):
-    # 1. 수정할 메뉴를 DB에서 콕 집어옵니다.
     menu = get_object_or_404(Menu, id=menu_id)
 
-    if request.method == 'POST':
-        # 2. 폼에서 날아온 새로운 이름과 카테고리로 덮어쓰기!
-        menu.name = request.POST.get('name')
-        menu.category = request.POST.get('category')
+    if request.method == "POST":
+        menu.name = request.POST.get("name")
+        menu.category = request.POST.get("category")
         menu.save()
 
-        # 3. 🚀 마법의 꼼수: 기존에 연결되어 있던 레시피를 싹 다 지워버립니다!
         menu.recipes.all().delete()
 
-        # 4. 그리고 화면에서 새로 받아온 식재료들로 다시 레시피를 만듭니다!
-        ing_names = request.POST.getlist('ing_name[]')
-        ing_amounts = request.POST.getlist('ing_amount[]')
+        ing_names = request.POST.getlist("ing_name[]")
+        ing_amounts = request.POST.getlist("ing_amount[]")
 
         for name, amount in zip(ing_names, ing_amounts):
             if name and amount:
                 clean_name = name.strip()
-                
-                # 💡 1순위: 이름이 100% 완벽하게 똑같은 식재료를 먼저 찾습니다!
+
                 ingredient = Ingredient.objects.filter(name=clean_name).first()
-                
-                # 💡 2순위: 완벽히 똑같은 이름이 DB에 없다면, 그때만 '포함된' 단어로 찾습니다!
+
                 if not ingredient:
                     ingredient = Ingredient.objects.filter(name__icontains=clean_name).first()
-                    
+
                 if ingredient:
                     Recipe.objects.create(
                         menu=menu,
@@ -258,8 +282,6 @@ def menu_update(request, menu_id):
                         required_amount=amount
                     )
 
-        # 수정이 끝나면 다시 메뉴판 화면으로!
-        return redirect('meals:menu_list')
+        return redirect("meals:menu_list")
 
-    # 처음 들어왔을 때 (GET): 기존 메뉴 정보를 html로 넘겨줍니다.
-    return render(request, "meals/menu_update.html", {'menu': menu})
+    return render(request, "meals/menu_update.html", {"menu": menu})
