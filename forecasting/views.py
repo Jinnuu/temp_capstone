@@ -174,7 +174,9 @@ def prediction_list_view(request):
 
 
 def ingredient_requirement_view(request):
-    target_date = request.GET.get("date", str(date.today()))
+    today = date.today()
+    formatted_today = f"{today.year}-{today.month:02d}-{today.day:02d}"
+    target_date = formatted_today
     meal_type = request.GET.get("meal_type", "lunch")
 
     requirements = get_ingredient_requirements(target_date, meal_type)
