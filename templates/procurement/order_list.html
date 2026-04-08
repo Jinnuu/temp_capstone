@@ -58,7 +58,7 @@
                         </td>
                         <td class="text-end pe-5"><strong>{{ order.total_amount }}</strong> 원</td>
                         <td>
-                            <a href="{% url 'procurement_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">명세서 조회</a>
+                            <a href="{% url 'procurement:order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">명세서 조회</a>
                         </td>
                     </tr>
                     {% empty %}
