@@ -1,45 +1,177 @@
 {% extends "base.html" %}
-{% block title %}재고 입출고 등록 | FoodSense{% endblock %}
+{% block title %}재고 출고 등록 | FoodSense{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-  <h1 class="mb-3">재고 입출고 등록</h1>
-  <p class="text-muted">창고에 들어오고 나가는 식재료의 수량을 기록합니다.</p>
-
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <form method="post">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger">
-            {{ form.non_field_errors }}
-          </div>
-        {% endif %}
-
-        <div class="row g-3">
-          {% for field in form %}
-            <div class="col-md-6">
-              <label class="form-label">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}
-                <div class="form-text">{{ field.help_text }}</div>
-              {% endif %}
-              {% if field.errors %}
-                <div class="text-danger small mt-1">{{ field.errors }}</div>
-              {% endif %}
-            </div>
-          {% endfor %}
-        </div>
-
-        <p class="text-muted mt-3 mb-0">출고나 폐기 시에는 유통기한을 비워두셔도 됩니다.</p>
-
-        <div class="mt-4 d-flex gap-2">
-          <button type="submit" class="btn btn-primary">기록 저장하기</button>
-          <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">목록으로 돌아가기</a>
-        </div>
-      </form>
+    <div class="mb-4">
+        <h1 class="h3 mb-1 fw-bold">재고 출고 등록</h1>
+        <p class="text-muted small">이름의 일부만 입력해도 식재료를 쉽게 찾을 수 있습니다.</p>
     </div>
-  </div>
+
+    <div class="card shadow-sm border-primary mb-5">
+        <div class="card-body bg-light-subtle p-4">
+            <form method="post" id="log-form" class="row g-3">
+                {% csrf_token %}
+                
+                <div class="col-md-5 position-relative">
+                    <label class="form-label fw-bold text-primary">식재료 검색</label>
+                    <input 
+                        type="text"
+                        id="ingredient-search" 
+                        class="form-control" 
+                        placeholder="단어 포함 검색 (예: 양파, 고기)" 
+                        autocomplete="off"
+                        required
+                    >
+                    <ul id="custom-list" class="list-group position-absolute w-100 shadow d-none" style="z-index: 1050; max-height: 250px; overflow-y: auto; top: 100%;">
+                        {% for item in ingredients %}
+                        <li class="list-group-item list-group-item-action py-2" 
+                            data-id="{{ item.id }}" 
+                            data-name="{{ item.name }}"
+                            data-category="{{ item.category }}"
+                            style="cursor: pointer;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-secondary-subtle text-dark me-2">{{ item.category }}</span>
+                                    <span class="fw-bold">{{ item.name }}</span>
+                                </div>
+                                <small class="text-primary fw-bold">재고: {{ item.current_stock|floatformat:1 }}</small>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <input type="hidden" name="ingredient" id="ingredient-id">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">{{ form.log_type.label }}</label>
+                    {{ form.log_type }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
+                    {{ form.quantity }}
+                </div>
+
+                <div class="col-12 text-end mt-4">
+                    <button type="submit" class="btn btn-primary px-5 fw-bold">기록 저장하기</button>
+                    <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">목록으로</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="text-center mb-4">
+        <h2 class="h4 fw-bold text-decoration-underline" style="text-underline-offset: 10px;">품목별 사용 내역 (최근 15건)</h2>
+    </div>
+
+    <div class="card shadow-sm border-dark">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 text-center align-middle" style="font-size: 0.9rem;">
+                    <thead class="table-secondary border-dark">
+                        <tr>
+                            <th style="width: 15%;">품목코드</th>
+                            <th style="width: 35%;">품목명</th>
+                            <th>일자</th>
+                            <th>수량</th>
+                            <th>단가</th>
+                            <th>구분</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td class="text-muted small">{{ log.ingredient.id|stringformat:"08d" }}</td>
+                            <td class="text-start fw-bold px-3">{{ log.ingredient.name }}</td>
+                            <td>{{ log.transaction_date|date:"Ymd" }}</td>
+                            <td class="text-end px-3">{{ log.quantity|floatformat:2 }}</td>
+                            <td class="text-end px-3 text-muted">{{ log.ingredient.unit_price }}</td>
+                            <td>
+                                {% if log.log_type == '출고' %}
+                                    <span class="badge rounded-pill bg-danger">출고</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-secondary">폐기</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="py-5 text-muted">최근 출고 내역이 없습니다.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById('ingredient-search');
+    const customList = document.getElementById('custom-list');
+    const listItems = customList.querySelectorAll('li');
+    const hiddenIdInput = document.getElementById('ingredient-id');
+
+    // 1. 실시간 포함 검색(Contains) 필터링 로직
+    searchInput.addEventListener('input', function() {
+        const val = this.value.toLowerCase().replace(/\s/g, ''); // 공백 제거 후 소문자화
+        let hasVisibleItems = false;
+
+        if (val.length > 0) {
+            customList.classList.remove('d-none');
+            listItems.forEach(item => {
+                const name = item.getAttribute('data-name').toLowerCase().replace(/\s/g, '');
+                // 단어가 포함되어 있으면 표시
+                if (name.includes(val)) {
+                    item.classList.remove('d-none');
+                    hasVisibleItems = true;
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+            // 검색 결과가 전혀 없으면 목록 닫기
+            if (!hasVisibleItems) customList.classList.add('d-none');
+        } else {
+            customList.classList.add('d-none');
+        }
+    });
+
+    // 2. 항목 선택 시 처리
+    listItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            
+            searchInput.value = name;
+            hiddenIdInput.value = id;
+            customList.classList.add('d-none');
+            
+            // 선택 후 수량 칸으로 포커스 이동 (편의 기능)
+            document.getElementsByName('quantity')[0].focus();
+        });
+    });
+
+    // 3. 외부 영역 클릭 시 목록 닫기
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !customList.contains(e.target)) {
+            customList.classList.add('d-none');
+        }
+    });
+
+    // 4. 엔터 키 방지 및 유효성 체크
+    document.getElementById('log-form').addEventListener('submit', function(e) {
+        if (!hiddenIdInput.value) {
+            alert("식재료를 목록에서 정확히 선택해 주세요.");
+            searchInput.focus();
+            e.preventDefault();
+        }
+    });
+</script>
+
+<style>
+    .table-bordered, .table-bordered th, .table-bordered td { border: 1px solid #333 !important; }
+    #custom-list .list-group-item:hover { background-color: #f0f7ff; border-left: 4px solid #0d6efd; }
+    .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 8px rgba(13,110,253,0.15); }
+</style>
 {% endblock %}

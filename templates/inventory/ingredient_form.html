@@ -6,7 +6,7 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h1 class="h3 mb-1">식재료 등록</h1>
-      <p class="text-muted mb-0">재고 관리의 기준이 되는 식재료 정보를 등록합니다.</p>
+      <p class="text-muted mb-0">재고 관리 및 발주처 정보가 포함된 식재료 정보를 등록합니다.</p>
     </div>
     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
       <i class="bi bi-file-earmark-excel"></i> 엑셀로 일괄 등록
@@ -17,16 +17,30 @@
     <div class="card-body">
       <form method="post">
         {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
         <div class="row g-3">
           {% for field in form %}
             <div class="col-md-6">
-              <label class="form-label">{{ field.label }}</label>
+              <label class="form-label fw-bold">{{ field.label }}</label>
               {{ field }}
+              {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors }}</div>
+              {% endif %}
             </div>
           {% endfor %}
         </div>
+
         <div class="mt-4 d-flex gap-2">
-          <button type="submit" class="btn btn-primary">저장하기</button>
+          <button type="submit" class="btn btn-primary px-4">저장하기</button>
           <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">취소</a>
         </div>
       </form>
@@ -34,20 +48,27 @@
   </div>
 </div>
 
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">엑셀 파일 업로드</h5>
+        <h5 class="modal-title" id="uploadModalLabel">엑셀 파일 업로드</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="{% url 'inventory:ingredient_upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">엑셀(.xlsx) 또는 CSV 파일 선택</label>
-            <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
-            <div class="form-text mt-2">
+            <label class="form-label">엑셀(.xlsx) 파일 선택</label>
+            <input type="file" name="file" class="form-control" accept=".xlsx" required>
+            <div class="form-text mt-3 bg-light p-2 rounded">
+              <p class="mb-1 fw-bold text-primary"><i class="bi bi-info-circle"></i> 필독: 엑셀 양식 안내</p>
+              <ul class="small mb-0">
+                <li><strong>식재료명:</strong> 필수 입력</li>
+                <li><strong>발주처:</strong> 시스템에 등록된 <span class="text-danger">사용자 ID(username)</span> 입력</li>
+                <li><strong>대분류:</strong> 정해진 12개 카테고리 중 입력</li>
+                <li><strong>나머지:</strong> 규격, 단위, 단가, 안전재고 등</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -59,5 +80,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

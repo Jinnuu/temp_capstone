@@ -5,12 +5,20 @@
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="h3 mb-1">식재료 목록</h1>
-      <p class="text-muted mb-0">식재료 목록, 단위, 단가, 재고 관리의 기준이 되는 데이터입니다.</p>
+      <h1 class="h3 mb-1 fw-bold">식재료 목록</h1>
+      <p class="text-muted mb-0">전체 페이지의 부족 품목을 한 번에 확인하고 발주하세요.</p>
     </div>
     <div class="d-flex gap-2">
+      {% if all_low_stock_ids %}
+        <a href="{% url 'procurement:order_create' %}?selected_ids={{ all_low_stock_ids }}" class="btn btn-danger fw-bold shadow-sm">
+          <i class="bi bi-cart-check-fill"></i> 부족분 전체 발주 (일괄)
+        </a>
+      {% else %}
+        <button class="btn btn-secondary fw-bold shadow-sm" disabled>부족분 없음</button>
+      {% endif %}
+      
       <a href="{% url 'inventory:ingredient_create' %}" class="btn btn-primary">식재료 등록</a>
-      <a href="{% url 'inventory:inventory_log_create' %}" class="btn btn-outline-primary">재고 입출고 등록</a>
+      <a href="{% url 'inventory:inventory_log_create' %}" class="btn btn-outline-primary">출고 등록</a>
     </div>
   </div>
 
@@ -19,87 +27,68 @@
       <form method="get" action="{% url 'inventory:ingredient_list' %}" class="row g-2">
         <div class="col-md-3">
           <select name="category" class="form-select" onchange="this.form.submit()">
-            <option value="" {% if not selected_category %}selected{% endif %}>전체 카테고리</option>
+            <option value="">전체 카테고리</option>
             {% for cat in categories %}
-              <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
-                {{ cat }}
-              </option>
+              <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
             {% endfor %}
           </select>
         </div>
-
+        <div class="col-md-3">
+          <select name="supplier" class="form-select" onchange="this.form.submit()">
+            <option value="">전체 발주처</option>
+            {% for sup in suppliers %}
+              <option value="{{ sup.username }}" {% if selected_supplier == sup.username %}selected{% endif %}>{{ sup.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
         <div class="col-md-6">
           <div class="input-group">
-            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-            <input 
-              type="text" 
-              name="search" 
-              class="form-control" 
-              placeholder="식재료명으로 검색..." 
-              value="{{ search_query|default:'' }}"
-            >
+            <input type="text" name="search" class="form-control" placeholder="식재료명 검색..." value="{{ search_query|default:'' }}">
+            <button type="submit" class="btn btn-dark px-4">조회</button>
+            {% if search_query or selected_category or selected_supplier %}
+              <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">초기화</a>
+            {% endif %}
           </div>
         </div>
-
-        <div class="col-md-3 d-flex gap-2">
-          <button type="submit" class="btn btn-dark w-100">조회</button>
-          {% if search_query or selected_category %}
-            <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary w-100">초기화</a>
-          {% endif %}
-        </div>
+        <input type="hidden" name="sort" value="{{ sort_by }}">
       </form>
     </div>
   </div>
 
-  <div class="card shadow-sm">
+  <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle mb-0">
+        <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th style="min-width: 120px;">대분류</th>
-              <th style="min-width: 150px;">품목명</th>
-              <th>규격</th>
+              <th style="width: 12%">대분류</th>
+              <th style="width: 30%">품목명</th>
+              <th>발주처</th>
               <th>단위</th>
-              <th>연간소요량</th>
               <th>단가</th>
-              <th>입고합</th>
-              <th>출고합</th>
-              <th>폐기합</th>
               <th>현재재고</th>
-              <th>안전재고</th>
               <th>상태</th>
             </tr>
           </thead>
           <tbody>
             {% for ingredient in page_obj %}
               <tr>
-                <td><span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ ingredient.category|default:"분류없음" }}</span></td>
-                <td class="fw-bold">{{ ingredient.name }}</td>
-                <td>{{ ingredient.spec|default:"-" }}</td>
+                <td><span class="badge bg-secondary-subtle text-secondary border small">{{ ingredient.category|default:"-" }}</span></td>
+                <td class="fw-bold text-dark">{{ ingredient.name }}</td>
+                <td class="text-muted small">{{ ingredient.supplier.username|default:"-" }}</td>
                 <td>{{ ingredient.unit }}</td>
-                <td>{{ ingredient.yearly_demand|default:"0" }}</td>
-                <td>{{ ingredient.unit_price }}원</td>
-                <td class="text-primary">{{ ingredient.in_qty }}</td>
-                <td class="text-danger">{{ ingredient.out_qty }}</td>
-                <td class="text-muted">{{ ingredient.waste_qty }}</td>
-                <td class="fw-bold">{{ ingredient.current_stock }}</td>
-                <td>{{ ingredient.safe_stock_level }}</td>
+                <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
+                <td class="fw-bold {% if ingredient.is_low_stock %}text-danger{% endif %}">{{ ingredient.current_stock }}</td>
                 <td>
                   {% if ingredient.is_low_stock %}
-                    <span class="badge rounded-pill text-bg-danger">부족</span>
+                    <span class="badge rounded-pill bg-danger px-3">부족</span>
                   {% else %}
-                    <span class="badge rounded-pill text-bg-success">정상</span>
+                    <span class="badge rounded-pill bg-success px-3">정상</span>
                   {% endif %}
                 </td>
               </tr>
             {% empty %}
-              <tr>
-                <td colspan="12" class="text-center py-5 text-muted">
-                  <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
-                  <p>검색 결과가 없거나 등록된 식재료가 없습니다.</p>
-                </td>
-              </tr>
+              <tr><td colspan="7" class="text-center py-5 text-muted">데이터가 없습니다.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -107,30 +96,20 @@
     </div>
   </div>
 
-  <nav class="mt-4">
+  <nav>
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-            이전
-          </a>
+          <a class="page-link text-dark" href="?page={{ page_obj.previous_page_number }}&category={{ selected_category }}&supplier={{ selected_supplier }}&search={{ search_query }}&sort={{ sort_by }}">이전</a>
         </li>
-      {% else %}
-        <li class="page-item disabled"><span class="page-link">이전</span></li>
       {% endif %}
-
       <li class="page-item active">
-        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        <span class="page-link bg-dark border-dark">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
       </li>
-
       {% if page_obj.has_next %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-            다음
-          </a>
+          <a class="page-link text-dark" href="?page={{ page_obj.next_page_number }}&category={{ selected_category }}&supplier={{ selected_supplier }}&search={{ search_query }}&sort={{ sort_by }}">다음</a>
         </li>
-      {% else %}
-        <li class="page-item disabled"><span class="page-link">다음</span></li>
       {% endif %}
     </ul>
   </nav>
