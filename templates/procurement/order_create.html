@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" id="order-form">
         {% csrf_token %}
         <div class="card shadow-sm mb-4">
             <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
@@ -58,7 +58,7 @@
                             <td>{{ ing.unit }}</td>
                             <td>{{ ing.unit_price }}</td>
                             <td>
-                                <input type="number" class="form-control item-qty mx-auto" style="max-width: 100px;" name="quantity[]" min="0" value="0" disabled>
+                                <input type="number" class="form-control item-qty mx-auto" style="max-width: 100px;" name="quantity[]" min="0" value="0">
                             </td>
                             <td class="item-subtotal text-end pe-4">0</td>
                         </tr>
@@ -87,7 +87,7 @@
                 </div>
             </div>
             <div class="text-center mt-5">
-                <a href="{% url 'procurement_order_list' %}" class="btn btn-outline-secondary btn-lg px-4 me-2">주문조회</a>
+                <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-4 me-2">주문조회</a>
                 <button type="submit" class="btn btn-danger btn-lg px-5 fw-bold shadow">간편주문 완료하기</button>
             </div>
         </div>
@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. 계산 로직
     const checkboxes = document.querySelectorAll('.item-checkbox');
     const qtys = document.querySelectorAll('.item-qty');
+    const rows = document.querySelectorAll('.ingredient-row');
     
     function calculateTotals() {
         let subtotal = 0;
@@ -107,17 +108,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const price = parseFloat(cb.dataset.price);
             const rowTotalTd = cb.closest('tr').querySelector('.item-subtotal');
             
-            if (cb.checked) {
-                qtyInput.disabled = false;
-                if (qtyInput.value === '0') qtyInput.value = '1';
-                
-                const q = Math.max(0, parseFloat(qtyInput.value) || 0);
+            const q = Math.max(0, parseFloat(qtyInput.value) || 0);
+
+            if (cb.checked && q > 0) {
                 const rowTotal = q * price;
                 rowTotalTd.innerHTML = `<strong>${rowTotal.toLocaleString()}</strong>`;
                 subtotal += rowTotal;
             } else {
-                qtyInput.disabled = true;
-                qtyInput.value = '0';
                 rowTotalTd.textContent = '0';
             }
         });
@@ -130,16 +127,58 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('final-total').textContent = finalTotal.toLocaleString();
     }
     
-    checkboxes.forEach((cb) => cb.addEventListener('change', calculateTotals));
-    qtys.forEach((qty) => {
-        qty.addEventListener('input', calculateTotals);
-        qty.addEventListener('change', calculateTotals);
+    // Checkbox 변경 시: 체크하면 기본수량 1, 해제하면 0으로 설정
+    checkboxes.forEach((cb, index) => {
+        const qtyInput = qtys[index];
+        cb.addEventListener('change', () => {
+            if (cb.checked && (parseFloat(qtyInput.value) || 0) === 0) {
+                qtyInput.value = '1';
+            } else if (!cb.checked) {
+                qtyInput.value = '0';
+            }
+            calculateTotals();
+        });
+    });
+
+    // 수량 변경 시: 0보다 크면 체크, 0이면 체크 해제
+    qtys.forEach((qtyInput, index) => {
+        const cb = checkboxes[index];
+        const updateFromQty = () => {
+            if ((parseFloat(qtyInput.value) || 0) > 0) {
+                cb.checked = true;
+            } else {
+                cb.checked = false;
+            }
+            calculateTotals();
+        };
+        qtyInput.addEventListener('input', updateFromQty);
+        qtyInput.addEventListener('change', updateFromQty);
+    });
+
+    // 마우스로 행 아무 곳이나 클릭해도 수량 입력창에 포커스가 가도록 (UX 개선)
+    rows.forEach((row, index) => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                const qtyInput = qtys[index];
+                qtyInput.focus();
+                qtyInput.select();
+            }
+        });
+    });
+
+    // 폼 제출 직전에 선택되지 않은 품목의 수량 필드는 전송되지 않도록 disabled 처리 (백엔드 zip 매칭용)
+    document.getElementById('order-form').addEventListener('submit', function() {
+        checkboxes.forEach((cb, index) => {
+            if (!cb.checked) {
+                qtys[index].disabled = true;
+            }
+        });
     });
 
     // 2. 검색 및 필터 로직
     const searchInput = document.getElementById('search-input');
     const categoryFilter = document.getElementById('category-filter');
-    const rows = document.querySelectorAll('.ingredient-row');
     
     function filterItems() {
         const query = searchInput.value.toLowerCase().trim();

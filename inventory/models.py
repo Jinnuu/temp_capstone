@@ -20,6 +20,9 @@ class Ingredient(models.Model):
     yearly_demand = models.IntegerField(null=True, blank=True, verbose_name='연간예상소요량')
     total_amount = models.IntegerField(null=True, blank=True, verbose_name='금액')
 
+    # 재고 수불 연동용 필드
+    current_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name='현재 재고량')
+
     def __str__(self):
         return self.name
 
@@ -28,12 +31,14 @@ class InventoryLog(models.Model):
         IN = '입고', '입고'
         OUT = '출고', '출고'
         WASTE = '폐기', '폐기'
+        ADJ = '조정', '조정'
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     log_type = models.CharField(max_length=10, choices=LogType.choices)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     transaction_date = models.DateTimeField(auto_now_add=True)
     expiration_date = models.DateField(null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True, verbose_name='변동 사유')
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.log_type}({self.quantity})"

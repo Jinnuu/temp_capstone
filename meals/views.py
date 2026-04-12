@@ -2,6 +2,7 @@ import calendar
 from datetime import datetime, date
 
 from django.contrib import messages
+from django.core.management import call_command
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
@@ -285,3 +286,14 @@ def menu_update(request, menu_id):
         return redirect("meals:menu_list")
 
     return render(request, "meals/menu_update.html", {"menu": menu})
+
+def deduct_inventory_view(request):
+    if request.method == "POST":
+        target_date = request.POST.get("target_date")
+        if target_date:
+            call_command("deduct_daily_inventory", date=target_date)
+            messages.success(request, f"{target_date} 기준 식재료 일괄 사용처리가 완료되었습니다.")
+        else:
+            call_command("deduct_daily_inventory")
+            messages.success(request, "오늘 기준 식재료 일괄 사용처리가 완료되었습니다.")
+    return redirect("meals:mealplan_list")

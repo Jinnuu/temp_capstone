@@ -3,12 +3,12 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>🧾 주문목록</h2>
-        <a href="{% url 'procurement_order_create' %}" class="btn btn-danger px-4">간편주문 (새 발주서)</a>
+        <a href="{% url 'procurement:order_create' %}" class="btn btn-danger px-4">간편주문 (새 발주서)</a>
     </div>
 
     <!-- 필터 UI -->
     <div class="card p-3 mb-4 bg-light shadow-sm">
-        <form method="GET" action="{% url 'procurement_order_list' %}">
+        <form method="GET" action="{% url 'procurement:order_list' %}">
             <div class="row align-items-center">
                 <div class="col-md-2 fw-bold text-center">입고일 조회 범위</div>
                 <div class="col-md-5">
@@ -58,7 +58,7 @@
                         </td>
                         <td class="text-end pe-5"><strong>{{ order.total_amount }}</strong> 원</td>
                         <td>
-                            <a href="{% url 'procurement_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">명세서 조회</a>
+                            <a href="{% url 'procurement:order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">명세서 조회</a>
                         </td>
                     </tr>
                     {% empty %}
