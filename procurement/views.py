@@ -19,8 +19,6 @@ def get_or_create_dummy_user(request):
 def order_create(request):
     """
     간편주문(발주서 작성) 생성 뷰
-    GET: 선택된 품목(selected_ids)을 받아와서 자동 체크된 상태로 페이지 노출
-    POST: 선택된 품목들과 수량을 바탕으로 PurchaseOrder 및 OrderItem 생성
     """
     if request.method == 'POST':
         ingredient_ids = request.POST.getlist('ingredient_id[]')
@@ -28,13 +26,10 @@ def order_create(request):
         
         if ingredient_ids and quantities:
             user = get_or_create_dummy_user(request)
-            # 발주서 기본 객체 생성 (상태: 대기중)
             po = PurchaseOrder.objects.create(supplier=user, status=PurchaseOrder.Status.PENDING)
             total_amount = 0
             
-            # 전송된 데이터 매칭 (zip 사용)
             for ing_id, qty in zip(ingredient_ids, quantities):
-                # 수량이 없거나 0 이하인 경우는 제외
                 if not qty or float(qty) <= 0:
                     continue
                     
@@ -43,7 +38,6 @@ def order_create(request):
                 estimated = int(q * ing.unit_price)
                 total_amount += estimated
                 
-                # 상세 품목(OrderItem) 저장
                 OrderItem.objects.create(
                     purchase_order=po,
                     ingredient=ing,
@@ -56,23 +50,13 @@ def order_create(request):
             po.total_amount = total_amount
             po.save()
             messages.success(request, f"발주서 #{po.id} 건이 성공적으로 전송되었습니다.")
-<<<<<<< HEAD
-            return redirect('procurement:order_detail', pk=po.id) # URL 네임스페이스 확인 필요
-=======
             return redirect('procurement:order_detail', pk=po.id)
->>>>>>> origin/feat/procurement-system-upgrades
             
     # --- GET 요청 처리 ---
-    
-    # 1. URL 파라미터에서 선택된 ID들 가져오기 (예: ?selected_ids=1,2,5)
     selected_ids_raw = request.GET.get('selected_ids', '')
-    # 콤마로 구분된 문자열을 리스트로 변환 (빈 문자열인 경우 빈 리스트)
     selected_ids = selected_ids_raw.split(',') if selected_ids_raw else []
 
-    # 2. 전체 식재료 목록 (이름순 정렬)
     ingredients = Ingredient.objects.all().order_by('name')
-    
-    # 3. 카테고리 필터용 목록 (비어있지 않은 대분류만 추출)
     categories = (
         Ingredient.objects.exclude(category__isnull=True)
         .exclude(category__exact='')
@@ -84,17 +68,16 @@ def order_create(request):
     return render(request, "procurement/order_create.html", {
         'ingredients': ingredients,
         'categories': categories,
-        'selected_ids': selected_ids, # 🔥 템플릿에서 {% if ing.id|stringformat:"s" in selected_ids %} 로 사용
+        'selected_ids': selected_ids,
     })
 
 def order_list(request):
     """
-    발주 내역 목록 조회 (필터링 포함)
+    발주 내역 목록 조회
     """
     user = get_or_create_dummy_user(request)
     orders = PurchaseOrder.objects.filter(supplier=user).order_by('-created_at')
     
-    # 내역이 아예 없는 경우 전체 노출 (테스트용)
     if not orders.exists():
         orders = PurchaseOrder.objects.all().order_by('-created_at')
         
@@ -102,7 +85,6 @@ def order_list(request):
     end_date = request.GET.get('end_date')
     status_filter = request.GET.get('status')
     
-    # 필터 적용
     if start_date:
         orders = orders.filter(created_at__date__gte=start_date)
     if end_date:
@@ -122,7 +104,7 @@ def order_detail(request, pk):
     특정 발주서 상세 내역 확인
     """
     order = get_object_or_404(PurchaseOrder, pk=pk)
-    items = order.items.all() # OrderItem 역참조
+    items = order.items.all()
     
     subtotal = order.total_amount
     vat = int(subtotal * 0.1)
@@ -134,37 +116,41 @@ def order_detail(request, pk):
         'subtotal': subtotal,
         'vat': vat,
         'total': total
-<<<<<<< HEAD
-    })
-=======
     })
 
 def order_status_update(request, pk):
+    """
+    발주 상태 변경 및 배송 완료 시 자동 입고 처리
+    """
     if request.method == 'POST':
         order = get_object_or_404(PurchaseOrder, pk=pk)
         new_status = request.POST.get('status')
+        
         if new_status in [choice[0] for choice in PurchaseOrder.Status.choices]:
+            # 배송 완료(DELIVERED)로 변경될 때만 재고에 반영
             if new_status == PurchaseOrder.Status.DELIVERED and order.status != PurchaseOrder.Status.DELIVERED:
-                # 입고 처리 로직
                 for item in order.items.all():
                     ing = item.ingredient
-                    ing.current_stock += item.required_qty
-                    ing.save()
+                    # 재석님이 앞서 사용한 '입고' 로그 생성 로직 적용
                     InventoryLog.objects.create(
                         ingredient=ing,
-                        log_type=InventoryLog.LogType.IN,
+                        log_type='입고',  # 한글 기반 문자열 매칭
                         quantity=item.required_qty,
-                        description=f"발주 #{order.id} 입고"
+                        description=f"발주 #{order.id} 배송 완료로 인한 자동 입고"
                     )
+            
             order.status = new_status
             order.save()
-            messages.success(request, f"발주서 #{order.id}의 상태가 '{new_status}'(으)로 변경되었습니다.")
+            messages.success(request, f"발주서 #{order.id}의 상태가 변경되었습니다.")
+            
     return redirect('procurement:order_detail', pk=pk)
 
 def order_delete(request, pk):
+    """
+    발주 내역 삭제
+    """
     if request.method == 'POST':
         order = get_object_or_404(PurchaseOrder, pk=pk)
         order.delete()
-        messages.success(request, f"해당 발주서 내역이 완전히 삭제되었습니다.")
+        messages.success(request, f"발주서 #{pk} 내역이 삭제되었습니다.")
     return redirect('procurement:order_list')
->>>>>>> origin/feat/procurement-system-upgrades

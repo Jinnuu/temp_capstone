@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
+{% block title %}발주 상세 내역 | FoodSense{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2>📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <h2>📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
+        <div class="text-end">
+            <form method="post" action="{% url 'procurement:order_delete' order.id %}" class="d-inline" onsubmit="return confirm('정말 이 명세서를 기록에서 완전히 삭제하시겠습니까?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ 명세서 영구 삭제</button>
+            </form>
+        </div>
+    </div>
+    
     <div class="text-muted mb-4 fs-6">
         주문요청 일시: <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong> 
         <span class="mx-2">|</span> 
@@ -30,24 +41,24 @@
                         <td>{{ forloop.counter }}</td>
                         <td class="text-danger fw-bold text-start ps-4">{{ item.ingredient.name }}</td>
                         <td>{{ item.ingredient.unit }}</td>
-                        <td class="text-end pe-4">{{ item.order_unit_price }}</td>
+                        <td class="text-end pe-4">{{ item.order_unit_price|floatformat:0 }}</td>
                         <td class="fw-bold">{{ item.required_qty|floatformat:0 }}</td>
-                        <td class="text-end pe-4">{{ item.estimated_price }}</td>
+                        <td class="text-end pe-4">{{ item.estimated_price|floatformat:0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot class="bg-light fw-bold">
                     <tr>
                         <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">총 공급가액 (식재료액합계)</td>
-                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ subtotal }}원</td>
+                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ subtotal|floatformat:0 }}원</td>
                     </tr>
                     <tr>
                         <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">부가가치세 (10%)</td>
-                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ vat }}원</td>
+                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ vat|floatformat:0 }}원</td>
                     </tr>
                     <tr class="table-secondary">
-                        <td colspan="5" class="text-end pe-4 py-4 fs-4 text-dark">최종 결제 총액 (A+B+C)</td>
-                        <td class="text-end pe-4 py-4 fs-3 text-danger">{{ total }}원</td>
+                        <td colspan="5" class="text-end pe-4 py-4 fs-4 text-dark">최종 결제 총액</td>
+                        <td class="text-end pe-4 py-4 fs-3 text-danger">{{ total|floatformat:0 }}원</td>
                     </tr>
                 </tfoot>
             </table>
@@ -55,35 +66,27 @@
     </div>
     
     <div class="text-center pb-5">
-<<<<<<< HEAD
-        <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-5">목록으로 돌아가기</a>
-=======
         {% if order.status == '대기' %}
         <form method="post" action="{% url 'procurement:order_status_update' order.id %}" class="d-inline-block">
             {% csrf_token %}
             <input type="hidden" name="status" value="승인">
-            <button type="submit" class="btn btn-primary btn-lg px-5 mx-2">✅ 발주 승인 (테스트용)</button>
+            <button type="submit" class="btn btn-primary btn-lg px-5 mx-2">✅ 발주 승인</button>
         </form>
         {% elif order.status == '승인' %}
         <form method="post" action="{% url 'procurement:order_status_update' order.id %}" class="d-inline-block">
             {% csrf_token %}
             <input type="hidden" name="status" value="배송중">
-            <button type="submit" class="btn btn-warning btn-lg px-5 mx-2 text-dark">🚚 배송 시작 (테스트용)</button>
+            <button type="submit" class="btn btn-warning btn-lg px-5 mx-2 text-dark">🚚 배송 시작</button>
         </form>
         {% elif order.status == '배송중' %}
         <form method="post" action="{% url 'procurement:order_status_update' order.id %}" class="d-inline-block">
             {% csrf_token %}
             <input type="hidden" name="status" value="배송완료">
-            <button type="submit" class="btn btn-success btn-lg px-5 mx-2">📦 납품 검수 / 완료 (테스트용)</button>
+            <button type="submit" class="btn btn-success btn-lg px-5 mx-2">📦 납품 검수 / 완료</button>
         </form>
         {% endif %}
         
-        <form method="post" action="{% url 'procurement:order_delete' order.id %}" class="d-inline-block" onsubmit="return confirm('정말 이 명세서를 기록에서 완전히 삭제하시겠습니까?');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg px-3 mx-2">🗑️ 영구 삭제</button>
-        </form>
-        <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-4 mx-2">목록으로 돌아가기</a>
->>>>>>> origin/feat/procurement-system-upgrades
+        <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-5 mx-2">목록으로 돌아가기</a>
     </div>
 </div>
 {% endblock %}

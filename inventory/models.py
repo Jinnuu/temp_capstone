@@ -21,7 +21,7 @@ class Ingredient(models.Model):
     total_amount = models.IntegerField(null=True, blank=True, verbose_name='금액')
 
     # 재고 수불 연동용 필드
-    current_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name='현재 재고량')
+    #current_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name='현재 재고량')
 
     def __str__(self):
         return self.name

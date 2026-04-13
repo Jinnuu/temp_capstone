@@ -8,6 +8,24 @@
         <p class="text-muted">선택된 품목의 수량을 확인하고 [간편주문 완료하기]를 누르세요.</p>
     </div>
 
+    <div class="card bg-light border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" id="search-input" class="form-control" placeholder="품목명 검색 (예: 양파, 고기) - 입력 후 잠시 기다리세요">
+                </div>
+                <div class="col-md-4">
+                    <select id="category-filter" class="form-select">
+                        <option value="">전체 카테고리</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <form method="post" id="order-form">
         {% csrf_token %}
         <div class="card shadow-sm mb-4 border-0 overflow-hidden">
@@ -23,31 +41,33 @@
                             <th class="text-end pe-4">합계금액</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="ingredient-tbody">
                         {% for ing in ingredients %}
-                        <tr>
+                        <tr class="ingredient-row" data-category="{{ ing.category|default:'일반' }}">
                             <td>
                                 <input class="form-check-input item-checkbox" type="checkbox" name="ingredient_id[]" value="{{ ing.id }}" data-price="{{ ing.unit_price }}"
                                 {% if ing.id|stringformat:"s" in selected_ids %} checked {% endif %}>
                             </td>
                             <td class="text-start">
-                                <div class="fw-bold text-danger">{{ ing.name }}</div>
+                                <div class="fw-bold item-name text-dark">{{ ing.name }}</div>
                                 <small class="text-muted">{{ ing.category|default:"일반" }}</small>
                             </td>
                             <td>{{ ing.unit }}</td>
                             <td class="text-muted">{{ ing.unit_price|floatformat:0 }}</td>
                             <td>
-<<<<<<< HEAD
                                 <input type="number" class="form-control item-qty mx-auto" name="quantity[]" min="0" step="0.1" 
-                                value="{% if ing.id|stringformat:"s" in selected_ids %}1{% else %}0{% endif %}"
-                                {% if ing.id|stringformat:"s" in selected_ids %} {% else %} disabled {% endif %}>
-=======
-                                <input type="number" class="form-control item-qty mx-auto" style="max-width: 100px;" name="quantity[]" min="0" value="0">
->>>>>>> origin/feat/procurement-system-upgrades
+                                       style="max-width: 100px;"
+                                       value="{% if ing.id|stringformat:'s' in selected_ids %}1{% else %}0{% endif %}"
+                                       {% if ing.id|stringformat:'s' in selected_ids %}{% else %}disabled{% endif %}>
                             </td>
                             <td class="item-subtotal text-end pe-4 fw-bold">0</td>
                         </tr>
                         {% endfor %}
+                        <tr id="no-result-row" style="display: none;">
+                            <td colspan="6" class="py-5 text-muted text-center">
+                                검색 결과와 일치하는 식재료가 없습니다.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -70,14 +90,9 @@
                     <strong id="final-total" class="display-6 text-danger fw-bold">0</strong>원
                 </div>
             </div>
-<<<<<<< HEAD
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-danger btn-lg px-5 fw-bold shadow">주문 전송하기</button>
-=======
             <div class="text-center mt-5">
                 <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-4 me-2">주문조회</a>
                 <button type="submit" class="btn btn-danger btn-lg px-5 fw-bold shadow">간편주문 완료하기</button>
->>>>>>> origin/feat/procurement-system-upgrades
             </div>
         </div>
     </form>
@@ -88,7 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.item-checkbox');
     const qtys = document.querySelectorAll('.item-qty');
     const rows = document.querySelectorAll('.ingredient-row');
-    
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const noResultRow = document.getElementById('no-result-row');
+
     function calculateTotals() {
         let subtotal = 0;
         checkboxes.forEach((cb, index) => {
@@ -96,21 +114,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const price = parseFloat(cb.dataset.price) || 0;
             const rowTotalTd = cb.closest('tr').querySelector('.item-subtotal');
             
-<<<<<<< HEAD
             if (cb.checked) {
                 qtyInput.disabled = false;
-                if (qtyInput.value === '0') qtyInput.value = '1';
-                const rowTotal = Math.round(parseFloat(qtyInput.value || 0) * price);
-                rowTotalTd.innerHTML = rowTotal.toLocaleString();
-=======
-            const q = Math.max(0, parseFloat(qtyInput.value) || 0);
-
-            if (cb.checked && q > 0) {
-                const rowTotal = q * price;
+                const q = parseFloat(qtyInput.value) || 0;
+                const rowTotal = Math.round(q * price);
                 rowTotalTd.innerHTML = `<strong>${rowTotal.toLocaleString()}</strong>`;
->>>>>>> origin/feat/procurement-system-upgrades
                 subtotal += rowTotal;
             } else {
+                qtyInput.disabled = true;
                 rowTotalTd.textContent = '0';
             }
         });
@@ -121,16 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('final-total').textContent = (subtotal + vat).toLocaleString();
     }
     
-<<<<<<< HEAD
-    checkboxes.forEach(cb => cb.addEventListener('change', calculateTotals));
-    qtys.forEach(qty => qty.addEventListener('input', calculateTotals));
-    calculateTotals(); // 초기 계산
-=======
-    // Checkbox 변경 시: 체크하면 기본수량 1, 해제하면 0으로 설정
     checkboxes.forEach((cb, index) => {
         const qtyInput = qtys[index];
         cb.addEventListener('change', () => {
-            if (cb.checked && (parseFloat(qtyInput.value) || 0) === 0) {
+            if (cb.checked && parseFloat(qtyInput.value) <= 0) {
                 qtyInput.value = '1';
             } else if (!cb.checked) {
                 qtyInput.value = '0';
@@ -139,68 +144,64 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 수량 변경 시: 0보다 크면 체크, 0이면 체크 해제
     qtys.forEach((qtyInput, index) => {
         const cb = checkboxes[index];
-        const updateFromQty = () => {
-            if ((parseFloat(qtyInput.value) || 0) > 0) {
+        qtyInput.addEventListener('input', () => {
+            if (parseFloat(qtyInput.value) > 0) {
                 cb.checked = true;
             } else {
                 cb.checked = false;
             }
             calculateTotals();
-        };
-        qtyInput.addEventListener('input', updateFromQty);
-        qtyInput.addEventListener('change', updateFromQty);
-    });
-
-    // 마우스로 행 아무 곳이나 클릭해도 수량 입력창에 포커스가 가도록 (UX 개선)
-    rows.forEach((row, index) => {
-        row.style.cursor = 'pointer';
-        row.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'INPUT') {
-                const qtyInput = qtys[index];
-                qtyInput.focus();
-                qtyInput.select();
-            }
         });
     });
 
-    // 폼 제출 직전에 선택되지 않은 품목의 수량 필드는 전송되지 않도록 disabled 처리 (백엔드 zip 매칭용)
-    document.getElementById('order-form').addEventListener('submit', function() {
-        checkboxes.forEach((cb, index) => {
-            if (!cb.checked) {
-                qtys[index].disabled = true;
-            }
-        });
-    });
-
-    // 2. 검색 및 필터 로직
-    const searchInput = document.getElementById('search-input');
-    const categoryFilter = document.getElementById('category-filter');
+    // --- 검색 로직 최적화 (방법 2: 디바운싱) ---
+    let searchTimer;
     
     function filterItems() {
         const query = searchInput.value.toLowerCase().trim();
         const category = categoryFilter.value;
+        let visibleCount = 0;
         
         rows.forEach(row => {
             const name = row.querySelector('.item-name').textContent.toLowerCase();
             const rowCategory = row.getAttribute('data-category');
-            
             const matchQuery = name.includes(query);
             const matchCategory = category === "" || rowCategory === category;
             
             if (matchQuery && matchCategory) {
                 row.style.display = '';
+                visibleCount++;
             } else {
                 row.style.display = 'none';
             }
         });
+
+        // 결과가 없으면 메시지 노출
+        noResultRow.style.display = (visibleCount === 0) ? '' : 'none';
     }
     
-    searchInput.addEventListener('input', filterItems);
+    // 0.4초 타이머 설정 (입력 중에는 타이머가 초기화됨)
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(filterItems, 400); 
+    });
+
+    // 카테고리는 즉시 필터링이 더 자연스러움
     categoryFilter.addEventListener('change', filterItems);
->>>>>>> origin/feat/procurement-system-upgrades
+
+    rows.forEach((row, index) => {
+        row.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                const qtyInput = qtys[index];
+                qtyInput.disabled = false;
+                qtyInput.focus();
+            }
+        });
+    });
+
+    calculateTotals();
 });
 </script>
 {% endblock %}

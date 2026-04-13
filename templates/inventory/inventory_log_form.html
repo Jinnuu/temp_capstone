@@ -35,7 +35,7 @@
                                     <span class="badge bg-secondary-subtle text-dark me-2">{{ item.category }}</span>
                                     <span class="fw-bold">{{ item.name }}</span>
                                 </div>
-                                <small class="text-primary fw-bold">재고: {{ item.current_stock|floatformat:1 }}</small>
+                                <small class="text-primary fw-bold">재고: {{ item.calc_stock|floatformat:1 }}</small>
                             </div>
                         </li>
                         {% endfor %}
