@@ -74,6 +74,8 @@
                 <div class="mt-4 d-grid gap-2">
                     <a href="{% url 'forecasting:prediction_list' %}" class="btn btn-outline-primary">예측 결과 목록</a>
                     <a href="{% url 'forecasting:ingredient_requirement' %}?date={{ form.prediction_date.value|default:'' }}&meal_type=lunch" class="btn btn-outline-secondary">식재료 산출 보기</a>
+                    {% comment %} This part has error: need to be fixed {% endcomment %}
+
                 </div>
             </div>
         </div>
