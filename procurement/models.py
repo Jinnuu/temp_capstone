@@ -7,8 +7,7 @@ class PurchaseOrder(models.Model):
     class Status(models.TextChoices):
         PENDING = '대기', '대기'
         APPROVED = '승인', '승인'
-        SHIPPING = '배송중', '배송중'
-        DELIVERED = '배송완료', '배송완료'
+        DELIVERED = '완료', '완료'
 
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)

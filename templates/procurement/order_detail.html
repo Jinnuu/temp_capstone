@@ -6,7 +6,7 @@
         주문요청 일시: <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong> 
         <span class="mx-2">|</span> 
         현재 배송 상태: 
-        <span class="badge {% if order.status == '대기' %}bg-secondary{% elif order.status == '승인' %}bg-primary{% elif order.status == '배송중' %}bg-warning text-dark{% elif order.status == '배송완료' %}bg-success{% else %}bg-secondary{% endif %}">
+        <span class="badge {% if order.status == '대기' %}bg-secondary{% elif order.status == '승인' %}bg-primary{% elif order.status == '완료' %}bg-success{% else %}bg-secondary{% endif %}">
             {{ order.status }}
         </span>
     </div>
@@ -64,22 +64,11 @@
         {% elif order.status == '승인' %}
         <form method="post" action="{% url 'procurement:order_status_update' order.id %}" class="d-inline-block">
             {% csrf_token %}
-            <input type="hidden" name="status" value="배송중">
-            <button type="submit" class="btn btn-warning btn-lg px-5 mx-2 text-dark">🚚 배송 시작 (테스트용)</button>
-        </form>
-        {% elif order.status == '배송중' %}
-        <form method="post" action="{% url 'procurement:order_status_update' order.id %}" class="d-inline-block">
-            {% csrf_token %}
-            <input type="hidden" name="status" value="배송완료">
-            <button type="submit" class="btn btn-success btn-lg px-5 mx-2">📦 납품 검수 / 완료 (테스트용)</button>
+            <input type="hidden" name="status" value="완료">
+            <button type="submit" class="btn btn-success btn-lg px-5 mx-2">📦 납품 검수 / 완료</button>
         </form>
         {% endif %}
-        
-        <form method="post" action="{% url 'procurement:order_delete' order.id %}" class="d-inline-block" onsubmit="return confirm('정말 이 명세서를 기록에서 완전히 삭제하시겠습니까?');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg px-3 mx-2">🗑️ 영구 삭제</button>
-        </form>
-        <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-4 mx-2">목록으로 돌아가기</a>
+        <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-5 mx-2">목록으로 돌아가기</a>
     </div>
 </div>
 {% endblock %}

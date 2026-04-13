@@ -99,7 +99,7 @@ def order_status_update(request, pk):
         order = get_object_or_404(PurchaseOrder, pk=pk)
         new_status = request.POST.get('status')
         if new_status in [choice[0] for choice in PurchaseOrder.Status.choices]:
-            if new_status == PurchaseOrder.Status.DELIVERED and order.status != PurchaseOrder.Status.DELIVERED:
+            if new_status == '완료' and order.status != '완료':
                 # 입고 처리 로직
                 for item in order.items.all():
                     ing = item.ingredient
@@ -116,9 +116,3 @@ def order_status_update(request, pk):
             messages.success(request, f"발주서 #{order.id}의 상태가 '{new_status}'(으)로 변경되었습니다.")
     return redirect('procurement:order_detail', pk=pk)
 
-def order_delete(request, pk):
-    if request.method == 'POST':
-        order = get_object_or_404(PurchaseOrder, pk=pk)
-        order.delete()
-        messages.success(request, f"해당 발주서 내역이 완전히 삭제되었습니다.")
-    return redirect('procurement:order_list')
