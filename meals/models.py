@@ -34,6 +34,8 @@ class DietPlan(models.Model):
 
     target_date = models.DateField(verbose_name="식단 날짜")
     meal_type = models.CharField(max_length=10, choices=MealType.choices, verbose_name="끼니")
+    headcount = models.IntegerField(default=0, verbose_name="식수(목표/당일인원)")
+    is_served = models.BooleanField(default=False, verbose_name="재고 차감 완료 여부")
 
     class Meta:
         constraints = [

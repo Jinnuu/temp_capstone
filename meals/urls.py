@@ -8,6 +8,7 @@ from .views import (
     mealplan_list,
     menu_delete, 
     menu_update,
+    deduct_inventory_view,
 )
 
 app_name = "meals"
@@ -21,4 +22,5 @@ urlpatterns = [
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
     path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
+    path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory"),
 ]

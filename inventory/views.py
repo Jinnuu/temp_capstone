@@ -1,15 +1,32 @@
 import openpyxl  
 import re
+from datetime import timedelta
+from django.utils import timezone
 from decimal import Decimal
 from django.contrib import messages  
 from django.core.paginator import Paginator
 from django.db.models import (
+<<<<<<< HEAD
     BooleanField, Case, DecimalField, ExpressionWrapper, 
     F, Sum, Value, When, Q, IntegerField
 )
 from django.db.models.functions import Coalesce
 from django.shortcuts import redirect, render
 from django.contrib.auth import get_user_model 
+=======
+    BooleanField,
+    Case,
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    Q,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce
+from django.shortcuts import redirect, render, get_object_or_404
+>>>>>>> origin/feat/procurement-system-upgrades
 
 from .forms import IngredientForm, InventoryLogForm
 from .models import Ingredient, InventoryLog
@@ -25,6 +42,7 @@ def get_ingredient_stock_queryset():
     return (
         Ingredient.objects.all()
         .annotate(
+<<<<<<< HEAD
             # log_type이 '입고', '출고', '폐기'인 경우를 각각 합산
             in_qty=Coalesce(Sum(Case(When(inventorylog__log_type='입고', then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
             out_qty=Coalesce(Sum(Case(When(inventorylog__log_type='출고', then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
@@ -33,6 +51,48 @@ def get_ingredient_stock_queryset():
         .annotate(
             # 현재고 = 입고 - 출고 - 폐기
             current_stock=ExpressionWrapper(F("in_qty") - F("out_qty") - F("waste_qty"), output_field=DecimalField(max_digits=12, decimal_places=2))
+=======
+            in_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.IN, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+            out_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.OUT, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+            waste_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.WASTE, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+            adj_qty=Coalesce(
+                Sum(
+                    Case(
+                        When(inventorylog__log_type=InventoryLog.LogType.ADJ, then=F("inventorylog__quantity")),
+                        default=DECIMAL_ZERO,
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ),
+                DECIMAL_ZERO,
+            ),
+>>>>>>> origin/feat/procurement-system-upgrades
         )
         .annotate(
             # 안전재고보다 현재고가 작거나 같으면 부족(True)
@@ -181,6 +241,7 @@ def inventory_log_create(request):
                 form.add_error('quantity', f"현재고({current_stock})가 부족합니다.")
             else:
                 form.save()
+<<<<<<< HEAD
                 messages.success(request, f"[{ingredient.name}] {log_type} 기록 완료.")
                 return redirect("inventory:inventory_log_create")
     else:
@@ -189,3 +250,77 @@ def inventory_log_create(request):
     return render(request, "inventory/inventory_log_form.html", {
         "form": form, "recent_logs": recent_logs, "ingredients": all_ingredients
     })
+=======
+                messages.success(request, "입출고 로그가 기록되었습니다.")
+                return redirect("inventory:ingredient_list")
+        form = InventoryLogForm()
+
+    return render(request, "inventory/inventory_log_form.html", {"form": form})
+
+def ingredient_stock_adjust(request, pk):
+    if request.method == "POST":
+        ingredient = get_object_or_404(Ingredient, pk=pk)
+        try:
+            new_stock = Decimal(request.POST.get("new_stock", 0))
+            diff = new_stock - ingredient.current_stock
+            
+            if diff != 0:
+                ingredient.current_stock = new_stock
+                ingredient.save()
+                
+                InventoryLog.objects.create(
+                    ingredient=ingredient,
+                    log_type=InventoryLog.LogType.ADJ,
+                    quantity=diff,
+                    description="수동 보정"
+                )
+                messages.success(request, f"{ingredient.name} 재고가 {new_stock}으로 수동 보정되었습니다.")
+        except Exception as e:
+            messages.error(request, f"오류가 발생했습니다: {e}")
+    return redirect("inventory:ingredient_list")
+
+def inventory_ledger(request):
+    today = timezone.localdate()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    start_date_str = request.GET.get('start_date', start_of_week.strftime('%Y-%m-%d'))
+    end_date_str = request.GET.get('end_date', end_of_week.strftime('%Y-%m-%d'))
+    
+    try:
+        start_date = timezone.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = timezone.datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        start_date = start_of_week
+        end_date = end_of_week
+        start_date_str = start_date.strftime('%Y-%m-%d')
+        end_date_str = end_date.strftime('%Y-%m-%d')
+    
+    ingredients = Ingredient.objects.all().annotate(
+        initial_in=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__lt=start_date) & Q(inventorylog__log_type=InventoryLog.LogType.IN), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        initial_out=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__lt=start_date) & Q(inventorylog__log_type=InventoryLog.LogType.OUT), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        initial_waste=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__lt=start_date) & Q(inventorylog__log_type=InventoryLog.LogType.WASTE), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        initial_adj=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__lt=start_date) & Q(inventorylog__log_type=InventoryLog.LogType.ADJ), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        
+        period_in=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__gte=start_date) & Q(inventorylog__transaction_date__lt=end_date + timedelta(days=1)) & Q(inventorylog__log_type=InventoryLog.LogType.IN), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        period_out=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__gte=start_date) & Q(inventorylog__transaction_date__lt=end_date + timedelta(days=1)) & Q(inventorylog__log_type=InventoryLog.LogType.OUT), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        period_waste=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__gte=start_date) & Q(inventorylog__transaction_date__lt=end_date + timedelta(days=1)) & Q(inventorylog__log_type=InventoryLog.LogType.WASTE), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+        period_adj=Coalesce(Sum(Case(When(Q(inventorylog__transaction_date__gte=start_date) & Q(inventorylog__transaction_date__lt=end_date + timedelta(days=1)) & Q(inventorylog__log_type=InventoryLog.LogType.ADJ), then=F("inventorylog__quantity")), default=DECIMAL_ZERO, output_field=DecimalField(max_digits=12, decimal_places=2))), DECIMAL_ZERO),
+    ).annotate(
+        initial_stock=ExpressionWrapper(F("initial_in") - F("initial_out") - F("initial_waste") + F("initial_adj"), output_field=DecimalField(max_digits=12, decimal_places=2)),
+        final_stock=ExpressionWrapper(F("initial_in") - F("initial_out") - F("initial_waste") + F("initial_adj") + F("period_in") - F("period_out") - F("period_waste") + F("period_adj"), output_field=DecimalField(max_digits=12, decimal_places=2))
+    ).exclude(
+        initial_stock=0,
+        period_in=0,
+        period_out=0,
+        period_waste=0,
+        period_adj=0
+    ).order_by('category', 'name')
+
+    context = {
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+        'ingredients': ingredients,
+    }
+    return render(request, 'inventory/inventory_ledger.html', context)
+>>>>>>> origin/feat/procurement-system-upgrades

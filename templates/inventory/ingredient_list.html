@@ -77,8 +77,24 @@
                 <td class="fw-bold text-dark">{{ ingredient.name }}</td>
                 <td class="text-muted small">{{ ingredient.supplier.username|default:"-" }}</td>
                 <td>{{ ingredient.unit }}</td>
+<<<<<<< HEAD
                 <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
                 <td class="fw-bold {% if ingredient.is_low_stock %}text-danger{% endif %}">{{ ingredient.current_stock }}</td>
+=======
+                <td>{{ ingredient.unit_price }}원</td>
+                <td class="text-primary">{{ ingredient.in_qty }}</td>
+                <td class="text-danger">{{ ingredient.out_qty }}</td>
+                <td class="text-muted">{{ ingredient.waste_qty }}</td>
+                <td class="fw-bold align-middle">
+                  {{ ingredient.current_stock }}
+                  <form method="post" action="{% url 'inventory:ingredient_stock_adjust' ingredient.id %}" class="d-inline-flex ms-2 align-items-center" style="max-width: 140px;">
+                    {% csrf_token %}
+                    <input type="number" step="0.01" class="form-control form-control-sm me-1 p-1" name="new_stock" value="{{ ingredient.current_stock }}" style="width: 60px;">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary p-1" title="수정 반영"><i class="bi bi-check2"></i></button>
+                  </form>
+                </td>
+                <td>{{ ingredient.safe_stock_level }}</td>
+>>>>>>> origin/feat/procurement-system-upgrades
                 <td>
                   {% if ingredient.is_low_stock %}
                     <span class="badge rounded-pill bg-danger px-3">부족</span>

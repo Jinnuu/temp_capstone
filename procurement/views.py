@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import PurchaseOrder, OrderItem
-from inventory.models import Ingredient
+from inventory.models import Ingredient, InventoryLog
 
 def get_or_create_dummy_user(request):
     """
@@ -56,7 +56,11 @@ def order_create(request):
             po.total_amount = total_amount
             po.save()
             messages.success(request, f"발주서 #{po.id} 건이 성공적으로 전송되었습니다.")
+<<<<<<< HEAD
             return redirect('procurement:order_detail', pk=po.id) # URL 네임스페이스 확인 필요
+=======
+            return redirect('procurement:order_detail', pk=po.id)
+>>>>>>> origin/feat/procurement-system-upgrades
             
     # --- GET 요청 처리 ---
     
@@ -130,4 +134,37 @@ def order_detail(request, pk):
         'subtotal': subtotal,
         'vat': vat,
         'total': total
+<<<<<<< HEAD
     })
+=======
+    })
+
+def order_status_update(request, pk):
+    if request.method == 'POST':
+        order = get_object_or_404(PurchaseOrder, pk=pk)
+        new_status = request.POST.get('status')
+        if new_status in [choice[0] for choice in PurchaseOrder.Status.choices]:
+            if new_status == PurchaseOrder.Status.DELIVERED and order.status != PurchaseOrder.Status.DELIVERED:
+                # 입고 처리 로직
+                for item in order.items.all():
+                    ing = item.ingredient
+                    ing.current_stock += item.required_qty
+                    ing.save()
+                    InventoryLog.objects.create(
+                        ingredient=ing,
+                        log_type=InventoryLog.LogType.IN,
+                        quantity=item.required_qty,
+                        description=f"발주 #{order.id} 입고"
+                    )
+            order.status = new_status
+            order.save()
+            messages.success(request, f"발주서 #{order.id}의 상태가 '{new_status}'(으)로 변경되었습니다.")
+    return redirect('procurement:order_detail', pk=pk)
+
+def order_delete(request, pk):
+    if request.method == 'POST':
+        order = get_object_or_404(PurchaseOrder, pk=pk)
+        order.delete()
+        messages.success(request, f"해당 발주서 내역이 완전히 삭제되었습니다.")
+    return redirect('procurement:order_list')
+>>>>>>> origin/feat/procurement-system-upgrades

@@ -26,6 +26,13 @@ def load_prediction_artifact(meal_type: str):
             f"(ml_models 폴더에 {MODEL_FILE_MAP[meal_type]} 파일을 넣어주세요)"
         )
 
+    import sys
+    try:
+        import sklearn._loss.loss as sk_loss
+        sys.modules['_loss'] = sk_loss
+    except ImportError:
+        pass
+        
     artifact = joblib.load(model_path)
 
     if not isinstance(artifact, dict):
