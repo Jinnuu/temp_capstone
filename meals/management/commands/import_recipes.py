@@ -63,6 +63,10 @@ class Command(BaseCommand):
                 if not ingredients_str or not ingredients_str.strip() or ingredients_str.strip() == 'nan':
                     continue
 
+                # Hotfix for legacy excel data typo (야채달걀말이 mistakenly matched with 고등어무조림 ingredients)
+                if menu_name == '야채달걀말이' and '고등어' in ingredients_str:
+                    ingredients_str = "달걀, 당근, 양파, 대파, 소금"
+
                 ingredient_names = [i.strip() for i in ingredients_str.split(',') if i.strip()]
                 
                 for ing_name in ingredient_names:

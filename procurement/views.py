@@ -144,13 +144,3 @@ def order_status_update(request, pk):
             messages.success(request, f"발주서 #{order.id}의 상태가 변경되었습니다.")
             
     return redirect('procurement:order_detail', pk=pk)
-
-def order_delete(request, pk):
-    """
-    발주 내역 삭제
-    """
-    if request.method == 'POST':
-        order = get_object_or_404(PurchaseOrder, pk=pk)
-        order.delete()
-        messages.success(request, f"발주서 #{pk} 내역이 삭제되었습니다.")
-    return redirect('procurement:order_list')

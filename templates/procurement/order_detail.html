@@ -5,12 +5,6 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-start mb-2">
         <h2>📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
-        <div class="text-end">
-            <form method="post" action="{% url 'procurement:order_delete' order.id %}" class="d-inline" onsubmit="return confirm('정말 이 명세서를 기록에서 완전히 삭제하시겠습니까?');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ 명세서 영구 삭제</button>
-            </form>
-        </div>
     </div>
     
     <div class="text-muted mb-4 fs-6">
