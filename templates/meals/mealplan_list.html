@@ -80,6 +80,50 @@
         min-height: 90px;
         padding: 0.25rem;
     }
+    
+    /* Inline Input Styles */
+    .inline-menu-input {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .inline-menu-input::placeholder {
+        color: #adb5bd;
+        font-size: 0.8rem;
+    }
+    .cell-wrapper {
+        min-height: 80px;
+        cursor: text;
+    }
+    .dropdown-autocomplete {
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+    .dropdown-autocomplete .list-group-item-action:hover,
+    .dropdown-autocomplete .list-group-item-action.active {
+        background-color: #e9ecef;
+        color: #000;
+        border-color: #dee2e6;
+    }
+    .menu-badge {
+        font-size: 0.8rem;
+    }
+    .remove-btn {
+        opacity: 0.5;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    .remove-btn:hover {
+        opacity: 1;
+        color: #dc3545;
+    }
+    .menu-name-span {
+        cursor: pointer;
+    }
+    .menu-name-span:hover {
+        text-decoration: underline;
+    }
 </style>
 
 <section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
@@ -92,40 +136,17 @@
     </div>
 
     <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'procurement:order_from_mealplan' %}" class="btn btn-primary shadow-sm fw-bold px-4">
+            <i class="bi bi-cart-check-fill me-1"></i> 식단기반 스마트 발주 (추천)
+        </a>
         <form method="post" action="{% url 'meals:deduct_inventory' %}" class="d-inline">
             {% csrf_token %}
-            <!-- date selector value could be passed here, but we'll use a simple button for today's deduction by default to simplify -->
-            <button type="submit" class="btn btn-warning shadow-sm fw-bold">⚡ 식재료 일괄 사용처리 (오늘 기준)</button>
+            <button type="submit" class="btn btn-outline-warning fw-bold">📉 식재료 재고 차감 (식사 완료 후)</button>
         </form>
-        <a href="{% url 'meals:mealplan_create' %}" class="btn btn-primary">식단 등록</a>
-        <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 등록</a>
-        <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-secondary">레시피 등록</a>
-        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
+        <a href="{% url 'meals:weekly_mealplan_create' %}" class="btn btn-outline-primary shadow-sm">주간 식단 등록</a>
     </div>
 </section>
 
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-body p-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-                <span class="text-uppercase small fw-bold text-primary">Selected Date</span>
-                <h2 class="h5 fw-bold mb-1 mt-2">선택한 날짜</h2>
-                <p class="text-muted mb-0">
-                    선택한 날짜:
-                    <strong id="selectedMealDateText">아직 선택된 날짜가 없습니다.</strong>
-                </p>
-            </div>
-
-            <div class="d-flex flex-wrap gap-2">
-                <a href="#" id="mealCalendarActionBtn" class="btn btn-primary disabled" aria-disabled="true">
-                    원하는 날짜를 선택하세요
-                </a>
-            </div>
-        </div>
-
-        <div id="mealCalendarSelectAlert" class="alert alert-warning mt-3 mb-0 d-none" role="alert">
-            원하는 날짜를 캘린더에서 선택해주세요.
-        </div>
     </div>
 </div>
 
@@ -177,17 +198,24 @@
                         {% for cell in week %}
                             {% if cell %}
                                 <td class="p-1 {% if cell.is_today %}border-primary border-2 shadow-sm{% endif %}">
-                                    <div class="fw-bold ms-1
-                                        {% if forloop.counter0 == 0 %}text-danger{% elif forloop.counter0 == 6 %}text-primary{% endif %}
-                                        {% if cell.is_today %} text-primary{% endif %}">
-                                        {{ cell.day }}{% if cell.is_today %} <small>(오늘)</small>{% endif %}
+                                    <div class="d-flex justify-content-between align-items-center mx-2 mb-1">
+                                        <div class="fw-bold {% if forloop.counter0 == 0 %}text-danger{% elif forloop.counter0 == 6 %}text-primary{% endif %} {% if cell.is_today %} text-primary{% endif %}">
+                                            {{ cell.day }}{% if cell.is_today %} <small>(오늘)</small>{% endif %}
+                                        </div>
+                                        {% if cell.meals.breakfast or cell.meals.lunch or cell.meals.dinner %}
+                                        <a href="{% url 'procurement:order_from_mealplan' %}?start_date={{ cell.date|date:'Y-m-d' }}" class="text-primary" title="이 날짜 식단으로 즉시 발주">
+                                            <i class="bi bi-cart-plus-fill" style="font-size: 1.1rem;"></i>
+                                        </a>
+                                        {% endif %}
                                     </div>
 
                                     <button
                                         type="button"
                                         class="meal-calendar-select-btn w-100 text-start border-0 bg-transparent p-0"
-                                        data-date="{{ cell.date|date:'Y-m-d' }}"
-                                        data-has-meal="{% if cell.meals.breakfast or cell.meals.lunch or cell.meals.dinner %}true{% else %}false{% endif %}">
+                                        onclick="openDailyEditor('{{ cell.date|date:'Y-m-d' }}')"
+                                        data-breakfast-dicts='{{ cell.meals.breakfast_dicts|default:"[]"|escapejs }}'
+                                        data-lunch-dicts='{{ cell.meals.lunch_dicts|default:"[]"|escapejs }}'
+                                        data-dinner-dicts='{{ cell.meals.dinner_dicts|default:"[]"|escapejs }}'>
                                         <div class="meal-content text-truncate">
                                             {% if cell.meals.breakfast or cell.meals.lunch or cell.meals.dinner %}
                                                 {% if cell.meals.breakfast %}
@@ -236,74 +264,362 @@
     </div>
 </div>
 
+<!-- Daily Editor Modal -->
+<div class="modal fade" id="dailyEditorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="dailyEditorTitle">일간 식단 관리</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">메뉴를 입력하고 엔터를 누르면 즉시 저장됩니다. 삭제는 X 버튼을 누르거나 빈 항목에서 백스페이스를 누르세요.</p>
+                
+                <table class="table table-bordered mb-0">
+                    <tbody>
+                        <!-- 조식 -->
+                        <tr>
+                            <td class="bg-info-subtle align-middle text-center fw-bold" style="width:70px;">조식</td>
+                            <td class="p-1" id="daily-cell-조식" data-cell-info="DATE|조식">
+                                <div class="cell-wrapper h-100 d-flex flex-column">
+                                    <div class="menu-container d-flex flex-column gap-1"></div>
+                                    <div class="position-relative flex-grow-1 mt-1">
+                                        <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- 중식 -->
+                        <tr>
+                            <td class="bg-primary-subtle align-middle text-center fw-bold">중식</td>
+                            <td class="p-1" id="daily-cell-중식" data-cell-info="DATE|중식">
+                                <div class="cell-wrapper h-100 d-flex flex-column">
+                                    <div class="menu-container d-flex flex-column gap-1"></div>
+                                    <div class="position-relative flex-grow-1 mt-1">
+                                        <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- 석식 -->
+                        <tr>
+                            <td class="bg-success-subtle align-middle text-center fw-bold">석식</td>
+                            <td class="p-1" id="daily-cell-석식" data-cell-info="DATE|석식">
+                                <div class="cell-wrapper h-100 d-flex flex-column">
+                                    <div class="menu-container d-flex flex-column gap-1"></div>
+                                    <div class="position-relative flex-grow-1 mt-1">
+                                        <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer pt-2 pb-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const cells = document.querySelectorAll(".meal-calendar-select-btn");
-    const selectedDateText = document.getElementById("selectedMealDateText");
-    const actionBtn = document.getElementById("mealCalendarActionBtn");
-    const alertBox = document.getElementById("mealCalendarSelectAlert");
+    const dailyEditorModal = new bootstrap.Modal(document.getElementById('dailyEditorModal'));
+    
+    let searchTimeout = null;
+    let currentDropdown = null;
+    let selectedIndex = -1;
+    let currentResults = [];
 
-    let selectedDate = null;
-    let hasMeal = false;
+    // Focus wrapping logic
+    document.querySelectorAll('.cell-wrapper').forEach(wrapper => {
+        wrapper.addEventListener('click', (e) => {
+            if(e.target === wrapper || e.target.classList.contains('menu-container')) {
+                const input = wrapper.querySelector('.inline-menu-input');
+                if (input) input.focus();
+            }
+        });
+    });
 
-    function clearSelection() {
-        document.querySelectorAll(".meal-calendar-selected").forEach(el => {
-            el.classList.remove("meal-calendar-selected");
+    window.openDailyEditor = function(btn, dateStr) {
+        document.getElementById('dailyEditorTitle').textContent = `${dateStr} 일간 식단 관리`;
+        
+        // Update dataset DATE info
+        document.getElementById('daily-cell-조식').dataset.cellInfo = `${dateStr}|조식`;
+        document.getElementById('daily-cell-중식').dataset.cellInfo = `${dateStr}|중식`;
+        document.getElementById('daily-cell-석식').dataset.cellInfo = `${dateStr}|석식`;
+        
+        // Clear old badges
+        document.querySelectorAll('.menu-container').forEach(c => c.innerHTML = '');
+        document.querySelectorAll('.inline-menu-input').forEach(i => i.value = '');
+        
+        if (btn) {
+            try {
+                const bDict = JSON.parse(btn.dataset.breakfastDicts || "[]");
+                const lDict = JSON.parse(btn.dataset.lunchDicts || "[]");
+                const dDict = JSON.parse(btn.dataset.dinnerDicts || "[]");
+                
+                populateCell('조식', bDict);
+                populateCell('중식', lDict);
+                populateCell('석식', dDict);
+            } catch(err) {
+                console.error("Parser issue:", err);
+            }
+        }
+        
+        dailyEditorModal.show();
+    };
+
+    function renderBadges(container, menus) {
+        container.innerHTML = '';
+        menus.forEach(menu => {
+            const html = `
+                <div class="badge bg-light text-dark border p-1 px-2 d-flex justify-content-between align-items-center w-100 text-wrap text-start menu-badge mb-1" data-menu-id="${menu.id}">
+                    <span class="menu-name-span cursor-pointer" onclick="editMenu(this, ${menu.id}, '${menu.name.replace(/'/g, "\\'")}')">${menu.name}</span>
+                    <i class="bi bi-x-circle fw-bold ms-1 remove-btn text-danger cursor-pointer" style="font-size:0.8rem;" onclick="removeMenu(this.previousElementSibling, ${menu.id})"></i>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
         });
     }
 
-    function updateAction() {
-        if (!selectedDate) {
-            actionBtn.classList.add("disabled");
-            actionBtn.setAttribute("aria-disabled", "true");
-            actionBtn.setAttribute("href", "#");
-            actionBtn.textContent = "원하는 날짜를 선택하세요";
-            selectedDateText.textContent = "아직 선택된 날짜가 없습니다.";
-            alertBox.classList.add("d-none");
-            return;
-        }
+    window.removeMenu = function(element, menuId) {
+        const td = element.closest('td');
+        const [dayStr, mealType] = td.dataset.cellInfo.split('|');
+        const container = td.querySelector('.menu-container');
+        element.closest('.badge').style.opacity = '0.5';
+        
+        // AJAX 통신
+        fetch('{% url "meals:remove_diet_menu_api" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: dayStr,
+                meal_type: mealType,
+                menu_id: menuId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                renderBadges(container, data.menus);
+                syncCalendarCell(dayStr);
+            }
+        })
+        .catch(err => {
+            console.error('Delete failed', err);
+            element.closest('.badge').style.opacity = '1';
+        });
+    };
 
-        actionBtn.classList.remove("disabled");
-        actionBtn.removeAttribute("aria-disabled");
-        selectedDateText.textContent = selectedDate;
+    window.editMenu = function(span, menuId, menuName) {
+        const td = span.closest('td');
+        const input = td.querySelector('.inline-menu-input');
+        input.value = menuName;
+        input.focus();
+        removeMenu(span, menuId);
+        input.dispatchEvent(new Event('input'));
+    };
 
-        actionBtn.classList.remove("btn-primary", "btn-outline-primary");
+    function populateCell(type, items) {
+        const container = document.getElementById(`daily-cell-${type}`).querySelector('.menu-container');
+        renderBadges(container, items);
+    }
 
-        if (hasMeal) {
-            actionBtn.textContent = "식단 수정";
-            actionBtn.classList.add("btn-outline-primary");
+    function syncCalendarCell(dateStr) {
+        // Rebuild the HTML for the calendar button and data attributes
+        const mainBtn = document.querySelector(`button[onclick="openDailyEditor('${dateStr}')"]`);
+        if (!mainBtn) return;
+
+        const breakfast = Array.from(document.getElementById('daily-cell-조식').querySelectorAll('.badge.menu-badge span')).map(s => s.textContent);
+        const lunch = Array.from(document.getElementById('daily-cell-중식').querySelectorAll('.badge.menu-badge span')).map(s => s.textContent);
+        const dinner = Array.from(document.getElementById('daily-cell-석식').querySelectorAll('.badge.menu-badge span')).map(s => s.textContent);
+        
+        const bDicts = Array.from(document.getElementById('daily-cell-조식').querySelectorAll('.badge.menu-badge')).map(b => ({id: b.dataset.menuId, name: b.querySelector('span').textContent}));
+        const lDicts = Array.from(document.getElementById('daily-cell-중식').querySelectorAll('.badge.menu-badge')).map(b => ({id: b.dataset.menuId, name: b.querySelector('span').textContent}));
+        const dDicts = Array.from(document.getElementById('daily-cell-석식').querySelectorAll('.badge.menu-badge')).map(b => ({id: b.dataset.menuId, name: b.querySelector('span').textContent}));
+
+        // Update Data Attributes
+        mainBtn.dataset.breakfastDicts = JSON.stringify(bDicts);
+        mainBtn.dataset.lunchDicts = JSON.stringify(lDicts);
+        mainBtn.dataset.dinnerDicts = JSON.stringify(dDicts);
+
+        // Update Content
+        const contentDiv = mainBtn.querySelector('.meal-content');
+        if (breakfast.length || lunch.length || dinner.length) {
+            let html = '';
+            if(breakfast.length) html += `<span class="badge meal-badge bg-info-subtle text-dark border-info-subtle w-100 text-start mb-1" data-full-menu="${breakfast.join(', ')}">B: ${breakfast.join(', ')}</span>`;
+            if(lunch.length) html += `<span class="badge meal-badge bg-primary-subtle text-dark border-primary-subtle w-100 text-start mb-1" data-full-menu="${lunch.join(', ')}">L: ${lunch.join(', ')}</span>`;
+            if(dinner.length) html += `<span class="badge meal-badge bg-success-subtle text-dark border-success-subtle w-100 text-start mb-1" data-full-menu="${dinner.join(', ')}">D: ${dinner.join(', ')}</span>`;
+            contentDiv.innerHTML = html;
         } else {
-            actionBtn.textContent = "식단 등록";
-            actionBtn.classList.add("btn-primary");
+            contentDiv.innerHTML = '<span class="badge bg-light text-muted border w-100 text-start mb-1">데이터 없음</span>';
         }
-
-        actionBtn.setAttribute("href", "{% url 'meals:mealplan_create' %}?date=" + selectedDate);
     }
 
-    cells.forEach(btn => {
-        btn.addEventListener("click", function () {
-            selectedDate = btn.dataset.date;
-            hasMeal = btn.dataset.hasMeal === "true";
-
-            clearSelection();
-            btn.closest("td").classList.add("meal-calendar-selected");
-
-            alertBox.classList.add("d-none");
-            updateAction();
-        });
-    });
-
-    actionBtn.addEventListener("click", function (e) {
-        if (!selectedDate) {
-            e.preventDefault();
-            alertBox.classList.remove("d-none");
+    function closeDropdown() {
+        if (currentDropdown) {
+            currentDropdown.remove();
+            currentDropdown = null;
         }
+        selectedIndex = -1;
+    }
+
+    function renderDropdown(input, results) {
+        closeDropdown();
+        const query = input.value.trim();
+        if (!query) return;
+
+        currentResults = [...results];
+        currentResults.push({
+            id: null,
+            name: query,
+            is_new: true
+        });
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'list-group position-absolute shadow z-3 dropdown-autocomplete border';
+        dropdown.style.width = '240px'; 
+        dropdown.style.top = '100%';
+        dropdown.style.left = '0';
+        dropdown.style.backgroundColor = 'white';
+
+        currentResults.forEach((menu, index) => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.className = 'list-group-item list-group-item-action py-1 px-2 border-0 border-bottom';
+            
+            if (menu.is_new) {
+                item.innerHTML = `<span class="fw-bold text-primary">+ "${menu.name}" 신규 등록</span>`;
+            } else {
+                let scoreText = menu.score !== undefined ? `<span class="badge bg-light text-secondary ms-1 float-end mt-1" style="font-size:0.6rem;">${(menu.score*100).toFixed(0)}%</span>` : '';
+                item.innerHTML = `<span class="fw-bold text-dark">${menu.name}</span>${scoreText}`;
+            }
+            
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault(); 
+                selectMenu(input, menu);
+            });
+            dropdown.appendChild(item);
+        });
+
+        input.parentElement.appendChild(dropdown);
+        currentDropdown = dropdown;
+    }
+
+    function selectMenu(input, menu) {
+        const td = input.closest('td');
+        const [dayStr, mealType] = td.dataset.cellInfo.split('|');
+        const container = td.querySelector('.menu-container');
+        
+        const bodyData = {
+            date: dayStr,
+            meal_type: mealType
+        };
+        if (menu.id) {
+            bodyData.menu_id = menu.id;
+        } else {
+            bodyData.menu_name = menu.name;
+        }
+
+        fetch('{% url "meals:add_diet_menu_api" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                renderBadges(container, data.menus);
+                syncCalendarCell(dayStr);
+            }
+        })
+        .catch(err => {
+            console.error('Save failed', err);
+        });
+
+        input.value = '';
+        closeDropdown();
+        input.focus();
+    }
+
+    const inputs = document.querySelectorAll('.inline-menu-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            closeDropdown();
+            clearTimeout(searchTimeout);
+            
+            if (query.length === 0) return;
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/meals/api/menus/search/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        renderDropdown(input, (data.results || []).slice(0, 8));
+                    })
+                    .catch(err => console.error(err));
+            }, 200);
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentDropdown && currentResults.length > 0) {
+                    const idx = selectedIndex >= 0 ? selectedIndex : 0;
+                    selectMenu(input, currentResults[idx]);
+                } else {
+                    const query = input.value.trim();
+                    if (query) {
+                        selectMenu(input, { id: null, name: query, is_new: true });
+                    }
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (currentDropdown) {
+                    const items = currentDropdown.querySelectorAll('.list-group-item');
+                    if (selectedIndex < items.length - 1) selectedIndex++;
+                    updateHighlight(items);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentDropdown) {
+                    const items = currentDropdown.querySelectorAll('.list-group-item');
+                    if (selectedIndex > 0) selectedIndex--;
+                    updateHighlight(items);
+                }
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+            } else if (e.key === 'Backspace' && input.value === '') {
+                const td = input.closest('td');
+                const badges = td.querySelectorAll('.badge.menu-badge');
+                if (badges.length > 0) {
+                    const icon = badges[badges.length - 1].querySelector('i.remove-btn');
+                    if (icon) icon.click();
+                }
+            }
+        });
+        
+        input.addEventListener('blur', () => closeDropdown());
     });
 
-    updateAction();
+    function updateHighlight(items) {
+        items.forEach((item, idx) => {
+            if (idx === selectedIndex) {
+                item.classList.add('active', 'bg-primary', 'text-white');
+                const span = item.querySelector('.fw-bold');
+                if(span) span.classList.replace('text-dark', 'text-white');
+            } else {
+                item.classList.remove('active', 'bg-primary', 'text-white');
+                const span = item.querySelector('.fw-bold');
+                if(span) span.classList.replace('text-white', 'text-dark');
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

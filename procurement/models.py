@@ -23,15 +23,17 @@ class PurchaseOrder(models.Model):
 class OrderItem(models.Model):
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='items')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    target_date = models.DateField(null=True, blank=True, verbose_name="요청일(식단일)")
+    meal_type = models.CharField(max_length=10, null=True, blank=True, verbose_name="끼니 구문")
     required_qty = models.DecimalField(max_digits=10, decimal_places=2)
     missing_qty = models.DecimalField(max_digits=10, decimal_places=2)
     order_unit_price = models.IntegerField(help_text="발주 생성 시점의 과거 단가 스냅샷")
     estimated_price = models.IntegerField()
 
     class Meta:
-        # SQL: UNIQUE(order_id, ingredient_id) 반영
+        # SQL: UNIQUE(order_id, ingredient_id, target_date, meal_type) 반영
         constraints = [
-            models.UniqueConstraint(fields=['purchase_order', 'ingredient'], name='unique_order_ingredient')
+            models.UniqueConstraint(fields=['purchase_order', 'ingredient', 'target_date', 'meal_type'], name='unique_order_ingredient_date_meal')
         ]
 
     def __str__(self):

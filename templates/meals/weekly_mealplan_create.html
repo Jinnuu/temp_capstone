@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}주간 식단 등록 | S&P{% endblock %}
+
+{% block content %}
+<style>
+    .weekly-table th, .weekly-table td {
+        width: 12.5%; /* 8 cols = 12.5% */
+        vertical-align: top;
+    }
+    .weekly-table th.meal-type-col {
+        width: 60px;
+        vertical-align: middle;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    .inline-menu-input {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .inline-menu-input::placeholder {
+        color: #adb5bd;
+        font-size: 0.8rem;
+    }
+    .cell-wrapper {
+        min-height: 80px;
+        cursor: text;
+    }
+    .dropdown-autocomplete {
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+    .dropdown-autocomplete .list-group-item-action:hover,
+    .dropdown-autocomplete .list-group-item-action.active {
+        background-color: #e9ecef;
+        color: #000;
+        border-color: #dee2e6;
+    }
+    .menu-badge {
+        font-size: 0.8rem;
+    }
+    .remove-btn {
+        opacity: 0.5;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    .remove-btn:hover {
+        opacity: 1;
+        color: dc3545;
+    }
+    .menu-name-span {
+        cursor: pointer;
+    }
+    .menu-name-span:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <span class="text-uppercase small fw-bold text-primary">Weekly Meal Planning</span>
+        <h1 class="h2 fw-bold mb-2">주간 식단표 (자동 저장)</h1>
+        <p class="text-muted mb-0">인라인 창에 메뉴를 <strong>타이핑하고 엔터(Enter)</strong>를 누르면 <strong>즉시 자동으로</strong> 데이터베이스에 저장됩니다.</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary">월간 달력 보기</a>
+        <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 추가 등록</a>
+    </div>
+</section>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <!-- Week Navigation -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="?start_date={{ prev_week }}" class="btn btn-outline-secondary btn-sm">&laquo; 이전 주</a>
+            <h4 class="fw-bold mb-0 text-primary">{{ start_date_str }} ~ {{ next_week }} 주간 식단</h4>
+            <a href="?start_date={{ next_week }}" class="btn btn-outline-secondary btn-sm">다음 주 &raquo;</a>
+        </div>
+        
+        <div class="table-responsive" style="overflow: visible;">
+            <table class="table table-bordered border-secondary-subtle weekly-table">
+                <thead class="table-light text-center align-middle">
+                    <tr>
+                        <th class="meal-type-col">구분</th>
+                        {% for day in days_context %}
+                            <th class="{% if day.weekday == '일' %}text-danger{% elif day.weekday == '토' %}text-primary{% endif %}">
+                                {{ day.date_str|date:"m/d" }}<br>
+                                <small class="fw-normal">({{ day.weekday }})</small>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 조식 -->
+                    <tr>
+                        <th class="meal-type-col border-secondary-subtle"><span class="badge bg-info-subtle text-dark border w-100">조식</span></th>
+                        {% for day in days_context %}
+                            <td class="p-1 border-secondary-subtle" data-cell-info="{{ day.date_str }}|조식">
+                                <div class="cell-wrapper h-100 d-flex flex-column">
+                                    <div class="menu-container d-flex flex-column gap-1">
+                                        {% for menu in day.breakfast %}
+                                            <div class="badge bg-light text-dark border p-1 px-2 d-flex justify-content-between align-items-center w-100 text-wrap text-start menu-badge" data-menu-id="{{ menu.id }}">
+                                                <span class="menu-name-span" onclick="editMenu(this, {{ menu.id }}, '{{ menu.name|escapejs }}')">{{ menu.name }}</span>
+                                                <i class="bi bi-x-circle fw-bold ms-1 remove-btn text-danger" style="font-size:0.8rem;" onclick="removeMenu(this.previousElementSibling, {{ menu.id }})"></i>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="position-relative flex-grow-1 mt-1">
+                                        <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    
+                    <!-- 중식 -->
+                    <tr>
+                        <th class="meal-type-col border-secondary-subtle"><span class="badge bg-primary-subtle text-dark border w-100">중식</span></th>
+                        {% for day in days_context %}
+                            <td class="p-1 border-secondary-subtle" data-cell-info="{{ day.date_str }}|중식">
+                                <div class="cell-wrapper h-100 d-flex flex-column">
+                                    <div class="menu-container d-flex flex-column gap-1">
+                                        {% for menu in day.lunch %}
+                                            <div class="badge bg-light text-dark border p-1 px-2 d-flex justify-content-between align-items-center w-100 text-wrap text-start menu-badge" data-menu-id="{{ menu.id }}">
+                                                <span class="menu-name-span" onclick="editMenu(this, {{ menu.id }}, '{{ menu.name|escapejs }}')">{{ menu.name }}</span>
+                                                <i class="bi bi-x-circle fw-bold ms-1 remove-btn text-danger" style="font-size:0.8rem;" onclick="removeMenu(this.previousElementSibling, {{ menu.id }})"></i>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="position-relative flex-grow-1 mt-1">
+                                        <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    
+                    <!-- 석식 -->
+                    <tr>
+                        <th class="meal-type-col border-secondary-subtle"><span class="badge bg-success-subtle text-dark border w-100">석식</span></th>
+                        {% for day in days_context %}
+                            {% if day.is_next_monday %}
+                                <td class="p-2 bg-light border-secondary-subtle align-middle text-center text-muted">
+                                    <small>작성 불가</small>
+                                </td>
+                            {% else %}
+                                <td class="p-1 border-secondary-subtle" data-cell-info="{{ day.date_str }}|석식">
+                                    <div class="cell-wrapper h-100 d-flex flex-column">
+                                        <div class="menu-container d-flex flex-column gap-1">
+                                            {% for menu in day.dinner %}
+                                                <div class="badge bg-light text-dark border p-1 px-2 d-flex justify-content-between align-items-center w-100 text-wrap text-start menu-badge" data-menu-id="{{ menu.id }}">
+                                                    <span class="menu-name-span" onclick="editMenu(this, {{ menu.id }}, '{{ menu.name|escapejs }}')">{{ menu.name }}</span>
+                                                    <i class="bi bi-x-circle fw-bold ms-1 remove-btn text-danger" style="font-size:0.8rem;" onclick="removeMenu(this.previousElementSibling, {{ menu.id }})"></i>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="position-relative flex-grow-1 mt-1">
+                                            <input type="text" class="form-control form-control-sm border-0 bg-transparent inline-menu-input p-1 w-100" placeholder="입력 후 엔터..." autocomplete="off">
+                                        </div>
+                                    </div>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function renderBadges(container, menus) {
+        container.innerHTML = '';
+        menus.forEach(menu => {
+            const html = `
+                <div class="badge bg-light text-dark border p-1 px-2 d-flex justify-content-between align-items-center w-100 text-wrap text-start menu-badge mb-1 transition-all" data-menu-id="${menu.id}">
+                    <span class="menu-name-span cursor-pointer" onclick="editMenu(this, ${menu.id}, '${menu.name.replace(/'/g, "\\'")}')">${menu.name}</span>
+                    <i class="bi bi-x-circle fw-bold ms-1 remove-btn text-danger cursor-pointer" style="font-size:0.8rem;" onclick="removeMenu(this.previousElementSibling, ${menu.id})"></i>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function removeMenu(element, menuId) {
+        const td = element.closest('td');
+        const [dayStr, mealType] = td.dataset.cellInfo.split('|');
+        const container = td.querySelector('.menu-container');
+        
+        // Optimistic UI (optional, but since we re-render, maybe just wait or hide)
+        element.closest('.badge').style.opacity = '0.5';
+        
+        // AJAX 통신
+        fetch('{% url "meals:remove_diet_menu_api" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: dayStr,
+                meal_type: mealType,
+                menu_id: menuId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                renderBadges(container, data.menus);
+            }
+        })
+        .catch(err => {
+            console.error('Delete failed', err);
+            alert('삭제에 실패했습니다.');
+            element.closest('.badge').style.opacity = '1';
+        });
+    }
+
+    function editMenu(span, menuId, menuName) {
+        const td = span.closest('td');
+        const input = td.querySelector('.inline-menu-input');
+        
+        // Populate input and focus
+        input.value = menuName;
+        input.focus();
+        
+        // Trigger deletion of the existing badge
+        removeMenu(span, menuId);
+        
+        // Trigger a search search
+        input.dispatchEvent(new Event('input'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('.inline-menu-input');
+        let searchTimeout = null;
+        let currentDropdown = null;
+        let selectedIndex = -1;
+        let currentResults = [];
+
+        // Focusing input when cell wrapper is clicked
+        document.querySelectorAll('.cell-wrapper').forEach(wrapper => {
+            wrapper.addEventListener('click', (e) => {
+                if(e.target === wrapper || e.target.classList.contains('menu-container')) {
+                    const input = wrapper.querySelector('.inline-menu-input');
+                    if (input) input.focus();
+                }
+            });
+        });
+
+        function closeDropdown() {
+            if (currentDropdown) {
+                currentDropdown.remove();
+                currentDropdown = null;
+            }
+            selectedIndex = -1;
+        }
+
+        function renderDropdown(input, results) {
+            closeDropdown();
+            const query = input.value.trim();
+            if (!query) return;
+
+            currentResults = [...results];
+            currentResults.push({
+                id: null,
+                name: query,
+                is_new: true
+            });
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'list-group position-absolute shadow z-3 dropdown-autocomplete border';
+            dropdown.style.width = '240px'; 
+            dropdown.style.top = '100%';
+            dropdown.style.left = '0';
+            dropdown.style.backgroundColor = 'white';
+
+            currentResults.forEach((menu, index) => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action py-1 px-2 border-0 border-bottom';
+                
+                if (menu.is_new) {
+                    item.innerHTML = `<span class="fw-bold text-primary">+ "${menu.name}" 신규 등록</span>`;
+                } else {
+                    let scoreText = menu.score !== undefined ? `<span class="badge bg-light text-secondary ms-1 float-end mt-1" style="font-size:0.6rem;">${(menu.score*100).toFixed(0)}%</span>` : '';
+                    item.innerHTML = `<span class="fw-bold text-dark">${menu.name}</span>${scoreText}`;
+                }
+                
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); 
+                    selectMenu(input, menu);
+                });
+                dropdown.appendChild(item);
+            });
+
+            input.parentElement.appendChild(dropdown);
+            currentDropdown = dropdown;
+        }
+
+        function selectMenu(input, menu) {
+            const td = input.closest('td');
+            const [dayStr, mealType] = td.dataset.cellInfo.split('|');
+            const container = td.querySelector('.menu-container');
+            
+            const bodyData = {
+                date: dayStr,
+                meal_type: mealType
+            };
+            if (menu.id) {
+                bodyData.menu_id = menu.id;
+            } else {
+                bodyData.menu_name = menu.name;
+            }
+
+            fetch('{% url "meals:add_diet_menu_api" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bodyData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    renderBadges(container, data.menus);
+                }
+            })
+            .catch(err => {
+                console.error('Save failed', err);
+            });
+
+            input.value = '';
+            closeDropdown();
+            input.focus();
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                closeDropdown();
+                clearTimeout(searchTimeout);
+                
+                if (query.length === 0) return;
+
+                searchTimeout = setTimeout(() => {
+                    fetch(`/meals/api/menus/search/?q=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            renderDropdown(input, (data.results || []).slice(0, 8));
+                        })
+                        .catch(err => console.error(err));
+                }, 200);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentDropdown && currentResults.length > 0) {
+                        const idx = selectedIndex >= 0 ? selectedIndex : 0;
+                        selectMenu(input, currentResults[idx]);
+                    } else {
+                        // Fallback: If no dropdown or no results, create as new if not empty
+                        const query = input.value.trim();
+                        if (query) {
+                            selectMenu(input, { id: null, name: query, is_new: true });
+                        }
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (currentDropdown) {
+                        const items = currentDropdown.querySelectorAll('.list-group-item');
+                        if (selectedIndex < items.length - 1) selectedIndex++;
+                        updateHighlight(items);
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (currentDropdown) {
+                        const items = currentDropdown.querySelectorAll('.list-group-item');
+                        if (selectedIndex > 0) selectedIndex--;
+                        updateHighlight(items);
+                    }
+                } else if (e.key === 'Escape') {
+                    closeDropdown();
+                } else if (e.key === 'Backspace' && input.value === '') {
+                    // Backspace 누를 때 마지막 항목 삭제!
+                    const td = input.closest('td');
+                    const badges = td.querySelectorAll('.badge.menu-badge');
+                    if (badges.length > 0) {
+                        const lastBadge = badges[badges.length - 1];
+                        // Get its delete icon which has the click handler
+                        const icon = lastBadge.querySelector('i.remove-btn');
+                        if (icon) {
+                            icon.click();
+                        }
+                    }
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                closeDropdown();
+            });
+        });
+
+        function updateHighlight(items) {
+            items.forEach((item, idx) => {
+                if (idx === selectedIndex) {
+                    item.classList.add('active');
+                    item.classList.add('bg-primary');
+                    item.classList.add('text-white');
+                    const span = item.querySelector('.fw-bold');
+                    if(span) span.classList.replace('text-dark', 'text-white');
+                } else {
+                    item.classList.remove('active');
+                    item.classList.remove('bg-primary');
+                    item.classList.remove('text-white');
+                    const span = item.querySelector('.fw-bold');
+                    if(span) span.classList.replace('text-white', 'text-dark');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
