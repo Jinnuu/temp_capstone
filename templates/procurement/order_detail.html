@@ -4,7 +4,10 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-start mb-2">
-        <h2>📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
+        <div>
+            <h6 class="text-primary fw-bold mb-1">발주처: {{ order.supplier.name|default:order.supplier.username }}</h6>
+            <h2 class="fw-bold">📄 주문리포트 명세서 (발주 #{{ order.id }})</h2>
+        </div>
     </div>
     
     <div class="text-muted mb-4 fs-6">
@@ -18,36 +21,56 @@
     
     <div class="card shadow-sm border-0 mb-4">
         <div class="table-responsive">
-            <table class="table table-bordered text-center align-middle m-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr>
-                        <th class="py-3">No</th>
-                        <th class="py-3">품목명</th>
-                        <th class="py-3">단위</th>
-                        <th class="py-3 text-end pe-4">단가(원)</th>
-                        <th class="py-3">발주 주문량</th>
-                        <th class="py-3 text-end pe-4">공급가액(원)</th>
+                    <tr class="small text-muted text-uppercase text-center">
+                        <th style="width: 80px;">날짜</th>
+                        <th style="width: 80px;">끼니</th>
+                        <th style="width: 200px;">품목명</th>
+                        <th style="width: 120px;">규격</th>
+                        <th style="width: 250px;">품목 설명</th>
+                        <th style="width: 100px;">수량</th>
+                        <th style="width: 100px;">단가</th>
+                        <th style="width: 150px;" class="text-end pe-4">금액</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td class="text-danger fw-bold text-start ps-4">{{ item.ingredient.name }}</td>
-                        <td>{{ item.ingredient.unit }}</td>
-                        <td class="text-end pe-4">{{ item.order_unit_price|floatformat:0 }}</td>
-                        <td class="fw-bold">{{ item.required_qty|floatformat:0 }}</td>
-                        <td class="text-end pe-4">{{ item.estimated_price|floatformat:0 }}</td>
-                    </tr>
+                    {% regroup order.items.all|dictsort:"target_date" by target_date as date_list %}
+                    {% for date_group in date_list %}
+                        {% regroup date_group.list by meal_type as meal_list %}
+                        {% for meal_group in meal_list %}
+                            {% for item in meal_group.list %}
+                            <tr>
+                                {% if forloop.parentloop.first and forloop.first %}
+                                <td rowspan="{{ date_group.list|length }}" class="text-center bg-light fw-bold border-end">
+                                    {{ date_group.grouper|date:"m/d" }}
+                                </td>
+                                {% endif %}
+                                
+                                {% if forloop.first %}
+                                <td rowspan="{{ meal_group.list|length }}" class="text-center fw-bold text-primary">
+                                    {{ meal_group.grouper }}
+                                </td>
+                                {% endif %}
+
+                                <td class="fw-bold">{{ item.ingredient.name }}</td>
+                                <td class="small text-muted text-center">{{ item.ingredient.spec|default:"-" }}</td>
+                                <td class="small text-muted text-truncate" style="max-width: 240px;" title="{{ item.ingredient.description }}">{{ item.ingredient.description|default:"-" }}</td>
+                                <td class="text-center">{{ item.required_qty|floatformat:2 }} <small>{{ item.ingredient.unit }}</small></td>
+                                <td class="text-end">{{ item.order_unit_price|floatformat:0 }}원</td>
+                                <td class="text-end pe-4 fw-bold text-dark">{{ item.estimated_price|floatformat:0 }}원</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
                     {% endfor %}
                 </tbody>
                 <tfoot class="bg-light fw-bold">
                     <tr>
-                        <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">총 공급가액 (식재료액합계)</td>
+                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">총 공급가액 (식재료액합계)</td>
                         <td class="text-end pe-4 border-bottom-0 fs-5">{{ subtotal|floatformat:0 }}원</td>
                     </tr>
                     <tr>
-                        <td colspan="5" class="text-end pe-4 py-3 border-bottom-0">부가가치세 (10%)</td>
+                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">부가가치세 (10%)</td>
                         <td class="text-end pe-4 border-bottom-0 fs-5">{{ vat|floatformat:0 }}원</td>
                     </tr>
                     <tr class="table-secondary">

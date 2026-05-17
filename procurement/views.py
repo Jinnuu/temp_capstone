@@ -1,10 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from datetime import datetime, date, timedelta
+
 from .models import PurchaseOrder, OrderItem
 from inventory.models import Ingredient, InventoryLog
 from forecasting.services.ingredient_calc import get_all_day_requirements
 from datetime import date
+from meals.models import DietPlan, DietMenu
+from django.db.models import Case, When, Value, IntegerField
+
+CATEGORY_ORDER = ['밥', '국', '주반찬', '부반찬', '김치', '간식']
+SORT_ORDER = Case(
+    *[When(menu__category=cat, then=Value(pos)) for pos, cat in enumerate(CATEGORY_ORDER)],
+    default=Value(len(CATEGORY_ORDER)),
+    output_field=IntegerField(),
+)
 
 def get_or_create_dummy_user(request):
     if request.user.is_authenticated:
@@ -91,13 +103,10 @@ def order_create(request):
 
 def order_list(request):
     """
-    발주 내역 목록 조회
+    발주 내역 목록 조회 (영양사용: 모든 업체의 발주 내역을 조회)
     """
-    user = get_or_create_dummy_user(request)
-    orders = PurchaseOrder.objects.filter(supplier=user).order_by('-created_at')
-    
-    if not orders.exists():
-        orders = PurchaseOrder.objects.all().order_by('-created_at')
+    # 모든 발주 내역 조회 (최신순)
+    orders = PurchaseOrder.objects.all().order_by('-created_at')
         
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -110,8 +119,25 @@ def order_list(request):
     if status_filter and status_filter != '전체':
         orders = orders.filter(status=status_filter)
         
+    # 업체별 그룹화를 위한 데이터 가공
+    from collections import defaultdict
+    orders_by_supplier = defaultdict(list)
+    for order in orders:
+        orders_by_supplier[order.supplier].append(order)
+    
+    # 템플릿에서 순회하기 좋게 리스트 형태로 변환
+    supplier_groups = []
+    for supplier, s_orders in orders_by_supplier.items():
+        supplier_groups.append({
+            'supplier': supplier,
+            'orders': s_orders
+        })
+    # 업체명 순으로 정렬
+    supplier_groups.sort(key=lambda x: x['supplier'].name or x['supplier'].username)
+
     return render(request, "procurement/order_list.html", {
         'orders': orders,
+        'supplier_groups': supplier_groups,
         'start_date': start_date,
         'end_date': end_date,
         'status_filter': status_filter
@@ -122,7 +148,18 @@ def order_detail(request, pk):
     특정 발주서 상세 내역 확인
     """
     order = get_object_or_404(PurchaseOrder, pk=pk)
-    items = order.items.all()
+    
+    # 끼니 정렬 순서 정의
+    MEAL_ORDER = Case(
+        When(meal_type='조식', then=Value(1)),
+        When(meal_type='중식', then=Value(2)),
+        When(meal_type='석식', then=Value(3)),
+        default=Value(4),
+        output_field=IntegerField(),
+    )
+
+    # 연관된 품목들 (날짜 및 끼니순 정렬)
+    items = order.items.select_related('ingredient').order_by('target_date', MEAL_ORDER, 'ingredient__name')
     
     subtotal = order.total_amount
     vat = int(subtotal * 0.1)
@@ -162,3 +199,166 @@ def order_status_update(request, pk):
             messages.success(request, f"발주서 #{order.id}의 상태가 변경되었습니다.")
             
     return redirect('procurement:order_detail', pk=pk)
+
+def order_from_mealplan(request):
+    """
+    식단 데이터(DietPlan)를 분석하여 식재료 필요량을 계산하고,
+    메뉴별 상세 조정 기능을 제공하는 스마트 발주 생성 뷰
+    """
+    if request.method == 'POST':
+        # 1. 업체(Supplier)별 및 날짜별로 그룹화 (발주처별/날짜별로 별개의 발주서 생성을 위함)
+        ingredient_ids = request.POST.getlist('ingredient_id[]')
+        quantities = request.POST.getlist('quantity[]')
+        target_dates = request.POST.getlist('target_date[]')
+        meal_types = request.POST.getlist('meal_type[]')
+        
+        # 구조: order_data[(sup_id, target_date)] = { (ing_id, meal_type): total_qty }
+        order_data = {} 
+        
+        for ing_id_str, qty_str, dt_str, mt_str in zip(ingredient_ids, quantities, target_dates, meal_types):
+            try:
+                ing_id = int(ing_id_str)
+                q = float(qty_str or 0)
+            except (ValueError, TypeError):
+                continue
+                
+            if q <= 0: continue
+            
+            ing = get_object_or_404(Ingredient, id=ing_id)
+            if not ing.supplier:
+                continue
+                
+            sup_id = ing.supplier.id
+            dt = dt_str if dt_str else None
+            
+            # 발주처와 날짜의 조합을 최상위 키로 사용
+            po_key = (sup_id, dt)
+            if po_key not in order_data:
+                order_data[po_key] = {}
+            
+            # 내부는 식재료와 끼니로 구분
+            item_key = (ing_id, mt_str if mt_str else None)
+            if item_key not in order_data[po_key]:
+                order_data[po_key][item_key] = 0
+            order_data[po_key][item_key] += q
+            
+        if not order_data:
+            messages.error(request, "발주할 품목이 없습니다.")
+            return redirect('procurement:order_from_mealplan')
+
+        # 2. 트랜잭션 내에서 각 (업체+날짜)별 발주서 생성
+        with transaction.atomic():
+            created_po_ids = []
+            for (sup_id, target_date), items_dict in order_data.items():
+                supplier_user = get_user_model().objects.get(id=sup_id)
+                po = PurchaseOrder.objects.create(
+                    supplier=supplier_user,
+                    status=PurchaseOrder.Status.PENDING,
+                    total_amount=0
+                )
+                
+                po_total = 0
+                for (ing_id, mt_str), q in items_dict.items():
+                    ing = Ingredient.objects.get(id=ing_id)
+                    subtotal = int(q * ing.unit_price)
+                    po_total += subtotal
+                    OrderItem.objects.create(
+                        purchase_order=po,
+                        ingredient=ing,
+                        target_date=dt_str if dt_str else None,
+                        required_qty=q,
+                        missing_qty=q,
+                        order_unit_price=ing.unit_price,
+                        estimated_price=subtotal
+                    )
+                
+                po.total_amount = po_total
+                po.save()
+                created_po_ids.append(po.id)
+                
+            messages.success(request, f"총 {len(created_po_ids)}건의 업체별 발주서가 성공적으로 생성되었습니다.")
+            return redirect('procurement:order_list')
+
+    # --- GET: 식단 기반 데이터 분석 ---
+    # 기본값: 오늘부터 7일치
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            start_date = date.today()
+    else:
+        start_date = date.today()
+        
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            end_date = start_date + timedelta(days=6)
+    else:
+        end_date = start_date + timedelta(days=6)
+
+    # 끼니 정렬 순서 정의
+    MEAL_ORDER = Case(
+        When(meal_type='조식', then=Value(1)),
+        When(meal_type='중식', then=Value(2)),
+        When(meal_type='석식', then=Value(3)),
+        default=Value(4),
+        output_field=IntegerField(),
+    )
+
+    # 해당 기간의 식단 조회 (식재료 및 공급업체 정보까지 미리 로드)
+    plans = DietPlan.objects.filter(
+        target_date__gte=start_date,
+        target_date__lte=end_date
+    ).prefetch_related('diet_menus__menu__recipes__ingredient__supplier').order_by('target_date', MEAL_ORDER)
+
+    # 데이터 구조화 (날짜별로 먼저 그룹화)
+    analysis_data = {} # date -> list of plans
+    for plan in plans:
+        dt = plan.target_date
+        if dt not in analysis_data:
+            analysis_data[dt] = []
+        
+        plan_item = {
+            'meal_type': plan.meal_type,
+            'headcount': plan.headcount,
+            'menus': []
+        }
+        
+        # 메뉴 정렬 순서 적용 (밥-국-주-부-김-간)
+        sorted_diet_menus = plan.diet_menus.all().select_related('menu').order_by(SORT_ORDER)
+        
+        for dm in sorted_diet_menus:
+            menu = dm.menu
+            menu_item = {'id': menu.id, 'name': menu.name, 'ingredients': []}
+            for recipe in menu.recipes.all():
+                ing = recipe.ingredient
+                needed_qty = float(plan.headcount) * float(recipe.required_amount)
+                menu_item['ingredients'].append({
+                    'id': ing.id, 'name': ing.name, 'unit': ing.unit,
+                    'price': ing.unit_price, 'category': ing.category,
+                    'spec': ing.spec, 'description': ing.description,
+                    'supplier_name': ing.supplier.name if ing.supplier else "미정",
+                    'needed_qty': round(needed_qty, 2),
+                })
+            plan_item['menus'].append(menu_item)
+        analysis_data[dt].append(plan_item)
+
+    # 템플릿에서 순서대로 출력하기 위해 리스트로 정렬
+    sorted_analysis = []
+    for dt in sorted(analysis_data.keys()):
+        sorted_analysis.append({
+            'date': dt,
+            'plans': analysis_data[dt]
+        })
+
+    all_ingredients = Ingredient.objects.all().order_by('name')
+
+    context = {
+        'start_date': start_date, 'end_date': end_date,
+        'analysis_data': sorted_analysis, 'all_ingredients': all_ingredients,
+    }
+    return render(request, "procurement/order_from_mealplan.html", context)

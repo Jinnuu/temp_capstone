@@ -4,6 +4,7 @@ from django.conf import settings
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
     spec = models.CharField(max_length=100, null=True, blank=True, verbose_name='규격')
+    description = models.TextField(null=True, blank=True, verbose_name='식품 설명')
     unit = models.CharField(max_length=20, help_text="예: kg, g, EA")
     unit_price = models.IntegerField(default=0)
     safe_stock_level = models.DecimalField(max_digits=10, decimal_places=2)

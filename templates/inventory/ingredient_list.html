@@ -37,7 +37,7 @@
                     <select name="supplier" class="form-select" onchange="this.form.submit()">
                         <option value="">전체 발주처</option>
                         {% for sup in suppliers %}
-                            <option value="{{ sup.username }}" {% if selected_supplier == sup.username %}selected{% endif %}>{{ sup.username }}</option>
+                            <option value="{{ sup.username }}" {% if selected_supplier == sup.username %}selected{% endif %}>{{ sup.name|default:sup.username }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -77,7 +77,7 @@
                             <tr>
                                 <td><span class="badge bg-secondary-subtle text-secondary border small">{{ ingredient.category|default:"-" }}</span></td>
                                 <td class="fw-bold text-dark text-start ps-3">{{ ingredient.name }}</td>
-                                <td class="text-muted small">{{ ingredient.supplier.username|default:"-" }}</td>
+                                <td class="text-muted small">{{ ingredient.supplier.name|default:ingredient.supplier.username|default:"-" }}</td>
                                 <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
                                 
                                 <td class="text-primary small">{{ ingredient.in_qty|floatformat:1 }}</td>

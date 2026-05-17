@@ -17,11 +17,29 @@
         <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-secondary">레시피 수정</a>
     </div>
 </section>
+<style>
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .clickable-row:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+    }
+</style>
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-4">
         <form method="get" class="row g-3 align-items-end mb-4">
-            <div class="col-md-4">
+            <div class="col-md-5">
+                <label for="q" class="form-label fw-semibold">메뉴명 검색</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0 ps-0" placeholder="메뉴 이름을 입력하세요..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
                 <label for="category" class="form-label fw-semibold">카테고리</label>
                 <select name="category" id="category" class="form-select">
                     <option value="">전체</option>
@@ -29,46 +47,45 @@
                     <option value="일식" {% if request.GET.category == "일식" %}selected{% endif %}>일식</option>
                     <option value="중식" {% if request.GET.category == "중식" %}selected{% endif %}>중식</option>
                     <option value="양식" {% if request.GET.category == "양식" %}selected{% endif %}>양식</option>
+                    <option value="기타" {% if request.GET.category == "기타" %}selected{% endif %}>기타</option>
                 </select>
             </div>
 
-            <div class="col-md-8 d-flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary">조회</button>
+            <div class="col-md-4 d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary px-4">조회</button>
                 <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">초기화</a>
             </div>
         </form>
 
         {% if menus %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="menu-table">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 90px;">ID</th>
+                        <th style="width: 100px;">ID</th>
                         <th>메뉴명</th>
-                        <th style="width: 160px;">카테고리</th>
-                        <th style="width: 220px;" class="text-end">관리</th>
+                        <th style="width: 200px;">카테고리</th>
+                        <th style="width: 120px;" class="text-end">삭제</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="menu-tbody">
                     {% for menu in menus %}
-                    <tr>
-                        <td>{{ menu.id }}</td>
-                        <td class="fw-semibold">{{ menu.name }}</td>
+                    <tr class="clickable-row" onclick="location.href='{% url 'meals:menu_update' menu.id %}'">
+                        <td><span class="text-muted">#{{ menu.id }}</span></td>
                         <td>
-                            <span class="badge text-bg-light border">{{ menu.category|default:"미분류" }}</span>
+                            <div class="fw-bold text-dark">{{ menu.name }}</div>
+                            <small class="text-muted">레시피: {{ menu.recipes.count }}개 항목</small>
+                        </td>
+                        <td>
+                            <span class="badge text-bg-light border px-2 py-1">{{ menu.category|default:"미분류" }}</span>
                         </td>
                         <td class="text-end">
-                            <div class="d-inline-flex gap-2">
-                                <a href="{% url 'meals:menu_update' menu.id %}" class="btn btn-sm btn-outline-primary">
-                                    상세 / 수정
-                                </a>
-                                <form method="post" action="{% url 'meals:menu_delete' menu.id %}" class="m-0">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        삭제
-                                    </button>
-                                </form>
-                            </div>
+                            <form method="post" action="{% url 'meals:menu_delete' menu.id %}" class="m-0" onclick="event.stopPropagation();">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link text-danger p-0 border-0" onclick="return confirm('정말 삭제하시겠습니까?');">
+                                    <i class="bi bi-trash3" style="font-size: 1.1rem;"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -82,4 +99,69 @@
         {% endif %}
     </div>
 </div>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const qInput = document.getElementById('q');
+    const catSelect = document.getElementById('category');
+    const tbody = document.getElementById('menu-tbody');
+    let debounceTimer;
+
+    function performSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const q = qInput.value;
+            const category = catSelect.value;
+            const url = `{% url 'meals:menu_list' %}?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`;
+            
+            tbody.style.opacity = '0.5';
+
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTbody = doc.getElementById('menu-tbody');
+                const emptyMsg = doc.querySelector('.border.rounded-4.bg-light');
+                
+                // Clear existing empty message if any
+                const existingMsg = document.querySelector('.border.rounded-4.bg-light');
+                if (existingMsg) existingMsg.remove();
+
+                if (newTbody && newTbody.children.length > 0) {
+                    tbody.innerHTML = newTbody.innerHTML;
+                    tbody.style.opacity = '1';
+                } else if (emptyMsg) {
+                    tbody.innerHTML = '';
+                    tbody.style.opacity = '1';
+                    const tableContainer = document.querySelector('.table-responsive');
+                    tableContainer.insertAdjacentElement('afterend', emptyMsg);
+                } else {
+                    tbody.innerHTML = '';
+                    tbody.style.opacity = '1';
+                }
+            })
+            .catch(err => {
+                console.error('Search error:', err);
+                tbody.style.opacity = '1';
+            });
+        }, 300);
+    }
+
+    qInput.addEventListener('input', performSearch);
+    catSelect.addEventListener('change', performSearch);
+    
+    // Prevent default form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}
