@@ -12,6 +12,7 @@ from .forms import AttendancePredictionForm, PredictionFilterForm
 from .models import AttendancePrediction
 from .services.ingredient_calc import get_ingredient_requirements
 from .services.prediction_service import run_attendance_prediction
+from .services.ingredient_calc import get_all_day_requirements
 
 
 def forecasting_home(request):
@@ -174,16 +175,15 @@ def prediction_list_view(request):
 
 
 def ingredient_requirement_view(request):
-    today = date.today()
-    formatted_today = f"{today.year}-{today.month:02d}-{today.day:02d}"
-    target_date = formatted_today
-    meal_type = request.GET.get("meal_type", "lunch")
-
-    requirements = get_ingredient_requirements(target_date, meal_type)
+    selected_date = request.GET.get("date", date.today().isoformat())
+    
+    # 💥 날짜 전체 통합 데이터 호출
+    requirements = get_all_day_requirements(selected_date)
 
     context = {
         "requirements": requirements,
-        "selected_date": target_date,
-        "selected_meal_type": meal_type,
+        "selected_date": selected_date,
+        "is_all_day": True, # 템플릿 표시용
     }
     return render(request, "forecasting/required_ingredient_list.html", context)
+
