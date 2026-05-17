@@ -47,7 +47,7 @@ def get_ingredient_requirements(date, meal_type):
             if name not in ingredient_totals:
                 ingredient_totals[name] = {
                     'needed_amount': 0,
-                    'current_stock': float(ingre.current_amount) if hasattr(ingre, 'current_amount') else 0,
+                    'current_stock': float(ingre.current_stock) if hasattr(ingre, 'current_stock') else 0,
                     'safe_level': float(ingre.safe_stock_level) if hasattr(ingre, 'safe_stock_level') else 0,
                     'unit': ingre.unit,
                     'included_menus': set() 
