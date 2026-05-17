@@ -17,7 +17,7 @@
         주문요청 일시: <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong> 
         <span class="mx-2">|</span> 
         현재 배송 상태: 
-        <span class="badge {% if order.status == '대기' %}bg-secondary{% elif order.status == '승인' %}bg-primary{% elif order.status == '배송중' %}bg-warning text-dark{% elif order.status == '배송완료' %}bg-success{% else %}bg-secondary{% endif %}">
+        <span class="badge {% if order.status == '대기' %}bg-secondary{% elif order.status == '승인' %}bg-primary{% elif order.status == '완료' %}bg-success{% else %}bg-secondary{% endif %}">
             {{ order.status }}
         </span>
     </div>
