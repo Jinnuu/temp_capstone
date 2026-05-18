@@ -100,26 +100,37 @@ def order_list(request):
         orders = orders.filter(created_at__date__lte=end_date)
     if status_filter and status_filter != '전체':
         orders = orders.filter(status=status_filter)
-        
-    # 업체별 그룹화를 위한 데이터 가공
+
+    # 1. 기존 전체 발주 내역을 위한 업체별 그룹화 (오류방지용으로 남겨둠 or 삭제가능)
     from collections import defaultdict
     orders_by_supplier = defaultdict(list)
     for order in orders:
         orders_by_supplier[order.supplier].append(order)
     
-    # 템플릿에서 순회하기 좋게 리스트 형태로 변환
-    supplier_groups = []
-    for supplier, s_orders in orders_by_supplier.items():
-        supplier_groups.append({
+    # 2. 새로운 '식단일 기준' 아이템 그룹화
+    items = OrderItem.objects.select_related('purchase_order', 'ingredient', 'purchase_order__supplier').order_by('target_date', 'meal_type', 'menu_name', 'ingredient__name')
+    if start_date:
+        items = items.filter(target_date__gte=start_date)
+    if end_date:
+        items = items.filter(target_date__lte=end_date)
+    if status_filter and status_filter != '전체':
+        items = items.filter(purchase_order__status=status_filter)
+        
+    supplier_items = defaultdict(list)
+    for item in items:
+        supplier_items[item.purchase_order.supplier].append(item)
+    
+    supplier_items_groups = []
+    for supplier, s_items in supplier_items.items():
+        supplier_items_groups.append({
             'supplier': supplier,
-            'orders': s_orders
+            'items': s_items
         })
-    # 업체명 순으로 정렬
-    supplier_groups.sort(key=lambda x: x['supplier'].name or x['supplier'].username)
+    supplier_items_groups.sort(key=lambda x: x['supplier'].name or x['supplier'].username)
 
     return render(request, "procurement/order_list.html", {
         'orders': orders,
-        'supplier_groups': supplier_groups,
+        'supplier_items_groups': supplier_items_groups,
         'start_date': start_date,
         'end_date': end_date,
         'status_filter': status_filter
@@ -141,7 +152,7 @@ def order_detail(request, pk):
     )
 
     # 연관된 품목들 (날짜 및 끼니순 정렬)
-    items = order.items.select_related('ingredient').order_by('target_date', MEAL_ORDER, 'ingredient__name')
+    items = order.items.select_related('ingredient').order_by('target_date', MEAL_ORDER, 'menu_name', 'ingredient__name')
     
     subtotal = order.total_amount
     vat = int(subtotal * 0.1)
@@ -193,11 +204,12 @@ def order_from_mealplan(request):
         quantities = request.POST.getlist('quantity[]')
         target_dates = request.POST.getlist('target_date[]')
         meal_types = request.POST.getlist('meal_type[]')
+        menu_names = request.POST.getlist('menu_name[]')
         
-        # 구조: order_data[(sup_id, target_date)] = { (ing_id, meal_type): total_qty }
+        # 구조: order_data[(sup_id, target_date)] = { (ing_id, meal_type, menu_name): total_qty }
         order_data = {} 
         
-        for ing_id_str, qty_str, dt_str, mt_str in zip(ingredient_ids, quantities, target_dates, meal_types):
+        for ing_id_str, qty_str, dt_str, mt_str, mn_str in zip(ingredient_ids, quantities, target_dates, meal_types, menu_names):
             try:
                 ing_id = int(ing_id_str)
                 q = float(qty_str or 0)
@@ -218,8 +230,8 @@ def order_from_mealplan(request):
             if po_key not in order_data:
                 order_data[po_key] = {}
             
-            # 내부는 식재료와 끼니로 구분
-            item_key = (ing_id, mt_str if mt_str else None)
+            # 내부는 식재료, 끼니, 메뉴명으로 구분
+            item_key = (ing_id, mt_str if mt_str else None, mn_str if mn_str else None)
             if item_key not in order_data[po_key]:
                 order_data[po_key][item_key] = 0
             order_data[po_key][item_key] += q
@@ -240,7 +252,7 @@ def order_from_mealplan(request):
                 )
                 
                 po_total = 0
-                for (ing_id, mt_str), q in items_dict.items():
+                for (ing_id, mt_str, mn_str), q in items_dict.items():
                     ing = Ingredient.objects.get(id=ing_id)
                     subtotal = int(q * ing.unit_price)
                     po_total += subtotal
@@ -248,6 +260,8 @@ def order_from_mealplan(request):
                         purchase_order=po,
                         ingredient=ing,
                         target_date=dt_str if dt_str else None,
+                        meal_type=mt_str,
+                        menu_name=mn_str,
                         required_qty=q,
                         missing_qty=q,
                         order_unit_price=ing.unit_price,
@@ -307,7 +321,8 @@ def order_from_mealplan(request):
         plan_item = {
             'meal_type': plan.meal_type,
             'headcount': plan.headcount,
-            'menus': []
+            'menus': [],
+            'total_ingredients': 0
         }
         
         # 메뉴 정렬 순서 적용 (밥-국-주-부-김-간)
@@ -326,7 +341,18 @@ def order_from_mealplan(request):
                     'supplier_name': ing.supplier.name if ing.supplier else "미정",
                     'needed_qty': round(needed_qty, 2),
                 })
+                plan_item['total_ingredients'] += 1
+            if not menu_item['ingredients']:
+                # If a menu has no ingredients, it still takes 1 row to show the menu name, 
+                # so we need to account for it in the rowspan if we decide to render it,
+                # but currently the template loops over menu.ingredients. 
+                # Wait, if there are no ingredients, the menu row won't render at all because of `for ing in menu.ingredients`.
+                pass
             plan_item['menus'].append(menu_item)
+            
+        if plan_item['total_ingredients'] == 0:
+            plan_item['total_ingredients'] = 1 # To prevent rowspan="0" or empty
+            
         analysis_data[dt].append(plan_item)
 
     # 템플릿에서 순서대로 출력하기 위해 리스트로 정렬

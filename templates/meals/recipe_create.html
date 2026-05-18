@@ -37,10 +37,10 @@
 
                     <div class="mb-4">
                         <label for="menu_id" class="form-label fw-semibold">수정할 메뉴 선택</label>
-                        <select name="menu_id" id="menu_id" class="form-select" required>
+                        <select name="menu_id" id="menu_id" class="form-select" required onchange="window.location.href='?menu_id=' + this.value;">
                             <option value="">메뉴를 선택하세요...</option>
                             {% for menu in menus %}
-                            <option value="{{ menu.id }}">{{ menu.name }}</option>
+                            <option value="{{ menu.id }}" {% if selected_menu and selected_menu.id == menu.id %}selected{% endif %}>{{ menu.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -55,28 +55,55 @@
                     </div>
 
                     <div id="ingredientRows" class="d-flex flex-column gap-3">
-                        <div class="row g-2 align-items-end ingredient-row">
-                            <div class="col-md-6">
-                                <label class="form-label">식재료</label>
-                                <select name="ingredient_id[]" class="form-select">
-                                    <option value="">식재료를 선택하세요</option>
-                                    {% for ingredient in ingredients %}
-                                    <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                        {% if selected_menu and selected_menu.recipes.all %}
+                            {% for recipe in selected_menu.recipes.all %}
+                            <div class="row g-2 align-items-end ingredient-row">
+                                <div class="col-md-6">
+                                    <label class="form-label">식재료</label>
+                                    <select name="ingredient_id[]" class="form-select">
+                                        <option value="">식재료를 선택하세요</option>
+                                        {% for ingredient in ingredients %}
+                                        <option value="{{ ingredient.id }}" {% if recipe.ingredient.id == ingredient.id %}selected{% endif %}>{{ ingredient.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">사용량</label>
-                                <input type="number" step="0.01" name="required_amount[]" class="form-control" placeholder="예: 2.5">
-                            </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">사용량</label>
+                                    <input type="number" step="0.01" name="required_amount[]" class="form-control" value="{{ recipe.required_amount }}">
+                                </div>
 
-                            <div class="col-md-2 d-grid">
-                                <button type="button" class="btn btn-outline-danger" onclick="removeIngredientRow(this)">
-                                    삭제
-                                </button>
+                                <div class="col-md-2 d-grid">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeIngredientRow(this)">
+                                        삭제
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row g-2 align-items-end ingredient-row">
+                                <div class="col-md-6">
+                                    <label class="form-label">식재료</label>
+                                    <select name="ingredient_id[]" class="form-select">
+                                        <option value="">식재료를 선택하세요</option>
+                                        {% for ingredient in ingredients %}
+                                        <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">사용량</label>
+                                    <input type="number" step="0.01" name="required_amount[]" class="form-control" placeholder="예: 2.5">
+                                </div>
+
+                                <div class="col-md-2 d-grid">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeIngredientRow(this)">
+                                        삭제
+                                    </button>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="d-flex flex-wrap gap-2 mt-4">

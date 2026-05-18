@@ -162,8 +162,9 @@
                                         <td>
                                             <input type="number" step="0.01" name="quantity[]" class="form-control form-control-sm qty-input mx-auto" value="{{ ing.needed_qty }}" oninput="updateRowSubtotal(this, {{ ing.price|default:0 }})">
                                             <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}">
-                                            <input type="hidden" name="target_date[]" value="{{ day.date|date:'Y-m-d' }}">
+                                            <input type="hidden" name="target_date[]" value="{{ target_date|date:'Y-m-d' }}">
                                             <input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}">
+                                            <input type="hidden" name="menu_name[]" value="{{ menu.name }}">
                                         </td>
                                         <td class="text-end pe-4 fw-bold text-primary subtotal-display" data-price="{{ ing.price|default:0 }}">
                                             {{ ing.subtotal|floatformat:0 }}원
@@ -249,13 +250,14 @@
 
 {% block extra_js %}
 <script>
-    let currentCtx = { container: null, date: null, mealType: null };
+    let currentCtx = { container: null, date: null, mealType: null, menuName: null };
 
     function setContext(menuName, btn, date, mealType) {
         document.getElementById('modalTitle').innerText = `${menuName} - 식재료 추가`;
         currentCtx.container = btn.closest('table').querySelector('tbody');
         currentCtx.date = date;
         currentCtx.mealType = mealType;
+        currentCtx.menuName = menuName;
     }
 
     function confirmAddIngredient() {
@@ -288,6 +290,7 @@
                     <input type="hidden" name="ingredient_id[]" value="${id}">
                     <input type="hidden" name="target_date[]" value="${currentCtx.date}">
                     <input type="hidden" name="meal_type[]" value="${currentCtx.mealType}">
+                    <input type="hidden" name="menu_name[]" value="${currentCtx.menuName}">
                 </td>
                 <td class="text-end pe-4 fw-bold text-primary subtotal-display" data-price="${price}">
                     ${subtotal.toLocaleString()}원
