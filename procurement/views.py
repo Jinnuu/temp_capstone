@@ -6,6 +6,8 @@ from datetime import datetime, date, timedelta
 
 from .models import PurchaseOrder, OrderItem
 from inventory.models import Ingredient, InventoryLog
+from forecasting.services.ingredient_calc import get_all_day_requirements
+from datetime import date
 from meals.models import DietPlan, DietMenu
 from django.db.models import Case, When, Value, IntegerField
 
@@ -17,9 +19,6 @@ SORT_ORDER = Case(
 )
 
 def get_or_create_dummy_user(request):
-    """
-    인증된 사용자가 없을 경우 테스트를 위한 더미 사용자를 반환합니다.
-    """
     if request.user.is_authenticated:
         return request.user
     User = get_user_model()
@@ -30,7 +29,7 @@ def get_or_create_dummy_user(request):
 
 def order_create(request):
     """
-    간편주문(발주서 작성) 생성 뷰
+    간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 로드 기능 포함
     """
     if request.method == 'POST':
         ingredient_ids = request.POST.getlist('ingredient_id[]')
@@ -65,8 +64,26 @@ def order_create(request):
             return redirect('procurement:order_detail', pk=po.id)
             
     # --- GET 요청 처리 ---
-    selected_ids_raw = request.GET.get('selected_ids', '')
-    selected_ids = selected_ids_raw.split(',') if selected_ids_raw else []
+    # 1. 외부(예측 페이지)에서 넘어온 데이터 수신
+    items_names = request.GET.getlist('items')
+    amounts = request.GET.getlist('amounts')
+    shortage_map = dict(zip(items_names, amounts))
+
+    # 2. 🔥 날짜 선택에 따른 부족분 로드 로직
+    target_date = request.GET.get('target_date')
+    
+    if target_date:
+        # 선택된 날짜의 통합 부족분을 계산해오는 서비스 호출
+        requirements = get_all_day_requirements(target_date)
+        
+        # 산출된 부족분 아이템들을 shortage_map에 병합
+        for name, data in requirements['items'].items():
+            if data.get('order_amount', 0) > 0:
+                # 이미 리스트에 수량이 있다면 덮어쓰지 않고, 없을 때만 추가 (혹은 합산 선택 가능)
+                shortage_map[name] = str(data['order_amount'])
+
+    # 디버깅용 로그
+    print(f"--- [DEBUG] 최종 shortage_map: {shortage_map} (날짜: {target_date}) ---")
 
     ingredients = Ingredient.objects.all().order_by('name')
     categories = (
@@ -80,7 +97,8 @@ def order_create(request):
     return render(request, "procurement/order_create.html", {
         'ingredients': ingredients,
         'categories': categories,
-        'selected_ids': selected_ids,
+        'shortage_map': shortage_map,
+        'target_date': target_date or date.today().isoformat(), # 템플릿 날짜 input용
     })
 
 def order_list(request):

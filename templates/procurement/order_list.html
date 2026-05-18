@@ -23,9 +23,9 @@
                 <div class="col-md-3">
                     <select name="status" class="form-select">
                         <option value="전체" {% if status_filter == '전체' or not status_filter %}selected{% endif %}>모든 상태</option>
-                        <option value="대기" {% if status_filter == '대기' %}selected{% endif %}>대기 (접수)</option>
-                        <option value="승인" {% if status_filter == '승인' %}selected{% endif %}>승인 (배송중)</option>
-                        <option value="완료" {% if status_filter == '완료' %}selected{% endif %}>완료 (주문마감)</option>
+                        <option value="대기" {% if status_filter == '대기' %}selected{% endif %}>대기</option>
+                        <option value="승인" {% if status_filter == '승인' %}selected{% endif %}>승인</option>
+                        <option value="완료" {% if status_filter == '완료' %}selected{% endif %}>완료</option>
                     </select>
                 </div>
                 <div class="col-md-2 text-end">
