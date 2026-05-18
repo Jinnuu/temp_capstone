@@ -138,3 +138,6 @@ STATICFILES_DIRS = [
 
 
 CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
+
+# Increase the max number of fields for large smart orders
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000

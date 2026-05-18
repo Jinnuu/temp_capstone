@@ -201,6 +201,11 @@ def mealplan_list(request):
 def recipe_create(request):
     menus = Menu.objects.all().order_by("name")
     ingredients = Ingredient.objects.all().order_by("name")
+    
+    selected_menu = None
+    menu_id_get = request.GET.get("menu_id")
+    if menu_id_get:
+        selected_menu = get_object_or_404(Menu, id=menu_id_get)
 
     if request.method == "POST":
         menu_id = request.POST.get("menu_id")
@@ -230,6 +235,7 @@ def recipe_create(request):
     context = {
         "menus": menus,
         "ingredients": ingredients,
+        "selected_menu": selected_menu,
     }
     return render(request, "meals/recipe_create.html", context)
 
