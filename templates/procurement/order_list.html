@@ -1,38 +1,42 @@
 {% extends "base.html" %}
 
-{% block title %}발주 관리 | S&P{% endblock %}
+{% block title %}주문목록 | S&P{% endblock %}
 
 {% block content %}
 <section class="np-page-title">
-  <p>Procurement</p>
-  <h1>발주 관리</h1>
-  <span>식단 기반 발주, 간편 발주, 발주 내역을 확인합니다.</span>
+  <p>Order List</p>
+  <h1>주문목록</h1>
+  <span>기간, 상태, 발주처 기준으로 발주 내역과 명세서를 확인합니다.</span>
 </section>
 
 <section class="np-action-row">
-  <a class="np-primary-action" href="{% url 'procurement:order_from_mealplan' %}">식단기반 스마트 발주</a>
-  <a href="{% url 'procurement:order_create' %}">간편주문</a>
+  <a class="np-primary-action" href="{% url 'procurement:order_from_mealplan' %}">
+    식단기반 스마트 발주
+  </a>
+  <a href="{% url 'procurement:order_create' %}">
+    간편주문
+  </a>
 </section>
 
 <section class="np-filter-panel">
-  <form method="get" class="np-filter-grid">
+  <form method="get" class="np-filter-grid np-filter-grid-compact">
     <label>
-      <span>입고일 조회 범위</span>
-      <input type="date" name="start_date" value="{{ request.GET.start_date }}">
+      <span>시작일</span>
+      <input type="date" name="start_date" value="{{ start_date }}">
     </label>
 
     <label>
       <span>종료일</span>
-      <input type="date" name="end_date" value="{{ request.GET.end_date }}">
+      <input type="date" name="end_date" value="{{ end_date }}">
     </label>
 
     <label>
       <span>상태</span>
       <select name="status">
         <option value="">모든 상태</option>
-        <option value="대기" {% if request.GET.status == "대기" %}selected{% endif %}>대기</option>
-        <option value="승인" {% if request.GET.status == "승인" %}selected{% endif %}>승인</option>
-        <option value="완료" {% if request.GET.status == "완료" %}selected{% endif %}>완료</option>
+        <option value="대기" {% if status_filter == "대기" %}selected{% endif %}>대기</option>
+        <option value="승인" {% if status_filter == "승인" %}selected{% endif %}>승인</option>
+        <option value="완료" {% if status_filter == "완료" %}selected{% endif %}>완료</option>
       </select>
     </label>
 
@@ -46,7 +50,7 @@
 <section class="np-panel">
   <div class="np-panel-head">
     <div>
-      <p>Order List</p>
+      <p>All Orders</p>
       <h2>전체 발주 내역</h2>
     </div>
   </div>
@@ -60,20 +64,20 @@
           <th>요청일시</th>
           <th>상태</th>
           <th>총 주문금액</th>
-          <th>상세</th>
+          <th>상세보기</th>
         </tr>
       </thead>
 
       <tbody>
         {% for order in orders %}
           <tr>
-            <td>#{{ order.id }}</td>
+            <td class="np-strong">#{{ order.id }}</td>
             <td>{{ order.supplier.name|default:order.supplier.username }}</td>
             <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
             <td>
-              {% if order.status == '대기' %}
+              {% if order.status == "대기" %}
                 <span class="np-status warning">주문마감</span>
-              {% elif order.status == '승인' %}
+              {% elif order.status == "승인" %}
                 <span class="np-status blue">배송중</span>
               {% else %}
                 <span class="np-status ok">완료</span>
@@ -105,8 +109,11 @@
   </div>
 
   {% for group in supplier_groups %}
-    <div class="np-supplier-group">
-      <h3>{{ group.supplier.name|default:group.supplier.username }} <span>{{ group.orders|length }}건</span></h3>
+    <article class="np-supplier-group">
+      <h3>
+        {{ group.supplier.name|default:group.supplier.username }}
+        <span>{{ group.orders|length }}건</span>
+      </h3>
 
       <div class="np-table-wrap">
         <table class="np-table compact">
@@ -137,7 +144,7 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </article>
   {% empty %}
     <p class="np-empty">업체별로 분류할 내역이 없습니다.</p>
   {% endfor %}
