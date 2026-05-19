@@ -47,12 +47,10 @@ def home(request):
 
     selected_date = _parse_date(request.GET.get("date"), today)
 
-    # 선택 날짜가 현재 선택한 연/월과 다르면 캘린더 기준을 선택 날짜로 맞춤
     if selected_date.year != selected_year or selected_date.month != selected_month:
         selected_year = selected_date.year
         selected_month = selected_date.month
 
-    # 1. 월간 식단 데이터
     plans = (
         DietPlan.objects.filter(
             target_date__year=selected_year,
@@ -83,7 +81,6 @@ def home(request):
             item.menu.name for item in plan.diet_menus.all()
         ]
 
-    # 2. 월간 예측 식수 데이터
     predictions = AttendancePrediction.objects.filter(
         prediction_date__year=selected_year,
         prediction_date__month=selected_month,
@@ -95,11 +92,9 @@ def home(request):
         day = prediction.prediction_date.day
         prediction_map.setdefault(day, {})
 
-        # 같은 날짜/끼니 예측이 여러 개면 가장 먼저 조회된 최신값만 사용
         if prediction.meal_type not in prediction_map[day]:
             prediction_map[day][prediction.meal_type] = prediction.predicted_count
 
-    # 3. 월간 캘린더 생성
     calendar_weeks = []
     month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
 
@@ -141,19 +136,16 @@ def home(request):
 
         calendar_weeks.append(week_cells)
 
-    # 4. 선택 날짜 상세 식단
     selected_plans = (
         DietPlan.objects.filter(target_date=selected_date)
         .prefetch_related("diet_menus__menu")
         .order_by("meal_type")
     )
 
-    # 5. 선택 날짜 예측 식수
     selected_predictions = AttendancePrediction.objects.filter(
         prediction_date=selected_date
     ).order_by("meal_type", "-created_at")
 
-    # 같은 날짜/끼니에 예측이 여러 개 있을 때 화면에는 최신 1개만 보여주기
     selected_prediction_rows = []
     used_meal_types = set()
 
@@ -170,14 +162,12 @@ def home(request):
             }
         )
 
-    # 6. 부족 재고
     low_stock_items = list(
         get_ingredient_stock_queryset()
         .filter(is_low_stock=True)
         .order_by("calc_stock", "name")[:8]
     )
 
-    # 7. 발주 대기 건수
     pending_order_count = PurchaseOrder.objects.filter(
         status=PurchaseOrder.Status.PENDING
     ).count()
@@ -201,4 +191,6 @@ def home(request):
 
 
 def docs_index(request):
-    return render(request, "docs/index.html")
+    # 기존 config/urls.py의 docs_index import 오류 방지용.
+    # 실제 데이터 문서화 기능은 다른 팀원 작업과 합칠 예정이므로 화면에서는 사용하지 않는다.
+    return render(request, "home.html")

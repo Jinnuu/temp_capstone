@@ -3,57 +3,47 @@
 {% block title %}급식 운영 대시보드 | S&P{% endblock %}
 
 {% block content %}
-<section class="sp-page-hero">
-  <div>
-    <p class="sp-eyebrow">Operation Dashboard</p>
-    <h1>급식 운영 대시보드</h1>
-    <p>
-      월간 식단, 예측 식수, 재고 부족, 발주 대기 상태를 한 화면에서 확인합니다.
-    </p>
-  </div>
-
-  <div class="sp-page-actions">
-    <a href="{% url 'meals:weekly_mealplan_create' %}" class="sp-btn sp-btn-primary">
-      주간 식단 등록
-    </a>
-    <a href="{% url 'forecasting:prediction_create' %}" class="sp-btn sp-btn-outline">
-      예측 실행
-    </a>
-    <a href="{% url 'procurement:order_from_mealplan' %}" class="sp-btn sp-btn-outline">
-      스마트 발주
-    </a>
-  </div>
+<section class="np-page-title">
+  <p>Operation Dashboard</p>
+  <h1>급식 운영 대시보드</h1>
+  <span>월간 식단, 예측 식수, 재고 부족, 발주 대기 상태를 한 화면에서 확인합니다.</span>
 </section>
 
-<section class="sp-summary-grid">
-  <article class="sp-summary-card">
+<section class="np-dashboard-top">
+  <div class="np-status-card">
     <span>선택 날짜</span>
     <strong>{{ selected_date|date:"Y.m.d" }}</strong>
-    <p>날짜를 클릭하면 우측 요약이 변경됩니다.</p>
-  </article>
+    <small>날짜를 클릭하면 상세 요약이 변경됩니다.</small>
+  </div>
 
-  <article class="sp-summary-card">
+  <div class="np-status-card danger">
     <span>부족 재고</span>
     <strong>{{ low_stock_items|length }}개</strong>
-    <p>안전재고 이하 품목 기준</p>
-  </article>
+    <small>안전재고 이하 품목 기준</small>
+  </div>
 
-  <article class="sp-summary-card">
+  <div class="np-status-card">
     <span>발주 대기</span>
     <strong>{{ pending_order_count }}건</strong>
-    <p>현재 대기 상태 발주서</p>
-  </article>
+    <small>현재 대기 상태 발주서</small>
+  </div>
+
+  <div class="np-status-actions">
+    <a href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
+    <a href="{% url 'forecasting:prediction_create' %}">예측 실행</a>
+    <a href="{% url 'procurement:order_from_mealplan' %}">스마트 발주</a>
+  </div>
 </section>
 
-<section class="sp-dashboard-layout">
-  <article class="sp-card sp-calendar-card">
-    <div class="sp-section-head">
+<section class="np-dashboard-grid">
+  <article class="np-panel np-calendar-panel">
+    <div class="np-panel-head">
       <div>
-        <p class="sp-eyebrow">Monthly Calendar</p>
+        <p>Monthly Calendar</p>
         <h2>{{ selected_year }}년 {{ selected_month }}월 운영 캘린더</h2>
       </div>
 
-      <form method="get" class="sp-month-filter">
+      <form method="get" class="np-filter-inline">
         <select name="year" aria-label="연도 선택">
           {% for year in years %}
             <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>
@@ -70,12 +60,12 @@
           {% endfor %}
         </select>
 
-        <button type="submit" class="sp-btn sp-btn-sm">조회</button>
+        <button type="submit">조회</button>
       </form>
     </div>
 
-    <div class="sp-calendar-wrap">
-      <table class="sp-operation-calendar">
+    <div class="np-calendar-wrap">
+      <table class="np-calendar">
         <thead>
           <tr>
             <th>일</th>
@@ -93,48 +83,37 @@
             <tr>
               {% for cell in week %}
                 {% if cell %}
-                  <td class="{% if cell.is_selected %}is-selected{% endif %} {% if cell.is_today %}is-today{% endif %}">
-                    <a
-                      class="sp-calendar-cell"
-                      href="?year={{ selected_year }}&month={{ selected_month }}&date={{ cell.date|date:'Y-m-d' }}"
-                    >
-                      <div class="sp-calendar-date-row">
+                  <td class="{% if cell.is_today %}today{% endif %} {% if cell.is_selected %}selected{% endif %}">
+                    <a href="?year={{ selected_year }}&month={{ selected_month }}&date={{ cell.date|date:'Y-m-d' }}">
+                      <div class="np-day-top">
                         <strong>{{ cell.day }}</strong>
-
                         {% if cell.is_today %}
-                          <span class="sp-mini-badge sp-mini-badge-primary">오늘</span>
+                          <em>오늘</em>
                         {% endif %}
                       </div>
 
                       {% if cell.meals.lunch %}
-                        <p class="sp-calendar-menu">
-                          중식 {{ cell.meals.lunch|join:", "|truncatechars:24 }}
-                        </p>
+                        <p>중식 {{ cell.meals.lunch|join:", "|truncatechars:24 }}</p>
                       {% elif cell.meals.breakfast %}
-                        <p class="sp-calendar-menu">
-                          조식 {{ cell.meals.breakfast|join:", "|truncatechars:24 }}
-                        </p>
+                        <p>조식 {{ cell.meals.breakfast|join:", "|truncatechars:24 }}</p>
                       {% elif cell.meals.dinner %}
-                        <p class="sp-calendar-menu">
-                          석식 {{ cell.meals.dinner|join:", "|truncatechars:24 }}
-                        </p>
+                        <p>석식 {{ cell.meals.dinner|join:", "|truncatechars:24 }}</p>
                       {% else %}
-                        <p class="sp-calendar-muted">식단 없음</p>
+                        <p class="muted">식단 없음</p>
                       {% endif %}
 
-                      <div class="sp-calendar-badges">
+                      <div class="np-badge-row">
                         {% if cell.has_prediction %}
-                          <span class="sp-mini-badge sp-mini-badge-info">예측 있음</span>
+                          <span class="blue">예측 있음</span>
                         {% endif %}
-
                         {% if not cell.has_meal %}
-                          <span class="sp-mini-badge">미등록</span>
+                          <span>미등록</span>
                         {% endif %}
                       </div>
                     </a>
                   </td>
                 {% else %}
-                  <td class="is-empty"></td>
+                  <td class="empty"></td>
                 {% endif %}
               {% endfor %}
             </tr>
@@ -144,23 +123,22 @@
     </div>
   </article>
 
-  <aside class="sp-card sp-side-panel">
-    <p class="sp-eyebrow">Selected Date</p>
-    <h2>{{ selected_date|date:"Y년 m월 d일" }}</h2>
+  <aside class="np-panel np-side-panel">
+    <div class="np-side-date">
+      <p>Selected Date</p>
+      <h2>{{ selected_date|date:"Y년 m월 d일" }}</h2>
+    </div>
 
-    <div class="sp-side-section">
-      <div class="sp-side-title-row">
+    <section class="np-side-section">
+      <div class="np-side-section-head">
         <h3>식단</h3>
-        <a href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">
-          수정
-        </a>
+        <a href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">수정</a>
       </div>
 
       {% for plan in selected_plans %}
-        <div class="sp-meal-box">
+        <div class="np-meal-row">
           <strong>{{ plan.meal_type }}</strong>
-
-          <div class="sp-tag-list">
+          <div>
             {% for item in plan.diet_menus.all %}
               <span>{{ item.menu.name }}</span>
             {% empty %}
@@ -169,40 +147,34 @@
           </div>
         </div>
       {% empty %}
-        <p class="sp-empty-text">
-          등록된 식단이 없습니다. 식단을 먼저 등록해주세요.
-        </p>
+        <p class="np-empty">등록된 식단이 없습니다. 식단을 먼저 등록해주세요.</p>
       {% endfor %}
-    </div>
+    </section>
 
-    <div class="sp-side-section">
-      <div class="sp-side-title-row">
+    <section class="np-side-section">
+      <div class="np-side-section-head">
         <h3>예측 식수</h3>
-        <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">
-          실행
-        </a>
+        <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">실행</a>
       </div>
 
       {% for prediction in selected_prediction_rows %}
-        <div class="sp-metric-row">
+        <div class="np-metric-line">
           <span>{{ prediction.meal_label }}</span>
           <strong>{{ prediction.predicted_count }}명</strong>
         </div>
       {% empty %}
-        <p class="sp-empty-text">
-          예측 결과가 없습니다. 해당 날짜의 식수 예측을 실행해주세요.
-        </p>
+        <p class="np-empty">예측 결과가 없습니다. 해당 날짜의 식수 예측을 실행해주세요.</p>
       {% endfor %}
-    </div>
+    </section>
 
-    <div class="sp-side-section">
-      <div class="sp-side-title-row">
+    <section class="np-side-section">
+      <div class="np-side-section-head">
         <h3>재고 부족</h3>
         <a href="{% url 'inventory:ingredient_list' %}">전체</a>
       </div>
 
-      {% for item in low_stock_items|slice:":4" %}
-        <div class="sp-stock-row">
+      {% for item in low_stock_items|slice:":5" %}
+        <div class="np-stock-mini">
           <div>
             <strong>{{ item.name }}</strong>
             <span>{{ item.category|default:"분류 없음" }}</span>
@@ -210,38 +182,32 @@
           <b>{{ item.calc_stock|floatformat:1 }} {{ item.unit }}</b>
         </div>
       {% empty %}
-        <p class="sp-empty-text">현재 부족 재고가 없습니다.</p>
+        <p class="np-empty">현재 부족 재고가 없습니다.</p>
       {% endfor %}
-    </div>
+    </section>
 
-    <div class="sp-side-actions">
-      <a href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">
-        식단 등록/수정
-      </a>
-      <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">
-        예측 실행
-      </a>
-      <a href="{% url 'procurement:order_from_mealplan' %}">
-        스마트 발주
-      </a>
+    <div class="np-side-buttons">
+      <a href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">식단 등록/수정</a>
+      <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">예측 실행</a>
+      <a href="{% url 'procurement:order_from_mealplan' %}">스마트 발주</a>
     </div>
   </aside>
 </section>
 
-<section class="sp-card">
-  <div class="sp-section-head">
+<section class="np-panel">
+  <div class="np-panel-head">
     <div>
-      <p class="sp-eyebrow">Low Stock</p>
+      <p>Low Stock</p>
       <h2>재고 부족 품목</h2>
     </div>
 
-    <a href="{% url 'inventory:ingredient_list' %}" class="sp-text-link">
+    <a class="np-outline-link" href="{% url 'inventory:ingredient_list' %}">
       식자재 목록으로 이동
     </a>
   </div>
 
-  <div class="sp-table-wrap">
-    <table class="sp-data-table">
+  <div class="np-table-wrap">
+    <table class="np-table">
       <thead>
         <tr>
           <th>품목명</th>
@@ -259,15 +225,11 @@
             <td>{{ item.category|default:"-" }}</td>
             <td>{{ item.calc_stock|floatformat:1 }} {{ item.unit }}</td>
             <td>{{ item.safe_stock_level|floatformat:1 }} {{ item.unit }}</td>
-            <td>
-              <span class="sp-status sp-status-danger">부족</span>
-            </td>
+            <td><span class="np-status danger">부족</span></td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="5" class="sp-empty-cell">
-              현재 부족 재고가 없습니다.
-            </td>
+            <td colspan="5" class="np-empty-cell">현재 부족 재고가 없습니다.</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -275,29 +237,25 @@
   </div>
 </section>
 
-<section class="sp-quick-grid">
-  <a href="{% url 'meals:mealplan_list' %}" class="sp-quick-card">
-    <span>Meal Calendar</span>
-    <strong>식단표 보기</strong>
-    <p>월간 식단을 확인하고 날짜별 식단을 수정합니다.</p>
+<section class="np-report-grid">
+  <a href="{% url 'meals:mealplan_list' %}" class="np-report-card">
+    <strong>식단표</strong>
+    <span>월간 식단을 확인하고 날짜별 식단을 수정합니다.</span>
   </a>
 
-  <a href="{% url 'forecasting:prediction_calendar' %}" class="sp-quick-card">
-    <span>Forecasting</span>
+  <a href="{% url 'forecasting:prediction_calendar' %}" class="np-report-card">
     <strong>예측 캘린더</strong>
-    <p>날짜별 식수 예측 생성 여부와 결과를 확인합니다.</p>
+    <span>날짜별 식수 예측 생성 여부와 결과를 확인합니다.</span>
   </a>
 
-  <a href="{% url 'procurement:order_from_mealplan' %}" class="sp-quick-card">
-    <span>Smart Order</span>
+  <a href="{% url 'inventory:ingredient_list' %}" class="np-report-card">
+    <strong>재고 현황</strong>
+    <span>현재고와 안전재고 이하 품목을 확인합니다.</span>
+  </a>
+
+  <a href="{% url 'procurement:order_from_mealplan' %}" class="np-report-card">
     <strong>식단기반 발주</strong>
-    <p>식단과 레시피를 기준으로 필요한 식재료를 산출합니다.</p>
-  </a>
-
-  <a href="{% url 'docs_index' %}" class="sp-quick-card">
-    <span>Documentation</span>
-    <strong>사용 문서</strong>
-    <p>화면별 사용법과 운영 흐름을 확인합니다.</p>
+    <span>식단과 레시피를 기준으로 필요한 식재료를 산출합니다.</span>
   </a>
 </section>
 {% endblock %}
