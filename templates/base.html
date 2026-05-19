@@ -5,103 +5,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}S&P{% endblock %}</title>
-
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    rel="stylesheet"
-  >
-  <link rel="stylesheet" href="{% static 'css/system.css' %}?v=nutritionist-benchmark-v1">
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/system.css' %}?v=sprint7-blue-ui-v1">
   {% block extra_css %}{% endblock %}
 </head>
-
-<body>
-  {% comment %} <div class="np-system-banner">
-    시스템 정기 배포 작업 안내 · 작업 시 일시적으로 느려지거나 사용이 불가할 수 있습니다.
-  </div> {% endcomment %}
-
-  <header class="np-header">
-    <div class="np-header-inner">
-      <a href="{% url 'home' %}" class="np-brand">
-        <span class="np-brand-mark">S&amp;P</span>
-        <span class="np-brand-text">
-          <strong>Smart Nutritionist Program</strong>
-          <small>식자재 · 식단 · 예측 · 발주 운영 시스템</small>
-        </span>
-      </a>
-
-      <form class="np-global-search" method="get" action="{% url 'inventory:ingredient_list' %}">
-        <input type="date" name="date">
-        <span></span>
-        <input type="search" name="search" placeholder="찾으시는 품목을 검색하세요">
-        <button type="submit" aria-label="검색">
-          <i class="bi bi-search"></i>
-        </button>
-      </form>
-
-      <div class="np-user-area">
-        <a href="{% url 'procurement:home' %}" class="np-icon-link" title="발주">
-          <i class="bi bi-cart3"></i>
-        </a>
-
+<body class="sp-body">
+  <div class="sp-system-notice">시스템 정기 배포 작업 안내 · 작업 시 일시적으로 느려지거나 사용이 불가할 수 있습니다.</div>
+  <header class="sp-header">
+    <div class="sp-header-main">
+      <a href="{% url 'home' %}" class="sp-brand"><span class="sp-brand-mark">S&amp;P</span><span><strong>Smart Nutritionist Program</strong><small>식단 · 식수 예측 · 재고 · 발주 운영 시스템</small></span></a>
+      <div class="sp-user-area">
         {% if user.is_authenticated %}
-          <span class="np-user-name">{{ user.username }}님</span>
-          <form method="post" action="{% url 'logout' %}" class="m-0">
-            {% csrf_token %}
-            <button type="submit" class="np-text-button">로그아웃</button>
-          </form>
+          <span>{{ user.username }}님</span><span class="sp-divider"></span><span>급식 운영자</span>
+          <form method="post" action="{% url 'logout' %}" class="m-0">{% csrf_token %}<button type="submit" class="sp-link-button">로그아웃</button></form>
         {% else %}
-          <a href="{% url 'login' %}" class="np-text-button">로그인</a>
-          <a href="{% url 'signup' %}" class="np-text-button">회원가입</a>
+          <a href="{% url 'login' %}" class="sp-link-button">로그인</a><a href="{% url 'signup' %}" class="sp-link-button">회원가입</a>
         {% endif %}
       </div>
     </div>
-
-    <nav class="np-nav-wrap">
-      {% include "partials/top_nav.html" %}
-    </nav>
+    <nav class="sp-nav-wrap">{% include "partials/top_nav.html" %}</nav>
   </header>
-
-  <main class="np-main">
-    {% if messages %}
-      <div class="np-message-area">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
+  <main class="sp-main">
+    {% if messages %}<div class="mb-3">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>{% endfor %}</div>{% endif %}
     {% block content %}{% endblock %}
   </main>
-
-  <button
-    type="button"
-    class="np-scroll-top"
-    onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-    aria-label="상단으로 이동"
-  >
-    <i class="bi bi-arrow-up"></i>
-  </button>
-
-  <footer class="np-footer">
-    <div>
-      <strong>S&amp;P</strong> · Smart Nutritionist Program
-    </div>
-    <div>
-      식자재 관리 · 식단 관리 · 식수 예측 · 발주 관리
-    </div>
-  </footer>
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-  </script>
-
+  <a href="#top" class="sp-top-button" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">↑</a>
+  <footer class="sp-footer"><span><strong>S&amp;P</strong> · Smart Nutritionist Program</span><span>식단 · 식수 예측 · 재고 · 발주</span></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
