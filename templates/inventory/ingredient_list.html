@@ -77,7 +77,13 @@
                             <tr>
                                 <td><span class="badge bg-secondary-subtle text-secondary border small">{{ ingredient.category|default:"-" }}</span></td>
                                 <td class="fw-bold text-dark text-start ps-3">{{ ingredient.name }}</td>
-                                <td class="text-muted small">{{ ingredient.supplier.name|default:ingredient.supplier.username|default:"-" }}</td>
+                                <td class="text-muted small">
+                                    {% if ingredient.supplier %}
+                                        {{ ingredient.supplier.name|default:"-" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                                 <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
                                 
                                 <td class="text-primary small">{{ ingredient.in_qty|floatformat:1 }}</td>

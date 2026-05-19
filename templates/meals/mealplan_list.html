@@ -325,6 +325,9 @@
 
 {% endblock %}
 
+
+
+
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -335,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let selectedIndex = -1;
     let currentResults = [];
 
-    // Focus wrapping logic
+    // 포커스 래핑 로직 (셀 여백 클릭 시에도 인풋창 자동 포커스)
     document.querySelectorAll('.cell-wrapper').forEach(wrapper => {
         wrapper.addEventListener('click', (e) => {
             if(e.target === wrapper || e.target.classList.contains('menu-container')) {
@@ -345,15 +348,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    window.openDailyEditor = function(btn, dateStr) {
+    // 🔥 1. 수정된 일간 식단 관리 모달 오픈 함수 (파라미터 매칭 해결)
+    window.openDailyEditor = function(dateStr) {
         document.getElementById('dailyEditorTitle').textContent = `${dateStr} 일간 식단 관리`;
         
-        // Update dataset DATE info
+        // HTML 버튼의 onclick 구조와 호환되도록 DOM에서 버튼 객체 역추적
+        const btn = document.querySelector(`button[onclick="openDailyEditor('${dateStr}')"]`);
+        
+        // 현재 선택된 날짜와 끼니 메타데이터를 모달 각 셀에 주입
         document.getElementById('daily-cell-조식').dataset.cellInfo = `${dateStr}|조식`;
         document.getElementById('daily-cell-중식').dataset.cellInfo = `${dateStr}|중식`;
         document.getElementById('daily-cell-석식').dataset.cellInfo = `${dateStr}|석식`;
         
-        // Clear old badges
+        // 이전 데이터 잔상 초기화
         document.querySelectorAll('.menu-container').forEach(c => c.innerHTML = '');
         document.querySelectorAll('.inline-menu-input').forEach(i => i.value = '');
         
@@ -374,6 +381,7 @@ document.addEventListener("DOMContentLoaded", function () {
         dailyEditorModal.show();
     };
 
+    // 식단 배지 렌더링 함수
     function renderBadges(container, menus) {
         container.innerHTML = '';
         menus.forEach(menu => {
@@ -387,13 +395,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // 식단 메뉴 삭제 API 호출
     window.removeMenu = function(element, menuId) {
         const td = element.closest('td');
         const [dayStr, mealType] = td.dataset.cellInfo.split('|');
         const container = td.querySelector('.menu-container');
         element.closest('.badge').style.opacity = '0.5';
         
-        // AJAX 통신
         fetch('{% url "meals:remove_diet_menu_api" %}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -416,6 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
+    // 메뉴 클릭 시 즉시 인풋창으로 가져와서 수정 모드로 전환
     window.editMenu = function(span, menuId, menuName) {
         const td = span.closest('td');
         const input = td.querySelector('.inline-menu-input');
@@ -430,8 +439,8 @@ document.addEventListener("DOMContentLoaded", function () {
         renderBadges(container, items);
     }
 
+    // 모달창 닫힐 때 메인 달력 셀과 실시간 동기화
     function syncCalendarCell(dateStr) {
-        // Rebuild the HTML for the calendar button and data attributes
         const mainBtn = document.querySelector(`button[onclick="openDailyEditor('${dateStr}')"]`);
         if (!mainBtn) return;
 
@@ -443,12 +452,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const lDicts = Array.from(document.getElementById('daily-cell-중식').querySelectorAll('.badge.menu-badge')).map(b => ({id: b.dataset.menuId, name: b.querySelector('span').textContent}));
         const dDicts = Array.from(document.getElementById('daily-cell-석식').querySelectorAll('.badge.menu-badge')).map(b => ({id: b.dataset.menuId, name: b.querySelector('span').textContent}));
 
-        // Update Data Attributes
         mainBtn.dataset.breakfastDicts = JSON.stringify(bDicts);
         mainBtn.dataset.lunchDicts = JSON.stringify(lDicts);
         mainBtn.dataset.dinnerDicts = JSON.stringify(dDicts);
 
-        // Update Content
         const contentDiv = mainBtn.querySelector('.meal-content');
         if (breakfast.length || lunch.length || dinner.length) {
             let html = '';
@@ -469,6 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedIndex = -1;
     }
 
+    // 자동완성 드롭다운 UI 렌더링
     function renderDropdown(input, results) {
         closeDropdown();
         const query = input.value.trim();
@@ -500,6 +508,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 item.innerHTML = `<span class="fw-bold text-dark">${menu.name}</span>${scoreText}`;
             }
             
+            // mousedown은 blur 이벤트보다 먼저 터지므로 자동완성 선택 가능하게 유도
             item.addEventListener('mousedown', (e) => {
                 e.preventDefault(); 
                 selectMenu(input, menu);
@@ -511,6 +520,7 @@ document.addEventListener("DOMContentLoaded", function () {
         currentDropdown = dropdown;
     }
 
+    // 메뉴 등록 혹은 선택 확정 시 API 발송 로직
     function selectMenu(input, menu) {
         const td = input.closest('td');
         const [dayStr, mealType] = td.dataset.cellInfo.split('|');
@@ -547,8 +557,10 @@ document.addEventListener("DOMContentLoaded", function () {
         input.focus();
     }
 
+    // 실시간 인풋창 이벤트 핸들러 바인딩
     const inputs = document.querySelectorAll('.inline-menu-input');
     inputs.forEach(input => {
+        // 단어 입력 시 자장 목록 가져오기
         input.addEventListener('input', (e) => {
             const query = e.target.value.trim();
             closeDropdown();
@@ -566,6 +578,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 200);
         });
 
+        // 엔터, 방향키 제어
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -595,6 +608,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (e.key === 'Escape') {
                 closeDropdown();
             } else if (e.key === 'Backspace' && input.value === '') {
+                // 빈 칸에서 백스페이스 누르면 가장 최근 등록된 식단 배지 삭제
                 const td = input.closest('td');
                 const badges = td.querySelectorAll('.badge.menu-badge');
                 if (badges.length > 0) {
@@ -604,19 +618,29 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
         
-        input.addEventListener('blur', () => closeDropdown());
+        // 🔥 2. blur 이벤트 지연 처리 (마우스 자동완성 클릭 차단 현상 해결)
+        input.addEventListener('blur', () => {
+            setTimeout(() => closeDropdown(), 200);
+        });
     });
 
+    // 드롭다운 키보드 탐색 시 하이라이트 클래스 제어 함수
     function updateHighlight(items) {
         items.forEach((item, idx) => {
             if (idx === selectedIndex) {
                 item.classList.add('active', 'bg-primary', 'text-white');
                 const span = item.querySelector('.fw-bold');
-                if(span) span.classList.replace('text-dark', 'text-white');
+                if(span) {
+                    span.classList.remove('text-dark');
+                    span.classList.add('text-white');
+                }
             } else {
                 item.classList.remove('active', 'bg-primary', 'text-white');
                 const span = item.querySelector('.fw-bold');
-                if(span) span.classList.replace('text-white', 'text-dark');
+                if(span) {
+                    span.classList.remove('text-white');
+                    span.classList.add('text-dark');
+                }
             }
         });
     }

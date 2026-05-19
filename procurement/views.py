@@ -174,29 +174,36 @@ def order_detail(request, pk):
     })
 
 def order_status_update(request, pk):
-    """
-    발주 상태 변경 및 배송 완료 시 자동 입고 처리
-    """
     if request.method == 'POST':
         order = get_object_or_404(PurchaseOrder, pk=pk)
-        new_status = request.POST.get('status')
+        new_status = request.POST.get('status') # '배송중' 또는 '배송완료' 등
         
-        if new_status in [choice[0] for choice in PurchaseOrder.Status.choices]:
-            # 배송 완료(DELIVERED)로 변경될 때만 재고에 반영
-            if new_status == PurchaseOrder.Status.DELIVERED and order.status != PurchaseOrder.Status.DELIVERED:
+        # 💡 '배송중'이나 '배송완료'가 들어오면 팀원 모델의 '완료'로 강제 매칭
+        if new_status in ['배송중', '배송완료', '완료']:
+            final_status = '완료'
+        else:
+            final_status = new_status
+            
+        valid_choices = [choice[0] for choice in PurchaseOrder.Status.choices]
+        
+        if final_status in valid_choices:
+            # '완료' 상태로 바뀔 때만 재고 자동 입고 처리
+            if final_status == '완료' and order.status != '완료':
                 for item in order.items.all():
                     ing = item.ingredient
-                    # 재석님이 앞서 사용한 '입고' 로그 생성 로직 적용
                     InventoryLog.objects.create(
                         ingredient=ing,
-                        log_type='입고',  # 한글 기반 문자열 매칭
+                        log_type='입고',
                         quantity=item.required_qty,
                         description=f"발주 #{order.id} 배송 완료로 인한 자동 입고"
                     )
-            
-            order.status = new_status
+                messages.success(request, "배송 완료 및 실시간 입고 재고 반영이 완료되었습니다.")
+                
+            order.status = final_status
             order.save()
-            messages.success(request, f"발주서 #{order.id}의 상태가 변경되었습니다.")
+            messages.success(request, f"발주 상태가 변경되었습니다.")
+        else:
+            messages.error(request, f"유효하지 않은 상태 값입니다: {new_status}")
             
     return redirect('procurement:order_detail', pk=pk)
 
