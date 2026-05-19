@@ -101,8 +101,9 @@ def home(request):
 
     # 3. 월간 캘린더 생성
     calendar_weeks = []
+    month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
 
-    for week in calendar.monthcalendar(selected_year, selected_month):
+    for week in month_calendar.monthdayscalendar(selected_year, selected_month):
         week_cells = []
 
         for day_num in week:

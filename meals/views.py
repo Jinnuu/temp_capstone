@@ -154,7 +154,9 @@ def mealplan_list(request):
             meal_map[day]["dinner_dicts"] = json.dumps(menu_dicts)
 
     calendar_weeks = []
-    for week in calendar.monthcalendar(selected_year, selected_month):
+    month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
+
+    for week in month_calendar.monthdayscalendar(selected_year, selected_month):
         week_cells = []
 
         for day_num in week:
