@@ -1,25 +1,31 @@
 <ul class="navbar-nav ms-lg-4 me-auto mb-2 mb-lg-0">
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'home' %}">홈</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'inventory:ingredient_list' %}">식자재</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'meals:mealplan_list' %}">식단</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'forecasting:prediction_create' %}">예측</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'procurement:home' %}">발주</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'docs_index' %}">문서</a>
+  </li>
+
+  {% if user.is_staff %}
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'home' %}">홈</a>
+      <a class="nav-link" href="/admin/">관리</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'inventory:ingredient_list' %}">식자재</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'meals:mealplan_list' %}">식단</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'forecasting:prediction_create' %}">예측</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'procurement:home' %}">발주</a>
-    </li>
-    {% if user.is_staff %}
-    <li class="nav-item">
-        <a class="nav-link" href="/admin/">관리</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'docs_index' %}">문서</a>
-    </li>
-    {% endif %}
+  {% endif %}
 </ul>
