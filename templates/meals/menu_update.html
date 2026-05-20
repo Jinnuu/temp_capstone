@@ -3,6 +3,23 @@
 {% block title %}메뉴 수정 | S&P{% endblock %}
 
 {% block content %}
+<style>
+    /* 자동완성 드롭다운 박스 스타일 설정 */
+    .dropdown-autocomplete {
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        z-index: 1050;
+        width: 100%;
+        background-color: white;
+    }
+    .dropdown-autocomplete .list-group-item-action:hover {
+        background-color: #e9ecef;
+        color: #000;
+    }
+</style>
+
 <section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
     <div>
         <span class="text-uppercase small fw-bold text-primary">Menu Management</span>
@@ -32,7 +49,7 @@
                     메뉴명, 카테고리, 식재료 구성을 수정한 뒤 저장하세요.
                 </p>
 
-                <form method="post" id="menuUpdateForm">
+                <form method="post" id="menuUpdateForm" autocomplete="off">
                     {% csrf_token %}
 
                     <div class="row g-4 mb-4">
@@ -67,14 +84,14 @@
                         {% if menu.recipes.all %}
                             {% for recipe in menu.recipes.all %}
                             <div class="row g-2 align-items-end ingredient-row">
-                                <div class="col-md-7">
+                                <div class="col-md-7 position-relative">
                                     <label class="form-label">식재료명</label>
-                                    <input type="text" name="ing_name[]" class="form-control" value="{{ recipe.ingredient.name }}">
+                                    <input type="text" name="ing_name[]" class="form-control ingredient-autocomplete-input" value="{{ recipe.ingredient.name }}" placeholder="식재료명을 입력해 보세요...">
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">사용량</label>
-                                    <input type="number" step="0.01" name="ing_amount[]" class="form-control" value="{{ recipe.required_amount }}">
+                                    <input type="number" step="0.01" name="ing_amount[]" class="form-control" value="{{ recipe.required_amount|stringformat:'.2f' }}">
                                 </div>
 
                                 <div class="col-md-2 d-grid">
@@ -86,9 +103,9 @@
                             {% endfor %}
                         {% else %}
                             <div class="row g-2 align-items-end ingredient-row">
-                                <div class="col-md-7">
+                                <div class="col-md-7 position-relative">
                                     <label class="form-label">식재료명</label>
-                                    <input type="text" name="ing_name[]" class="form-control" placeholder="예: 돼지고기">
+                                    <input type="text" name="ing_name[]" class="form-control ingredient-autocomplete-input" placeholder="식재료명을 입력해 보세요...">
                                 </div>
 
                                 <div class="col-md-3">
@@ -128,7 +145,7 @@
 
                     <div class="p-3 rounded-4 bg-light border">
                         <strong class="d-block mb-1">2. 식재료 재구성</strong>
-                        <span class="text-muted small">기존 재료를 수정하거나 새로운 재료를 추가할 수 있습니다.</span>
+                        <span class="text-muted small">식재료 검색창을 통해 기존 DB 자재를 편리하게 연동할 수 있습니다.</span>
                     </div>
 
                     <div class="p-3 rounded-4 bg-light border">
@@ -147,16 +164,98 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 최초 로드 시 존재하는 모든 인풋창에 자동완성 이벤트 바인딩
+    bindAllAutocomplete();
+});
+
+let searchTimeout = null;
+
+function bindAllAutocomplete() {
+    const inputs = document.querySelectorAll('.ingredient-autocomplete-input');
+    inputs.forEach(input => {
+        if (input.dataset.bound === "true") return;
+        input.dataset.bound = "true";
+
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            removeExistingDropdown(input);
+            clearTimeout(searchTimeout);
+
+            if (query.length === 0) return;
+
+            searchTimeout = setTimeout(() => {
+                // 🚨 기존 /api/menus/search/ 대신 식재료 검색 전용 API 주소로 변경합니다!
+                // (만약 팀원이 만들어둔 식재료 API 주소명이 다르면 그 주소로 교체하세요)
+                fetch(`/meals/api/ingredients/search/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        // 백엔드에서 주는 데이터가 [{id: 1, name: '양파'}, ...] 구조인지 확인
+                        renderIngredientDropdown(input, data.results || data.ingredients || []);
+                    })
+                    .catch(err => console.error(err));
+            }, 250);
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => removeExistingDropdown(input), 200);
+        });
+    });
+}
+
+function renderIngredientDropdown(input, results) {
+    removeExistingDropdown(input);
+    if (results.length === 0) return;
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'list-group position-absolute shadow z-3 dropdown-autocomplete border';
+    
+    results.slice(0, 6).forEach(item => {
+        const btn = document.createElement('a');
+        btn.href = '#';
+        btn.className = 'list-group-item list-group-item-action py-2 px-3 border-0 border-bottom';
+        btn.textContent = item.name;
+
+        // 마우스로 선택 시 인풋창에 값 입력 후 드롭다운 닫기
+        btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            input.value = item.name;
+            removeExistingDropdown(input);
+        });
+        dropdown.appendChild(btn);
+    });
+
+    input.parentElement.appendChild(dropdown);
+}
+
+function removeExistingDropdown(input) {
+    const p = input.parentElement;
+    const oldDropdown = p.querySelector('.dropdown-autocomplete');
+    if (oldDropdown) oldDropdown.remove();
+}
+
+// 식재료 행 추가 함수 보완
 function addIngredientRow() {
     const container = document.getElementById("ingredientRows");
     const firstRow = container.querySelector(".ingredient-row");
     const newRow = firstRow.cloneNode(true);
 
+    // 내부 인풋값 및 중복이벤트 플래그 완전 초기화
     newRow.querySelectorAll("input").forEach(el => {
         el.value = "";
+        if (el.classList.contains('ingredient-autocomplete-input')) {
+            el.removeAttribute('data-bound');
+        }
     });
 
+    // 기존에 붙어있던 드롭다운 박스가 복사되는 현상 방지 잔상 제거
+    const oldDrop = newRow.querySelector('.dropdown-autocomplete');
+    if(oldDrop) oldDrop.remove();
+
     container.appendChild(newRow);
+    
+    // 새로 태어난 인풋창에 자동완성 이벤트 동적 결합
+    bindAllAutocomplete();
 }
 
 function removeIngredientRow(button) {

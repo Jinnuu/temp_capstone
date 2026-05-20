@@ -13,6 +13,9 @@ from .views import (
     search_menus_api,
     add_diet_menu_api,
     remove_diet_menu_api,
+    recipe_upload_api,
+    search_ingredients_api,
+    get_menu_recipes_api
 )
 
 app_name = "meals"
@@ -31,4 +34,7 @@ urlpatterns = [
     path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
     path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory"),
+    path('menu/upload-excel/', recipe_upload_api, name='recipe_upload_api'),
+    path('api/ingredients/search/', search_ingredients_api, name='search_ingredients_api'),
+    path('api/menu/<int:menu_id>/recipes/', get_menu_recipes_api, name='get_menu_recipes_api'),
 ]

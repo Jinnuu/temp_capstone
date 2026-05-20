@@ -12,8 +12,17 @@
         </p>
     </div>
 
-    <div class="d-flex flex-wrap gap-2">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
         <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
+        
+        <form id="excelUploadForm" action="{% url 'meals:recipe_upload_api' %}" method="post" enctype="multipart/form-data" class="d-inline m-0">
+            {% csrf_token %}
+            <input type="file" id="excelFile" name="excel_file" accept=".xlsx, .xls" class="d-none" onchange="submitExcelUpload()">
+            <button type="button" class="btn btn-outline-success" onclick="triggerExcelForm()">
+                <i class="bi bi-file-earmark-excel me-1"></i>레시피 업로드
+            </button>
+        </form>
+
         <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-primary">레시피 수정</a>
     </div>
 </section>
@@ -125,6 +134,26 @@
 </div>
 
 <script>
+// 🔥 엑셀 업로드 관련 스크립트 함수 추가
+function triggerExcelForm() {
+    document.getElementById('excelFile').click();
+}
+
+function submitExcelUpload() {
+    const fileInput = document.getElementById('excelFile');
+    const form = document.getElementById('excelUploadForm');
+    
+    if (fileInput.files.length > 0) {
+        // 백엔드 구현 전 확인용 및 실제 전송 처리
+        if(confirm(`${fileInput.files[0].name} 파일을 업로드하여 레시피를 일괄 등록하시겠습니까?`)) {
+            form.submit();
+        } else {
+            fileInput.value = ''; // 취소 시 초기화
+        }
+    }
+}
+
+// 기존 식재료 행 제어 함수
 function addIngredientRow() {
     const container = document.getElementById("ingredientRows");
     const firstRow = container.querySelector(".ingredient-row");

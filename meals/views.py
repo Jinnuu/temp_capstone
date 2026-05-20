@@ -5,12 +5,14 @@ from django.http import JsonResponse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
+import openpyxl
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib import messages
 from django.core.management import call_command
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.db import transaction
 
 from .models import Menu, Recipe, DietPlan, DietMenu
 from inventory.models import Ingredient
@@ -296,27 +298,52 @@ def menu_update(request, menu_id):
         menu.category = request.POST.get("category")
         menu.save()
 
-        menu.recipes.all().delete()
+        # 데이터 안전을 위해 트랜잭션 블록 안에서 레시피 재빌드
+        with transaction.atomic():
+            # 1. 기존 레시피 일괄 삭제
+            menu.recipes.all().delete()
 
-        ing_names = request.POST.getlist("ing_name[]")
-        ing_amounts = request.POST.getlist("ing_amount[]")
+            ing_names = request.POST.getlist("ing_name[]")
+            ing_amounts = request.POST.getlist("ing_amount[]")
 
-        for name, amount in zip(ing_names, ing_amounts):
-            if name and amount:
-                clean_name = name.strip()
+            # 2. 리스트 돌면서 대조 작업 시작
+            for name, amount in zip(ing_names, ing_amounts):
+                # 이름과 수량이 실제로 존재할 때만 처리
+                if name and amount:
+                    clean_name = name.strip()
+                    
+                    # 💡 [핵심] 띄어쓰기를 완전히 무시하고 DB 뒤지기
+                    clean_search_name = clean_name.replace(" ", "")
+                    all_ingredients = Ingredient.objects.all()
+                    ingredient = None
 
-                ingredient = Ingredient.objects.filter(name=clean_name).first()
+                    for ing in all_ingredients:
+                        if ing.name.replace(" ", "") == clean_search_name:
+                            ingredient = ing
+                            break
 
-                if not ingredient:
-                    ingredient = Ingredient.objects.filter(name__icontains=clean_name).first()
+                    # 💡 [보완] 만약 포함 조건이나 공백 제거 조건으로도 없다면 새로 개설해서 매칭
+                    if not ingredient:
+                        # safe_stock_level NOT NULL 제약조건 방어 코드 포함
+                        ingredient = Ingredient.objects.create(
+                            name=clean_name,
+                            category='기타',
+                            unit='kg',
+                            safe_stock_level=0
+                        )
 
-                if ingredient:
-                    Recipe.objects.create(
-                        menu=menu,
-                        ingredient=ingredient,
-                        required_amount=amount
-                    )
+                    # 3. 안전하게 float 변환 후 레시피 생성
+                    try:
+                        Recipe.objects.create(
+                            menu=menu,
+                            ingredient=ingredient,
+                            required_amount=float(amount)
+                        )
+                    except ValueError:
+                        print(f"[WARN] 사용량 숫자가 유효하지 않음: {amount}")
+                        continue
 
+        messages.success(request, f"'{menu.name}' 메뉴의 레시피 정보가 업데이트되었습니다.")
         return redirect("meals:menu_list")
 
     return render(request, "meals/menu_update.html", {"menu": menu})
@@ -508,3 +535,140 @@ def weekly_mealplan_create(request):
     }
     
     return render(request, "meals/weekly_mealplan_create.html", context)
+
+def recipe_upload_api(request):
+    """
+    [진짜 무적 버전]
+    엑셀의 행 시작 위치뿐만 아니라, 컬럼(열)의 순서가 뒤바뀌어도 
+    헤더 이름('메뉴명', '카테고리', '식재료명', '사용량')을 매칭하여 정확하게 데이터를 파싱합니다.
+    """
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        
+        try:
+            wb = openpyxl.load_workbook(excel_file)
+            sheet = wb.active
+            
+            # 🔍 1. 헤더 위치(행 번호) 및 각 컬럼의 인덱스(열 번호) 찾기
+            header_row = None
+            col_map = {} # {'메뉴명': 0, '카테고리': 1, ...} 형태로 인덱스 저장
+            
+            # 상위 20줄을 뒤져서 헤더 행을 찾습니다.
+            for r_num in range(1, min(sheet.max_row + 1, 20)):
+                row_values = [str(sheet.cell(row=r_num, column=c).value).strip() for c in range(1, sheet.max_column + 1)]
+                
+                # '메뉴명'과 '식재료명'이 포함된 행을 헤더 행으로 판단
+                if "메뉴명" in row_values and "식재료명" in row_values:
+                    header_row = r_num
+                    # 각 헤더 이름이 몇 번째 인덱스(0부터 시작)에 있는지 기록
+                    for idx, val in enumerate(row_values):
+                        if "메뉴명" in val: col_map["menu"] = idx
+                        elif "카테고리" in val: col_map["category"] = idx
+                        elif "식재료명" in val: col_map["ing_name"] = idx
+                        elif "사용량" in val: col_map["amount"] = idx
+                    break
+            
+            # 헤더를 못 찾았다면 기본 고정 순서(0, 1, 2, 3)를 안전장치로 설정
+            if not header_row:
+                header_row = 4  # 기본 헤더 행 위치 가정
+                col_map = {"menu": 0, "category": 1, "ing_name": 2, "amount": 3}
+                
+            start_row = header_row + 1
+            success_count = 0
+            
+            # 🔍 2. 찾아낸 열 인덱스를 기반으로 정확하게 데이터 추출
+            for row in sheet.iter_rows(min_row=start_row, values_only=True):
+                if not row or row[col_map["menu"]] is None:
+                    continue
+                
+                # 🔥 고정된 row[0] 대신 찾은 위치(col_map)에서 데이터를 쏙쏙 뽑아옵니다!
+                menu_name = row[col_map["menu"]]
+                category = row[col_map["category"]] if col_map.get("category") < len(row) else "기타"
+                ing_name = row[col_map["ing_name"]]
+                amount = row[col_map["amount"]] if col_map.get("amount") < len(row) else 0
+                
+                if not str(menu_name).strip() or not str(ing_name).strip():
+                    continue
+                
+                # [1] 메뉴 가져오거나 생성
+                menu, created = Menu.objects.get_or_create(
+                    name=str(menu_name).strip(),
+                    defaults={'category': category or '기타'}
+                )
+                
+                # [2] 식재료 DB에서 매칭 (공백 무시)
+                clean_ing_name = str(ing_name).replace(" ", "")
+                all_ingredients = Ingredient.objects.all()
+                ingredient = None
+                
+                for ing in all_ingredients:
+                    if ing.name.replace(" ", "") == clean_ing_name:
+                        ingredient = ing
+                        break
+                
+                if not ingredient:
+                    ingredient = Ingredient.objects.create(
+                        name=str(ing_name).strip(), 
+                        category='기타', 
+                        unit='kg',
+                        safe_stock_level=0
+                    )
+                
+                # [3] 레시피 데이터 연결 및 저장
+                Recipe.objects.update_or_create(
+                    menu=menu,
+                    ingredient=ingredient,
+                    defaults={'required_amount': float(amount or 0)}
+                )
+                success_count += 1
+                
+            messages.success(request, f"엑셀 일괄 업로드 완료! 총 {success_count}건의 레시피 데이터가 안정적으로 반영되었습니다.")
+            
+        except Exception as e:
+            print(f"[ERROR] Excel upload failed: {e}")
+            messages.error(request, f"엑셀 파일 파싱 중 오류가 발생했습니다: {e}")
+            
+    else:
+        messages.error(request, f"올바르지 않은 파일 요청입니다.")
+        
+    return redirect('meals:menu_list')
+
+def search_ingredients_api(request):
+    """
+    인풋창에 입력한 글자가 포함된 식재료 목록을 JSON으로 반환
+    """
+    query = request.GET.get('q', '').strip()
+    if query:
+        # 이름에 검색어가 포함된 식재료 상위 10개 필터링
+        ingredients = Ingredient.objects.filter(name__icontains=query)[:10]
+        results = [{'id': ing.id, 'name': ing.name} for ing in ingredients]
+    else:
+        results = []
+        
+    return JsonResponse({'results': results})
+
+def get_menu_recipes_api(request, menu_id):
+    """
+    선택된 메뉴의 등록된 레시피(식재료 일람 및 사용량)를 JSON 배열로 변환하여 리턴
+    """
+    try:
+        menu = Menu.objects.get(id=menu_id)
+        # 역참조(related_name)인 recipes로 해당 메뉴의 모든 식재료 구성을 조회합니다.
+        recipes_queryset = menu.recipes.all()
+        
+        recipes_list = []
+        for r in recipes_queryset:
+            recipes_list.append({
+                'ingredient_id': r.ingredient.id,
+                'ingredient_name': r.ingredient.name,
+                'required_amount': float(r.required_amount)
+            })
+            
+        return JsonResponse({
+            'status': 'success',
+            'recipes': recipes_list
+        })
+    except Menu.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': '존재하지 않는 메뉴입니다.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
