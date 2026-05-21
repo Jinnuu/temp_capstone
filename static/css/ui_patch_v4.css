@@ -1,0 +1,147 @@
+/* v4: remove system notice, dropdown navigation, unified calendar, meal buttons */
+
+.sp-system-notice {
+  display: none !important;
+}
+
+.sp-header-main {
+  min-height: 78px;
+}
+
+.sp-nav-dropdown {
+  overflow: visible;
+}
+
+.sp-nav-dropdown > li {
+  position: relative;
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.sp-submenu {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  z-index: 1000;
+  min-width: 190px;
+  padding: 8px;
+  display: none;
+  transform: translateX(-50%);
+  border: 1px solid #d9dee7;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(20, 28, 38, 0.14);
+}
+
+.sp-nav-dropdown > li:hover .sp-submenu,
+.sp-nav-dropdown > li:focus-within .sp-submenu {
+  display: grid;
+  gap: 4px;
+}
+
+.sp-submenu a {
+  min-height: 38px !important;
+  padding: 0 12px;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  color: #343a40 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.sp-submenu a::after {
+  display: none !important;
+}
+
+.sp-submenu a:hover {
+  background: #eef2ff;
+  color: #2448d8 !important;
+}
+
+.sp-action-row.sp-meal-action-row {
+  justify-content: flex-start;
+}
+
+.sp-action-row.sp-meal-action-row .sp-btn {
+  min-width: 146px;
+}
+
+.sp-unified-calendar td {
+  height: 150px;
+}
+
+.sp-unified-calendar td.today,
+.sp-unified-calendar td.selected {
+  border-color: rgba(36, 72, 216, 0.45);
+  background: #eef2ff;
+}
+
+.sp-unified-calendar .sp-day-top em {
+  background: #dbe4ff;
+  color: #2448d8;
+}
+
+.sp-unified-calendar p {
+  margin-top: 8px;
+}
+
+.sp-unified-calendar p b {
+  color: #2448d8;
+}
+
+.sp-calendar-main {
+  min-height: 42px;
+  line-height: 1.5;
+}
+
+.sp-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sp-docs-grid article {
+  min-height: 150px;
+  padding: 20px;
+  border: 1px solid #d9dee7;
+  border-top: 3px solid #20242a;
+  background: #fff;
+}
+
+.sp-docs-grid strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.sp-docs-grid span {
+  color: #6c757d;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+  .sp-nav-dropdown {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .sp-submenu {
+    left: 0;
+    transform: none;
+  }
+
+  .sp-docs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .sp-docs-grid {
+    grid-template-columns: 1fr;
+  }
+}

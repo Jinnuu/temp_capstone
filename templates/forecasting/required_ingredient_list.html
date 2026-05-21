@@ -1,83 +1,116 @@
-{% extends 'base.html' %}
-{% block title %}일일 상세 산출 | FoodSense{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}식재료 산출 상세 | S&P{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="mb-4">
-        <h2 class="fw-bold">📅 {{ selected_date }} 식재료 산출 상세</h2>
-        <p class="text-muted">끼니별 예측 인원에 따른 상세 필요량입니다.</p>
+<section class="sp-page-title">
+  <h1>{{ selected_date }} 식재료 산출 상세</h1>
+  <p>예측 식수 기준으로 필요한 식재료와 부족분을 확인합니다.</p>
+</section>
+
+<section class="sp-action-row">
+  <a href="{% url 'forecasting:prediction_list' %}" class="sp-btn">예측 결과 목록</a>
+  <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date }}" class="sp-btn">다시 예측</a>
+</section>
+
+<section class="sp-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Required Ingredients</p>
+      <h2>끼니별 필요 식재료</h2>
+    </div>
+  </div>
+
+  {% for meal in requirements.meal_details %}
+    <article class="sp-day-block">
+      <div class="sp-day-block-head">
+        <div>
+          <p>{{ selected_date }}</p>
+          <h3>{{ meal.meal_type }} · {{ meal.pred_count }}명 예측</h3>
+        </div>
+      </div>
+
+      <div class="sp-table-wrap">
+        <table class="sp-data-table">
+          <thead>
+            <tr>
+              <th>식재료명</th>
+              <th>필요량</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ing in meal.ingredients %}
+              <tr>
+                <td>{{ ing.name }}</td>
+                <td>{{ ing.needed|floatformat:1 }} {{ ing.unit }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="2" class="sp-empty-cell">산출된 식재료가 없습니다.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  {% empty %}
+    <p class="sp-empty">끼니별 산출 결과가 없습니다.</p>
+  {% endfor %}
+</section>
+
+<section class="sp-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Shortage Order</p>
+      <h2>통합 부족분 발주</h2>
+    </div>
+  </div>
+
+  <p class="sp-help">
+    아래 버튼을 누르면 부족분 품목명과 수량이 발주 화면으로 전달되어 주문 수량이 미리 채워집니다.
+  </p>
+
+  <form method="get" action="{% url 'procurement:order_create' %}" class="sp-shortage-form">
+    <input type="hidden" name="target_date" value="{{ selected_date }}">
+
+    <div class="sp-table-wrap">
+      <table class="sp-data-table">
+        <thead>
+          <tr>
+            <th>식재료명</th>
+            <th>부족 수량</th>
+            <th>단위</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for name, data in requirements.items.items %}
+            {% if data.order_amount > 0 %}
+              <tr>
+                <td>
+                  {{ name }}
+                  <input type="hidden" name="items" value="{{ name }}">
+                </td>
+                <td>
+                  {{ data.order_amount|floatformat:1 }}
+                  <input type="hidden" name="amounts" value="{{ data.order_amount }}">
+                </td>
+                <td>{{ data.unit }}</td>
+              </tr>
+            {% endif %}
+          {% empty %}
+            <tr>
+              <td colspan="3" class="sp-empty-cell">부족분이 없습니다.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <!-- 1. 끼니별 상세 내역 (화면 표시용) -->
-    <div class="row g-4 mb-5">
-        {% for meal in requirements.meal_details %}
-        <div class="col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-dark text-white py-3">
-                    <h5 class="mb-0 text-center">{{ meal.meal_type }} ({{ meal.pred_count }}명 예측)</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr class="text-muted small">
-                                <th>식재료명</th>
-                                <th class="text-end">필요량</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ing in meal.ingredients %}
-                            <tr>
-                                <td>{{ ing.name }}</td>
-                                <td class="text-end fw-bold">{{ ing.needed|floatformat:1 }}{{ ing.unit }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+    <div class="sp-action-row mt-3">
+      <button type="submit" class="sp-btn sp-btn-primary">
+        부족분 발주 화면으로 이동
+      </button>
     </div>
-
-    <!-- 2. 통합 발주 안내 (날짜 단위) -->
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-body p-0">
-            <div class="bg-danger text-white p-4 d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="fw-bold mb-1">🛒 일일 통합 발주 신청</h4>
-                    <p class="mb-0 opacity-75">위 모든 끼니의 부족분을 합산하여 발주 페이지로 전송합니다.</p>
-                </div>
-                
-                <!-- 날짜 단위 통합 발주 폼 -->
-                <form action="{% url 'procurement:order_create' %}" method="get" class="m-0">
-                    {% for name, data in requirements.items.items %}
-                        {% if data.order_amount > 0 %}
-                            <input type="hidden" name="items" value="{{ name }}">
-                            <input type="hidden" name="amounts" value="{{ data.order_amount }}">
-                        {% endif %}
-                    {% endfor %}
-                    <button type="submit" class="btn btn-light btn-lg fw-bold text-danger px-4">
-                        통합 부족분 발주하기
-                    </button>
-                </form>
-            </div>
-            
-            <div class="p-4">
-                <h5 class="fw-bold mb-3">📍 발주 포함 내역 (합산 결과)</h5>
-                <div class="row row-cols-2 row-cols-md-4 g-3">
-                    {% for name, data in requirements.items.items %}
-                        {% if data.order_amount > 0 %}
-                        <div class="col">
-                            <div class="p-3 border rounded bg-light">
-                                <small class="text-muted d-block">{{ name }}</small>
-                                <strong class="text-danger">{{ data.order_amount }}{{ data.unit }}</strong>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+  </form>
+</section>
 {% endblock %}

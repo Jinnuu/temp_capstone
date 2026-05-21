@@ -1,3 +1,217 @@
 {% extends "base.html" %}
+
 {% block title %}간편 발주 | S&P{% endblock %}
-{% block content %}<section class="sp-page-title"><h1>간편 발주</h1><p>부족분을 불러오거나 직접 품목 수량을 입력해 발주서를 작성합니다.</p></section><section class="sp-action-row"><a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a><a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_create' %}">간편 발주</a><a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a></section><section class="sp-filter-panel"><form method="get" class="sp-filter-grid sp-filter-grid-compact"><label><span>부족분 기준 날짜</span><input type="date" name="target_date" value="{{ target_date }}"></label><div class="sp-filter-actions"><button type="submit" class="sp-btn sp-btn-primary">데이터 로드</button><a href="{% url 'procurement:order_create' %}" class="sp-btn">초기화</a></div></form></section>{{ shortage_map|json_script:"shortage-data" }}<form method="post">{% csrf_token %}<section class="sp-panel"><div class="sp-panel-head"><div><p>Quick Order</p><h2>품목 선택</h2></div></div><div class="sp-table-wrap"><table class="sp-data-table"><thead><tr><th>선택</th><th>품목명</th><th>분류</th><th>단위</th><th>단가</th><th>주문수량</th></tr></thead><tbody>{% for ing in ingredients %}<tr><td><input type="checkbox" name="ingredient_id[]" value="{{ ing.id }}"></td><td class="fw-bold">{{ ing.name }}</td><td>{{ ing.category|default:"일반" }}</td><td>{{ ing.unit }}</td><td>{{ ing.unit_price|floatformat:0 }}원</td><td><input type="number" min="0" step="0.01" name="quantity[]" value="0" class="sp-qty-input"></td></tr>{% empty %}<tr><td colspan="6" class="sp-empty-cell">등록된 식재료가 없습니다.</td></tr>{% endfor %}</tbody></table></div><div class="mt-3 text-end"><button type="submit" class="sp-btn sp-btn-primary">간편 발주 완료</button></div></section></form>{% endblock %}
+
+{% block content %}
+<section class="sp-page-title">
+  <h1>간편 발주</h1>
+  <p>예측 결과에서 넘어온 부족분 또는 직접 선택한 품목 수량으로 발주서를 작성합니다.</p>
+</section>
+
+<section class="sp-action-row">
+  <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+  <a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_create' %}">간편 발주</a>
+  <a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a>
+</section>
+
+<section class="sp-filter-panel">
+  <form method="get" class="sp-filter-grid sp-filter-grid-compact">
+    <label>
+      <span>부족분 기준 날짜</span>
+      <input type="date" name="target_date" value="{{ target_date }}">
+    </label>
+    <div class="sp-filter-actions">
+      <button type="submit" class="sp-btn sp-btn-primary">데이터 로드</button>
+      <a href="{% url 'procurement:order_create' %}" class="sp-btn">초기화</a>
+    </div>
+  </form>
+  <p class="sp-help">
+    예측 결과에서 넘어온 부족분이 있으면 해당 품목의 주문 수량이 자동으로 채워집니다.
+  </p>
+</section>
+
+{{ shortage_map|json_script:"shortage-data" }}
+
+<form method="post" id="quickOrderForm">
+  {% csrf_token %}
+
+  <section class="sp-order-grid">
+    <article class="sp-panel">
+      <div class="sp-panel-head">
+        <div>
+          <p>Quick Order</p>
+          <h2>품목 선택</h2>
+        </div>
+        <select id="categoryFilter" class="sp-standalone-select">
+          <option value="">전체 카테고리</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="sp-table-wrap">
+        <table class="sp-data-table sp-order-table">
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>품목명</th>
+              <th>분류</th>
+              <th>단위</th>
+              <th>단가</th>
+              <th>주문수량</th>
+              <th>합계금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ing in ingredients %}
+              <tr data-category="{{ ing.category|default:'일반' }}" data-name="{{ ing.name }}">
+                <td><input type="checkbox" class="sp-order-check"></td>
+                <td class="fw-bold">
+                  {{ ing.name }}
+                  <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}" disabled>
+                </td>
+                <td>{{ ing.category|default:"일반" }}</td>
+                <td>{{ ing.unit }}</td>
+                <td><span class="sp-unit-price" data-price="{{ ing.unit_price }}">{{ ing.unit_price|floatformat:0 }}원</span></td>
+                <td><input type="number" min="0" step="0.01" name="quantity[]" value="0" class="sp-qty-input" disabled></td>
+                <td class="sp-row-total">0원</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="sp-empty-cell">등록된 식재료가 없습니다.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <aside class="sp-panel sp-cart-panel">
+      <div class="sp-panel-head">
+        <div>
+          <p>Order Summary</p>
+          <h2>발주 요약</h2>
+        </div>
+      </div>
+
+      <div class="sp-cart-summary">
+        <div><span>선택 품목</span><strong id="selectedCount">0개</strong></div>
+        <div><span>공급가액</span><strong id="subtotalAmount">0원</strong></div>
+        <div><span>부가세(10%)</span><strong id="vatAmount">0원</strong></div>
+        <div class="total"><span>최종 결제 예정액</span><strong id="totalAmount">0원</strong></div>
+      </div>
+
+      <div class="sp-side-actions">
+        <a href="{% url 'procurement:order_list' %}" class="sp-btn">발주 목록</a>
+        <button type="submit" class="sp-btn sp-btn-primary">간편 발주 완료</button>
+      </div>
+    </aside>
+  </section>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function formatWon(value) {
+    return Number(value || 0).toLocaleString("ko-KR") + "원";
+  }
+
+  function updateOrderTotals() {
+    let selectedCount = 0;
+    let subtotal = 0;
+
+    document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+      const check = row.querySelector(".sp-order-check");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+      const hiddenInput = row.querySelector('input[name="ingredient_id[]"]');
+      const priceEl = row.querySelector(".sp-unit-price");
+      const rowTotalEl = row.querySelector(".sp-row-total");
+
+      if (!check || !qtyInput || !hiddenInput || !priceEl || !rowTotalEl) return;
+
+      qtyInput.disabled = !check.checked;
+      hiddenInput.disabled = !check.checked;
+
+      if (!check.checked) {
+        rowTotalEl.textContent = "0원";
+        return;
+      }
+
+      selectedCount += 1;
+      const rowTotal = Number(priceEl.dataset.price || 0) * Number(qtyInput.value || 0);
+      subtotal += rowTotal;
+      rowTotalEl.textContent = formatWon(rowTotal);
+    });
+
+    const vat = Math.floor(subtotal * 0.1);
+    document.getElementById("selectedCount").textContent = selectedCount + "개";
+    document.getElementById("subtotalAmount").textContent = formatWon(subtotal);
+    document.getElementById("vatAmount").textContent = formatWon(vat);
+    document.getElementById("totalAmount").textContent = formatWon(subtotal + vat);
+  }
+
+  function normalizeName(value) {
+    return String(value || "").trim();
+  }
+
+  function applyShortageMap() {
+    const script = document.getElementById("shortage-data");
+    if (!script) return;
+
+    let shortageMap = {};
+    try {
+      shortageMap = JSON.parse(script.textContent || "{}");
+    } catch (error) {
+      shortageMap = {};
+    }
+
+    document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+      const rowName = normalizeName(row.dataset.name);
+      const shortageValue = shortageMap[rowName];
+
+      if (shortageValue === undefined || shortageValue === null || shortageValue === "") {
+        return;
+      }
+
+      const numericValue = Number(shortageValue || 0);
+      if (numericValue <= 0) {
+        return;
+      }
+
+      const check = row.querySelector(".sp-order-check");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+
+      if (!check || !qtyInput) {
+        return;
+      }
+
+      check.checked = true;
+      qtyInput.value = numericValue;
+    });
+  }
+
+  document.addEventListener("change", (event) => {
+    if (event.target.matches(".sp-order-check")) {
+      const row = event.target.closest("tr");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+      if (event.target.checked && Number(qtyInput.value || 0) <= 0) qtyInput.value = 1;
+      updateOrderTotals();
+    }
+
+    if (event.target.matches("#categoryFilter")) {
+      const selectedCategory = event.target.value;
+      document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+        row.style.display = (!selectedCategory || row.dataset.category === selectedCategory) ? "" : "none";
+      });
+    }
+  });
+
+  document.addEventListener("input", (event) => {
+    if (event.target.matches('input[name="quantity[]"]')) updateOrderTotals();
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    applyShortageMap();
+    updateOrderTotals();
+  });
+</script>
+{% endblock %}

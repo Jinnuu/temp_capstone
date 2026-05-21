@@ -1,19 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}재고·식자재 | S&P{% endblock %}
+{% block title %}식자재 | S&P{% endblock %}
 
 {% block content %}
 <section class="sp-page-title">
-  <h1>재고·식자재</h1>
+  <h1>식자재</h1>
   <p>현재고와 안전재고를 확인하고, 식자재 기준정보를 등록·수정합니다.</p>
-</section>
-
-<section class="sp-subtab-row">
-  <a class="sp-subtab active" href="#stock">재고현황</a>
-  <a class="sp-subtab" href="#ingredient-master">식자재관리</a>
-  <a class="sp-subtab" href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
-  <a class="sp-subtab" href="{% url 'inventory:ingredient_create' %}">식재료 등록</a>
-  <a class="sp-subtab" href="{% url 'inventory:ingredient_upload' %}">엑셀 업로드</a>
 </section>
 
 <section class="sp-summary-grid">
@@ -23,14 +15,14 @@
     <small>현재 필터 기준</small>
   </article>
   <article class="sp-summary-card">
-    <span>부족 품목</span>
-    <strong class="text-danger">{% if all_low_stock_ids %}있음{% else %}0개{% endif %}</strong>
-    <small>안전재고 이하 품목</small>
+    <span>부족분 일괄 발주</span>
+    <strong>{% if all_low_stock_ids %}가능{% else %}없음{% endif %}</strong>
+    <small>안전재고 이하 품목 기준</small>
   </article>
   <article class="sp-summary-card">
-    <span>등록 분류</span>
+    <span>분류</span>
     <strong>{{ categories|length }}개</strong>
-    <small>대분류 기준</small>
+    <small>등록된 대분류</small>
   </article>
   <article class="sp-summary-actions">
     {% if all_low_stock_ids %}
@@ -38,7 +30,8 @@
     {% else %}
       <span class="sp-btn disabled">부족분 없음</span>
     {% endif %}
-    <a class="sp-btn" href="{% url 'inventory:ingredient_create' %}">식재료 등록</a>
+    <a class="sp-btn" href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
+    <a class="sp-btn" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
     <a class="sp-btn" href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
   </article>
 </section>
@@ -88,13 +81,12 @@
   </form>
 </section>
 
-<section id="stock" class="sp-panel">
+<section class="sp-panel" id="stock">
   <div class="sp-panel-head">
     <div>
-      <p>Stock Status</p>
-      <h2>재고현황</h2>
+      <p>Inventory</p>
+      <h2>재고 현황</h2>
     </div>
-    <a class="sp-text-link" href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
   </div>
 
   <div class="sp-table-wrap">
@@ -104,6 +96,7 @@
           <th>대분류</th>
           <th>품목명</th>
           <th>발주처</th>
+          <th>단가</th>
           <th>입고</th>
           <th>출고</th>
           <th>폐기</th>
@@ -124,6 +117,7 @@
                 -
               {% endif %}
             </td>
+            <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
             <td>{{ ingredient.in_qty|floatformat:1 }}</td>
             <td>{{ ingredient.out_qty|floatformat:1 }}</td>
             <td>{{ ingredient.waste_qty|floatformat:1 }}</td>
@@ -138,59 +132,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="9" class="sp-empty-cell">조회된 식재료가 없습니다.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section id="ingredient-master" class="sp-panel">
-  <div class="sp-panel-head">
-    <div>
-      <p>Ingredient Master</p>
-      <h2>식자재 기준정보</h2>
-    </div>
-    <div class="sp-head-actions">
-      <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_create' %}">식재료 등록</a>
-      <a class="sp-btn" href="{% url 'inventory:ingredient_upload' %}">엑셀 업로드</a>
-    </div>
-  </div>
-
-  <div class="sp-table-wrap">
-    <table class="sp-data-table">
-      <thead>
-        <tr>
-          <th>대분류</th>
-          <th>품목명</th>
-          <th>단위</th>
-          <th>규격/설명</th>
-          <th>단가</th>
-          <th>발주처</th>
-          <th>안전재고</th>
-          <th>관리</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ingredient in page_obj %}
-          <tr>
-            <td>{{ ingredient.category|default:"-" }}</td>
-            <td class="fw-bold">{{ ingredient.name }}</td>
-            <td>{{ ingredient.unit }}</td>
-            <td>{{ ingredient.description|default:ingredient.spec|default:"-" }}</td>
-            <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
-            <td>
-              {% if ingredient.supplier %}
-                {{ ingredient.supplier.name|default:ingredient.supplier.username }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ ingredient.safe_stock_level|floatformat:1 }} {{ ingredient.unit }}</td>
-            <td><a class="sp-text-link" href="{% url 'inventory:ingredient_stock_adjust' ingredient.id %}">재고조정</a></td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="8" class="sp-empty-cell">조회된 식재료가 없습니다.</td></tr>
+          <tr><td colspan="10" class="sp-empty-cell">조회된 식자재가 없습니다.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -204,6 +146,58 @@
     {% if page_obj.has_next %}
       <a href="?page={{ page_obj.next_page_number }}&category={{ selected_category }}&supplier={{ selected_supplier }}&search={{ search_query }}&sort={{ sort_by }}">다음</a>
     {% endif %}
+  </div>
+</section>
+
+<section class="sp-panel" id="ingredient-master">
+  <div class="sp-panel-head">
+    <div>
+      <p>Ingredient Master</p>
+      <h2>식자재 기준정보</h2>
+    </div>
+    <div class="sp-filter-actions">
+      <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
+      <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
+    </div>
+  </div>
+
+  <div class="sp-table-wrap">
+    <table class="sp-data-table">
+      <thead>
+        <tr>
+          <th>대분류</th>
+          <th>품목명</th>
+          <th>단위</th>
+          <th>규격</th>
+          <th>단가</th>
+          <th>발주처</th>
+          <th>안전재고</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ingredient in page_obj %}
+          <tr>
+            <td>{{ ingredient.category|default:"-" }}</td>
+            <td class="fw-bold">{{ ingredient.name }}</td>
+            <td>{{ ingredient.unit }}</td>
+            <td>{{ ingredient.spec|default:"-" }}</td>
+            <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
+            <td>
+              {% if ingredient.supplier %}
+                {{ ingredient.supplier.name|default:ingredient.supplier.username }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ ingredient.safe_stock_level|floatformat:1 }} {{ ingredient.unit }}</td>
+            <td><a class="sp-text-link" href="{% url 'inventory:ingredient_create' %}">수정</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="sp-empty-cell">조회된 식자재가 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </section>
 {% endblock %}

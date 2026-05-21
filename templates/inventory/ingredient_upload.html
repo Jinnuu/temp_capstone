@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}식자재 엑셀 일괄 등록 | S&P{% endblock %}
+
+{% block content %}
+<section class="sp-page-title">
+  <h1>식자재 엑셀 일괄 등록</h1>
+  <p>식자재 기준정보를 XLSX 파일로 한 번에 등록하거나 수정합니다.</p>
+</section>
+
+<section class="sp-action-row">
+  <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">식자재 목록</a>
+  <a class="sp-btn" href="{% url 'inventory:ingredient_create' %}">단일 식자재 등록</a>
+  <a class="sp-btn" href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
+</section>
+
+<section class="sp-panel sp-narrow-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Excel Upload</p>
+      <h2>XLSX 파일 업로드</h2>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="sp-form">
+    {% csrf_token %}
+
+    <label>
+      <span>식자재 엑셀 파일</span>
+      <input type="file" name="file" accept=".xlsx" required>
+    </label>
+
+    <button type="submit" class="sp-btn sp-btn-primary">엑셀 일괄 등록</button>
+  </form>
+</section>
+
+<section class="sp-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Template Guide</p>
+      <h2>권장 엑셀 양식</h2>
+    </div>
+  </div>
+
+  <p class="sp-help">
+    첫 번째 행에는 아래 컬럼명을 입력해 주세요. <strong>식재료명</strong>은 필수입니다.
+    발주처는 시스템에 등록된 사용자 ID 또는 이름과 일치해야 연결됩니다.
+  </p>
+
+  <div class="sp-table-wrap">
+    <table class="sp-data-table">
+      <thead>
+        <tr>
+          <th>식재료명</th>
+          <th>대분류</th>
+          <th>규격</th>
+          <th>단위</th>
+          <th>단가</th>
+          <th>안전재고</th>
+          <th>발주처</th>
+          <th>연간예상소요량</th>
+          <th>금액</th>
+          <th>식품 설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>양파</td>
+          <td>농산물</td>
+          <td>국내산, KG</td>
+          <td>KG</td>
+          <td>2300</td>
+          <td>10</td>
+          <td>supplier01</td>
+          <td>1200</td>
+          <td>2760000</td>
+          <td>제육볶음, 카레 등에 사용</td>
+        </tr>
+        <tr>
+          <td>돼지고기</td>
+          <td>축산물</td>
+          <td>냉장, KG</td>
+          <td>KG</td>
+          <td>10700</td>
+          <td>10</td>
+          <td>supplier02</td>
+          <td>900</td>
+          <td>9630000</td>
+          <td>주찬 조리용</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

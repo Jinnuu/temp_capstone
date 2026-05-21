@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}문서화 | S&P{% endblock %}
+
+{% block content %}
+<section class="sp-page-title">
+  <h1>문서화</h1>
+  <p>식단표, 수불 현황, 재고 현황, 발주 내역, 예측 결과를 문서화하는 공간입니다.</p>
+</section>
+
+<section class="sp-panel sp-docs-placeholder">
+  <div class="sp-panel-head">
+    <div>
+      <p>Documentation</p>
+      <h2>문서화 기능 준비 중</h2>
+    </div>
+  </div>
+
+  <div class="sp-docs-grid">
+    <article id="meal-docs">
+      <strong>식단 문서화</strong>
+      <span>월간 식단표, 주간 식단표, 날짜별 식단표 출력 자리</span>
+    </article>
+    <article id="stock-docs">
+      <strong>수불 현황</strong>
+      <span>일수불명세서, 월수불명세서, 재고 흐름 문서화 자리</span>
+    </article>
+    <article id="order-docs">
+      <strong>발주 내역</strong>
+      <span>발주 목록, 발주 명세서, 업체별 발주 내역 문서화 자리</span>
+    </article>
+    <article>
+      <strong>예측 결과</strong>
+      <span>날짜별 식수 예측, 예측 대비 실제 식수 문서화 자리</span>
+    </article>
+  </div>
+
+  <p class="sp-help mt-3">
+    현재 화면은 다른 팀원이 구현할 문서화 기능을 연결하기 위한 빈 페이지입니다.
+  </p>
+</section>
+{% endblock %}

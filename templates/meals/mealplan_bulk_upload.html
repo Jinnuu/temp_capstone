@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}식단 일괄 등록 | S&P{% endblock %}
+
+{% block content %}
+<section class="sp-page-title">
+  <h1>CSV/XLSX 식단 일괄 등록</h1>
+  <p>월간 식단표를 CSV 또는 XLSX 파일로 업로드해 한 번에 등록하는 화면입니다.</p>
+</section>
+
+<section class="sp-panel sp-narrow-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Bulk Upload</p>
+      <h2>업로드 파일 선택</h2>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="sp-form">
+    {% csrf_token %}
+
+    <label>
+      <span>파일 형식</span>
+      <select name="file_type">
+        <option value="xlsx">XLSX</option>
+        <option value="csv">CSV</option>
+      </select>
+    </label>
+
+    <label>
+      <span>식단 파일</span>
+      <input type="file" name="mealplan_file" accept=".csv,.xlsx">
+    </label>
+
+    <button type="submit" class="sp-btn sp-btn-primary">일괄 등록하기</button>
+  </form>
+</section>
+
+<section class="sp-panel">
+  <div class="sp-panel-head">
+    <div>
+      <p>Template Guide</p>
+      <h2>권장 업로드 양식</h2>
+    </div>
+  </div>
+
+  <div class="sp-table-wrap">
+    <table class="sp-data-table">
+      <thead>
+        <tr>
+          <th>date</th>
+          <th>meal_type</th>
+          <th>menu_name</th>
+          <th>category</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026-05-20</td>
+          <td>중식</td>
+          <td>제육볶음</td>
+          <td>주반찬</td>
+        </tr>
+        <tr>
+          <td>2026-05-20</td>
+          <td>중식</td>
+          <td>미역국</td>
+          <td>국</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
