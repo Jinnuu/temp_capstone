@@ -1,3 +1,99 @@
 {% extends "base.html" %}
+
 {% block title %}식수예측 | S&P{% endblock %}
-{% block content %}<section class="sp-page-title"><h1>식수예측</h1><p>날짜별 예측 생성 여부와 예측 결과를 확인합니다.</p></section><section class="sp-action-row"><a href="{% url 'forecasting:prediction_create' %}" class="sp-btn sp-btn-primary">예측 실행</a><a href="{% url 'forecasting:prediction_list' %}" class="sp-btn">전체 결과 보기</a></section><section class="sp-filter-panel"><form method="get" class="sp-filter-grid sp-filter-grid-compact"><label><span>조회 연도</span><input type="number" name="year" value="{{ selected_year }}"></label><label><span>조회 월</span><select name="month">{% for month in months %}<option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>{{ month }}월</option>{% endfor %}</select></label><div class="sp-filter-actions"><button class="sp-btn sp-btn-primary" type="submit">조회</button><a href="{% url 'forecasting:prediction_calendar' %}" class="sp-btn">이번 달</a></div></form></section><section class="sp-panel"><div class="sp-panel-head"><div><p>Prediction Calendar</p><h2>{{ selected_year }}년 {{ selected_month }}월 예측 캘린더</h2></div></div><div class="sp-table-wrap"><table class="sp-calendar"><thead><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr></thead><tbody>{% for week in calendar_weeks %}<tr>{% for cell in week %}{% if cell %}<td><a href="{% url 'forecasting:prediction_create' %}?date={{ cell.date|date:'Y-m-d' }}"><div class="sp-day-top"><strong>{{ cell.day }}</strong>{% if cell.has_prediction %}<em>완료</em>{% endif %}</div><p>{{ cell.status_label }}</p></a></td>{% else %}<td class="empty"></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table></div></section>{% endblock %}
+
+{% block content %}
+<section class="sp-page-title">
+  <h1>식수예측</h1>
+  <p>운영현황과 동일한 캘린더 형식으로 날짜별 예측 생성 여부를 확인합니다.</p>
+</section>
+
+<section class="sp-action-row">
+  <a href="{% url 'forecasting:prediction_create' %}" class="sp-btn sp-btn-primary">예측 실행</a>
+  <a href="{% url 'forecasting:prediction_list' %}" class="sp-btn">전체 결과 보기</a>
+  <a href="{% url 'forecasting:ingredient_requirement' %}" class="sp-btn">식재료 산출</a>
+</section>
+
+<section class="sp-filter-panel">
+  <form method="get" class="sp-filter-grid sp-filter-grid-compact">
+    <label>
+      <span>조회 연도</span>
+      <input type="number" name="year" value="{{ selected_year }}">
+    </label>
+    <label>
+      <span>조회 월</span>
+      <select name="month">
+        {% for month in months %}
+          <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>{{ month }}월</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="sp-filter-actions">
+      <button class="sp-btn sp-btn-primary" type="submit">조회</button>
+      <a href="{% url 'forecasting:prediction_calendar' %}" class="sp-btn">이번 달</a>
+    </div>
+  </form>
+</section>
+
+<section class="sp-dashboard-grid">
+  <article class="sp-panel sp-calendar-panel">
+    <div class="sp-panel-head">
+      <div>
+        <p>Prediction Calendar</p>
+        <h2>{{ selected_year }}년 {{ selected_month }}월 예측 캘린더</h2>
+      </div>
+    </div>
+
+    <div class="sp-table-wrap">
+      <table class="sp-calendar">
+        <thead>
+          <tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr>
+        </thead>
+        <tbody>
+          {% for week in calendar_weeks %}
+            <tr>
+              {% for cell in week %}
+                {% if cell %}
+                  <td class="{% if cell.is_today %}today{% endif %} {% if cell.has_prediction %}selected{% endif %}">
+                    <a href="{% url 'forecasting:prediction_create' %}?date={{ cell.date|date:'Y-m-d' }}">
+                      <div class="sp-day-top">
+                        <strong>{{ cell.day }}</strong>
+                        {% if cell.has_prediction %}<em>완료</em>{% endif %}
+                      </div>
+                      <p>{{ cell.status_label }}</p>
+                      <div class="sp-badge-row">
+                        {% if cell.has_prediction %}
+                          <span class="sp-badge blue">예측 있음</span>
+                        {% else %}
+                          <span class="sp-badge">미생성</span>
+                        {% endif %}
+                      </div>
+                    </a>
+                  </td>
+                {% else %}
+                  <td class="empty"></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <aside class="sp-panel">
+    <div class="sp-side-title">
+      <p>Forecasting</p>
+      <h2>예측 관리</h2>
+    </div>
+    <section class="sp-side-section">
+      <h3>사용 흐름</h3>
+      <p class="sp-empty">날짜 선택 → 예측 실행 → 결과 확인 → 식단기반 발주로 연결</p>
+    </section>
+    <section class="sp-side-section">
+      <a href="{% url 'forecasting:prediction_create' %}" class="sp-btn sp-btn-primary w-100">예측 실행</a>
+      <a href="{% url 'forecasting:prediction_list' %}" class="sp-btn w-100 mt-2">결과 목록</a>
+    </section>
+  </aside>
+</section>
+{% endblock %}

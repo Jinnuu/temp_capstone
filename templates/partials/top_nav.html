@@ -2,7 +2,10 @@
   <li><a href="{% url 'home' %}">운영현황</a></li>
   <li><a href="{% url 'meals:mealplan_list' %}">식단계획</a></li>
   <li><a href="{% url 'forecasting:prediction_calendar' %}">식수예측</a></li>
-  <li><a href="{% url 'inventory:ingredient_list' %}">재고·식자재</a></li>
+  <li><a href="{% url 'inventory:ingredient_list' %}#stock">재고현황</a></li>
+  <li><a href="{% url 'inventory:ingredient_list' %}#ingredient-master">식자재관리</a></li>
   <li><a href="{% url 'procurement:home' %}">발주관리</a></li>
-  {% if user.is_staff %}<li><a href="/admin/">관리</a></li>{% endif %}
+  {% if user.is_staff %}
+    <li><a href="/admin/">관리</a></li>
+  {% endif %}
 </ul>
