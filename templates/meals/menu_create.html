@@ -2,152 +2,531 @@
 
 {% block title %}메뉴 등록 | S&P{% endblock %}
 
-{% block content %}
-<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
-    <div>
-        <span class="text-uppercase small fw-bold text-primary">Menu Management</span>
-        <h1 class="h2 fw-bold mb-2">메뉴 등록</h1>
-        <p class="text-muted mb-0">
-            새로운 메뉴를 등록하고, 기본 식재료와 사용량을 함께 입력할 수 있습니다.
-        </p>
-    </div>
+{% block extra_css %}
+<style>
+  .menu-page {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
 
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
-        <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-primary">레시피 수정</a>
-    </div>
-</section>
+  .menu-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
+    margin-bottom: 22px;
+  }
 
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 p-md-5">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="badge text-bg-primary rounded-pill">New Menu</span>
-                    <span class="text-muted small">메뉴 기본 정보 및 식재료 입력</span>
-                </div>
+  .menu-kicker {
+    margin: 0 0 7px;
+    color: #2448d8;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 
-                <h2 class="h4 fw-bold mb-2">메뉴 정보 입력</h2>
-                <p class="text-muted mb-4">
-                    메뉴명과 카테고리를 입력하고, 필요한 식재료와 사용량을 추가하세요.
-                </p>
+  .menu-hero h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1.1;
+  }
 
-                <form method="post" id="menuCreateForm">
-                    {% csrf_token %}
+  .menu-hero p {
+    margin: 9px 0 0;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 700;
+  }
 
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label fw-semibold">메뉴명</label>
-                            <input type="text" name="name" id="name" class="form-control" placeholder="예: 제육볶음" required>
-                        </div>
+  .menu-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
 
-                        <div class="col-md-6">
-                            <label for="category" class="form-label fw-semibold">카테고리</label>
-                            <select name="category" id="category" class="form-select" required>
-                                <option value="">카테고리를 선택하세요</option>
-                                <option value="한식">한식</option>
-                                <option value="일식">일식</option>
-                                <option value="중식">중식</option>
-                                <option value="양식">양식</option>
-                                <option value="기타">기타</option>
-                            </select>
-                        </div>
-                    </div>
+  .menu-upload-form {
+    margin: 0;
+  }
 
-                    <hr class="my-4">
+  .menu-card {
+    width: 100%;
+    margin-bottom: 18px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #d9dee7;
+    box-shadow: 0 12px 32px rgba(20, 28, 38, 0.05);
+  }
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="h5 fw-bold mb-0">기본 식재료 구성</h3>
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addIngredientRow()">
-                            + 식재료 추가
-                        </button>
-                    </div>
+  .menu-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 18px;
+    margin-bottom: 22px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #20242a;
+  }
 
-                    <div id="ingredientRows" class="d-flex flex-column gap-3">
-                        <div class="row g-2 align-items-end ingredient-row">
-                            <div class="col-md-7">
-                                <label class="form-label">식재료명</label>
-                                <input type="text" name="ing_name[]" class="form-control" placeholder="예: 돼지고기">
-                            </div>
+  .menu-card-head h2 {
+    margin: 4px 0 0;
+    color: #111827;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
 
-                            <div class="col-md-3">
-                                <label class="form-label">사용량</label>
-                                <input type="number" step="0.01" name="ing_amount[]" class="form-control" placeholder="예: 2.5">
-                            </div>
+  .menu-form {
+    display: grid;
+    gap: 22px;
+  }
 
-                            <div class="col-md-2 d-grid">
-                                <button type="button" class="btn btn-outline-danger" onclick="removeIngredientRow(this)">
-                                    삭제
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+  .menu-basic-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 14px;
+  }
 
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">메뉴 등록</button>
-                        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary btn-lg">취소</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+  .menu-field {
+    display: grid;
+    gap: 7px;
+  }
 
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-body p-4 p-md-5">
-                <span class="text-uppercase small fw-bold text-primary">Quick Guide</span>
-                <h2 class="h4 fw-bold mt-2 mb-3">입력 흐름 안내</h2>
+  .menu-field label {
+    margin: 0;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 900;
+  }
 
-                <div class="d-flex flex-column gap-3">
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">1. 메뉴 기본 정보 입력</strong>
-                        <span class="text-muted small">메뉴명과 카테고리를 먼저 설정합니다.</span>
-                    </div>
+  .menu-field input,
+  .menu-field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #cfd6e4;
+    background: #fff;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+  }
 
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">2. 식재료 추가</strong>
-                        <span class="text-muted small">식재료명과 사용량을 필요한 만큼 추가합니다.</span>
-                    </div>
+  .menu-field input:focus,
+  .menu-field select:focus {
+    outline: none;
+    border-color: #2448d8;
+    box-shadow: 0 0 0 3px rgba(36, 72, 216, 0.12);
+  }
 
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">3. 메뉴 저장</strong>
-                        <span class="text-muted small">등록 후 메뉴 목록에서 수정 및 관리할 수 있습니다.</span>
-                    </div>
-                </div>
+  .menu-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 14px;
+    padding-top: 3px;
+  }
 
-                <div class="mt-4 d-grid gap-2">
-                    <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록 보기</a>
-                    <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-primary">레시피 수정하기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+  .menu-section-title h2 {
+    margin: 4px 0 0;
+    color: #111827;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
 
-<script>
-function addIngredientRow() {
-    const container = document.getElementById("ingredientRows");
-    const firstRow = container.querySelector(".ingredient-row");
-    const newRow = firstRow.cloneNode(true);
+  .recipe-rows {
+    display: grid;
+    gap: 10px;
+  }
 
-    newRow.querySelectorAll("input").forEach(el => {
-        el.value = "";
-    });
+  .recipe-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px 76px;
+    gap: 10px;
+    align-items: end;
+    padding: 14px;
+    border: 1px solid #e2e6ee;
+    background: #f8fafc;
+  }
 
-    container.appendChild(newRow);
-}
+  .recipe-row .sp-btn {
+    min-width: 76px;
+  }
 
-function removeIngredientRow(button) {
-    const container = document.getElementById("ingredientRows");
-    const rows = container.querySelectorAll(".ingredient-row");
+  .menu-submit-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 2px;
+  }
 
-    if (rows.length > 1) {
-        button.closest(".ingredient-row").remove();
-    } else {
-        rows[0].querySelectorAll("input").forEach(el => {
-            el.value = "";
-        });
+  .menu-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .menu-guide-box {
+    min-height: 132px;
+    padding: 16px;
+    border: 1px solid #e2e6ee;
+    background: #f8fafc;
+  }
+
+  .menu-guide-box strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .menu-guide-box span {
+    display: block;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .upload-format-row {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .upload-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .upload-chip-grid span {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d9dee7;
+    background: #f8fafc;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .menu-note {
+    margin: 12px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .template-table th,
+  .template-table td {
+    text-align: center !important;
+  }
+
+  .template-table td:first-child,
+  .template-table th:first-child {
+    text-align: left !important;
+  }
+
+  @media (max-width: 900px) {
+    .menu-hero {
+      grid-template-columns: 1fr;
     }
-}
+
+    .menu-actions {
+      justify-content: flex-start;
+    }
+
+    .menu-basic-grid,
+    .recipe-row,
+    .upload-format-row {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-guide-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .upload-chip-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+  <section class="menu-hero">
+    <div>
+      <p class="menu-kicker">Menu Management</p>
+      <h1>메뉴 등록</h1>
+      <p>새로운 메뉴를 등록하고, 기본 식재료와 사용량을 함께 입력합니다.</p>
+    </div>
+
+    <div class="menu-actions">
+      <a class="sp-btn" href="{% url 'meals:menu_list' %}">메뉴 목록</a>
+
+      <form id="recipeExcelUploadForm" class="menu-upload-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="excel_file" id="recipeExcelFile" accept=".xlsx,.xlsm,.xltx,.xltm" hidden>
+        <button type="button" class="sp-btn sp-btn-primary" id="recipeExcelUploadButton">
+          레시피 엑셀 업로드
+        </button>
+      </form>
+
+      <a class="sp-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
+    </div>
+  </section>
+
+  <section class="menu-card">
+    <div class="menu-card-head">
+      <div>
+        <p class="menu-kicker">New Menu</p>
+        <h2>메뉴 기본 정보 및 식재료 입력</h2>
+      </div>
+    </div>
+
+    <form method="post" class="menu-form">
+      {% csrf_token %}
+
+      <div class="menu-basic-grid">
+        <div class="menu-field">
+          <label for="menu-name">메뉴명</label>
+          <input id="menu-name" type="text" name="name" required placeholder="예: 제육볶음">
+        </div>
+
+        <div class="menu-field">
+          <label for="menu-category">카테고리</label>
+          <select id="menu-category" name="category" required>
+            <option value="">카테고리 선택</option>
+            <option value="밥">밥</option>
+            <option value="국">국</option>
+            <option value="주반찬">주반찬</option>
+            <option value="부반찬">부반찬</option>
+            <option value="김치">김치</option>
+            <option value="간식">간식</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="menu-section-title">
+        <div>
+          <p class="menu-kicker">Recipe</p>
+          <h2>기본 식재료 구성</h2>
+        </div>
+        <button type="button" class="sp-btn" onclick="addRecipeRow()">+ 식재료 추가</button>
+      </div>
+
+      <div id="recipeRows" class="recipe-rows">
+        <div class="recipe-row">
+          <div class="menu-field">
+            <label>식재료명</label>
+            <input type="text" name="ing_name[]" class="js-ingredient-search" placeholder="예: 양파">
+          </div>
+
+          <div class="menu-field">
+            <label>사용량</label>
+            <input type="number" step="0.01" min="0" name="ing_amount[]" placeholder="1인분 기준">
+          </div>
+
+          <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
+        </div>
+      </div>
+
+      <div class="menu-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">메뉴 등록</button>
+        <a class="sp-btn" href="{% url 'meals:menu_list' %}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="menu-card">
+    <div class="menu-card-head">
+      <div>
+        <p class="menu-kicker">Quick Guide</p>
+        <h2>입력 가이드</h2>
+      </div>
+    </div>
+
+    <div class="menu-guide-grid">
+      <article class="menu-guide-box">
+        <strong>1. 메뉴 기본 정보</strong>
+        <span>메뉴명과 카테고리를 먼저 입력합니다.</span>
+      </article>
+      <article class="menu-guide-box">
+        <strong>2. 식재료 구성</strong>
+        <span>1인분 기준 사용량을 입력하면 식단 기반 발주 계산에 활용됩니다.</span>
+      </article>
+      <article class="menu-guide-box">
+        <strong>3. 엑셀 일괄 등록</strong>
+        <span>여러 메뉴와 레시피는 엑셀 파일로 한 번에 등록할 수 있습니다.</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="menu-card">
+    <div class="menu-card-head">
+      <div>
+        <p class="menu-kicker">Upload Format</p>
+        <h2>엑셀 업로드 컬럼</h2>
+      </div>
+    </div>
+
+    <div class="upload-format-row">
+      <p class="menu-note" style="margin:0;">
+        헤더명을 기준으로 컬럼을 인식하므로, 순서가 달라도 업로드할 수 있습니다.
+      </p>
+
+      <div>
+        <div class="upload-chip-grid">
+          <span>메뉴명</span>
+          <span>카테고리</span>
+          <span>식재료명</span>
+          <span>사용량</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu-card">
+    <div class="menu-card-head">
+      <div>
+        <p class="menu-kicker">Excel Template</p>
+        <h2>레시피 엑셀 업로드 양식</h2>
+      </div>
+    </div>
+
+    <div class="sp-table-wrap">
+      <table class="sp-data-table template-table">
+        <thead>
+          <tr>
+            <th>메뉴명</th>
+            <th>카테고리</th>
+            <th>식재료명</th>
+            <th>사용량</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>제육볶음</td>
+            <td>주반찬</td>
+            <td>돼지고기</td>
+            <td>0.15</td>
+          </tr>
+          <tr>
+            <td>제육볶음</td>
+            <td>주반찬</td>
+            <td>양파</td>
+            <td>0.03</td>
+          </tr>
+          <tr>
+            <td>미역국</td>
+            <td>국</td>
+            <td>건미역</td>
+            <td>0.01</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function addRecipeRow() {
+    const container = document.getElementById("recipeRows");
+    const row = document.createElement("div");
+    row.className = "recipe-row";
+    row.innerHTML = `
+      <div class="menu-field">
+        <label>식재료명</label>
+        <input type="text" name="ing_name[]" class="js-ingredient-search" placeholder="예: 양파">
+      </div>
+
+      <div class="menu-field">
+        <label>사용량</label>
+        <input type="number" step="0.01" min="0" name="ing_amount[]" placeholder="1인분 기준">
+      </div>
+
+      <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
+    `;
+    container.appendChild(row);
+  }
+
+  function removeRecipeRow(button) {
+    const rows = document.querySelectorAll(".recipe-row");
+    if (rows.length <= 1) return;
+    button.closest(".recipe-row").remove();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("recipeExcelFile");
+    const uploadButton = document.getElementById("recipeExcelUploadButton");
+    const uploadForm = document.getElementById("recipeExcelUploadForm");
+
+    if (uploadButton && fileInput) {
+      uploadButton.addEventListener("click", () => fileInput.click());
+    }
+
+    if (fileInput && uploadForm) {
+      fileInput.addEventListener("change", async () => {
+        if (!fileInput.files.length) return;
+
+        if (!confirm("선택한 엑셀 파일로 메뉴/레시피를 일괄 등록할까요?")) {
+          fileInput.value = "";
+          return;
+        }
+
+        const formData = new FormData(uploadForm);
+        uploadButton.disabled = true;
+        uploadButton.textContent = "업로드 중...";
+
+        try {
+          const response = await fetch("{% url 'meals:recipe_upload_api' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+              "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            }
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.ok) {
+            alert(data.message || "레시피 업로드에 실패했습니다.");
+            return;
+          }
+
+          let message = data.message;
+          if (data.skipped_count) {
+            message += `\n건너뛴 행: ${data.skipped_count}건`;
+          }
+          if (data.created_ingredients && data.created_ingredients.length) {
+            message += `\n새로 생성된 식재료: ${data.created_ingredients.join(", ")}`;
+          }
+
+          alert(message);
+          window.location.href = "{% url 'meals:menu_list' %}";
+        } catch (error) {
+          alert("레시피 업로드 중 오류가 발생했습니다.");
+          console.error(error);
+        } finally {
+          uploadButton.disabled = false;
+          uploadButton.textContent = "레시피 엑셀 업로드";
+          fileInput.value = "";
+        }
+      });
+    }
+  });
 </script>
 {% endblock %}

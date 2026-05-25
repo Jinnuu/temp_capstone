@@ -1,67 +1,75 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}월간 식단 등록 | S&P{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
+{% endblock %}
+
 {% block content %}
-<section class="sp-page-title">
-  <h1>월간 식단 등록</h1>
-  <p>한 달 단위로 식단을 등록하는 화면입니다. 현재는 UI 연결용 미리보기입니다.</p>
-</section>
-
-<section class="sp-panel sp-narrow-panel">
-  <div class="sp-panel-head">
+<div class="sp-align-page">
+  <section class="sp-align-hero">
     <div>
-      <p>Monthly Meal Plan</p>
-      <h2>등록 조건</h2>
+      <p class="sp-align-kicker">Monthly Meal Plan</p>
+      <h1>월간 식단 등록</h1>
+      <p>한 달 단위로 식단 등록 슬롯을 생성하거나, 기존 식단을 복사합니다.</p>
     </div>
-  </div>
 
-  <form method="post" class="sp-form">
-    {% csrf_token %}
-
-    <label>
-      <span>등록 월</span>
-      <input type="month" name="target_month">
-    </label>
-
-    <label>
-      <span>등록 방식</span>
-      <select name="register_type">
-        <option value="blank">빈 월간 식단표 생성</option>
-        <option value="copy">이전 월 식단 복사</option>
-        <option value="template">표준 식단 템플릿 적용</option>
-      </select>
-    </label>
-
-    <button type="submit" class="sp-btn sp-btn-primary">월간 식단 등록</button>
-  </form>
-</section>
-
-<section class="sp-panel">
-  <div class="sp-panel-head">
-    <div>
-      <p>Preview</p>
-      <h2>월간 등록 후 흐름</h2>
+    <div class="sp-align-actions">
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄등록</a>
     </div>
-  </div>
+  </section>
 
-  <div class="sp-docs-grid">
-    <article>
-      <strong>1. 월간 식단표 생성</strong>
-      <span>선택 월에 대해 조식·중식·석식 입력 슬롯을 생성합니다.</span>
-    </article>
-    <article>
-      <strong>2. 날짜별 상세 수정</strong>
-      <span>필요한 날짜만 일간 식단 등록 화면에서 세부 수정합니다.</span>
-    </article>
-    <article>
-      <strong>3. 식수 예측 연결</strong>
-      <span>등록된 식단을 기준으로 해당 월 예측 실행으로 연결합니다.</span>
-    </article>
-    <article>
-      <strong>4. 발주 산출 연결</strong>
-      <span>예측 식수와 레시피를 기준으로 발주량 산출에 활용합니다.</span>
-    </article>
-  </div>
-</section>
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Register Option</p>
+        <h2>등록 조건</h2>
+      </div>
+    </div>
+
+    <form method="post" class="sp-align-form">
+      {% csrf_token %}
+
+      <div class="sp-align-grid-2">
+        <div class="sp-align-field">
+          <label>등록 월</label>
+          <input type="month" name="target_month" required>
+        </div>
+
+        <div class="sp-align-field">
+          <label>등록 방식</label>
+          <select name="register_type">
+            <option value="blank">빈 월간 식단표 생성</option>
+            <option value="copy">이전 월 식단 복사</option>
+            <option value="template">표준 식단 템플릿 적용</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sp-align-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">월간 식단 등록</button>
+        <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Preview</p>
+        <h2>월간 등록 후 흐름</h2>
+      </div>
+    </div>
+
+    <div class="sp-align-grid-3">
+      <article class="sp-align-guide-box"><strong>1. 월간 식단표 생성</strong><span>선택 월에 대해 조식·중식·석식 입력 슬롯을 생성합니다.</span></article>
+      <article class="sp-align-guide-box"><strong>2. 날짜별 상세 수정</strong><span>필요한 날짜만 일간 식단 등록 화면에서 세부 수정합니다.</span></article>
+      <article class="sp-align-guide-box"><strong>3. 예측·발주 연결</strong><span>등록된 식단을 기준으로 식수 예측과 발주 산출로 이어집니다.</span></article>
+    </div>
+  </section>
+</div>
 {% endblock %}
