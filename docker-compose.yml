@@ -1,0 +1,33 @@
+services:
+  my-capstone-sprint7:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: capstone-web:sprint7
+    container_name: my-capstone-sprint7
+    restart: always
+    environment:
+      - DB_NAME=capstone_sprint7_db
+      - DB_USER=root
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=nextcloud-db
+      - DB_PORT=3306
+      - ALLOWED_HOSTS=*
+    networks:
+      - db-net
+      - proxy-net
+      - scholarpilot_net
+    ports:
+      - "8007:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+
+networks:
+  db-net:
+    name: nextcloud-project_default
+    external: true
+  proxy-net:
+    name: proxy-network
+    external: true
+  scholarpilot_net:
+    name: scholarpilot_core_default
+    external: true
