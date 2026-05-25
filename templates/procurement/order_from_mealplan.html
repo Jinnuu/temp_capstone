@@ -1,3 +1,250 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}식단기반 발주 | S&P{% endblock %}
-{% block content %}<section class="sp-page-title"><h1>식단기반 발주</h1><p>등록된 식단과 레시피를 기준으로 필요한 식재료를 계산하고 발주서를 생성합니다.</p></section><section class="sp-action-row"><a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a><a class="sp-btn" href="{% url 'procurement:order_create' %}">간편 발주</a><a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a><a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표</a></section><section class="sp-filter-panel"><form method="get" class="sp-filter-grid sp-filter-grid-compact"><label><span>시작 일자</span><input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}"></label><label><span>종료 일자</span><input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}"></label><div class="sp-filter-actions"><button type="submit" class="sp-btn sp-btn-primary">조회</button><a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">초기화</a></div></form></section>{% if analysis_data %}<form method="post">{% csrf_token %}<section class="sp-panel"><div class="sp-panel-head"><div><p>Smart Procurement</p><h2>발주 예정 품목</h2></div><button type="submit" class="sp-btn sp-btn-primary">최종 발주서 생성</button></div>{% for day in analysis_data %}<article class="sp-day-block"><div class="sp-day-block-head"><div><p>Target Date</p><h3>{{ day.date|date:"Y년 m월 d일" }}</h3></div><span>식단 {{ day.plans|length }}건</span></div><div class="sp-table-wrap"><table class="sp-data-table"><thead><tr><th>끼니</th><th>메뉴</th><th>식재료명</th><th>규격</th><th>단위</th><th>발주처</th><th>발주수량</th><th>단가</th></tr></thead><tbody>{% for plan in day.plans %}{% for menu in plan.menus %}{% for ing in menu.ingredients %}<tr><td>{{ plan.meal_type }}</td><td>{{ menu.name }}</td><td class="fw-bold">{{ ing.name }}</td><td>{{ ing.spec|default:"-" }}</td><td>{{ ing.unit }}</td><td>{{ ing.supplier_name }}</td><td><input type="hidden" name="ingredient_id[]" value="{{ ing.id }}"><input type="hidden" name="target_date[]" value="{{ day.date|date:'Y-m-d' }}"><input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}"><input type="number" step="0.01" min="0" name="quantity[]" value="{{ ing.needed_qty }}" class="sp-qty-input"></td><td>{{ ing.price|floatformat:0 }}원</td></tr>{% empty %}<tr><td>{{ plan.meal_type }}</td><td>{{ menu.name }}</td><td colspan="6" class="sp-empty-cell">연결된 레시피 식재료가 없습니다.</td></tr>{% endfor %}{% empty %}<tr><td>{{ plan.meal_type }}</td><td colspan="7" class="sp-empty-cell">등록된 메뉴가 없습니다.</td></tr>{% endfor %}{% endfor %}</tbody></table></div></article>{% endfor %}<div class="sp-order-total-bar"><div><span>발주 대상 기간</span><strong>{{ start_date|date:"Y.m.d" }} ~ {{ end_date|date:"Y.m.d" }}</strong></div><button type="submit" class="sp-btn sp-btn-primary">발주서 확정</button></div></section></form>{% else %}<section class="sp-panel sp-empty-panel"><h2>선택한 기간에 등록된 식단이 없습니다.</h2><p>날짜 범위를 다시 설정하거나 식단표를 먼저 작성해 주세요.</p><a class="sp-btn sp-btn-primary" href="{% url 'meals:mealplan_create' %}">식단 등록하러 가기</a></section>{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/sp_final_fix_v2.css' %}?v=sprint7-final-fix-v2">
+{% endblock %}
+
+{% block content %}
+<div class="sp-page">
+  <section class="sp-hero">
+    <div>
+      <p class="sp-kicker">Smart Procurement</p>
+      <h1>식단기반 발주</h1>
+      <p>등록된 식단과 예측 식수를 기준으로 필요한 식재료를 계산하고, 현재고를 반영해 부족분만 발주합니다.</p>
+    </div>
+    <div class="sp-actions">
+      <a class="sp-btn primary" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+      <a class="sp-btn" href="{% url 'procurement:order_create' %}">간편 발주</a>
+      <a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표</a>
+    </div>
+  </section>
+
+  <section class="sp-card">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Date Range</p>
+        <h2>발주 대상 기간</h2>
+      </div>
+    </div>
+
+    <form method="get" class="sp-filter" style="grid-template-columns: 1fr 1fr auto auto;">
+      <div class="sp-field">
+        <label>시작 일자</label>
+        <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+      </div>
+      <div class="sp-field">
+        <label>종료 일자</label>
+        <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+      </div>
+      <button type="submit" class="sp-btn primary">조회하기</button>
+      <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">초기화</a>
+    </form>
+  </section>
+
+  {% if analysis_data %}
+    <form method="post" id="smartOrderForm">
+      {% csrf_token %}
+
+      <section class="sp-card">
+        <div class="sp-card-head">
+          <div>
+            <p class="sp-kicker">Order Preview</p>
+            <h2>발주 예정 품목</h2>
+          </div>
+          <div class="sp-actions">
+            <a class="sp-btn" href="{% url 'procurement:order_list' %}">취소</a>
+            <button type="submit" class="sp-btn primary">최종 발주서 생성</button>
+          </div>
+        </div>
+
+        <p class="sp-smart-note">
+          필요량은 <strong>식수 예측 결과</strong>를 우선 사용합니다. 예측 결과가 없으면 식단의 목표 식수(headcount)를 사용합니다.
+          발주수량은 <strong>필요량 + 안전재고 - 현재고</strong>를 기준으로 자동 입력됩니다.
+        </p>
+
+        {% for day in analysis_data %}
+          <section style="margin-bottom:28px;">
+            <div class="sp-card-head" style="border-bottom:1px solid #d7dce5;">
+              <div>
+                <p class="sp-kicker">Target Date</p>
+                <h2>{{ day.date|date:"Y년 m월 d일" }}</h2>
+              </div>
+              <span class="sp-status blue">식단 {{ day.plans|length }}건</span>
+            </div>
+
+            <div class="sp-table-wrap">
+              <table class="sp-table smart-order-table">
+                <thead>
+                  <tr>
+                    <th>끼니</th>
+                    <th>예측/기준 식수</th>
+                    <th>메뉴</th>
+                    <th class="left">식재료명</th>
+                    <th>규격</th>
+                    <th>단위</th>
+                    <th>현재고</th>
+                    <th>안전재고</th>
+                    <th>필요량</th>
+                    <th>발주수량</th>
+                    <th>단가</th>
+                    <th>예상금액</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for plan in day.plans %}
+                    {% for menu in plan.menus %}
+                      {% for ing in menu.ingredients %}
+                        <tr data-price="{{ ing.price }}">
+                          <td>{{ plan.meal_type }}</td>
+                          <td>
+                            <span class="sp-forecast-count">{{ plan.serving_count }}명</span>
+                            <div class="sp-note">{{ plan.serving_source }}</div>
+                          </td>
+                          <td>{{ menu.name }}</td>
+                          <td class="left">
+                            <div class="sp-product-cell">
+                              <span class="sp-thumb">{{ ing.name|slice:":1" }}</span>
+                              <span class="sp-product-main">
+                                <strong>{{ ing.name }}</strong>
+                                <small>{{ ing.description|default:"식품 설명 미등록" }}</small>
+                              </span>
+                            </div>
+                          </td>
+                          <td>{{ ing.spec|default:"-" }}</td>
+                          <td>{{ ing.unit }}</td>
+                          <td>{{ ing.current_stock }} {{ ing.unit }}</td>
+                          <td>{{ ing.safe_stock }} {{ ing.unit }}</td>
+                          <td>{{ ing.needed_qty }} {{ ing.unit }}</td>
+                          <td>
+                            <div class="sp-order-qty">
+                              <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}">
+                              <input type="hidden" name="target_date[]" value="{{ day.date|date:'Y-m-d' }}">
+                              <input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="quantity[]"
+                                value="{{ ing.order_qty }}"
+                                data-price="{{ ing.price }}"
+                                class="{% if ing.order_qty > 0 %}needs-order{% endif %}"
+                              >
+                              {% if ing.order_qty > 0 %}
+                                <small>부족분 자동 입력</small>
+                              {% else %}
+                                <small style="color:#2f9e44;">재고 충분</small>
+                              {% endif %}
+                            </div>
+                          </td>
+                          <td>{{ ing.price|floatformat:0 }}원</td>
+                          <td class="js-line-total">0원</td>
+                          <td>
+                            {% if ing.order_qty > 0 %}
+                              <span class="sp-status danger">발주필요</span>
+                            {% else %}
+                              <span class="sp-status ok">재고충분</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% empty %}
+                        <tr>
+                          <td>{{ plan.meal_type }}</td>
+                          <td>{{ plan.serving_count }}명</td>
+                          <td>{{ menu.name }}</td>
+                          <td colspan="10">연결된 레시피 식재료가 없습니다.</td>
+                        </tr>
+                      {% endfor %}
+                    {% empty %}
+                      <tr>
+                        <td>{{ plan.meal_type }}</td>
+                        <td>{{ plan.serving_count }}명</td>
+                        <td colspan="11">등록된 메뉴가 없습니다.</td>
+                      </tr>
+                    {% endfor %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        {% endfor %}
+
+        <div class="sp-summary-box">
+          <div>
+            <h3>공급가액</h3>
+            <strong id="smartOrderSubtotal">0원</strong>
+          </div>
+          <div class="equals">+</div>
+          <div>
+            <h3>부가세</h3>
+            <strong id="smartOrderVat">0원</strong>
+          </div>
+          <div class="equals">=</div>
+          <div class="total">
+            <h3>총액</h3>
+            <strong id="smartOrderTotal">0원</strong>
+          </div>
+        </div>
+      </section>
+    </form>
+  {% else %}
+    <section class="sp-card">
+      <div class="sp-card-head">
+        <div>
+          <p class="sp-kicker">No Data</p>
+          <h2>선택한 기간에 등록된 식단이 없습니다.</h2>
+        </div>
+      </div>
+      <p class="sp-note">날짜 범위를 다시 설정하거나 식단표를 먼저 작성해 주세요.</p>
+      <div class="sp-actions" style="justify-content:flex-start;margin-top:16px;">
+        <a class="sp-btn primary" href="{% url 'meals:mealplan_create' %}">식단 등록하러 가기</a>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function spMoney(value) {
+  return Math.round(value).toLocaleString("ko-KR") + "원";
+}
+
+function updateSmartOrderTotals() {
+  let subtotal = 0;
+
+  document.querySelectorAll(".smart-order-table tbody tr[data-price]").forEach((row) => {
+    const qtyInput = row.querySelector('input[name="quantity[]"]');
+    if (!qtyInput) return;
+
+    const price = Number(qtyInput.dataset.price || 0);
+    const qty = Number(qtyInput.value || 0);
+    const amount = qty * price;
+    subtotal += amount;
+
+    const lineTotal = row.querySelector(".js-line-total");
+    if (lineTotal) lineTotal.textContent = spMoney(amount);
+  });
+
+  const vat = subtotal * 0.1;
+  const subtotalEl = document.getElementById("smartOrderSubtotal");
+  const vatEl = document.getElementById("smartOrderVat");
+  const totalEl = document.getElementById("smartOrderTotal");
+
+  if (subtotalEl) subtotalEl.textContent = spMoney(subtotal);
+  if (vatEl) vatEl.textContent = spMoney(vat);
+  if (totalEl) totalEl.textContent = spMoney(subtotal + vat);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll('.smart-order-table input[name="quantity[]"]').forEach((input) => {
+    input.addEventListener("input", updateSmartOrderTotals);
+  });
+  updateSmartOrderTotals();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+/* Sprint7 final fix v2: candidate menus + smart order quantity alignment */
+.sp-menu-candidate-box {
+  margin-top: 8px;
+  display: none;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px;
+  border: 1px solid #d7dce5;
+  background: #fbfcfd;
+}
+
+.sp-menu-candidate-box.is-open {
+  display: flex;
+}
+
+.sp-menu-candidate {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cfd6e4;
+  border-radius: 999px;
+  background: #fff;
+  color: #2448d8;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sp-menu-candidate:hover {
+  border-color: #2448d8;
+  background: #eef2ff;
+}
+
+.sp-forecast-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #e7f5ff;
+  color: #1971c2;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sp-order-qty input.needs-order {
+  border-color: #e03131;
+  background: #fff5f5;
+  color: #e03131;
+}
+
+.sp-smart-note {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #d7dce5;
+  background: #fbfcfd;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.sp-smart-note strong {
+  color: #2448d8;
+}
