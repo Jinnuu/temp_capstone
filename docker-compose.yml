@@ -1,0 +1,30 @@
+services:
+  my-capstone:
+    image: capstone-web:1.1
+    container_name: my-capstone
+    restart: always
+    environment:
+      - DB_NAME=capstone_db
+      - DB_USER=root
+      - DB_PASSWORD=jin664255@
+      - DB_HOST=nextcloud-db      # 이 이름으로 DB 연결 성공했던 상태 유지
+      - DB_PORT=3306
+      - ALLOWED_HOSTS=*
+    networks:
+      - scholarpilot_net
+      - db-net                    # 1번 날개: DB 단지망
+      - proxy-net                 # 2번 날개: NPM 교통망
+    ports:
+      - "8000:8000"
+      #- "127.0.0.1:8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+networks:
+  db-net:
+    name: nextcloud-project_default
+    external: true
+  proxy-net:
+    name: proxy-network
+    external: true
+  scholarpilot_net:
+    external: true
+    name: scholarpilot_core_default
