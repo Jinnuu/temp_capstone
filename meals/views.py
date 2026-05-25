@@ -1,27 +1,37 @@
 import calendar
-from datetime import datetime, date, timedelta
-
-from django.http import JsonResponse
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import json
-from django.views.decorators.csrf import csrf_exempt
+from datetime import date, datetime, timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.core.management import call_command
-from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
+from django.db.models import Case, IntegerField, Value, When
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-from .models import Menu, Recipe, DietPlan, DietMenu
 from inventory.models import Ingredient
-from django.db.models import Case, When, Value, IntegerField
+from .models import DietMenu, DietPlan, Menu, Recipe
 
-CATEGORY_ORDER = ['밥', '국', '주반찬', '부반찬', '김치', '간식']
+
+CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
+
 SORT_ORDER = Case(
     *[When(menu__category=cat, then=Value(pos)) for pos, cat in enumerate(CATEGORY_ORDER)],
     default=Value(len(CATEGORY_ORDER)),
     output_field=IntegerField(),
 )
+
+
+def to_decimal(value):
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
 
 
 def meal_home(request):
@@ -65,11 +75,9 @@ def mealplan_create(request):
             messages.error(request, "날짜를 선택해주세요.")
             return redirect("meals:mealplan_create")
 
-        # 기존 식단 삭제 후 다시 생성
         DietPlan.objects.filter(target_date=meal_date).delete()
 
         created_count = 0
-
         meal_type_map = {
             "조식": breakfast_menu_ids,
             "중식": lunch_menu_ids,
@@ -105,12 +113,12 @@ def mealplan_create(request):
         "selected_date": selected_date,
         "existing_meals": existing_meals,
     }
+
     return render(request, "meals/mealplan_create.html", context)
 
 
 def mealplan_list(request):
     today = date.today()
-
     selected_year = int(request.GET.get("year", today.year))
     selected_month = int(request.GET.get("month", today.month))
 
@@ -124,9 +132,9 @@ def mealplan_list(request):
     )
 
     meal_map = {}
+
     for plan in plans:
         day = plan.target_date.day
-
         meal_map.setdefault(
             day,
             {
@@ -139,7 +147,7 @@ def mealplan_list(request):
             },
         )
 
-        sorted_diet_menus = plan.diet_menus.all().select_related('menu').order_by(SORT_ORDER)
+        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
         menu_names = [item.menu.name for item in sorted_diet_menus]
         menu_dicts = [{"id": item.menu.id, "name": item.menu.name} for item in sorted_diet_menus]
 
@@ -197,7 +205,46 @@ def mealplan_list(request):
         "today_year": today.year,
         "today_month": today.month,
     }
+
     return render(request, "meals/mealplan_list.html", context)
+
+
+def save_recipe_rows(menu, ingredient_ids, amounts):
+    valid_count = 0
+    skipped_count = 0
+    seen_ingredient_ids = set()
+
+    for ingredient_id, amount in zip(ingredient_ids, amounts):
+        if not ingredient_id or not amount:
+            continue
+
+        amount_decimal = to_decimal(amount)
+
+        if amount_decimal is None or amount_decimal <= 0:
+            skipped_count += 1
+            continue
+
+        try:
+            ingredient = Ingredient.objects.get(id=ingredient_id)
+        except Ingredient.DoesNotExist:
+            skipped_count += 1
+            continue
+
+        if ingredient.id in seen_ingredient_ids:
+            skipped_count += 1
+            continue
+
+        seen_ingredient_ids.add(ingredient.id)
+
+        Recipe.objects.update_or_create(
+            menu=menu,
+            ingredient=ingredient,
+            defaults={"required_amount": amount_decimal},
+        )
+
+        valid_count += 1
+
+    return valid_count, skipped_count
 
 
 def recipe_create(request):
@@ -209,63 +256,61 @@ def recipe_create(request):
         ingredient_ids = request.POST.getlist("ingredient_id[]")
         required_amounts = request.POST.getlist("required_amount[]")
 
-        if menu_id:
-            menu = get_object_or_404(Menu, id=menu_id)
+        if not menu_id:
+            messages.error(request, "수정할 메뉴를 선택해주세요.")
+            return redirect("meals:recipe_create")
 
-            valid_rows = []
-            for ingredient_id, amount in zip(ingredient_ids, required_amounts):
-                if ingredient_id and amount:
-                    valid_rows.append((ingredient_id, amount))
+        menu = get_object_or_404(Menu, id=menu_id)
 
-            if valid_rows:
-                menu.recipes.all().delete()
+        with transaction.atomic():
+            Recipe.objects.filter(menu=menu).delete()
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, required_amounts)
 
-                for ingredient_id, amount in valid_rows:
-                    Recipe.objects.create(
-                        menu=menu,
-                        ingredient_id=ingredient_id,
-                        required_amount=amount,
-                    )
+        if valid_count:
+            messages.success(request, f"{menu.name} 레시피 식재료 {valid_count}개가 저장되었습니다.")
+        else:
+            messages.warning(request, "저장된 식재료가 없습니다. 식재료 검색 후 후보를 클릭했는지 확인해주세요.")
 
-            return redirect("meals:menu_list")
+        if skipped_count:
+            messages.warning(request, f"중복/오류 입력 {skipped_count}건은 제외했습니다.")
+
+        return redirect("meals:menu_list")
 
     context = {
         "menus": menus,
         "ingredients": ingredients,
     }
+
     return render(request, "meals/recipe_create.html", context)
 
 
 def menu_create(request):
     if request.method == "POST":
-        name = request.POST.get("name")
+        name = (request.POST.get("name") or "").strip()
         category = request.POST.get("category")
+        ingredient_ids = request.POST.getlist("ingredient_id[]")
+        amounts = request.POST.getlist("ing_amount[]")
 
-        if name and category:
+        if not name or not category:
+            messages.error(request, "메뉴명과 카테고리를 입력해주세요.")
+            return render(request, "meals/menu_create.html")
+
+        with transaction.atomic():
             menu = Menu.objects.create(
                 name=name,
                 category=category,
             )
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts)
 
-            ing_names = request.POST.getlist("ing_name[]")
-            ing_amounts = request.POST.getlist("ing_amount[]")
+        if valid_count:
+            messages.success(request, f"{menu.name} 메뉴와 식재료 {valid_count}개가 저장되었습니다.")
+        else:
+            messages.warning(request, f"{menu.name} 메뉴는 저장되었지만 연결된 식재료가 없습니다. 식재료 검색 후 후보를 클릭했는지 확인해주세요.")
 
-            for ing_name, ing_amount in zip(ing_names, ing_amounts):
-                if ing_name and ing_amount:
-                    clean_name = ing_name.strip()
+        if skipped_count:
+            messages.warning(request, f"중복/오류 입력 {skipped_count}건은 제외했습니다.")
 
-                    ingredient = Ingredient.objects.filter(name=clean_name).first()
-                    if not ingredient:
-                        ingredient = Ingredient.objects.filter(name__icontains=clean_name).first()
-
-                    if ingredient:
-                        Recipe.objects.create(
-                            menu=menu,
-                            ingredient=ingredient,
-                            required_amount=ing_amount,
-                        )
-
-            return redirect("meals:menu_list")
+        return redirect("meals:menu_list")
 
     return render(request, "meals/menu_create.html")
 
@@ -273,178 +318,192 @@ def menu_create(request):
 def menu_list(request):
     q = request.GET.get("q", "")
     category = request.GET.get("category", "")
-    
+
     menus = Menu.objects.all().prefetch_related("recipes__ingredient")
-    
+
     if q:
         menus = menus.filter(name__icontains=q)
+
     if category:
         menus = menus.filter(category=category)
-        
+
     return render(request, "meals/menu_list.html", {"menus": menus})
 
 
 def menu_delete(request, menu_id):
     menu = get_object_or_404(Menu, id=menu_id)
     menu.delete()
+    messages.success(request, "메뉴가 삭제되었습니다.")
     return redirect("meals:menu_list")
 
 
 def menu_update(request, menu_id):
-    menu = get_object_or_404(Menu, id=menu_id)
+    menu = get_object_or_404(Menu.objects.prefetch_related("recipes__ingredient"), id=menu_id)
 
     if request.method == "POST":
-        menu.name = request.POST.get("name")
-        menu.category = request.POST.get("category")
-        menu.save()
+        name = (request.POST.get("name") or "").strip()
+        category = request.POST.get("category")
+        ingredient_ids = request.POST.getlist("ingredient_id[]")
+        amounts = request.POST.getlist("ing_amount[]")
 
-        menu.recipes.all().delete()
+        if not name or not category:
+            messages.error(request, "메뉴명과 카테고리를 입력해주세요.")
+            return render(request, "meals/menu_update.html", {"menu": menu})
 
-        ing_names = request.POST.getlist("ing_name[]")
-        ing_amounts = request.POST.getlist("ing_amount[]")
+        with transaction.atomic():
+            menu.name = name
+            menu.category = category
+            menu.save()
 
-        for name, amount in zip(ing_names, ing_amounts):
-            if name and amount:
-                clean_name = name.strip()
+            Recipe.objects.filter(menu=menu).delete()
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts)
 
-                ingredient = Ingredient.objects.filter(name=clean_name).first()
+        if valid_count:
+            messages.success(request, f"{menu.name} 레시피 식재료 {valid_count}개가 저장되었습니다.")
+        else:
+            messages.warning(request, f"{menu.name} 메뉴는 저장되었지만 연결된 식재료가 없습니다. 식재료 검색 후 후보를 클릭했는지 확인해주세요.")
 
-                if not ingredient:
-                    ingredient = Ingredient.objects.filter(name__icontains=clean_name).first()
-
-                if ingredient:
-                    Recipe.objects.create(
-                        menu=menu,
-                        ingredient=ingredient,
-                        required_amount=amount
-                    )
+        if skipped_count:
+            messages.warning(request, f"중복/오류 입력 {skipped_count}건은 제외했습니다.")
 
         return redirect("meals:menu_list")
 
     return render(request, "meals/menu_update.html", {"menu": menu})
 
+
 def deduct_inventory_view(request):
     if request.method == "POST":
         target_date = request.POST.get("target_date")
+
         if target_date:
             call_command("deduct_daily_inventory", date=target_date)
             messages.success(request, f"{target_date} 기준 식재료 일괄 사용처리가 완료되었습니다.")
         else:
             call_command("deduct_daily_inventory")
             messages.success(request, "오늘 기준 식재료 일괄 사용처리가 완료되었습니다.")
+
     return redirect("meals:mealplan_list")
 
 
 def search_menus_api(request):
-    query = request.GET.get('q', '').strip()
+    query = request.GET.get("q", "").strip()
     menus = list(Menu.objects.all())
-    
+
     if not menus:
-        return JsonResponse({'results': []})
-        
+        return JsonResponse({"results": []})
+
     if not query:
-        results = [{"id": m.id, "name": m.name, "category": m.category or ''} for m in menus[:50]]
-        return JsonResponse({'results': results})
+        results = [{"id": m.id, "name": m.name, "category": m.category or ""} for m in menus[:50]]
+        return JsonResponse({"results": results})
 
     documents = [m.name for m in menus]
     documents.append(query)
-    
-    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(1, 3)) 
+
+    vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(1, 3))
+
     try:
         tfidf_matrix = vectorizer.fit_transform(documents)
     except ValueError:
-        return JsonResponse({'results': []})
-        
+        return JsonResponse({"results": []})
+
     cosine_sim = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1]).flatten()
-    
     top_indices = cosine_sim.argsort()[-20:][::-1]
-    
+
     results = []
+
     for idx in top_indices:
         if cosine_sim[idx] > 0.0:
             menu = menus[idx]
-            results.append({
-                "id": menu.id,
-                "name": menu.name,
-                "category": menu.category or '',
-                "score": float(cosine_sim[idx])
-            })
-            
-    return JsonResponse({'results': results})
+            results.append(
+                {
+                    "id": menu.id,
+                    "name": menu.name,
+                    "category": menu.category or "",
+                    "score": float(cosine_sim[idx]),
+                }
+            )
+
+    return JsonResponse({"results": results})
+
 
 @csrf_exempt
 def add_diet_menu_api(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
-            date_str = data.get('date')
-            meal_type = data.get('meal_type')
-            menu_id = data.get('menu_id')
-            menu_name = data.get('menu_name')
-            
+            date_str = data.get("date")
+            meal_type = data.get("meal_type")
+            menu_id = data.get("menu_id")
+            menu_name = data.get("menu_name")
+
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            
+
             if menu_id:
                 menu = Menu.objects.get(id=menu_id)
             elif menu_name:
-                menu, created = Menu.objects.get_or_create(name=menu_name, defaults={'category': '기타'})
+                menu, _ = Menu.objects.get_or_create(
+                    name=menu_name,
+                    defaults={"category": "기타"},
+                )
             else:
-                return JsonResponse({'status': 'error', 'message': 'No menu info provided'}, status=400)
-            
-            plan, created = DietPlan.objects.get_or_create(
-                target_date=target_date, 
-                meal_type=meal_type
+                return JsonResponse({"status": "error", "message": "No menu info provided"}, status=400)
+
+            plan, _ = DietPlan.objects.get_or_create(
+                target_date=target_date,
+                meal_type=meal_type,
             )
-            
+
             DietMenu.objects.get_or_create(diet_plan=plan, menu=menu)
-            
-            # Return sorted menus for this meal
-            sorted_menus = plan.diet_menus.all().select_related('menu').order_by(SORT_ORDER)
+
+            sorted_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
             menu_data = [{"id": dm.menu.id, "name": dm.menu.name} for dm in sorted_menus]
-            
-            return JsonResponse({
-                'status': 'success', 
-                'menu_id': menu.id, 
-                'menu_name': menu.name,
-                'menus': menu_data
-            })
+
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "menu_id": menu.id,
+                    "menu_name": menu.name,
+                    "menus": menu_data,
+                }
+            )
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    return JsonResponse({'status': 'error'}, status=405)
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "error"}, status=405)
+
 
 @csrf_exempt
 def remove_diet_menu_api(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
-            date_str = data.get('date')
-            meal_type = data.get('meal_type')
-            menu_id = data.get('menu_id')
-            
+            date_str = data.get("date")
+            meal_type = data.get("meal_type")
+            menu_id = data.get("menu_id")
+
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            
             plan = DietPlan.objects.get(target_date=target_date, meal_type=meal_type)
             DietMenu.objects.filter(diet_plan=plan, menu_id=menu_id).delete()
-            
+
             if not plan.diet_menus.exists():
                 plan.delete()
-                return JsonResponse({'status': 'success', 'menus': []})
-            
-            # Return remaining sorted menus
-            sorted_menus = plan.diet_menus.all().select_related('menu').order_by(SORT_ORDER)
+                return JsonResponse({"status": "success", "menus": []})
+
+            sorted_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
             menu_data = [{"id": dm.menu.id, "name": dm.menu.name} for dm in sorted_menus]
-                
-            return JsonResponse({'status': 'success', 'menus': menu_data})
+
+            return JsonResponse({"status": "success", "menus": menu_data})
         except DietPlan.DoesNotExist:
-            return JsonResponse({'status': 'success'})
+            return JsonResponse({"status": "success"})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    return JsonResponse({'status': 'error'}, status=405)
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "error"}, status=405)
 
 
 def weekly_mealplan_create(request):
     start_date_str = request.GET.get("start_date")
-    
+
     if start_date_str:
         try:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
@@ -452,61 +511,61 @@ def weekly_mealplan_create(request):
             start_date = date.today()
     else:
         start_date = date.today()
-        
-    # start_date를 무조건 해당 주의 월요일로 맞춤
+
     start_date = start_date - timedelta(days=start_date.weekday())
-        
+
     if request.method == "POST":
-        post_start_date_str = request.POST.get("start_date")
+        post_start_date_str = request.POST.get("start_date") or start_date.strftime("%Y-%m-%d")
         messages.success(request, "완료되었습니다.")
         return redirect(f"{reverse('meals:weekly_mealplan_create')}?start_date={post_start_date_str}")
-        
-    # GET 렌더링용: 8일치 데이터 가져오기
-    dates = [start_date + timedelta(days=i) for i in range(8)]
-    
-    # 8일치의 DietPlan, DietMenu 조회
-    all_plans = DietPlan.objects.filter(
-        target_date__gte=dates[0],
-        target_date__lte=dates[7]
-    ).prefetch_related("diet_menus__menu")
-    
-    # date -> meal_type -> list of menu objects
+
+    dates = [start_date + timedelta(days=i) for i in range(7)]
+
+    all_plans = (
+        DietPlan.objects.filter(
+            target_date__gte=dates[0],
+            target_date__lte=dates[-1],
+        )
+        .prefetch_related("diet_menus__menu")
+    )
+
     weekly_data = {}
+
     for d in dates:
         weekly_data[d] = {
-            '조식': [],
-            '중식': [],
-            '석식': []
+            "조식": [],
+            "중식": [],
+            "석식": [],
         }
-    
+
     for plan_obj in all_plans:
         if plan_obj.target_date in weekly_data:
-            # 카테고리 순서(밥-국-주-부-김-간)로 정렬
-            sorted_diet_menus = plan_obj.diet_menus.all().select_related('menu').order_by(SORT_ORDER)
+            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
             menus = [dm.menu for dm in sorted_diet_menus]
             weekly_data[plan_obj.target_date][plan_obj.meal_type] = menus
-            
+
     days_context = []
-    weekdays_list = ['월', '화', '수', '목', '금', '토', '일', '월(다음주)']
-    
+    weekdays_list = ["월", "화", "수", "목", "금", "토", "일"]
+
     for i, d in enumerate(dates):
-        item = {
-            'date': d,
-            'date_str': d.strftime('%Y-%m-%d'),
-            'weekday': weekdays_list[i],
-            'breakfast': weekly_data[d].get('조식', []),
-            'lunch': weekly_data[d].get('중식', []),
-            'dinner': weekly_data[d].get('석식', []),
-            'is_next_monday': (i == 7)
-        }
-        days_context.append(item)
-        
+        days_context.append(
+            {
+                "date": d,
+                "date_str": d.strftime("%Y-%m-%d"),
+                "weekday": weekdays_list[i],
+                "breakfast": weekly_data[d].get("조식", []),
+                "lunch": weekly_data[d].get("중식", []),
+                "dinner": weekly_data[d].get("석식", []),
+                "is_next_monday": False,
+            }
+        )
+
     context = {
-        'start_date': start_date,
-        'start_date_str': start_date.strftime('%Y-%m-%d'),
-        'prev_week': (start_date - timedelta(days=7)).strftime('%Y-%m-%d'),
-        'next_week': (start_date + timedelta(days=7)).strftime('%Y-%m-%d'),
-        'days_context': days_context,
+        "start_date": start_date,
+        "start_date_str": start_date.strftime("%Y-%m-%d"),
+        "prev_week": (start_date - timedelta(days=7)).strftime("%Y-%m-%d"),
+        "next_week": (start_date + timedelta(days=7)).strftime("%Y-%m-%d"),
+        "days_context": days_context,
     }
-    
+
     return render(request, "meals/weekly_mealplan_create.html", context)

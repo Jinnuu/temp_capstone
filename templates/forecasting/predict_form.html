@@ -1,74 +1,76 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}식수 예측 실행 | S&P{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-docker">
+<link rel="stylesheet" href="{% static 'css/sp_sprint7_docker_fix.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'css/sp_sprint7_ui_db_fix_v4.css' %}?v=4">
+{% endblock %}
+
 {% block content %}
-<section class="sp-page-title">
-  <h1>식수 예측 실행</h1>
-  <p>기준일을 선택하면 조식, 중식, 석식 예측을 생성합니다.</p>
-</section>
-
-<section class="sp-action-row">
-  <a href="{% url 'forecasting:prediction_calendar' %}" class="sp-btn">예측 캘린더</a>
-  <a href="{% url 'forecasting:prediction_list' %}" class="sp-btn">예측 결과 목록</a>
-  <a href="{% url 'forecasting:ingredient_requirement' %}" class="sp-btn">식재료 산출</a>
-</section>
-
-<section class="sp-panel sp-narrow-panel">
-  <div class="sp-panel-head">
+<div class="sp-page">
+  <section class="sp-hero center">
     <div>
-      <p>Prediction</p>
-      <h2>예측 조건 입력</h2>
+      <h1>식수 예측 실행</h1>
+      <p>기준일을 선택하면 조식, 중식, 석식 예측을 생성합니다.</p>
     </div>
+  </section>
+
+  <div class="sp-actions" style="justify-content:center;margin-bottom:22px;">
+    <a class="sp-btn" href="{% url 'forecasting:prediction_calendar' %}">예측 캘린더</a>
+    <a class="sp-btn" href="{% url 'forecasting:prediction_list' %}">예측 결과 목록</a>
+    <a class="sp-btn" href="{% url 'forecasting:ingredient_requirement' %}">식재료 산출</a>
   </div>
 
-  <form method="post" class="sp-form js-prediction-form">
-    {% csrf_token %}
+  <section class="sp-card" style="width:min(100%, 760px); margin-left:auto; margin-right:auto;">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Prediction</p>
+        <h2>예측 조건 입력</h2>
+      </div>
+    </div>
 
-    <label>
-      <span>{{ form.prediction_date.label }}</span>
-      {{ form.prediction_date }}
-      {% if form.prediction_date.errors %}
-        <small class="text-danger">{{ form.prediction_date.errors }}</small>
-      {% endif %}
-    </label>
+    <form method="post" id="predictionForm" class="sp-form-grid">
+      {% csrf_token %}
+      <div class="sp-field">
+        <label for="{{ form.prediction_date.id_for_label }}">예측 날짜</label>
+        {{ form.prediction_date }}
+        {% if form.prediction_date.errors %}
+          <div class="sp-note-box" style="border-color:#ffc9c9;color:#e03131;">
+            {{ form.prediction_date.errors }}
+          </div>
+        {% endif %}
+      </div>
+      <button type="submit" class="sp-btn primary" style="width:100%;height:48px;">
+        해당 날짜 예측 실행
+      </button>
+    </form>
+  </section>
+</div>
 
-    <button type="submit" class="sp-btn sp-btn-primary js-prediction-submit">
-      해당 날짜 예측 실행
-    </button>
-  </form>
-</section>
-
-<div class="sp-loading-overlay" id="predictionLoadingOverlay" aria-hidden="true">
-  <div class="sp-loading-card">
+<div class="sp-loading-overlay" id="predictionLoading">
+  <div class="sp-loading-panel">
     <div class="sp-spinner"></div>
     <h2>식수 예측을 실행하고 있습니다</h2>
-    <p>조식·중식·석식 예측을 생성하는 중입니다.<br>잠시만 기다려 주세요.</p>
-    <small>새로고침하거나 창을 닫지 않는 것이 좋습니다.</small>
+    <p>
+      조식·중식·석식 예측을 생성하는 중입니다.<br>
+      새로고침하거나 창을 닫지 않는 것이 좋습니다.
+    </p>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector(".js-prediction-form");
-    const overlay = document.getElementById("predictionLoadingOverlay");
-    const submitButton = document.querySelector(".js-prediction-submit");
-
-    if (!form || !overlay) {
-      return;
-    }
-
-    form.addEventListener("submit", function () {
-      overlay.classList.add("is-active");
-      overlay.setAttribute("aria-hidden", "false");
-
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = "예측 실행 중...";
-      }
-    });
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("predictionForm");
+  const loading = document.getElementById("predictionLoading");
+  if (!form || !loading) return;
+  form.addEventListener("submit", function () {
+    loading.classList.add("is-active");
   });
+});
 </script>
 {% endblock %}

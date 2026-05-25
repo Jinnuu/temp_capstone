@@ -4,14 +4,17 @@
 {% block title %}레시피 수정 | S&P{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-docker">
+<link rel="stylesheet" href="{% static 'css/sp_sprint7_docker_fix.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'css/sp_sprint7_ui_db_fix_v4.css' %}?v=4">
+<link rel="stylesheet" href="{% static 'css/sp_sprint7_recipe_row_align_fix_v5.css' %}?v=5">
 {% endblock %}
 
 {% block content %}
 <div class="sp-page">
   <section class="sp-hero">
     <div>
-      <p class="sp-kicker">Recipe Management</p>
+      <p class="sp-kicker">Menu Management</p>
       <h1>레시피 수정</h1>
       <p>등록된 메뉴를 선택하고 식재료와 1인분 기준 사용량을 관리합니다.</p>
     </div>
@@ -21,7 +24,7 @@
     </div>
   </section>
 
-  <section class="sp-card" style="max-width:980px;margin-left:auto;margin-right:auto;">
+  <section class="sp-card sp-form-wide">
     <div class="sp-card-head">
       <div>
         <p class="sp-kicker">Recipe Editor</p>
@@ -42,7 +45,7 @@
         </select>
       </div>
 
-      <div class="sp-card-head" style="border-bottom:1px solid #d7dce5;margin-top:12px;">
+      <div class="sp-card-head" style="border-bottom:1px solid #d7dce5;margin-top:16px;">
         <div>
           <p class="sp-kicker">Recipe</p>
           <h2>식재료 사용량 단위 관리</h2>
@@ -50,28 +53,43 @@
         <button type="button" class="sp-btn" onclick="addRecipeRow()">+ 식재료 추가</button>
       </div>
 
-      <div id="recipeRows" style="display:grid;gap:10px;">
-        <div class="recipe-row sp-form-grid" style="grid-template-columns:minmax(0,1fr) 220px 74px;gap:10px;align-items:end;">
-          <div class="sp-field">
-            <label>식재료</label>
-            <select name="ingredient_id[]" class="js-ingredient-select" onchange="syncRecipeUnit(this)" required>
-              <option value="">식재료를 선택하세요</option>
-              {% for ingredient in ingredients %}
-                <option value="{{ ingredient.id }}" data-unit="{{ ingredient.unit|default:'단위' }}">
-                  {{ ingredient.name }}{% if ingredient.unit %} / {{ ingredient.unit }}{% endif %}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="sp-field">
-            <label>사용량</label>
-            <div class="sp-unit-input">
-              <input type="number" name="required_amount[]" step="0.01" min="0" placeholder="1인분 기준" required>
+      <div class="sp-recipe-table">
+        <div class="sp-recipe-header">
+          <div>식재료명</div>
+          <div>사용량</div>
+          <div>단위</div>
+          <div></div>
+        </div>
+
+        <div id="recipeRows" class="sp-row-list">
+          <div class="sp-recipe-row search-row recipe-row">
+            <div class="sp-field">
+              <label>식재료명</label>
+              <div class="sp-ingredient-search-wrap">
+                <input type="text" class="js-ingredient-search" placeholder="식재료명을 검색하세요. 예: 쌀" autocomplete="off">
+                <input type="hidden" name="ingredient_id[]" class="js-ingredient-id">
+                <div class="sp-ingredient-results"></div>
+              </div>
+              <div class="sp-ingredient-selected"></div>
+            </div>
+
+            <div class="sp-field">
+              <label>사용량</label>
+              <input type="number" step="0.01" min="0" name="required_amount[]" placeholder="1인분 기준">
+            </div>
+
+            <div class="sp-field">
+              <label>단위</label>
               <span class="sp-unit-badge">단위</span>
             </div>
+
+            <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
           </div>
-          <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
         </div>
+      </div>
+
+      <div class="sp-note-box">
+        식재료명을 검색한 뒤 후보를 클릭해야 저장됩니다. 직접 입력만 하고 후보를 선택하지 않으면 저장 대상에서 제외됩니다.
       </div>
 
       <div class="sp-actions" style="justify-content:flex-start;">
@@ -84,32 +102,138 @@
 {% endblock %}
 
 {% block extra_js %}
+
 <script>
-function syncRecipeUnit(select) {
-  const row = select.closest(".recipe-row");
-  const badge = row.querySelector(".sp-unit-badge");
-  const selected = select.options[select.selectedIndex];
-  badge.textContent = selected.dataset.unit || "단위";
+function closeIngredientResults(row) {
+  const box = row.querySelector(".sp-ingredient-results");
+  if (!box) return;
+  box.classList.remove("is-open");
+  box.innerHTML = "";
+}
+
+function setIngredient(row, item) {
+  const textInput = row.querySelector(".js-ingredient-search");
+  const hiddenInput = row.querySelector(".js-ingredient-id");
+  const unitBadge = row.querySelector(".sp-unit-badge");
+  const selected = row.querySelector(".sp-ingredient-selected");
+
+  textInput.value = item.name;
+  hiddenInput.value = item.id;
+  unitBadge.textContent = item.unit || "단위";
+  selected.textContent = `${item.name} / ${item.unit || "단위"}${item.category ? " / " + item.category : ""}`;
+
+  closeIngredientResults(row);
+}
+
+function bindIngredientSearch(row) {
+  const input = row.querySelector(".js-ingredient-search");
+  const hidden = row.querySelector(".js-ingredient-id");
+  const results = row.querySelector(".sp-ingredient-results");
+  const unitBadge = row.querySelector(".sp-unit-badge");
+  const selected = row.querySelector(".sp-ingredient-selected");
+
+  if (!input || !hidden || !results) return;
+
+  let timer = null;
+
+  input.addEventListener("input", function () {
+    const q = input.value.trim();
+
+    hidden.value = "";
+    unitBadge.textContent = "단위";
+    selected.textContent = "";
+
+    clearTimeout(timer);
+
+    if (!q) {
+      closeIngredientResults(row);
+      return;
+    }
+
+    timer = setTimeout(async function () {
+      try {
+        const url = "{% url 'meals:search_ingredients_api' %}?q=" + encodeURIComponent(q);
+        const response = await fetch(url);
+        const data = await response.json();
+        const items = data.results || data.ingredients || [];
+
+        results.innerHTML = "";
+
+        if (!items.length) {
+          const empty = document.createElement("button");
+          empty.type = "button";
+          empty.className = "sp-ingredient-result empty";
+          empty.textContent = "검색 결과가 없습니다. 먼저 식자재 기준정보에 등록해 주세요.";
+          results.appendChild(empty);
+          results.classList.add("is-open");
+          return;
+        }
+
+        items.slice(0, 12).forEach(function (item) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "sp-ingredient-result";
+          btn.textContent = `${item.name} / ${item.unit || "단위"}${item.category ? " / " + item.category : ""}`;
+          btn.addEventListener("click", function () {
+            setIngredient(row, item);
+          });
+          results.appendChild(btn);
+        });
+
+        results.classList.add("is-open");
+      } catch (error) {
+        closeIngredientResults(row);
+      }
+    }, 180);
+  });
 }
 
 function addRecipeRow() {
   const container = document.getElementById("recipeRows");
   const first = container.querySelector(".recipe-row");
   const row = first.cloneNode(true);
-  row.querySelectorAll("input").forEach((input) => input.value = "");
-  row.querySelectorAll("select").forEach((select) => select.selectedIndex = 0);
-  row.querySelector(".sp-unit-badge").textContent = "단위";
+
+  row.querySelectorAll("input").forEach(function (input) {
+    input.value = "";
+  });
+
+  const selected = row.querySelector(".sp-ingredient-selected");
+  if (selected) selected.textContent = "";
+
+  const badge = row.querySelector(".sp-unit-badge");
+  if (badge) badge.textContent = "단위";
+
+  closeIngredientResults(row);
   container.appendChild(row);
+  bindIngredientSearch(row);
 }
 
 function removeRecipeRow(button) {
   const rows = document.querySelectorAll(".recipe-row");
-  if (rows.length <= 1) return;
+  if (rows.length <= 1) {
+    const row = rows[0];
+    row.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+    const selected = row.querySelector(".sp-ingredient-selected");
+    if (selected) selected.textContent = "";
+    const badge = row.querySelector(".sp-unit-badge");
+    if (badge) badge.textContent = "단위";
+    closeIngredientResults(row);
+    return;
+  }
   button.closest(".recipe-row").remove();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".js-ingredient-select").forEach(syncRecipeUnit);
+  document.querySelectorAll(".recipe-row").forEach(bindIngredientSearch);
+
+  document.addEventListener("click", function (event) {
+    document.querySelectorAll(".recipe-row").forEach(function (row) {
+      if (!row.contains(event.target)) {
+        closeIngredientResults(row);
+      }
+    });
+  });
 });
 </script>
+
 {% endblock %}

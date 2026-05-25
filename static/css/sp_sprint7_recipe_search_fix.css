@@ -1,0 +1,127 @@
+/* Sprint7 docker hotfix: wider form card + searchable ingredient picker */
+
+.sp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0 28px 72px;
+}
+
+.sp-form-wide {
+  width: min(100%, 1260px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sp-card.sp-form-wide {
+  padding: 28px 28px 30px;
+}
+
+.sp-card-head {
+  margin-bottom: 20px;
+}
+
+.sp-card-head h2 {
+  letter-spacing: -0.05em;
+}
+
+.sp-form-grid.cols-2 {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.sp-recipe-row.search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) 240px 82px;
+  gap: 10px;
+  align-items: end;
+}
+
+.sp-ingredient-search-wrap {
+  position: relative;
+}
+
+.sp-ingredient-selected {
+  margin-top: 6px;
+  min-height: 24px;
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sp-ingredient-results {
+  display: none;
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #cfd6e4;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(20, 28, 38, 0.12);
+}
+
+.sp-ingredient-results.is-open {
+  display: block;
+}
+
+.sp-ingredient-result {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 0;
+  border-bottom: 1px solid #eef0f3;
+  background: #fff;
+  color: #20242a;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sp-ingredient-result:hover {
+  background: #eef2ff;
+  color: #2448d8;
+}
+
+.sp-ingredient-result.empty {
+  color: #868e96;
+  cursor: default;
+}
+
+.sp-unit-input {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 64px;
+  gap: 6px;
+  align-items: center;
+}
+
+.sp-unit-badge {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cfd6e4;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sp-note-box {
+  margin-top: 16px;
+  padding: 13px 14px;
+  border: 1px solid #d7dce5;
+  background: #fbfcfd;
+  color: #596273;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .sp-form-grid.cols-2,
+  .sp-recipe-row.search-row {
+    grid-template-columns: 1fr;
+  }
+}
