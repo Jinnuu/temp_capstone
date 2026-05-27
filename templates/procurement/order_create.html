@@ -1,217 +1,217 @@
-{% extends 'base.html' %}
-{% block title %}간편주문 | FoodSense{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}간편 발주 | S&P{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="mb-4">
-        <h2 class="fw-bold">🍽️ 간편주문 (발주서 작성)</h2>
-        <p class="text-muted">날짜를 선택하여 해당 일자의 부족분을 불러오거나, 직접 품목을 선택하세요.</p>
+<section class="sp-page-title">
+  <h1>간편 발주</h1>
+  <p>예측 결과에서 넘어온 부족분 또는 직접 선택한 품목 수량으로 발주서를 작성합니다.</p>
+</section>
+
+<section class="sp-action-row">
+  <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+  <a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_create' %}">간편 발주</a>
+  <a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a>
+</section>
+
+<section class="sp-filter-panel">
+  <form method="get" class="sp-filter-grid sp-filter-grid-compact">
+    <label>
+      <span>부족분 기준 날짜</span>
+      <input type="date" name="target_date" value="{{ target_date }}">
+    </label>
+    <div class="sp-filter-actions">
+      <button type="submit" class="sp-btn sp-btn-primary">데이터 로드</button>
+      <a href="{% url 'procurement:order_create' %}" class="sp-btn">초기화</a>
     </div>
+  </form>
+  <p class="sp-help">
+    예측 결과에서 넘어온 부족분이 있으면 해당 품목의 주문 수량이 자동으로 채워집니다.
+  </p>
+</section>
 
-    <!-- 🔥 추가된 섹션: 날짜 선택 및 데이터 로드 -->
-    <div class="card bg-white border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" action="." class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">예측 기반 부족분 불러오기</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                        <input type="date" name="target_date" class="form-control" value="{{ target_date }}">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold">데이터 로드</button>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p class="small text-muted mb-0">💡 날짜 선택 후 [로드]를 누르면 해당 날짜의 통합 부족분이 자동 입력됩니다.</p>
-                </div>
-            </form>
-        </div>
-    </div>
+{{ shortage_map|json_script:"shortage-data" }}
 
-    <!-- 검색 및 필터 -->
-    <div class="card bg-light border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <input type="text" id="search-input" class="form-control" placeholder="품목명 검색 (예: 양파, 고기)">
-                </div>
-                <div class="col-md-4">
-                    <select id="category-filter" class="form-select">
-                        <option value="">전체 카테고리</option>
-                        {% for cat in categories %}
-                            <option value="{{ cat }}">{{ cat }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
+<form method="post" id="quickOrderForm">
+  {% csrf_token %}
 
-    <form method="post" id="order-form">
-        {% csrf_token %}
-        <div class="card shadow-sm mb-4 border-0 overflow-hidden">
-            <div class="table-responsive" style="max-height: 550px;">
-                <table class="table table-hover align-middle text-center m-0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="width: 60px;">선택</th>
-                            <th class="text-start">품목명 (분류)</th>
-                            <th>단위</th>
-                            <th>단가</th>
-                            <th style="width: 160px;">주문수량</th>
-                            <th class="text-end pe-4">합계금액</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ingredient-tbody">
-                        {% for ing in ingredients %}
-                        <tr class="ingredient-row" data-category="{{ ing.category|default:'일반' }}">
-                            <td>
-                                <input class="form-check-input item-checkbox" type="checkbox" name="ingredient_id[]" value="{{ ing.id }}" data-price="{{ ing.unit_price }}">
-                            </td>
-                            <td class="text-start">
-                                <div class="fw-bold item-name text-dark">{{ ing.name }}</div>
-                                <small class="text-muted">{{ ing.category|default:"일반" }}</small>
-                            </td>
-                            <td>{{ ing.unit }}</td>
-                            <td class="text-muted">{{ ing.unit_price|floatformat:0 }}</td>
-                            <td>
-                                <input type="number" class="form-control item-qty mx-auto" name="quantity[]" min="0" step="0.1" 
-                                       style="max-width: 100px;" value="0" disabled>
-                            </td>
-                            <td class="item-subtotal text-end pe-4 fw-bold">0</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+  <section class="sp-order-grid">
+    <article class="sp-panel">
+      <div class="sp-panel-head">
+        <div>
+          <p>Quick Order</p>
+          <h2>품목 선택</h2>
         </div>
-        
-        <!-- 하단 합계 영역 -->
-        <div class="card border-0 shadow-sm p-4 bg-light mb-5">
-            <div class="row align-items-center">
-                <div class="col-md-8 d-flex justify-content-around border-end">
-                    <div class="text-center">
-                        <span class="text-muted small d-block">공급가액</span>
-                        <strong id="total-subtotal" class="h4">0</strong>원
-                    </div>
-                    <div class="text-center">
-                        <span class="text-muted small d-block">부가세(10%)</span>
-                        <strong id="total-vat" class="h4">0</strong>원
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <span class="text-danger fw-bold small d-block">최종 결제 예정액</span>
-                    <strong id="final-total" class="display-6 text-danger fw-bold">0</strong>원
-                </div>
-            </div>
-            <div class="text-center mt-5">
-                <a href="{% url 'procurement:order_list' %}" class="btn btn-outline-secondary btn-lg px-4 me-2">주문조회</a>
-                <button type="submit" class="btn btn-danger btn-lg px-5 fw-bold shadow">간편주문 완료하기</button>
-            </div>
-        </div>
-    </form>
-</div>
+        <select id="categoryFilter" class="sp-standalone-select">
+          <option value="">전체 카테고리</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
+      <div class="sp-table-wrap">
+        <table class="sp-data-table sp-order-table">
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>품목명</th>
+              <th>분류</th>
+              <th>단위</th>
+              <th>단가</th>
+              <th>주문수량</th>
+              <th>합계금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ing in ingredients %}
+              <tr data-category="{{ ing.category|default:'일반' }}" data-name="{{ ing.name }}">
+                <td><input type="checkbox" class="sp-order-check"></td>
+                <td class="fw-bold">
+                  {{ ing.name }}
+                  <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}" disabled>
+                </td>
+                <td>{{ ing.category|default:"일반" }}</td>
+                <td>{{ ing.unit }}</td>
+                <td><span class="sp-unit-price" data-price="{{ ing.unit_price }}">{{ ing.unit_price|floatformat:0 }}원</span></td>
+                <td><input type="number" min="0" step="0.01" name="quantity[]" value="0" class="sp-qty-input" disabled></td>
+                <td class="sp-row-total">0원</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="sp-empty-cell">등록된 식재료가 없습니다.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <aside class="sp-panel sp-cart-panel">
+      <div class="sp-panel-head">
+        <div>
+          <p>Order Summary</p>
+          <h2>발주 요약</h2>
+        </div>
+      </div>
+
+      <div class="sp-cart-summary">
+        <div><span>선택 품목</span><strong id="selectedCount">0개</strong></div>
+        <div><span>공급가액</span><strong id="subtotalAmount">0원</strong></div>
+        <div><span>부가세(10%)</span><strong id="vatAmount">0원</strong></div>
+        <div class="total"><span>최종 결제 예정액</span><strong id="totalAmount">0원</strong></div>
+      </div>
+
+      <div class="sp-side-actions">
+        <a href="{% url 'procurement:order_list' %}" class="sp-btn">발주 목록</a>
+        <button type="submit" class="sp-btn sp-btn-primary">간편 발주 완료</button>
+      </div>
+    </aside>
+  </section>
+</form>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. 서버에서 넘어온 부족분 데이터
-    const shortageMap = {
-        {% for name, qty in shortage_map.items %}
-            "{{ name|escapejs }}": "{{ qty }}",
-        {% endfor %}
-    };
+  function formatWon(value) {
+    return Number(value || 0).toLocaleString("ko-KR") + "원";
+  }
 
-    const checkboxes = document.querySelectorAll('.item-checkbox');
-    const qtys = document.querySelectorAll('.item-qty');
-    const rows = document.querySelectorAll('.ingredient-row');
-    const searchInput = document.getElementById('search-input');
-    const categoryFilter = document.getElementById('category-filter');
+  function updateOrderTotals() {
+    let selectedCount = 0;
+    let subtotal = 0;
 
-    // 2. 텍스트 정제 함수 (공백 및 특수기호 제거 매칭용)
-    function cleanText(text) {
-        return text.replace(/\s+/g, '');
-    }
+    document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+      const check = row.querySelector(".sp-order-check");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+      const hiddenInput = row.querySelector('input[name="ingredient_id[]"]');
+      const priceEl = row.querySelector(".sp-unit-price");
+      const rowTotalEl = row.querySelector(".sp-row-total");
 
-    // 3. 합계 계산 로직
-    function calculateTotals() {
-        let subtotal = 0;
-        checkboxes.forEach((cb, index) => {
-            const qtyInput = qtys[index];
-            const price = parseFloat(cb.dataset.price) || 0;
-            const rowTotalTd = cb.closest('tr').querySelector('.item-subtotal');
-            
-            if (cb.checked) {
-                qtyInput.disabled = false;
-                const q = parseFloat(qtyInput.value) || 0;
-                const rowTotal = Math.round(q * price);
-                rowTotalTd.innerHTML = `<strong>${rowTotal.toLocaleString()}</strong>`;
-                subtotal += rowTotal;
-            } else {
-                qtyInput.disabled = true;
-                rowTotalTd.textContent = '0';
-            }
-        });
-        const vat = Math.floor(subtotal * 0.1);
-        document.getElementById('total-subtotal').textContent = subtotal.toLocaleString();
-        document.getElementById('total-vat').textContent = vat.toLocaleString();
-        document.getElementById('final-total').textContent = (subtotal + vat).toLocaleString();
-    }
+      if (!check || !qtyInput || !hiddenInput || !priceEl || !rowTotalEl) return;
 
-    // 4. 🔥 데이터 매칭 및 행 숨김 로직
-    rows.forEach((row, index) => {
-        const nameElement = row.querySelector('.item-name');
-        if (!nameElement) return;
+      qtyInput.disabled = !check.checked;
+      hiddenInput.disabled = !check.checked;
 
-        const rowName = cleanText(nameElement.innerText);
-        let isMatched = false;
+      if (!check.checked) {
+        rowTotalEl.textContent = "0원";
+        return;
+      }
 
-        // shortageMap과 대조
-        for (const [shortageName, qty] of Object.entries(shortageMap)) {
-            if (rowName === cleanText(shortageName)) {
-                const cb = checkboxes[index];
-                const qtyInput = qtys[index];
-                cb.checked = true;
-                qtyInput.disabled = false;
-                qtyInput.value = qty;
-                isMatched = true;
-                break;
-            }
-        }
-
-        // 💡 부족분 데이터가 존재할 경우, 매칭되지 않은 행은 숨김 처리
-        if (Object.keys(shortageMap).length > 0) {
-            if (!isMatched) {
-                row.style.display = 'none';
-            }
-        }
+      selectedCount += 1;
+      const rowTotal = Number(priceEl.dataset.price || 0) * Number(qtyInput.value || 0);
+      subtotal += rowTotal;
+      rowTotalEl.textContent = formatWon(rowTotal);
     });
 
-    // 5. 검색 및 필터링 기능 (검색 시 숨겨진 행 다시 보이게 함)
-    function filterItems() {
-        const query = searchInput.value.toLowerCase().trim();
-        const category = categoryFilter.value;
-        
-        rows.forEach(row => {
-            const name = row.querySelector('.item-name').innerText.toLowerCase();
-            const rowCat = row.getAttribute('data-category');
-            const match = name.includes(query) && (category === "" || rowCat === category);
-            row.style.display = match ? '' : 'none';
-        });
+    const vat = Math.floor(subtotal * 0.1);
+    document.getElementById("selectedCount").textContent = selectedCount + "개";
+    document.getElementById("subtotalAmount").textContent = formatWon(subtotal);
+    document.getElementById("vatAmount").textContent = formatWon(vat);
+    document.getElementById("totalAmount").textContent = formatWon(subtotal + vat);
+  }
+
+  function normalizeName(value) {
+    return String(value || "").trim();
+  }
+
+  function applyShortageMap() {
+    const script = document.getElementById("shortage-data");
+    if (!script) return;
+
+    let shortageMap = {};
+    try {
+      shortageMap = JSON.parse(script.textContent || "{}");
+    } catch (error) {
+      shortageMap = {};
     }
 
-    checkboxes.forEach(cb => cb.addEventListener('change', calculateTotals));
-    qtys.forEach(qty => qty.addEventListener('input', calculateTotals));
-    searchInput.addEventListener('input', filterItems);
-    categoryFilter.addEventListener('change', filterItems);
+    document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+      const rowName = normalizeName(row.dataset.name);
+      const shortageValue = shortageMap[rowName];
 
-    // 초기 합계 계산
-    calculateTotals();
-});
+      if (shortageValue === undefined || shortageValue === null || shortageValue === "") {
+        return;
+      }
+
+      const numericValue = Number(shortageValue || 0);
+      if (numericValue <= 0) {
+        return;
+      }
+
+      const check = row.querySelector(".sp-order-check");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+
+      if (!check || !qtyInput) {
+        return;
+      }
+
+      check.checked = true;
+      qtyInput.value = numericValue;
+    });
+  }
+
+  document.addEventListener("change", (event) => {
+    if (event.target.matches(".sp-order-check")) {
+      const row = event.target.closest("tr");
+      const qtyInput = row.querySelector('input[name="quantity[]"]');
+      if (event.target.checked && Number(qtyInput.value || 0) <= 0) qtyInput.value = 1;
+      updateOrderTotals();
+    }
+
+    if (event.target.matches("#categoryFilter")) {
+      const selectedCategory = event.target.value;
+      document.querySelectorAll(".sp-order-table tbody tr").forEach((row) => {
+        row.style.display = (!selectedCategory || row.dataset.category === selectedCategory) ? "" : "none";
+      });
+    }
+  });
+
+  document.addEventListener("input", (event) => {
+    if (event.target.matches('input[name="quantity[]"]')) updateOrderTotals();
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    applyShortageMap();
+    updateOrderTotals();
+  });
 </script>
-
-<style>
-    .ingredient-row td { padding-top: 12px; padding-bottom: 12px; }
-    .item-qty:focus { border-color: #dc3545; box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); }
-</style>
 {% endblock %}

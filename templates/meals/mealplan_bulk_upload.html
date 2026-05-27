@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}식단 일괄 등록 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
+{% endblock %}
+
+{% block content %}
+<div class="sp-align-page">
+  <section class="sp-align-hero">
+    <div>
+      <p class="sp-align-kicker">Meal Plan Upload</p>
+      <h1>CSV/XLSX 식단 일괄 등록</h1>
+      <p>월간 식단표를 CSV 또는 XLSX 파일로 업로드해 한 번에 등록합니다.</p>
+    </div>
+
+    <div class="sp-align-actions">
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a>
+      <a class="sp-btn" href="{% url 'meals:monthly_mealplan_create' %}">월간 식단 등록</a>
+    </div>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Bulk Upload</p>
+        <h2>업로드 파일 선택</h2>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="sp-align-form">
+      {% csrf_token %}
+
+      <div class="sp-align-grid-2">
+        <div class="sp-align-field">
+          <label>파일 형식</label>
+          <select name="file_type">
+            <option value="xlsx">XLSX</option>
+            <option value="csv">CSV</option>
+          </select>
+        </div>
+
+        <div class="sp-align-field">
+          <label>식단 파일</label>
+          <input type="file" name="mealplan_file" accept=".csv,.xlsx" required>
+        </div>
+      </div>
+
+      <div class="sp-align-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">일괄 등록하기</button>
+        <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Template Guide</p>
+        <h2>권장 업로드 양식</h2>
+      </div>
+    </div>
+
+    <div class="sp-align-chip-grid">
+      <span>date</span>
+      <span>meal_type</span>
+      <span>menu_name</span>
+      <span>category</span>
+    </div>
+
+    <p class="sp-align-note">날짜, 끼니, 메뉴명, 카테고리를 기준으로 월간 식단을 생성합니다.</p>
+
+    <div class="sp-table-wrap mt-3">
+      <table class="sp-data-table sp-align-table">
+        <thead>
+          <tr>
+            <th>date</th>
+            <th>meal_type</th>
+            <th>menu_name</th>
+            <th>category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-05-20</td><td>중식</td><td>제육볶음</td><td>주반찬</td></tr>
+          <tr><td>2026-05-20</td><td>중식</td><td>미역국</td><td>국</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

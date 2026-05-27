@@ -1,0 +1,260 @@
+/* S&P aligned subpage design patch */
+.sp-align-page {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.sp-align-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.sp-align-kicker {
+  margin: 0 0 7px;
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sp-align-hero h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.sp-align-hero p {
+  margin: 9px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sp-align-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sp-align-inline-form {
+  margin: 0;
+}
+
+.sp-align-card {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #d9dee7;
+  box-shadow: 0 12px 32px rgba(20, 28, 38, 0.05);
+}
+
+.sp-align-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #20242a;
+}
+
+.sp-align-card-head h2 {
+  margin: 4px 0 0;
+  color: #111827;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.sp-align-form {
+  display: grid;
+  gap: 22px;
+}
+
+.sp-align-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sp-align-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sp-align-field {
+  display: grid;
+  gap: 7px;
+}
+
+.sp-align-field label {
+  margin: 0;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sp-align-field input,
+.sp-align-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #cfd6e4;
+  background: #fff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sp-align-field input[type="file"] {
+  height: auto;
+  min-height: 42px;
+  padding: 9px 12px;
+}
+
+.sp-align-field input:focus,
+.sp-align-field select:focus {
+  outline: none;
+  border-color: #2448d8;
+  box-shadow: 0 0 0 3px rgba(36, 72, 216, 0.12);
+}
+
+.sp-align-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.sp-align-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px 76px;
+  gap: 10px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.sp-align-row .sp-btn {
+  min-width: 76px;
+}
+
+.sp-align-submit-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.sp-align-guide-box {
+  min-height: 124px;
+  padding: 16px;
+  border: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.sp-align-guide-box strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.sp-align-guide-box span {
+  display: block;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.sp-align-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sp-align-chip-grid span {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9dee7;
+  background: #f8fafc;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sp-align-note {
+  margin: 12px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.sp-align-table th,
+.sp-align-table td {
+  text-align: center !important;
+}
+
+.sp-align-table td:first-child,
+.sp-align-table th:first-child {
+  text-align: left !important;
+}
+
+.sp-align-menu-title {
+  display: grid;
+  gap: 5px;
+  text-align: left;
+}
+
+.sp-align-menu-title strong {
+  color: #111827;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.sp-align-menu-title span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sp-align-empty {
+  padding: 44px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .sp-align-hero,
+  .sp-align-grid-2,
+  .sp-align-grid-3,
+  .sp-align-filter,
+  .sp-align-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sp-align-actions {
+    justify-content: flex-start;
+  }
+
+  .sp-align-chip-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

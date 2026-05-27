@@ -1,345 +1,250 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}식단기반 스마트 발주 | S&P{% endblock %}
+{% block title %}식단기반 발주 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/sp_final_fix_v2.css' %}?v=sprint7-final-fix-v2">
+{% endblock %}
 
 {% block content %}
-<style>
-    .smart-procurement-container {
-        max-width: 100%;
-        font-family: 'Inter', -apple-system, sans-serif;
-    }
-    .date-range-card {
-        background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
-        color: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 20px rgba(30, 64, 175, 0.2);
-    }
-    .day-card {
-        border-radius: 1rem;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        margin-bottom: 2rem;
-        background: white;
-    }
-    .day-header {
-        background: #f8fafc;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .ingredient-row:hover {
-        background-color: #f1f5f9 !important;
-    }
-    .qty-input {
-        width: 100px;
-        text-align: right;
-        font-weight: 600;
-        border-color: #3b82f6;
-    }
-    .subtotal-display {
-        font-size: 1rem;
-        white-space: nowrap;
-    }
-    .total-footer {
-        position: sticky;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(12px);
-        padding: 1.5rem 2.5rem;
-        border-top: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 1000;
-        margin: 0 -1.5rem -2.5rem -1.5rem;
-        box-shadow: 0 -10px 20px rgba(0,0,0,0.05);
-    }
-    .item-add-btn {
-        font-size: 0.8rem;
-        color: #3b82f6;
-        text-decoration: none;
-        padding: 0.2rem 0.5rem;
-        border: 1px dashed #3b82f6;
-        border-radius: 4px;
-        display: inline-block;
-        margin-top: 0.25rem;
-    }
-    .remove-ing { color: #ef4444; cursor: pointer; }
-    .badge-supplier { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-    
-    /* Responsive Table Fixes */
-    .table th { font-weight: 600; color: #64748b; background: #f8fafc; vertical-align: middle; }
-</style>
+<div class="sp-page">
+  <section class="sp-hero">
+    <div>
+      <p class="sp-kicker">Smart Procurement</p>
+      <h1>식단기반 발주</h1>
+      <p>등록된 식단과 예측 식수를 기준으로 필요한 식재료를 계산하고, 현재고를 반영해 부족분만 발주합니다.</p>
+    </div>
+    <div class="sp-actions">
+      <a class="sp-btn primary" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+      <a class="sp-btn" href="{% url 'procurement:order_create' %}">간편 발주</a>
+      <a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표</a>
+    </div>
+  </section>
 
-<div class="container-fluid px-4 smart-procurement-container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <span class="text-primary fw-bold text-uppercase small">Integrated Procurement System</span>
-            <h1 class="h2 fw-bold mb-0">식단기반 스마트 발주</h1>
-        </div>
-        <div class="d-flex gap-2">
-            <button type="submit" form="orderForm" class="btn btn-primary btn-lg px-5 shadow">
-                <i class="bi bi-file-earmark-check me-2"></i>최종 발주서 생성
-            </button>
-            <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary btn-lg px-4">취소</a>
-        </div>
+  <section class="sp-card">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Date Range</p>
+        <h2>발주 대상 기간</h2>
+      </div>
     </div>
 
-    <div class="date-range-card">
-        <h5 class="fw-bold mb-3"><i class="bi bi-calendar-range me-2"></i>발주 대상 기간 설정</h5>
-        <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-5">
-                <label class="form-label small opacity-75">시작 일자</label>
-                <input type="date" name="start_date" class="form-control form-control-lg border-0 shadow-sm" value="{{ start_date|date:'Y-m-d' }}">
-            </div>
-            <div class="col-md-5">
-                <label class="form-label small opacity-75">종료 일자</label>
-                <input type="date" name="end_date" class="form-control form-control-lg border-0 shadow-sm" value="{{ end_date|date:'Y-m-d' }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-white btn-lg w-100 fw-bold shadow-sm" style="background: white; color: #1e3a8a;">조회하기</button>
-            </div>
-        </form>
-    </div>
+    <form method="get" class="sp-filter" style="grid-template-columns: 1fr 1fr auto auto;">
+      <div class="sp-field">
+        <label>시작 일자</label>
+        <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+      </div>
+      <div class="sp-field">
+        <label>종료 일자</label>
+        <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+      </div>
+      <button type="submit" class="sp-btn primary">조회하기</button>
+      <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">초기화</a>
+    </form>
+  </section>
 
-    {% if analysis_data %}
-    <form id="orderForm" method="post">
-        {% csrf_token %}
-        
+  {% if analysis_data %}
+    <form method="post" id="smartOrderForm">
+      {% csrf_token %}
+
+      <section class="sp-card">
+        <div class="sp-card-head">
+          <div>
+            <p class="sp-kicker">Order Preview</p>
+            <h2>발주 예정 품목</h2>
+          </div>
+          <div class="sp-actions">
+            <a class="sp-btn" href="{% url 'procurement:order_list' %}">취소</a>
+            <button type="submit" class="sp-btn primary">최종 발주서 생성</button>
+          </div>
+        </div>
+
+        <p class="sp-smart-note">
+          필요량은 <strong>식수 예측 결과</strong>를 우선 사용합니다. 예측 결과가 없으면 식단의 목표 식수(headcount)를 사용합니다.
+          발주수량은 <strong>필요량 + 안전재고 - 현재고</strong>를 기준으로 자동 입력됩니다.
+        </p>
+
         {% for day in analysis_data %}
-        <div class="day-card card shadow-sm mb-4">
-            <div class="day-header d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-calendar-check me-2 text-primary"></i>{{ day.date|date:"Y년 m월 d일 (D)" }}
-                </h5>
-                <span class="badge bg-secondary-subtle text-dark px-3 py-2">총 {{ day.plans|length }}건의 식단</span>
+          <section style="margin-bottom:28px;">
+            <div class="sp-card-head" style="border-bottom:1px solid #d7dce5;">
+              <div>
+                <p class="sp-kicker">Target Date</p>
+                <h2>{{ day.date|date:"Y년 m월 d일" }}</h2>
+              </div>
+              <span class="sp-status blue">식단 {{ day.plans|length }}건</span>
             </div>
-            
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr class="small text-center">
-                                <th style="width: 100px;">끼니</th>
-                                <th style="width: 200px;">메뉴명</th>
-                                <th style="width: 250px;">식재료명</th>
-                                <th style="width: 150px;">규격</th>
-                                <th style="width: 300px;">식품 설명</th>
-                                <th style="width: 80px;">단위</th>
-                                <th style="width: 200px;">발주처</th>
-                                <th style="width: 140px;">발주수량</th>
-                                <th style="width: 150px;" class="text-end pe-4">예상금액</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="ingredient-list-container">
-                            {% for plan in day.plans %}
-                                {% for menu in plan.menus %}
-                                    {% for ing in menu.ingredients %}
-                                    <tr class="ingredient-row" data-meal-type="{{ plan.meal_type }}" data-date="{{ day.date|date:'Y-m-d' }}">
-                                        {% if forloop.parentloop.first and forloop.first %}
-                                        <td rowspan="{{ plan.total_ingredients }}" class="bg-light fw-bold text-center border-end">{{ plan.meal_type }}</td>
-                                        {% endif %}
-                                        
-                                        {% if forloop.first %}
-                                        <td rowspan="{{ menu.ingredients|length }}" class="fw-bold text-primary border-end">
-                                            <div class="d-flex flex-column align-items-center gap-1">
-                                                <span>{{ menu.name }}</span>
-                                                <a href="#" class="item-add-btn" data-bs-toggle="modal" data-bs-target="#addIngredientModal" 
-                                                   onclick="setContext('{{ menu.name|escapejs }}', this, '{{ day.date|date:'Y-m-d' }}', '{{ plan.meal_type }}')">
-                                                    <i class="bi bi-plus-circle"></i> 추가
-                                                </a>
-                                            </div>
-                                        </td>
-                                        {% endif %}
 
-                                        <td class="fw-bold">{{ ing.name }}</td>
-                                        <td class="small text-muted text-center">{{ ing.spec|default:"-" }}</td>
-                                        <td class="text-muted small text-truncate" style="max-width: 280px;" title="{{ ing.description }}">{{ ing.description|default:"-" }}</td>
-                                        <td class="text-center"><span class="badge bg-light text-dark border">{{ ing.unit }}</span></td>
-                                        <td class="text-center"><span class="badge badge-supplier">{{ ing.supplier_name }}</span></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="quantity[]" class="form-control form-control-sm qty-input mx-auto" value="{{ ing.needed_qty }}" oninput="updateRowSubtotal(this, {{ ing.price|default:0 }})">
-                                            <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}">
-                                            <input type="hidden" name="target_date[]" value="{{ target_date|date:'Y-m-d' }}">
-                                            <input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}">
-                                            <input type="hidden" name="menu_name[]" value="{{ menu.name }}">
-                                        </td>
-                                        <td class="text-end pe-4 fw-bold text-primary subtotal-display" data-price="{{ ing.price|default:0 }}">
-                                            {{ ing.subtotal|floatformat:0 }}원
-                                        </td>
-                                        <td class="text-center">
-                                            <i class="bi bi-trash remove-ing" onclick="removeRow(this)"></i>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="sp-table-wrap">
+              <table class="sp-table smart-order-table">
+                <thead>
+                  <tr>
+                    <th>끼니</th>
+                    <th>예측/기준 식수</th>
+                    <th>메뉴</th>
+                    <th class="left">식재료명</th>
+                    <th>규격</th>
+                    <th>단위</th>
+                    <th>현재고</th>
+                    <th>안전재고</th>
+                    <th>필요량</th>
+                    <th>발주수량</th>
+                    <th>단가</th>
+                    <th>예상금액</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for plan in day.plans %}
+                    {% for menu in plan.menus %}
+                      {% for ing in menu.ingredients %}
+                        <tr data-price="{{ ing.price }}">
+                          <td>{{ plan.meal_type }}</td>
+                          <td>
+                            <span class="sp-forecast-count">{{ plan.serving_count }}명</span>
+                            <div class="sp-note">{{ plan.serving_source }}</div>
+                          </td>
+                          <td>{{ menu.name }}</td>
+                          <td class="left">
+                            <div class="sp-product-cell">
+                              <span class="sp-thumb">{{ ing.name|slice:":1" }}</span>
+                              <span class="sp-product-main">
+                                <strong>{{ ing.name }}</strong>
+                                <small>{{ ing.description|default:"식품 설명 미등록" }}</small>
+                              </span>
+                            </div>
+                          </td>
+                          <td>{{ ing.spec|default:"-" }}</td>
+                          <td>{{ ing.unit }}</td>
+                          <td>{{ ing.current_stock }} {{ ing.unit }}</td>
+                          <td>{{ ing.safe_stock }} {{ ing.unit }}</td>
+                          <td>{{ ing.needed_qty }} {{ ing.unit }}</td>
+                          <td>
+                            <div class="sp-order-qty">
+                              <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}">
+                              <input type="hidden" name="target_date[]" value="{{ day.date|date:'Y-m-d' }}">
+                              <input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="quantity[]"
+                                value="{{ ing.order_qty }}"
+                                data-price="{{ ing.price }}"
+                                class="{% if ing.order_qty > 0 %}needs-order{% endif %}"
+                              >
+                              {% if ing.order_qty > 0 %}
+                                <small>부족분 자동 입력</small>
+                              {% else %}
+                                <small style="color:#2f9e44;">재고 충분</small>
+                              {% endif %}
+                            </div>
+                          </td>
+                          <td>{{ ing.price|floatformat:0 }}원</td>
+                          <td class="js-line-total">0원</td>
+                          <td>
+                            {% if ing.order_qty > 0 %}
+                              <span class="sp-status danger">발주필요</span>
+                            {% else %}
+                              <span class="sp-status ok">재고충분</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% empty %}
+                        <tr>
+                          <td>{{ plan.meal_type }}</td>
+                          <td>{{ plan.serving_count }}명</td>
+                          <td>{{ menu.name }}</td>
+                          <td colspan="10">연결된 레시피 식재료가 없습니다.</td>
+                        </tr>
+                      {% endfor %}
+                    {% empty %}
+                      <tr>
+                        <td>{{ plan.meal_type }}</td>
+                        <td>{{ plan.serving_count }}명</td>
+                        <td colspan="11">등록된 메뉴가 없습니다.</td>
+                      </tr>
+                    {% endfor %}
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-        </div>
+          </section>
         {% endfor %}
 
-        <div class="total-footer shadow-lg border-top">
-            <div class="d-flex align-items-center gap-5">
-                <div>
-                    <span class="text-muted small d-block mb-1">총 발주 품목</span>
-                    <span class="h4 fw-bold mb-0" id="itemCountDisplay">0개</span>
-                </div>
-                <div>
-                    <span class="text-muted small d-block mb-1">예상 총 발주액 (VAT 별도)</span>
-                    <span class="h2 fw-bold text-primary mb-0" id="grandTotalDisplay">0원</span>
-                </div>
-            </div>
-            <div class="d-flex gap-3">
-                <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="history.back()">취소 및 돌아가기</button>
-                <button type="submit" class="btn btn-primary btn-lg px-5 shadow fw-bold">최종 발주서 확정하기</button>
-            </div>
+        <div class="sp-summary-box">
+          <div>
+            <h3>공급가액</h3>
+            <strong id="smartOrderSubtotal">0원</strong>
+          </div>
+          <div class="equals">+</div>
+          <div>
+            <h3>부가세</h3>
+            <strong id="smartOrderVat">0원</strong>
+          </div>
+          <div class="equals">=</div>
+          <div class="total">
+            <h3>총액</h3>
+            <strong id="smartOrderTotal">0원</strong>
+          </div>
         </div>
+      </section>
     </form>
-    {% else %}
-    <div class="card border-0 shadow-sm rounded-4 text-center py-5 mt-5">
-        <div class="card-body">
-            <i class="bi bi-calendar-x opacity-25" style="font-size: 5rem;"></i>
-            <h3 class="fw-bold mt-3 text-secondary">선택한 기간에 등록된 식단이 없습니다.</h3>
-            <p class="text-muted mb-4">상단의 날짜 범위를 다시 설정하거나, 식단표를 먼저 작성해 주세요.</p>
-            <a href="{% url 'meals:weekly_mealplan_create' %}" class="btn btn-primary btn-lg rounded-pill px-5">식단 등록하러 가기</a>
+  {% else %}
+    <section class="sp-card">
+      <div class="sp-card-head">
+        <div>
+          <p class="sp-kicker">No Data</p>
+          <h2>선택한 기간에 등록된 식단이 없습니다.</h2>
         </div>
-    </div>
-    {% endif %}
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="addIngredientModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalTitle">식재료 추가</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted">식재료 검색</label>
-                    <select id="ingredientSelect" class="form-select form-select-lg shadow-sm border-0 bg-light">
-                        <option value="">식재료를 선택하세요...</option>
-                        {% for ing in all_ingredients %}
-                        <option value="{{ ing.id }}" 
-                                data-unit="{{ ing.unit }}" 
-                                data-price="{{ ing.unit_price }}" 
-                                data-supplier="{{ ing.supplier.username|default:'미정' }}"
-                                data-spec="{{ ing.spec|default:'-' }}"
-                                data-desc="{{ ing.description|default:'-'|truncatechars:30 }}">
-                            {{ ing.name }} ({{ ing.unit_price|floatformat:0 }}원 / {{ ing.unit }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted">발주 수량</label>
-                    <input type="number" id="addQty" class="form-control form-control-lg shadow-sm border-0 bg-light" value="1" step="0.01">
-                </div>
-                <button type="button" class="btn btn-primary btn-lg w-100 fw-bold shadow mt-2" onclick="confirmAddIngredient()">목록에 추가하기</button>
-            </div>
-        </div>
-    </div>
+      </div>
+      <p class="sp-note">날짜 범위를 다시 설정하거나 식단표를 먼저 작성해 주세요.</p>
+      <div class="sp-actions" style="justify-content:flex-start;margin-top:16px;">
+        <a class="sp-btn primary" href="{% url 'meals:mealplan_create' %}">식단 등록하러 가기</a>
+      </div>
+    </section>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    let currentCtx = { container: null, date: null, mealType: null, menuName: null };
+function spMoney(value) {
+  return Math.round(value).toLocaleString("ko-KR") + "원";
+}
 
-    function setContext(menuName, btn, date, mealType) {
-        document.getElementById('modalTitle').innerText = `${menuName} - 식재료 추가`;
-        currentCtx.container = btn.closest('table').querySelector('tbody');
-        currentCtx.date = date;
-        currentCtx.mealType = mealType;
-        currentCtx.menuName = menuName;
-    }
+function updateSmartOrderTotals() {
+  let subtotal = 0;
 
-    function confirmAddIngredient() {
-        const select = document.getElementById('ingredientSelect');
-        const id = select.value;
-        if(!id) return;
-        
-        const opt = select.options[select.selectedIndex];
-        const name = opt.text.split(' (')[0];
-        const unit = opt.dataset.unit;
-        const price = parseFloat(opt.dataset.price);
-        const supplier = opt.dataset.supplier;
-        const spec = opt.dataset.spec;
-        const desc = opt.dataset.desc;
-        const qty = parseFloat(document.getElementById('addQty').value) || 0;
-        
-        const subtotal = Math.round(qty * price);
-        
-        const html = `
-            <tr class="ingredient-row animate__animated animate__fadeIn" data-meal-type="${currentCtx.mealType}">
-                <td></td>
-                <td></td>
-                <td class="fw-bold">${name}</td>
-                <td class="small text-muted text-center">${spec}</td>
-                <td class="text-muted small text-truncate" style="max-width: 280px;" title="${desc}">${desc}</td>
-                <td class="text-center"><span class="badge bg-light text-dark border">${unit}</span></td>
-                <td class="text-center"><span class="badge badge-supplier">${supplier}</span></td>
-                <td>
-                    <input type="number" step="0.01" name="quantity[]" class="form-control form-control-sm qty-input mx-auto" value="${qty}" oninput="updateRowSubtotal(this, ${price})">
-                    <input type="hidden" name="ingredient_id[]" value="${id}">
-                    <input type="hidden" name="target_date[]" value="${currentCtx.date}">
-                    <input type="hidden" name="meal_type[]" value="${currentCtx.mealType}">
-                    <input type="hidden" name="menu_name[]" value="${currentCtx.menuName}">
-                </td>
-                <td class="text-end pe-4 fw-bold text-primary subtotal-display" data-price="${price}">
-                    ${subtotal.toLocaleString()}원
-                </td>
-                <td class="text-center">
-                    <i class="bi bi-trash remove-ing" onclick="removeRow(this)"></i>
-                </td>
-            </tr>
-        `;
-        
-        currentCtx.container.insertAdjacentHTML('beforeend', html);
-        bootstrap.Modal.getInstance(document.getElementById('addIngredientModal')).hide();
-        updateFullSummary();
-    }
+  document.querySelectorAll(".smart-order-table tbody tr[data-price]").forEach((row) => {
+    const qtyInput = row.querySelector('input[name="quantity[]"]');
+    if (!qtyInput) return;
 
-    function removeRow(btn) {
-        const row = btn.closest('tr');
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(20px)';
-        setTimeout(() => {
-            row.remove();
-            updateFullSummary();
-        }, 300);
-    }
+    const price = Number(qtyInput.dataset.price || 0);
+    const qty = Number(qtyInput.value || 0);
+    const amount = qty * price;
+    subtotal += amount;
 
-    function updateRowSubtotal(input, price) {
-        const qty = parseFloat(input.value) || 0;
-        const subtotal = Math.round(qty * price);
-        const row = input.closest('tr');
-        row.querySelector('.subtotal-display').innerText = `${subtotal.toLocaleString()}원`;
-        updateFullSummary();
-    }
+    const lineTotal = row.querySelector(".js-line-total");
+    if (lineTotal) lineTotal.textContent = spMoney(amount);
+  });
 
-    function updateFullSummary() {
-        let total = 0;
-        let count = 0;
-        document.querySelectorAll('.subtotal-display').forEach(el => {
-            const row = el.closest('tr');
-            const q = parseFloat(row.querySelector('.qty-input').value) || 0;
-            const p = parseFloat(el.dataset.price);
-            total += Math.round(q * p);
-            count++;
-        });
-        document.getElementById('grandTotalDisplay').innerText = `${total.toLocaleString()}원`;
-        document.getElementById('itemCountDisplay').innerText = `${count}개`;
-    }
+  const vat = subtotal * 0.1;
+  const subtotalEl = document.getElementById("smartOrderSubtotal");
+  const vatEl = document.getElementById("smartOrderVat");
+  const totalEl = document.getElementById("smartOrderTotal");
 
-    document.addEventListener('DOMContentLoaded', () => {
-        updateFullSummary();
-    });
+  if (subtotalEl) subtotalEl.textContent = spMoney(subtotal);
+  if (vatEl) vatEl.textContent = spMoney(vat);
+  if (totalEl) totalEl.textContent = spMoney(subtotal + vat);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll('.smart-order-table input[name="quantity[]"]').forEach((input) => {
+    input.addEventListener("input", updateSmartOrderTotals);
+  });
+  updateSmartOrderTotals();
+});
 </script>
 {% endblock %}

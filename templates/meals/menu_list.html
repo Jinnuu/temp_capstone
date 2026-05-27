@@ -1,167 +1,113 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}등록 메뉴 관리 | S&P{% endblock %}
 
-{% block content %}
-<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
-    <div>
-        <span class="text-uppercase small fw-bold text-primary">Menu Management</span>
-        <h1 class="h2 fw-bold mb-2">등록 메뉴 관리</h1>
-        <p class="text-muted mb-0">
-            시스템에 등록된 전체 메뉴를 확인하고, 수정하거나 삭제할 수 있습니다.
-        </p>
-    </div>
-
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'meals:menu_create' %}" class="btn btn-primary">새 메뉴 등록</a>
-        <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-secondary">레시피 수정</a>
-    </div>
-</section>
-<style>
-    .clickable-row {
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .clickable-row:hover {
-        background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
-    }
-</style>
-
-<div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-4">
-        <form method="get" class="row g-3 align-items-end mb-4">
-            <div class="col-md-5">
-                <label for="q" class="form-label fw-semibold">메뉴명 검색</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" name="q" id="q" class="form-control border-start-0 ps-0" placeholder="메뉴 이름을 입력하세요..." value="{{ request.GET.q }}">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <label for="category" class="form-label fw-semibold">카테고리</label>
-                <select name="category" id="category" class="form-select">
-                    <option value="">전체</option>
-                    <option value="한식" {% if request.GET.category == "한식" %}selected{% endif %}>한식</option>
-                    <option value="일식" {% if request.GET.category == "일식" %}selected{% endif %}>일식</option>
-                    <option value="중식" {% if request.GET.category == "중식" %}selected{% endif %}>중식</option>
-                    <option value="양식" {% if request.GET.category == "양식" %}selected{% endif %}>양식</option>
-                    <option value="기타" {% if request.GET.category == "기타" %}selected{% endif %}>기타</option>
-                </select>
-            </div>
-
-            <div class="col-md-4 d-flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary px-4">조회</button>
-                <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">초기화</a>
-            </div>
-        </form>
-
-        {% if menus %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="menu-table">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 100px;">ID</th>
-                        <th>메뉴명</th>
-                        <th style="width: 200px;">카테고리</th>
-                        <th style="width: 120px;" class="text-end">삭제</th>
-                    </tr>
-                </thead>
-                <tbody id="menu-tbody">
-                    {% for menu in menus %}
-                    <tr class="clickable-row" onclick="location.href='{% url 'meals:menu_update' menu.id %}'">
-                        <td><span class="text-muted">#{{ menu.id }}</span></td>
-                        <td>
-                            <div class="fw-bold text-dark">{{ menu.name }}</div>
-                            <small class="text-muted">레시피: {{ menu.recipes.count }}개 항목</small>
-                        </td>
-                        <td>
-                            <span class="badge text-bg-light border px-2 py-1">{{ menu.category|default:"미분류" }}</span>
-                        </td>
-                        <td class="text-end">
-                            <form method="post" action="{% url 'meals:menu_delete' menu.id %}" class="m-0" onclick="event.stopPropagation();">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link text-danger p-0 border-0" onclick="return confirm('정말 삭제하시겠습니까?');">
-                                    <i class="bi bi-trash3" style="font-size: 1.1rem;"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="border rounded-4 bg-light px-4 py-5 text-center text-muted">
-            등록된 메뉴가 없습니다.
-        </div>
-        {% endif %}
-    </div>
-</div>
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const qInput = document.getElementById('q');
-    const catSelect = document.getElementById('category');
-    const tbody = document.getElementById('menu-tbody');
-    let debounceTimer;
-
-    function performSearch() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const q = qInput.value;
-            const category = catSelect.value;
-            const url = `{% url 'meals:menu_list' %}?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`;
-            
-            tbody.style.opacity = '0.5';
-
-            fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newTbody = doc.getElementById('menu-tbody');
-                const emptyMsg = doc.querySelector('.border.rounded-4.bg-light');
-                
-                // Clear existing empty message if any
-                const existingMsg = document.querySelector('.border.rounded-4.bg-light');
-                if (existingMsg) existingMsg.remove();
-
-                if (newTbody && newTbody.children.length > 0) {
-                    tbody.innerHTML = newTbody.innerHTML;
-                    tbody.style.opacity = '1';
-                } else if (emptyMsg) {
-                    tbody.innerHTML = '';
-                    tbody.style.opacity = '1';
-                    const tableContainer = document.querySelector('.table-responsive');
-                    tableContainer.insertAdjacentElement('afterend', emptyMsg);
-                } else {
-                    tbody.innerHTML = '';
-                    tbody.style.opacity = '1';
-                }
-            })
-            .catch(err => {
-                console.error('Search error:', err);
-                tbody.style.opacity = '1';
-            });
-        }, 300);
-    }
-
-    qInput.addEventListener('input', performSearch);
-    catSelect.addEventListener('change', performSearch);
-    
-    // Prevent default form submission
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            performSearch();
-        });
-    }
-});
-</script>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
 {% endblock %}
+
+{% block content %}
+<div class="sp-align-page">
+  <section class="sp-align-hero">
+    <div>
+      <p class="sp-align-kicker">Menu Management</p>
+      <h1>등록 메뉴 관리</h1>
+      <p>시스템에 등록된 전체 메뉴를 확인하고, 수정하거나 삭제할 수 있습니다.</p>
+    </div>
+
+    <div class="sp-align-actions">
+      <a class="sp-btn sp-btn-primary" href="{% url 'meals:menu_create' %}">새 메뉴 등록</a>
+      <a class="sp-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표 보기</a>
+    </div>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Search</p>
+        <h2>메뉴 조회</h2>
+      </div>
+    </div>
+
+    <form method="get" class="sp-align-filter">
+      <div class="sp-align-field">
+        <label>메뉴명 검색</label>
+        <input type="search" name="q" value="{{ request.GET.q }}" placeholder="예: 제육볶음">
+      </div>
+
+      <div class="sp-align-field">
+        <label>카테고리</label>
+        <select name="category">
+          <option value="">전체</option>
+          <option value="밥">밥</option>
+          <option value="국">국</option>
+          <option value="주반찬">주반찬</option>
+          <option value="부반찬">부반찬</option>
+          <option value="김치">김치</option>
+          <option value="간식">간식</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+
+      <div class="sp-align-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">조회</button>
+        <a class="sp-btn" href="{% url 'meals:menu_list' %}">초기화</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Menu List</p>
+        <h2>메뉴 목록</h2>
+      </div>
+      <span class="sp-align-note" style="margin:0;">레시피 개수와 카테고리를 함께 확인합니다.</span>
+    </div>
+
+    {% if menus %}
+      <div class="sp-table-wrap">
+        <table class="sp-data-table sp-align-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>메뉴명</th>
+              <th>카테고리</th>
+              <th>레시피</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for menu in menus %}
+              <tr>
+                <td>#{{ menu.id }}</td>
+                <td>
+                  <div class="sp-align-menu-title">
+                    <strong>{{ menu.name }}</strong>
+                    <span>Recipe {{ menu.recipes.count }} items</span>
+                  </div>
+                </td>
+                <td>{{ menu.category|default:"미분류" }}</td>
+                <td>{{ menu.recipes.count }}개 항목</td>
+                <td>
+                  <div class="sp-align-submit-row" style="justify-content:center;">
+                    <a class="sp-btn" href="{% url 'meals:menu_update' menu.id %}">수정</a>
+                    <form method="post" action="{% url 'meals:menu_delete' menu.id %}" class="sp-align-inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="sp-btn" onclick="return confirm('이 메뉴를 삭제할까요?');">삭제</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="sp-align-empty">등록된 메뉴가 없습니다.</div>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

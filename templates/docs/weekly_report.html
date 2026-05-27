@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}주간 식단표 보고서 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ERP Style Layout */
+    .sp-report-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 64px);
+        background-color: #f8f9fa;
+    }
+
+    /* Top Control Toolbar */
+    .sp-report-toolbar {
+        background: white;
+        padding: 12px 24px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        z-index: 10;
+    }
+
+    .sp-toolbar-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    /* Document Preview Area */
+    .sp-report-preview {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* A4 Document Box */
+    .a4-document {
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        padding: 20mm;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        position: relative;
+        color: #333;
+    }
+
+    .report-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 20px;
+    }
+
+    .report-header h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        letter-spacing: 10px;
+        font-weight: 800;
+    }
+
+    .report-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* Table Styles */
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .report-table th, .report-table td {
+        border: 1px solid #000;
+        padding: 12px 8px;
+        text-align: center;
+        vertical-align: middle;
+        word-break: break-all;
+    }
+
+    .report-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .meal-type-col {
+        width: 80px;
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .meal-content {
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.9rem;
+    }
+
+    .next-mon-label {
+        font-size: 0.7rem;
+        color: #007bff;
+        margin-bottom: 4px;
+        font-weight: bold;
+    }
+
+    /* Print optimization */
+    @media print {
+        header, .sp-report-toolbar {
+            display: none !important;
+        }
+        .sp-report-container {
+            height: auto;
+            background: white;
+        }
+        .sp-report-preview {
+            padding: 0;
+            overflow: visible;
+        }
+        .a4-document {
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-report-container">
+    <!-- 상단 컨트롤 영역 -->
+    <div class="sp-report-toolbar">
+        <div class="sp-toolbar-group">
+            <span class="sp-kicker">보고서 조회</span>
+            <form method="get" class="sp-toolbar-group">
+                <input type="date" name="date" value="{{ start_date_str }}" class="sp-input">
+                <button type="submit" class="sp-btn primary">조회</button>
+            </form>
+        </div>
+        <div class="sp-toolbar-group">
+            <a href="{% url 'meals:export_weekly_mealplan_excel' %}?date={{ start_date_str }}" class="sp-btn ok">
+                엑셀 다운로드
+            </a>
+            <button onclick="window.print()" class="sp-btn">
+                인쇄하기
+            </button>
+            <a href="{% url 'docs_index' %}" class="sp-btn gray">뒤로가기</a>
+        </div>
+    </div>
+
+    <!-- 하단 문서 미리보기 영역 -->
+    <div class="sp-report-preview">
+        <article class="a4-document">
+            <div class="report-header">
+                <h1>주간 식단표</h1>
+            </div>
+
+            <div class="report-meta">
+                <span>조회 기간: {{ start_date_str }} ~ {{ end_date_str }}</span>
+                <span>출력일: {% now "Y-m-d H:i" %}</span>
+            </div>
+
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th class="meal-type-col">구분</th>
+                        {% for day in days_context %}
+                        <th>{{ day.date|date:"m/d" }}<br>({{ day.weekday }})</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="meal-type-col">조식</td>
+                        {% for day in days_context %}
+                        <td>
+                            <div class="meal-content">
+                                {% for menu in day.breakfast %}
+                                <span>{{ menu }}</span>
+                                {% empty %}-{% endfor %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="meal-type-col">중식</td>
+                        {% for day in days_context %}
+                        <td>
+                            <div class="meal-content">
+                                {% for menu in day.lunch %}
+                                <span>{{ menu }}</span>
+                                {% empty %}-{% endfor %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="meal-type-col">석식</td>
+                        {% for day in days_context %}
+                        <td>
+                            <div class="meal-content">
+                                {% for menu in day.dinner %}
+                                <span>{{ menu }}</span>
+                                {% empty %}-{% endfor %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="meal-type-col">비고</td>
+                        {% for day in days_context %}
+                        <td>
+                            <div class="meal-content">
+                                {% if forloop.last %}
+                                    <div class="next-mon-label">[다음주 월요일 조식]</div>
+                                    {% for menu in day.remarks %}
+                                    <span>{{ menu }}</span>
+                                    {% empty %}-{% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 50px; text-align: right; padding-right: 20px;">
+                <p>위와 같이 주간 식단을 보고합니다.</p>
+                <div style="margin-top: 30px;">
+                    <span style="border-bottom: 1px solid #000; padding: 0 30px;">관리자: (인)</span>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}

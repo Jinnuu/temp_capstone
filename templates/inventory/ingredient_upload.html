@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}식자재 엑셀 일괄 등록 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
+{% endblock %}
+
+{% block content %}
+<div class="sp-align-page">
+  <section class="sp-align-hero">
+    <div>
+      <p class="sp-align-kicker">Ingredient Upload</p>
+      <h1>식자재 엑셀 일괄 등록</h1>
+      <p>식자재 기준정보를 XLSX 파일로 한 번에 등록하거나 수정합니다.</p>
+    </div>
+
+    <div class="sp-align-actions">
+      <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">식자재 목록</a>
+      <a class="sp-btn" href="{% url 'inventory:ingredient_create' %}">단일 식자재 등록</a>
+      <a class="sp-btn" href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
+    </div>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Excel Upload</p>
+        <h2>XLSX 파일 업로드</h2>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="sp-align-form">
+      {% csrf_token %}
+
+      <div class="sp-align-field">
+        <label>식자재 엑셀 파일</label>
+        <input type="file" name="file" accept=".xlsx" required>
+      </div>
+
+      <div class="sp-align-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">엑셀 일괄 등록</button>
+        <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Required Columns</p>
+        <h2>권장 엑셀 컬럼</h2>
+      </div>
+    </div>
+
+    <div class="sp-align-chip-grid">
+      <span>식재료명</span>
+      <span>대분류</span>
+      <span>규격</span>
+      <span>단위</span>
+      <span>단가</span>
+      <span>안전재고</span>
+      <span>발주처</span>
+      <span>식품 설명</span>
+    </div>
+
+    <p class="sp-align-note">
+      첫 번째 행에는 컬럼명을 입력해 주세요. <strong>식재료명</strong>은 필수이며, 발주처는 시스템 사용자 ID 또는 이름과 일치할 때 연결됩니다.
+    </p>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Template Guide</p>
+        <h2>권장 엑셀 양식</h2>
+      </div>
+    </div>
+
+    <div class="sp-table-wrap">
+      <table class="sp-data-table sp-align-table">
+        <thead>
+          <tr>
+            <th>식재료명</th>
+            <th>대분류</th>
+            <th>규격</th>
+            <th>단위</th>
+            <th>단가</th>
+            <th>안전재고</th>
+            <th>발주처</th>
+            <th>식품 설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>양파</td>
+            <td>농산물</td>
+            <td>국내산, KG</td>
+            <td>KG</td>
+            <td>2300</td>
+            <td>10</td>
+            <td>supplier01</td>
+            <td>제육볶음, 카레 등에 사용</td>
+          </tr>
+          <tr>
+            <td>돼지고기</td>
+            <td>축산물</td>
+            <td>냉장, KG</td>
+            <td>KG</td>
+            <td>10700</td>
+            <td>10</td>
+            <td>supplier02</td>
+            <td>주찬 조리용</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
