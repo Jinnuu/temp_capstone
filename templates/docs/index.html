@@ -26,7 +26,10 @@
     </article>
     <article id="stock-docs">
       <strong>수불 현황</strong>
-      <span>일수불명세서, 월수불명세서, 재고 흐름 문서화 자리</span>
+      <div class="sp-docs-links">
+        <a href="{% url 'inventory:weekly_inventory_report' %}" class="sp-doc-link">주간수불명세서</a>
+        <a href="{% url 'inventory:monthly_inventory_report' %}" class="sp-doc-link">월수불명세서</a>
+      </div>
     </article>
     <article id="order-docs">
       <strong>발주 내역</strong>
