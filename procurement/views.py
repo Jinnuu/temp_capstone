@@ -5,8 +5,12 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Case, IntegerField, Sum, Value, When
+from django.db.models import Case, DateField, F, IntegerField, Sum, Value, When
+from django.db.models.functions import Cast, Coalesce
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+import openpyxl
+from openpyxl.styles import Alignment, Border, Font, Side
 
 from forecasting.models import AttendancePrediction
 from forecasting.services.ingredient_calc import get_all_day_requirements
@@ -114,6 +118,7 @@ def order_create(request):
     if request.method == "POST":
         ingredient_ids = request.POST.getlist("ingredient_id[]")
         quantities = request.POST.getlist("quantity[]")
+        target_date_val = request.POST.get("target_date")
 
         if ingredient_ids and quantities:
             user = get_or_create_dummy_user(request)
@@ -137,6 +142,7 @@ def order_create(request):
                 OrderItem.objects.create(
                     purchase_order=po,
                     ingredient=ing,
+                    target_date=target_date_val if target_date_val else None,
                     required_qty=q,
                     missing_qty=q,
                     order_unit_price=ing.unit_price,
@@ -507,3 +513,169 @@ def order_from_mealplan(request):
             "all_ingredients": Ingredient.objects.all().order_by("name"),
         },
     )
+
+
+def get_monday_sunday_range(date_str):
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            target_date = date.today()
+    else:
+        target_date = date.today()
+
+    monday = target_date - timedelta(days=target_date.weekday())
+    sunday = monday + timedelta(days=6)
+    return target_date, monday, sunday
+
+
+def weekly_procurement_report(request):
+    target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+
+    # Use Coalesce to fallback to purchase_order__created_at__date if target_date is NULL
+    order_items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday]
+    ).select_related("ingredient", "purchase_order__supplier").order_by("display_date", "ingredient__name")
+
+    # Group by date
+    analysis_data = defaultdict(list)
+    for item in order_items:
+        analysis_data[item.display_date].append(item)
+
+    report_data = [
+        {"date": dt, "items": analysis_data[dt]}
+        for dt in sorted(analysis_data.keys())
+    ]
+
+    context = {
+        "report_data": report_data,
+        "monday": monday,
+        "sunday": sunday,
+        "target_date": target_date,
+        "prev_week_date": (monday - timedelta(days=7)).isoformat(),
+        "next_week_date": (monday + timedelta(days=7)).isoformat(),
+    }
+    return render(request, "docs/weekly_procurement_report.html", context)
+
+
+def vendor_procurement_report(request):
+    target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    supplier_id = request.GET.get("supplier_id")
+
+    suppliers = get_user_model().objects.filter(purchase_orders__isnull=False).distinct()
+    selected_supplier = None
+    report_data = []
+
+    if supplier_id:
+        selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        order_items = OrderItem.objects.annotate(
+            display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+        ).filter(
+            display_date__range=[monday, sunday],
+            purchase_order__supplier=selected_supplier
+        ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
+
+        analysis_data = defaultdict(list)
+        for item in order_items:
+            analysis_data[item.display_date].append(item)
+
+        report_data = [
+            {"date": dt, "items": analysis_data[dt]}
+            for dt in sorted(analysis_data.keys())
+        ]
+
+    context = {
+        "suppliers": suppliers,
+        "selected_supplier": selected_supplier,
+        "current_supplier_id": supplier_id,
+        "report_data": report_data,
+        "monday": monday,
+        "sunday": sunday,
+        "target_date": target_date,
+        "prev_week_date": (monday - timedelta(days=7)).isoformat(),
+        "next_week_date": (monday + timedelta(days=7)).isoformat(),
+    }
+    return render(request, "docs/vendor_procurement_report.html", context)
+
+
+def export_weekly_procurement_excel(request):
+    _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday]
+    ).select_related("ingredient", "purchase_order__supplier").order_by("display_date", "ingredient__name")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "주간발주서"
+
+    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "공급처", "주문일자"]
+    ws.append(headers)
+
+    for i, item in enumerate(items, 1):
+        ws.append([
+            i,
+            item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
+            item.ingredient.category or "-",
+            item.ingredient.name,
+            item.ingredient.spec or "-",
+            item.ingredient.unit,
+            item.order_unit_price,
+            float(item.required_qty),
+            float(item.missing_qty),
+            item.estimated_price,
+            item.purchase_order.supplier.name or item.purchase_order.supplier.username,
+            item.purchase_order.created_at.strftime("%Y-%m-%d")
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="weekly_procurement_{monday}.xlsx"'
+    wb.save(response)
+    return response
+
+
+def export_vendor_procurement_excel(request):
+    _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    supplier_id = request.GET.get("supplier_id")
+    
+    if not supplier_id:
+        return HttpResponse("업체를 선택해주세요.", status=400)
+
+    supplier = get_object_or_404(get_user_model(), id=supplier_id)
+    items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday],
+        purchase_order__supplier=supplier
+    ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"발주명세서_{supplier.name or supplier.username}"
+
+    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "주문일자"]
+    ws.append(headers)
+
+    for i, item in enumerate(items, 1):
+        ws.append([
+            i,
+            item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
+            item.ingredient.category or "-",
+            item.ingredient.name,
+            item.ingredient.spec or "-",
+            item.ingredient.unit,
+            item.order_unit_price,
+            float(item.required_qty),
+            float(item.missing_qty),
+            item.estimated_price,
+            item.purchase_order.created_at.strftime("%Y-%m-%d")
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    filename = f"vendor_procurement_{supplier.name or supplier.username}_{monday}.xlsx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response

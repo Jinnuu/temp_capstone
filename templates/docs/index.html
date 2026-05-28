@@ -33,7 +33,10 @@
     </article>
     <article id="order-docs">
       <strong>발주 내역</strong>
-      <span>발주 목록, 발주 명세서, 업체별 발주 내역 문서화 자리</span>
+      <div class="sp-docs-links">
+        <a href="{% url 'procurement:weekly_procurement_report' %}" class="sp-doc-link">주간 발주서</a>
+        <a href="{% url 'procurement:vendor_procurement_report' %}" class="sp-doc-link">업체별 발주 명세서</a>
+      </div>
     </article>
     <article>
       <strong>예측 결과</strong>

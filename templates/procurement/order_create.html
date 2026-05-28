@@ -34,6 +34,7 @@
 
 <form method="post" id="quickOrderForm">
   {% csrf_token %}
+  <input type="hidden" name="target_date" value="{{ target_date }}">
 
   <section class="sp-order-grid">
     <article class="sp-panel">
