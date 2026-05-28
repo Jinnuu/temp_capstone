@@ -562,7 +562,11 @@ def weekly_procurement_report(request):
 
 def vendor_procurement_report(request):
     target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
-    supplier_id = request.GET.get("supplier_id")
+    supplier_id = request.GET.get("supplier_id", "").strip()
+
+    # 빈 문자열이나 문자열 'None'이 넘어온 경우 필터링하지 않는다.
+    if supplier_id in ("", "None", "none"):
+        supplier_id = ""
 
     suppliers = get_user_model().objects.filter(purchase_orders__isnull=False).distinct()
     selected_supplier = None
@@ -639,8 +643,12 @@ def export_weekly_procurement_excel(request):
 
 def export_vendor_procurement_excel(request):
     _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
-    supplier_id = request.GET.get("supplier_id")
-    
+    supplier_id = request.GET.get("supplier_id", "").strip()
+
+    # 빈 문자열이나 문자열 'None'이 넘어온 경우 업체 미선택으로 처리한다.
+    if supplier_id in ("None", "none"):
+        supplier_id = ""
+
     if not supplier_id:
         return HttpResponse("업체를 선택해주세요.", status=400)
 
