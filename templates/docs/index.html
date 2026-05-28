@@ -2,50 +2,194 @@
 
 {% block title %}문서화 | S&P{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ERP 스타일 문서화 홈 */
+  .docs-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f3f5;
+  }
+
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .doc-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .doc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-color: #dee2e6;
+  }
+
+  .doc-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .doc-card-title i {
+    color: #4dabf7;
+  }
+
+  .doc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .doc-item {
+    margin-bottom: 0.75rem;
+  }
+
+  .doc-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: #495057;
+    text-decoration: none !important;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .doc-link::before {
+    content: "•";
+    position: absolute;
+    left: 0.5rem;
+    color: #adb5bd;
+    transition: color 0.2s;
+  }
+
+  .doc-link:hover {
+    background-color: #f8f9fa;
+    color: #228be6;
+    font-weight: 500;
+  }
+
+  .doc-link:hover::before {
+    color: #228be6;
+  }
+
+  .doc-card-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    font-size: 0.85rem;
+    color: #adb5bd;
+  }
+
+  .empty-prediction {
+    padding: 0.5rem 0.75rem;
+    color: #adb5bd;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="sp-page-title">
-  <h1>문서화</h1>
-  <p>식단표, 수불 현황, 재고 현황, 발주 내역, 예측 결과를 문서화하는 공간입니다.</p>
+<section class="docs-header">
+  <h1 class="h2 fw-bold">문서화 센터</h1>
+  <p class="text-muted">ERP 시스템 전반의 데이터를 시각화하고 공식 문서로 출력할 수 있습니다.</p>
 </section>
 
-<section class="sp-panel sp-docs-placeholder">
-  <div class="sp-panel-head">
-    <div>
-      <p>Documentation</p>
-      <h2>문서화 기능 준비 중</h2>
+<div class="docs-grid">
+  <!-- 식단 문서화 -->
+  <article class="doc-card">
+    <div class="doc-card-title">
+      <i class="bi bi-calendar-check"></i>
+      식단 문서화
     </div>
-  </div>
+    <ul class="doc-list">
+      <li class="doc-item">
+        <a href="{% url 'meals:weekly_meal_plan_document' %}" class="doc-link">주간 식단표</a>
+      </li>
+      <li class="doc-item">
+        <a href="{% url 'meals:monthly_meal_plan_document' %}" class="doc-link">월간 식단표</a>
+      </li>
+    </ul>
+    <div class="doc-card-footer">
 
-  <div class="sp-docs-grid">
-    <article id="meal-docs">
-      <strong>식단 문서화</strong>
-      <div class="sp-docs-links">
-        <a href="{% url 'meals:weekly_meal_plan_document' %}" class="sp-doc-link">주간 식단표</a>
-        <a href="{% url 'meals:monthly_meal_plan_document' %}" class="sp-doc-link">월간 식단표</a>
-      </div>
-    </article>
-    <article id="stock-docs">
-      <strong>수불 현황</strong>
-      <div class="sp-docs-links">
-        <a href="{% url 'inventory:weekly_inventory_report' %}" class="sp-doc-link">주간수불명세서</a>
-        <a href="{% url 'inventory:monthly_inventory_report' %}" class="sp-doc-link">월수불명세서</a>
-      </div>
-    </article>
-    <article id="order-docs">
-      <strong>발주 내역</strong>
-      <div class="sp-docs-links">
-        <a href="{% url 'procurement:weekly_procurement_report' %}" class="sp-doc-link">주간 발주서</a>
-        <a href="{% url 'procurement:vendor_procurement_report' %}" class="sp-doc-link">업체별 발주 명세서</a>
-      </div>
-    </article>
-    <article>
-      <strong>예측 결과</strong>
-      <span>날짜별 식수 예측, 예측 대비 실제 식수 문서화 자리</span>
-    </article>
-  </div>
+    </div>
+  </article>
 
-  <p class="sp-help mt-3">
-    현재 화면은 다른 팀원이 구현할 문서화 기능을 연결하기 위한 빈 페이지입니다.
-  </p>
-</section>
+  <!-- 수불 현황 -->
+  <article class="doc-card">
+    <div class="doc-card-title">
+      <i class="bi bi-box-seam"></i>
+      수불 현황
+    </div>
+    <ul class="doc-list">
+      <li class="doc-item">
+        <a href="{% url 'inventory:weekly_inventory_report' %}" class="doc-link">주간 수불 명세서</a>
+      </li>
+      <li class="doc-item">
+        <a href="{% url 'inventory:monthly_inventory_report' %}" class="doc-link">월 수불 명세서</a>
+      </li>
+    </ul>
+    <div class="doc-card-footer">
+
+    </div>
+  </article>
+
+  <!-- 발주 내역 -->
+  <article class="doc-card">
+    <div class="doc-card-title">
+      <i class="bi bi-truck"></i>
+      발주 내역
+    </div>
+    <ul class="doc-list">
+      <li class="doc-item">
+        <a href="{% url 'procurement:weekly_procurement_report' %}" class="doc-link">주간 통합 발주서</a>
+      </li>
+      <li class="doc-item">
+        <a href="{% url 'procurement:vendor_procurement_report' %}" class="doc-link">업체별 발주 명세서</a>
+      </li>
+      <li class="doc-item">
+        <a href="{% url 'procurement:daily_inspection_report' %}" class="doc-link">일자별 검수서(주문)</a>
+      </li>
+    </ul>
+    <div class="doc-card-footer">
+    </div>
+  </article>
+
+  <!-- 예측 결과 -->
+  <article class="doc-card">
+    <div class="doc-card-title">
+      <i class="bi bi-graph-up-arrow"></i>
+      예측 보고서
+    </div>
+    <div class="empty-prediction">
+      예측 결과 문서화 기능 준비 중입니다.
+    </div>
+    <div class="doc-card-footer">
+      Coming Soon
+    </div>
+  </article>
+</div>
+
+<div class="alert alert-light mt-5" role="alert">
+  <i class="bi bi-info-circle me-2"></i>
+  모든 문서는 <strong>A4 사이즈 출력</strong>에 최적화되어 있으며, <strong>엑셀(XLSX)</strong> 파일로도 다운로드 가능합니다.
+</div>
 {% endblock %}

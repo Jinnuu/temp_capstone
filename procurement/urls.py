@@ -14,6 +14,8 @@ urlpatterns = [
     # Reports
     path("weekly-report/", views.weekly_procurement_report, name="weekly_procurement_report"),
     path("vendor-report/", views.vendor_procurement_report, name="vendor_procurement_report"),
+    path("daily-report/", views.daily_inspection_report, name="daily_inspection_report"),
     path("weekly-report/excel/", views.export_weekly_procurement_excel, name="export_weekly_procurement_excel"),
     path("vendor-report/excel/", views.export_vendor_procurement_excel, name="export_vendor_procurement_excel"),
-]
+    path("daily-report/excel/", views.export_daily_inspection_excel, name="export_daily_inspection_excel"),
+]

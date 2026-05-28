@@ -38,3 +38,21 @@ class PurchaseOrderStatusUpdateTest(TestCase):
         # 모델의 상태가 기존(대기) 그대로인지 확인
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, PurchaseOrder.Status.PENDING)
+
+
+class DailyInspectionReportTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test_supplier_daily', password='password123')
+        self.order = PurchaseOrder.objects.create(supplier=self.user, status=PurchaseOrder.Status.PENDING)
+
+    def test_daily_inspection_report_status_code(self):
+        """검수일지 페이지가 정상적으로 로드되는지 확인"""
+        url = reverse('procurement:daily_inspection_report')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_daily_inspection_report_with_date(self):
+        """특정 날짜 파라미터와 함께 검수일지 페이지 접근"""
+        url = reverse('procurement:daily_inspection_report')
+        response = self.client.get(url, {'date': '2026-05-28'})
+        self.assertEqual(response.status_code, 200)
