@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}메뉴 레시피 일괄 등록 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
+{% endblock %}
+
+{% block content %}
+<div class="sp-align-page">
+  {% if messages %}
+  <div class="mb-4">
+      {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show border-0 shadow-sm rounded-4 p-3" role="alert">
+          <div class="d-flex align-items-center gap-2">
+              {% if message.tags == 'error' %}
+                  <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+              {% elif message.tags == 'warning' %}
+                  <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+              {% else %}
+                  <i class="bi bi-check-circle-fill text-success fs-5"></i>
+              {% endif %}
+              <div>
+                  <strong class="d-block">시스템 알림</strong>
+                  <span class="small text-secondary">{{ message.message }}</span>
+              </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="top: 50%; transform: translateY(-50%);"></button>
+      </div>
+      {% endfor %}
+  </div>
+  {% endif %}
+
+  <section class="sp-align-hero">
+    <div>
+      <p class="sp-align-kicker">Menu Recipe Upload</p>
+      <h1>CSV/XLSX 메뉴 레시피 일괄 등록</h1>
+      <p>메뉴 정보와 메뉴별 식재료 소요량(레시피) 데이터를 엑셀 파일로 업로드해 한 번에 등록합니다.</p>
+    </div>
+
+    <div class="sp-align-actions">
+      <a class="sp-btn" href="{% url 'meals:menu_list' %}">등록 메뉴 목록</a>
+      <a class="sp-btn" href="{% url 'meals:recipe_create' %}">레시피 직접 수정</a>
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표 보기</a>
+    </div>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Bulk Upload</p>
+        <h2>업로드 파일 선택</h2>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="sp-align-form">
+      {% csrf_token %}
+
+      <div class="sp-align-grid-2">
+        <div class="sp-align-field">
+          <label>파일 형식</label>
+          <select name="file_type">
+            <option value="xlsx">XLSX (Excel)</option>
+            <option value="csv">CSV</option>
+          </select>
+        </div>
+
+        <div class="sp-align-field">
+          <label>레시피 구성 파일</label>
+          <input type="file" name="recipe_file" accept=".csv,.xlsx" required>
+        </div>
+      </div>
+
+      <div class="sp-align-submit-row">
+        <button type="submit" class="sp-btn sp-btn-primary">일괄 등록하기</button>
+        <a class="sp-btn" href="{% url 'meals:menu_list' %}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sp-align-card">
+    <div class="sp-align-card-head">
+      <div>
+        <p class="sp-align-kicker">Template Guide</p>
+        <h2>권장 업로드 양식</h2>
+      </div>
+    </div>
+
+    <div class="sp-align-chip-grid">
+      <span>menu_name</span>
+      <span>category</span>
+      <span>ingredient_name</span>
+      <span>required_amount</span>
+    </div>
+
+    <p class="sp-align-note">메뉴명, 카테고리, 식재료명, 사용량을 기준으로 일괄 레시피를 생성합니다.</p>
+
+    <div class="sp-table-wrap mt-3">
+      <table class="sp-data-table sp-align-table">
+        <thead>
+          <tr>
+            <th>menu_name</th>
+            <th>category</th>
+            <th>ingredient_name</th>
+            <th>required_amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>테스트 제육볶음</td>
+            <td>한식</td>
+            <td>테스트 식재료 1</td>
+            <td>0.15</td>
+          </tr>
+          <tr>
+            <td>테스트 제육볶음</td>
+            <td>한식</td>
+            <td>양파</td>
+            <td>0.05</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

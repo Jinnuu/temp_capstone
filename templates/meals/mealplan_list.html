@@ -18,8 +18,9 @@
     </div>
     <div class="sp-actions">
       <a class="sp-btn primary" href="{% url 'procurement:order_from_mealplan' %}">식단기반 스마트 발주</a>
-      <form method="post" action="{% url 'meals:deduct_inventory' %}" style="display:inline;">
+        <form method="post" action="{% url 'meals:deduct_inventory_view' %}" style="display:inline;">
         {% csrf_token %}
+        <input type="hidden" name="target_date" value="{{ selected_date }}"> 
         <button type="submit" class="sp-btn">식재료 재고 차감</button>
       </form>
       <a class="sp-btn" href="{% url 'meals:mealplan_create' %}">일간식단 등록</a>

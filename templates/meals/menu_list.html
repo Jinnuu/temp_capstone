@@ -17,6 +17,9 @@
     </div>
 
     <div class="sp-align-actions">
+      <a class="sp-btn" href="{% url 'meals:menu_bulk_upload' %}" style="border-color: #365F91; color: #365F91;">
+        <i class="bi bi-file-earmark-excel"></i> xlsx로 메뉴 등록
+      </a>
       <a class="sp-btn sp-btn-primary" href="{% url 'meals:menu_create' %}">새 메뉴 등록</a>
       <a class="sp-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
       <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표 보기</a>

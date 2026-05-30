@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 import openpyxl
 from django.contrib import messages
+from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.db.models import (
@@ -359,3 +360,70 @@ def ingredient_stock_adjust(request, pk=None):
         messages.error(request, f"오류가 발생했습니다: {exc}")
 
     return redirect("inventory:ingredient_list")
+
+def inventory_bulk_log_create(request):
+    if request.method == "POST":
+        # HTML 폼의 name="bulk_ingredient_names" 배열 수신
+        names = request.POST.getlist('bulk_ingredient_names')
+        quantities = request.POST.getlist('bulk_quantities')
+        log_types = request.POST.getlist('bulk_log_types')
+
+        if not names:
+            messages.error(request, "출고 처리할 품목이 선택되지 않았습니다.")
+            return redirect('inventory:ingredient_list')
+
+        try:
+            # 1. 쿼리 최적화를 위해 자재 대장 한 번에 가져와서 캐싱 (공백 제거 매칭용)
+            all_ingredients = list(Ingredient.objects.all())
+            
+            # 2. 🔥 원자성 보장을 위한 MySQL 트랜잭션 블록 가동
+            with transaction.atomic():
+                success_count = 0
+                
+                for i in range(len(names)):
+                    ing_name_val = names[i].strip()
+                    qty_val = float(quantities[i])
+                    log_type_val = log_types[i]
+
+                    # 0 이하의 수량은 출고하지 않고 패스
+                    if qty_val <= 0:
+                        continue
+
+                    # 💡 공백을 제거하고 이름 비교 매칭 (안전성 강화)
+                    clean_target_name = ing_name_val.replace(" ", "")
+                    matched_ingredient = None
+                    for ing in all_ingredients:
+                        if ing.name.replace(" ", "") == clean_target_name:
+                            matched_ingredient = ing
+                            break
+
+                    # 🚨 방어선: 만약 자재 대장에서 해당 품목을 순간적으로 찾지 못했다면 에러 발생 후 전체 롤백
+                    if not matched_ingredient:
+                        raise NameError(f"자재 마스터 대장에서 [{ing_name_val}] 품목을 찾을 수 없습니다.")
+
+                    # 3. 🎯 InventoryLog 모델 양식에 맞추어 MySQL 일괄 적재
+                    InventoryLog.objects.create(
+                        ingredient=matched_ingredient,
+                        log_type=log_type_val,
+                        quantity=qty_val,
+                        description="AI 식수 예측 기반 식단표 일괄 자동 차감"  # 변동 사유 자동 기입
+                    )
+                    success_count += 1
+
+            # 4. 성공 시 세션 바구니 비우기 (메모리 관리 및 휘발성 보장)
+            if 'bulk_ingredients' in request.session:
+                del request.session['bulk_ingredients']
+            if 'bulk_date' in request.session:
+                del request.session['bulk_date']
+
+            messages.success(request, f"🎉 AI 예측 기반 식재료 총 {success_count}건이 인벤토리 수불 대장에 일괄 출고 적재되었습니다!")
+            
+        except NameError as ne:
+            print(f"[Bulk Stock Log User Error] {ne}")
+            messages.error(request, str(ne))
+        except Exception as e:
+            print(f"[Bulk Stock Log System Error] {e}")
+            messages.error(request, f"재고 적재 중 시스템 오류가 발생했습니다: {str(e)}")
+
+    # 처리가 끝나면 자재 대장 메인 화면으로 리다이렉트
+    return redirect('inventory:ingredient_list')

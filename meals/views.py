@@ -2,6 +2,10 @@ import calendar
 import json
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
+import pandas as pd
+from .models import Menu,Recipe
+from django.utils import timezone
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.management import call_command
@@ -16,6 +20,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from inventory.models import Ingredient
 from .models import DietMenu, DietPlan, Menu, Recipe
+from forecasting.models import AttendancePrediction
 
 
 CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
@@ -373,17 +378,98 @@ def menu_update(request, menu_id):
 
 def deduct_inventory_view(request):
     if request.method == "POST":
-        target_date = request.POST.get("target_date")
+        date_str = request.POST.get("target_date")
+        if not date_str:
+            date_str = timezone.now().date().strftime('%Y-%m-%d')
 
-        if target_date:
-            call_command("deduct_daily_inventory", date=target_date)
-            messages.success(request, f"{target_date} 기준 식재료 일괄 사용처리가 완료되었습니다.")
-        else:
-            call_command("deduct_daily_inventory")
-            messages.success(request, "오늘 기준 식재료 일괄 사용처리가 완료되었습니다.")
+        ingredients_summary = {}
+
+        try:
+            # 1. 당일 식단표 긁어오기
+            day_plans = DietPlan.objects.filter(target_date=date_str)
+            
+            print(f"\n" + "="*50)
+            print(f"[🤖 하이브리드 AI 식수 추적 가동] 날짜: {date_str}")
+
+            for plan in day_plans:
+                headcount = 100  # 기본 방어선 값
+                
+                # 🔄 끼니 매칭용 딕셔너리 (DietPlan 한글 ➡️ AttendancePrediction 영문 변환)
+                # 만약 AttendancePrediction도 한글('중식')로 저장된다면 아래 매핑 없이 바로 쓰시면 됩니다.
+                meal_mapping = {
+                    '조식': 'breakfast',
+                    '중식': 'lunch',
+                    '석식': 'dinner'
+                }
+                target_meal_type = meal_mapping.get(plan.meal_type, 'lunch')
+
+                # 🎯 [루트 1] 원래 설계한 1:1 MealForecast 테이블 먼저 찔러보기
+                if hasattr(plan, 'forecast') and plan.forecast:
+                    headcount = plan.forecast.predicted_count
+                    print(f"  ⭕ [루트1 성공] DietPlan ID {plan.id}와 1:1 매핑된 예측치 반영: {headcount}명")
+                
+                # 🎯 [루트 2] 1:1이 비어있다면? 날짜와 끼니 조건으로 AttendancePrediction 대장 직접 타겟팅!
+                else:
+                    pred_record = AttendancePrediction.objects.filter(
+                        prediction_date=date_str,
+                        meal_type=target_meal_type  # 또는 plan.meal_type (디비 스펙에 맞춤)
+                    ).first()
+
+                    if pred_record:
+                        headcount = pred_record.predicted_count
+                        print(f"  ⚡ [루트2 성공] 날짜/끼니({date_str} {plan.meal_type}) 직접 조인 성공 -> AI 예측치: {headcount}명 반영")
+                    else:
+                        # 3순위 방어선: 둘 다 없으면 디비 기본값이나 100명 대입
+                        headcount = plan.headcount if plan.headcount > 0 else 100
+                        print(f"  ⚠️ [루트3 방어] AI 예측 대장에도 데이터가 없어 기본 식수 {headcount}명 적용")
+
+                # 2. 메뉴 및 레시피 순회 연산
+                diet_menus = plan.diet_menus.all()
+                for dm in diet_menus:
+                    recipes = dm.menu.recipes.all()
+                    for recipe in recipes:
+                        ing_name = recipe.ingredient.name
+                        raw_amount = recipe.required_amount
+                        required_amount = float(raw_amount) if raw_amount else 0.0
+                        
+                        # 진짜 찾아낸 AI 예측 headcount 곱하기
+                        row_total = required_amount * headcount
+                        
+                        if ing_name in ingredients_summary:
+                            ingredients_summary[ing_name] += row_total
+                        else:
+                            ingredients_summary[ing_name] = row_total
+
+            print(f"\n[📊 AI 연동 최종 자재 명세서]: {ingredients_summary}")
+            print("="*50 + "\n")
+
+        except Exception as e:
+            print(f"🚨 [하이브리드 엔진 에러]: {str(e)}")
+            messages.error(request, f"데이터 계산 중 오류 발생: {str(e)}")
+            return redirect("meals:mealplan_list")
+
+        if not ingredients_summary:
+            messages.warning(request, f"{date_str} 날짜에 매칭된 레시피 데이터가 없습니다.")
+            return redirect("meals:mealplan_list")
+
+        # 3. 완벽하게 계산된 바구니 세션 적재 후 출고창 토스
+        request.session['bulk_ingredients'] = ingredients_summary
+        request.session['bulk_date'] = date_str
+        
+        first_ing_name = list(ingredients_summary.keys())[0]
+        first_quantity = ingredients_summary[first_ing_name]
+        
+        query_params = urlencode({
+            'ingredient_name': first_ing_name,
+            'quantity': format(first_quantity, '.2f'),
+            'is_bulk': 'true'
+        })
+        
+        response = redirect('inventory:inventory_log_create')
+        response['Location'] += f'?{query_params}'
+        return response
 
     return redirect("meals:mealplan_list")
-
 
 def search_menus_api(request):
     query = request.GET.get("q", "").strip()
@@ -569,3 +655,216 @@ def weekly_mealplan_create(request):
     }
 
     return render(request, "meals/weekly_mealplan_create.html", context)
+
+def mealplan_bulk_upload(request):
+    if request.method == 'POST':
+        file_type = request.POST.get('file_type')
+        uploaded_file = request.FILES.get('mealplan_file')
+
+        if not uploaded_file:
+            messages.error(request, "업로드된 파일이 없습니다.")
+            return render(request, 'meals/mealplan_bulk_upload.html')
+
+        try:
+            # 1. 파일 타입별 Pandas 로드
+            if file_type == 'xlsx' or uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file)
+            elif file_type == 'csv' or uploaded_file.name.endswith('.csv'):
+                try:
+                    df = pd.read_csv(uploaded_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(uploaded_file, encoding='cp949')
+            else:
+                messages.error(request, "지원하지 않는 파일 형식입니다.")
+                return render(request, 'meals/mealplan_bulk_upload.html')
+
+            # 엑셀 헤더 기둥 검증
+            required_columns = ['date', 'meal_type', 'menu_name', 'category']
+            if not all(col in df.columns for col in required_columns):
+                messages.error(request, "엑셀 양식이 올바르지 않습니다. 헤더(date, meal_type, menu_name, category)를 확인하세요.")
+                return render(request, 'meals/mealplan_bulk_upload.html')
+
+            # 2. 🔥 MySQL 트랜잭션 시작 (DietPlan -> Menu -> DietMenu 순차 적재)
+            with transaction.atomic():
+                success_count = 0
+                new_menu_count = 0  # ✨ 신규 생성된 메뉴 개수를 추적할 카운터 변수 추가
+                all_menus = list(Menu.objects.all()) # 캐싱으로 매 루프 쿼리 최소화
+                
+                for index, row in df.iterrows():
+                    if pd.isna(row['date']) or pd.isna(row['menu_name']):
+                        continue
+                        
+                    date_val = str(row['date']).strip()
+                    meal_type_raw = str(row['meal_type']).strip()
+                    menu_name_val = str(row['menu_name']).strip()
+                    category_val = str(row['category']).strip() if not pd.isna(row['category']) else '기타'
+
+                    # 💡 [끼니 매핑 튜닝] 엑셀의 '아침/점심/저녁'을 모델의 TextChoices 규칙으로 치환
+                    if '아침' in meal_type_raw or '조식' in meal_type_raw:
+                        meal_type_val = DietPlan.MealType.BREAKFAST
+                    elif '점심' in meal_type_raw or '중식' in meal_type_raw:
+                        meal_type_val = DietPlan.MealType.LUNCH
+                    elif '저녁' in meal_type_raw or '석식' in meal_type_raw:
+                        meal_type_val = DietPlan.MealType.DINNER
+                    else:
+                        meal_type_val = DietPlan.MealType.OTHER
+
+                    # 💡 [식단 마스터 레코드] DietPlan 생성 또는 기존 객체 가져오기
+                    diet_plan, plan_created = DietPlan.objects.get_or_create(
+                        target_date=date_val,
+                        meal_type=meal_type_val,
+                        defaults={'headcount': 0, 'is_served': False}
+                    )
+
+                    # 💡 [메뉴 마스터 레코드] 기존에 등록된 메뉴인지 띄어쓰기 무시하고 체크
+                    clean_menu_name = menu_name_val.replace(" ", "")
+                    matched_menu = None
+                    for m in all_menus:
+                        if m.name.replace(" ", "") == clean_menu_name:
+                            matched_menu = m
+                            break
+                    
+                    # MySQL에 없는 완전 신규 메뉴라면 자동 등록
+                    if not matched_menu:
+                        matched_menu = Menu.objects.create(
+                            name=menu_name_val,
+                            category=category_val
+                        )
+                        all_menus.append(matched_menu) # 다음 루프를 위해 캐시에 추가
+                        new_menu_count += 1  # ✨ 새로운 메뉴가 생겼으므로 카운트 증가
+
+                    # 💡 [N:M 매핑 레코드] DietMenu(식단 상세)에 꽂아 넣기
+                    DietMenu.objects.get_or_create(
+                        diet_plan=diet_plan,
+                        menu=matched_menu
+                    )
+                    
+                    success_count += 1
+
+            # 🎯 3. [동적 알림 피드백 시스템] 신규 생성 메뉴 여부에 따른 경고 가이드 출력
+            if new_menu_count > 0:
+                messages.warning(
+                    request, 
+                    f"식단 데이터 총 {success_count}건이 일괄 등록되었습니다. "
+                    f"이 중 시스템에 등록되어 있지 않던 [신규 메뉴 {new_menu_count}개]가 자동 생성되었습니다. "
+                    f"원활한 재고 차감을 위해 '레시피 등록 및 관리' 페이지에서 식재료 내역을 추가해 주세요."
+                )
+            else:
+                messages.success(request, f"MySQL에 총 {success_count}개의 식단 상세 데이터가 완벽하게 일괄 적재되었습니다.")
+                
+            return redirect('meals:mealplan_list')
+
+        except Exception as e:
+            print(f"[MySQL Bulk Error] {e}")
+            messages.error(request, f"데이터베이스 적재 실패: {str(e)}")
+            return render(request, 'meals/mealplan_bulk_upload.html')
+
+    return render(request, 'meals/mealplan_bulk_upload.html')
+
+def menu_bulk_upload(request):
+    if request.method == 'POST':
+        file_type = request.POST.get('file_type')
+        uploaded_file = request.FILES.get('recipe_file')
+
+        if not uploaded_file:
+            messages.error(request, "업로드된 파일이 없습니다.")
+            return render(request, 'meals/menu_bulk_upload.html')
+
+        try:
+            # 1. 파일 타입별 Pandas 로드
+            if file_type == 'xlsx' or uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file)
+            elif file_type == 'csv' or uploaded_file.name.endswith('.csv'):
+                try:
+                    df = pd.read_csv(uploaded_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(uploaded_file, encoding='cp949')
+            else:
+                messages.error(request, "지원하지 않는 파일 형식입니다.")
+                return render(request, 'meals/menu_bulk_upload.html')
+
+            # 엑셀 헤더 기둥 검증
+            required_columns = ['menu_name', 'category', 'ingredient_name', 'required_amount']
+            if not all(col in df.columns for col in required_columns):
+                messages.error(request, "엑셀 양식이 올바르지 않습니다. 헤더(menu_name, category, ingredient_name, required_amount)를 확인하세요.")
+                return render(request, 'meals/menu_bulk_upload.html')
+
+            # 2. 🔥 MySQL 트랜잭션 시작
+            with transaction.atomic():
+                recipe_success_count = 0
+                menu_new_count = 0
+                
+                all_menus = list(Menu.objects.all())
+                all_ingredients = list(Ingredient.objects.all())
+
+                for index, row in df.iterrows():
+                    if pd.isna(row['menu_name']) or pd.isna(row['ingredient_name']) or pd.isna(row['required_amount']):
+                        continue
+                        
+                    menu_name_val = str(row['menu_name']).strip()
+                    category_val = str(row['category']).strip() if not pd.isna(row['category']) else '기타'
+                    ing_name_val = str(row['ingredient_name']).strip()
+                    
+                    try:
+                        amount_val = float(row['required_amount'])
+                    except (ValueError, TypeError):
+                        # 숫자가 아닌 잘못된 값이 들어왔을 때도 에러 처리 후 롤백
+                        raise ValueError(f"{index + 2}번째 행의 사용량({row['required_amount']})이 올바른 숫자가 아닙니다.")
+
+                    # [A 단계] Menu 마스터 검증 및 생성
+                    clean_menu_name = menu_name_val.replace(" ", "")
+                    matched_menu = None
+                    for m in all_menus:
+                        if m.name.replace(" ", "") == clean_menu_name:
+                            matched_menu = m
+                            break
+                    
+                    if not matched_menu:
+                        matched_menu = Menu.objects.create(name=menu_name_val, category=category_val)
+                        all_menus.append(matched_menu)
+                        menu_new_count += 1
+
+                    # [B 단계] Ingredient 마스터 검증
+                    clean_ing_name = ing_name_val.replace(" ", "")
+                    matched_ingredient = None
+                    for ing in all_ingredients:
+                        if ing.name.replace(" ", "") == clean_ing_name:
+                            matched_ingredient = ing
+                            break
+
+                    # 🚨 [수정 포인트] 자재 대장에 없는 식재료 발견 시 예외를 의도적으로 발생시켜 트랜잭션 전체 취소(Rollback)
+                    if not matched_ingredient:
+                        raise NameError(
+                            f"자재 대장에 존재하지 않는 식재료가 발견되었습니다: [{ing_name_val}] "
+                            f"(엑셀 {index + 2}번째 행 확인 요망). "
+                            f"재고 관리 탭에서 해당 식재료를 먼저 등록한 뒤 다시 업로드해 주세요."
+                        )
+
+                    # [C 단계] Recipe 매핑 적재
+                    Recipe.objects.update_or_create(
+                        menu=matched_menu,
+                        ingredient=matched_ingredient,
+                        defaults={'required_amount': amount_val}
+                    )
+                    recipe_success_count += 1
+
+            # 3. 🎯 한 건의 누락도 없이 100% 완벽하게 성공했을 때만 이리로 넘어옵니다.
+            messages.success(
+                request, 
+                f"총 {recipe_success_count}개의 메뉴 레시피 데이터가 성공적으로 적재되었습니다! "
+                f"(새로 추가된 메뉴: {menu_new_count}개)"
+            )
+            return redirect('meals:menu_list')
+
+        # 🎯 위에서 일부러 터트린 예외(NameError, ValueError)를 가로채서 명확하게 브라우저 화면에 에러를 띄웁니다.
+        except (NameError, ValueError) as custom_error:
+            print(f"[Recipe Bulk User Error] {custom_error}")
+            messages.error(request, str(custom_error))
+            return render(request, 'meals/menu_bulk_upload.html')
+
+        except Exception as e:
+            print(f"[MySQL Menu Bulk System Error] {e}")
+            messages.error(request, f"시스템 오류가 발생했습니다: {str(e)}")
+            return render(request, 'meals/menu_bulk_upload.html')
+
+    return render(request, 'meals/menu_bulk_upload.html')

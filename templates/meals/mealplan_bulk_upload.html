@@ -9,6 +9,28 @@
 
 {% block content %}
 <div class="sp-align-page">
+  {% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show border-0 shadow-sm rounded-4 p-3" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            {% if message.tags == 'error' %}
+                <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+            {% else %}
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            {% endif %}
+            <div>
+                <strong class="d-block">시스템 알림</strong>
+                <span class="small text-secondary">{{ message.message }}</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="top: 50%; transform: translateY(-50%);"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
   <section class="sp-align-hero">
     <div>
       <p class="sp-align-kicker">Meal Plan Upload</p>

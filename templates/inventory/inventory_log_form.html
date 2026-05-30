@@ -3,59 +3,93 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="mb-4">
-        <h1 class="h3 mb-1 fw-bold">재고 출고 등록</h1>
-        <p class="text-muted small">이름의 일부만 입력해도 식재료를 쉽게 찾을 수 있습니다.</p>
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 fw-bold">재고 출고 등록</h1>
+            <p class="text-muted small mb-0">
+                {% if request.GET.is_bulk == 'true' %}
+                    <span class="text-primary fw-bold"><i class="bi bi-cpu-fill"></i> AI 식수 예측 명세서</span>가 로드되었습니다. 필요 시 검색창을 통해 식재료를 추가할 수 있습니다.
+                {% else %}
+                    자재 출고 내역을 입력하는 공간입니다. 검색창을 통해 여러 품목을 한꺼번에 직접 추가해 보세요.
+                {% endif %}
+            </p>
+        </div>
+        <span class="badge bg-dark fs-6 p-2 fw-bold">
+            <i class="bi bi-calendar-check"></i> 
+            {% if request.session.bulk_date %}{{ request.session.bulk_date }}{% else %}{% now "Y-m-d" %}{% endif %}
+        </span>
     </div>
 
     <div class="card shadow-sm border-primary mb-5">
-        <div class="card-body bg-light-subtle p-4">
-            <form method="post" id="log-form" class="row g-3">
+        <div class="card-header bg-primary text-white fw-bold py-3 d-flex justify-content-between align-items-center">
+            <span class="fs-5"><i class="bi bi-grid-3x3-gap-fill"></i> 출고 전송 품목 명세서</span>
+            <button type="button" id="btn-add-row" class="btn btn-light fw-bold text-primary shadow-sm px-3">
+                <i class="bi bi-plus-circle-fill"></i> 식재료 행 추가
+            </button>
+        </div>
+        
+        <div class="card-body p-0">
+            <form method="post" action="{% url 'inventory:inventory_bulk_log_create' %}" id="bulk-log-form">
                 {% csrf_token %}
-                
-                <div class="col-md-5 position-relative">
-                    <label class="form-label fw-bold text-primary">식재료 검색</label>
-                    <input 
-                        type="text"
-                        id="ingredient-search" 
-                        class="form-control" 
-                        placeholder="단어 포함 검색 (예: 양파, 고기)" 
-                        autocomplete="off"
-                        required
-                    >
-                    <ul id="custom-list" class="list-group position-absolute w-100 shadow d-none" style="z-index: 1050; max-height: 250px; overflow-y: auto; top: 100%;">
-                        {% for item in ingredients %}
-                        <li class="list-group-item list-group-item-action py-2" 
-                            data-id="{{ item.id }}" 
-                            data-name="{{ item.name }}"
-                            data-category="{{ item.category }}"
-                            style="cursor: pointer;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge bg-secondary-subtle text-dark me-2">{{ item.category }}</span>
-                                    <span class="fw-bold">{{ item.name }}</span>
-                                </div>
-                                <small class="text-primary fw-bold">재고: {{ item.calc_stock|floatformat:1 }}</small>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <input type="hidden" name="ingredient" id="ingredient-id">
+                <div class="table-responsive" style="overflow: visible !important;">
+                    <table class="table table-hover align-middle mb-0 text-center" id="inventory-table" style="font-size: 1rem;">
+                        <thead class="table-light py-3">
+                            <tr class="align-middle" style="height: 55px;">
+                                <th style="width: 6%;">번호</th>
+                                <th style="width: 40%;" class="text-start px-4">식재료 품목명 (검색)</th>
+                                <th style="width: 25%;">출고 수량 / 단위</th>
+                                <th style="width: 17%;">출고 구분</th>
+                                <th style="width: 12%;">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-tbody" style="overflow: visible !important;">
+                            {% if request.GET.is_bulk == 'true' and request.session.bulk_ingredients %}
+                                {% for ing_name, qty in request.session.bulk_ingredients.items %}
+                                <tr class="ingredient-row locked-row" style="height: 65px;">
+                                    <td class="row-counter text-muted small">{{ forloop.counter }}</td>
+                                    <td class="px-4">
+                                        <div class="fw-bold text-start text-secondary px-3 py-2 bg-light rounded border fs-6"><i class="bi bi-lock-fill me-2 small"></i>{{ ing_name }}</div>
+                                        <input type="hidden" name="bulk_ingredient_names" value="{{ ing_name }}">
+                                    </td>
+                                    <td class="px-3">
+                                        <div class="input-group m-auto" style="max-width: 220px;">
+                                            <input type="number" step="0.01" name="bulk_quantities" class="form-control form-control-lg text-end fw-bold text-primary fs-5" style="width: 60%;" value="{{ qty|floatformat:2 }}" required>
+                                            <select name="bulk_units" class="form-select form-select-lg fw-bold bg-light text-secondary fs-6" style="width: 40%;">
+                                                <option value="kg" selected>kg</option>
+                                                <option value="g">g</option>
+                                                <option value="EA">EA</option>
+                                                <option value="팩">팩</option>
+                                                <option value="박스">박스</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select name="bulk_log_types" class="form-select form-select-lg m-auto fw-bold" style="max-width: 130px; font-size: 0.95rem;">
+                                            <option value="출고" selected>출고</option>
+                                            <option value="폐기">폐기</option>
+                                            <option value="조정">조정</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger btn-delete-row"><i class="bi bi-trash3-fill"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">{{ form.log_type.label }}</label>
-                    {{ form.log_type }}
+                <div id="empty-alert" class="text-center py-5 text-muted d-none">
+                    <i class="bi bi-exclamation-triangle fs-2 text-warning mb-2 d-block"></i>
+                    출고할 품목이 없습니다. 우측 상단의 <strong>[식재료 행 추가]</strong> 버튼을 눌러주세요.
                 </div>
 
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
-                    {{ form.quantity }}
-                </div>
-
-                <div class="col-12 text-end mt-4">
-                    <button type="submit" class="btn btn-primary px-5 fw-bold">기록 저장하기</button>
-                    <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary">목록으로</a>
+                <div class="card-footer bg-light text-end p-4 border-top">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm" id="btn-submit-all">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> 명세서 전체 일괄 저장 🚀
+                    </button>
+                    <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary btn-lg px-4">목록으로</a>
                 </div>
             </form>
         </div>
@@ -73,27 +107,29 @@
                 <table class="table table-bordered mb-0 text-center align-middle" style="font-size: 0.9rem;">
                     <thead class="table-secondary border-dark">
                         <tr>
-                            <th style="width: 15%;">품목코드</th>
-                            <th style="width: 35%;">품목명</th>
-                            <th>일자</th>
-                            <th>수량</th>
-                            <th>단가</th>
-                            <th>구분</th>
+                            <th style="width: 12%;">품목코드</th>
+                            <th style="width: 33%;">품목명</th>
+                            <th style="width: 15%;">일자</th>
+                            <th style="width: 15%;">수량</th>
+                            <th style="width: 10%;">단위</th> <th style="width: 10%;">구분</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for log in recent_logs %}
                         <tr>
                             <td class="text-muted small">{{ log.ingredient.id|stringformat:"08d" }}</td>
-                            <td class="text-start fw-bold px-3">{{ log.ingredient.name }}</td>
-                            <td>{{ log.transaction_date|date:"Ymd" }}</td>
-                            <td class="text-end px-3">{{ log.quantity|floatformat:2 }}</td>
-                            <td class="text-end px-3 text-muted">{{ log.ingredient.unit_price }}</td>
+                            <td class="text-start fw-bold px-3 text-dark">{{ log.ingredient.name }}</td>
+                            <td>{{ log.transaction_date|date:"Y-m-d" }}</td> <td class="text-end px-3 fw-bold text-primary">{{ log.quantity|floatformat:2 }}</td>
+                            
+                            <td class="text-secondary small fw-bold">{{ log.ingredient.unit|default:"kg" }}</td>
+                            
                             <td>
                                 {% if log.log_type == '출고' %}
-                                    <span class="badge rounded-pill bg-danger">출고</span>
+                                    <span class="badge rounded-pill bg-danger px-2 py-1">출고</span>
+                                {% elif log.log_type == '폐기' %}
+                                    <span class="badge rounded-pill bg-secondary px-2 py-1">폐기</span>
                                 {% else %}
-                                    <span class="badge rounded-pill bg-secondary">폐기</span>
+                                    <span class="badge rounded-pill bg-warning text-dark px-2 py-1">조정</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -108,70 +144,183 @@
 </div>
 
 <script>
-    const searchInput = document.getElementById('ingredient-search');
-    const customList = document.getElementById('custom-list');
-    const listItems = customList.querySelectorAll('li');
-    const hiddenIdInput = document.getElementById('ingredient-id');
+    const dbIngredientsMaster = [
+        {% for item in ingredients %}
+        {
+            id: "{{ item.id }}",
+            name: "{{ item.name }}",
+            category: "{{ item.category|default:'미분류' }}",
+            stock: "{{ item.calc_stock|floatformat:1 }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
 
-    // 1. 실시간 포함 검색(Contains) 필터링 로직
-    searchInput.addEventListener('input', function() {
-        const val = this.value.toLowerCase().replace(/\s/g, ''); // 공백 제거 후 소문자화
-        let hasVisibleItems = false;
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tbody = document.getElementById('inventory-tbody');
+        const btnAddRow = document.getElementById('btn-add-row');
+        const emptyAlert = document.getElementById('empty-alert');
+        const bulkForm = document.getElementById('bulk-log-form');
 
-        if (val.length > 0) {
-            customList.classList.remove('d-none');
-            listItems.forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase().replace(/\s/g, '');
-                // 단어가 포함되어 있으면 표시
-                if (name.includes(val)) {
-                    item.classList.remove('d-none');
-                    hasVisibleItems = true;
+        function updateTableState() {
+            const rows = tbody.querySelectorAll('.ingredient-row');
+            if (rows.length === 0) {
+                emptyAlert.classList.remove('d-none');
+            } else {
+                emptyAlert.classList.add('d-none');
+                rows.forEach((row, index) => {
+                    row.querySelector('.row-counter').textContent = index + 1;
+                });
+            }
+        }
+
+        function createNewInputRow() {
+            const tr = document.createElement('tr');
+            tr.className = 'ingredient-row animated-fadeIn';
+            tr.style.height = '70px'; 
+
+            tr.innerHTML = `
+                <td class="row-counter text-muted small"></td>
+                <td class="px-4 position-relative text-start" style="overflow: visible !important;">
+                    <input 
+                        type="text" 
+                        class="form-control form-control-lg bulk-search-input fw-bold fs-6" 
+                        placeholder="품목명 단어 검색 (예: 마늘, 양파)" 
+                        autocomplete="off" 
+                        style="height: 48px; border-width: 2px;"
+                        required
+                    >
+                    <input type="hidden" name="bulk_ingredient_names" class="bulk-hidden-name">
+                    
+                    <ul class="list-group position-absolute w-100 shadow bulk-suggest-list d-none" 
+                        style="z-index: 2000; max-height: 280px; overflow-y: auto; left: 0; right: 0; margin: 4px 24px; border: 2px solid #0d6efd;">
+                    </ul>
+                </td>
+                <td class="px-3">
+                    <div class="input-group m-auto" style="max-width: 220px;">
+                        <input type="number" step="0.01" name="bulk_quantities" class="form-control form-control-lg text-end fw-bold text-primary fs-5" style="height: 48px; width: 60%;" placeholder="0.00" min="0.01" required>
+                        <select name="bulk_units" class="form-select form-select-lg fw-bold bg-light text-secondary fs-6" style="height: 48px; width: 40%;">
+                            <option value="kg" selected>kg</option>
+                            <option value="g">g</option>
+                            <option value="EA">EA</option>
+                            <option value="팩">팩</option>
+                            <option value="박스">박스</option>
+                             <option value="병">병</option>
+                              <option value="통">통</option>
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <select name="bulk_log_types" class="form-select form-select-lg m-auto fw-bold" style="max-width: 130px; height: 48px; font-size: 0.95rem;">
+                        <option value="출고" selected>출고</option>
+                        <option value="폐기">폐기</option>
+                        <option value="조정">조정</option>
+                    </select>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger btn-delete-row btn-lg"><i class="bi bi-trash3-fill"></i></button>
+                </td>
+            `;
+
+            const searchInput = tr.querySelector('.bulk-search-input');
+            const hiddenNameInput = tr.querySelector('.bulk-hidden-name');
+            const suggestList = tr.querySelector('.bulk-suggest-list');
+
+            searchInput.addEventListener('input', function() {
+                const val = this.value.toLowerCase().replace(/\s/g, '');
+                suggestList.innerHTML = '';
+                
+                if (val.length === 0) {
+                    suggestList.classList.add('d-none');
+                    hiddenNameInput.value = '';
+                    return;
+                }
+
+                let hasMatches = false;
+                dbIngredientsMaster.forEach(ing => {
+                    const cleanDbName = ing.name.toLowerCase().replace(/\s/g, '');
+                    
+                    if (cleanDbName.includes(val)) {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item list-group-item-action text-start py-3 px-3 fs-6';
+                        li.style.cursor = 'pointer';
+                        li.innerHTML = `
+                            <span class="badge bg-secondary text-dark me-2 p-2" style="font-size: 0.8rem;">${ing.category}</span>
+                            <span class="fw-bold text-dark fs-6">${ing.name}</span>
+                            <small class="text-primary float-end fw-bold fs-6">현재고: ${ing.stock}kg</small>
+                        `;
+
+                        li.addEventListener('click', function() {
+                            searchInput.value = ing.name;
+                            hiddenNameInput.value = ing.name;
+                            suggestList.classList.add('d-none');
+                            tr.querySelector('input[name="bulk_quantities"]').focus();
+                        });
+
+                        suggestList.appendChild(li);
+                        hasMatches = true;
+                    }
+                });
+
+                if (hasMatches) {
+                    suggestList.classList.remove('d-none');
                 } else {
-                    item.classList.add('d-none');
+                    suggestList.classList.add('d-none');
                 }
             });
-            // 검색 결과가 전혀 없으면 목록 닫기
-            if (!hasVisibleItems) customList.classList.add('d-none');
-        } else {
-            customList.classList.add('d-none');
-        }
-    });
 
-    // 2. 항목 선택 시 처리
-    listItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            const name = this.getAttribute('data-name');
-            
-            searchInput.value = name;
-            hiddenIdInput.value = id;
-            customList.classList.add('d-none');
-            
-            // 선택 후 수량 칸으로 포커스 이동 (편의 기능)
-            document.getElementsByName('quantity')[0].focus();
-        });
-    });
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !suggestList.contains(e.target)) {
+                    suggestList.classList.add('d-none');
+                }
+            });
 
-    // 3. 외부 영역 클릭 시 목록 닫기
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !customList.contains(e.target)) {
-            customList.classList.add('d-none');
-        }
-    });
+            tr.querySelector('.btn-delete-row').addEventListener('click', function() {
+                tr.remove();
+                updateTableState();
+            });
 
-    // 4. 엔터 키 방지 및 유효성 체크
-    document.getElementById('log-form').addEventListener('submit', function(e) {
-        if (!hiddenIdInput.value) {
-            alert("식재료를 목록에서 정확히 선택해 주세요.");
+            tbody.appendChild(tr);
+            updateTableState();
             searchInput.focus();
-            e.preventDefault();
         }
+
+        const initialRows = tbody.querySelectorAll('.ingredient-row');
+        if (initialRows.length === 0) {
+            createNewInputRow();
+        } else {
+            updateTableState();
+        }
+
+        btnAddRow.addEventListener('click', createNewInputRow);
+
+        bulkForm.addEventListener('submit', function(e) {
+            const dynamicRows = tbody.querySelectorAll('.ingredient-row:not(.locked-row)');
+            let isValid = true;
+
+            dynamicRows.forEach(row => {
+                const hiddenName = row.querySelector('.bulk-hidden-name').value;
+                const searchTxt = row.querySelector('.bulk-search-input').value;
+                
+                if (!hiddenName && searchTxt) {
+                    alert(`[${searchTxt}] 품목이 리스트에서 정확하게 선택되지 않았습니다. 입력 창을 클릭해 드롭다운 리스트 항목을 눌러주세요.`);
+                    row.querySelector('.bulk-search-input').focus();
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) e.preventDefault();
+        });
     });
 </script>
 
 <style>
     .table-bordered, .table-bordered th, .table-bordered td { border: 1px solid #333 !important; }
-    #custom-list .list-group-item:hover { background-color: #f0f7ff; border-left: 4px solid #0d6efd; }
-    .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 8px rgba(13,110,253,0.15); }
+    .bulk-suggest-list { border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; }
+    .bulk-suggest-list .list-group-item:hover { background-color: #e6f2ff !important; border-left: 5px solid #0d6efd; color: #0d6efd !important; }
+    .form-control:focus, .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 10px rgba(13,110,253,0.25); }
+    .animated-fadeIn { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 {% endblock %}

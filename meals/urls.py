@@ -19,8 +19,10 @@ from .views import (
     remove_diet_menu_api,
     search_menus_api,
     weekly_mealplan_create,
+    mealplan_bulk_upload,
+    menu_bulk_upload,
 )
-from .views_extra import mealplan_bulk_upload, monthly_mealplan_create
+from .views_extra import monthly_mealplan_create
 
 app_name = "meals"
 
@@ -33,7 +35,7 @@ urlpatterns = [
     path("mealplan_create/", mealplan_create, name="mealplan_create"),
     path("mealplan/monthly/", monthly_mealplan_create, name="monthly_mealplan_create"),
     path("mealplan/weekly/", weekly_mealplan_create, name="weekly_mealplan_create"),
-    path("mealplan/upload/", mealplan_bulk_upload, name="mealplan_bulk_upload"),
+    
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
 
     path("menu/upload-excel/", recipe_upload_api, name="recipe_upload_api"),
@@ -45,5 +47,7 @@ urlpatterns = [
 
     path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
-    path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory"),
+    path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory_view"),
+    path('mealplan/bulk-upload/', mealplan_bulk_upload, name='mealplan_bulk_upload'),
+    path('menu/bulk-upload/', menu_bulk_upload, name='menu_bulk_upload'),
 ]
