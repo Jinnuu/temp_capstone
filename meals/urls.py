@@ -38,6 +38,7 @@ urlpatterns = [
     path("mealplan/weekly/", weekly_mealplan_create, name="weekly_mealplan_create"),
     path("mealplan/upload/", mealplan_bulk_upload, name="mealplan_bulk_upload"),
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
+    
     path("document/weekly/", weekly_meal_plan_document, name="weekly_meal_plan_document"),
     path("document/monthly/", monthly_meal_plan_document, name="monthly_meal_plan_document"),
     path("document/weekly/export/", export_weekly_mealplan_excel, name="export_weekly_mealplan_excel"),
