@@ -16,7 +16,8 @@ from .forms import AttendancePredictionForm, PredictionFilterForm
 from .models import AttendancePrediction
 from .services.ingredient_calc import get_all_day_requirements
 from .services.prediction_service import run_attendance_prediction
-
+from meals.models import DietPlan
+from meals.models import DietPlan, DietMenu, Menu, Recipe
 
 MEAL_LABELS = {
     AttendancePrediction.MealType.BREAKFAST: "조식",

@@ -174,7 +174,7 @@ def mealplan_list(request):
     month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
 
     for week in month_calendar.monthdayscalendar(selected_year, selected_month):
-    month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
+        month_calendar = calendar.Calendar(firstweekday=calendar.SUNDAY)
 
     for week in month_calendar.monthdayscalendar(selected_year, selected_month):
         week_cells = []
@@ -368,9 +368,9 @@ def menu_create(request):
             return render(request, "meals/menu_create.html")
 
         with transaction.atomic():
-        if not name or not category:
-            messages.error(request, "메뉴명과 카테고리를 입력해주세요.")
-            return render(request, "meals/menu_create.html")
+            if not name or not category:
+                messages.error(request, "메뉴명과 카테고리를 입력해주세요.")
+                return render(request, "meals/menu_create.html")
 
         with transaction.atomic():
             menu = Menu.objects.create(

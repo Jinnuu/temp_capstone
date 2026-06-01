@@ -2,18 +2,29 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
+import openpyxl
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from datetime import datetime, date, timedelta
+from django.db.models import (
+    Case,
+    DateField,
+    F,
+    IntegerField,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Cast, Coalesce
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import PurchaseOrder, OrderItem
-from inventory.models import Ingredient, InventoryLog
+from forecasting.models import AttendancePrediction
 from forecasting.services.ingredient_calc import get_all_day_requirements
 from inventory.models import Ingredient, InventoryLog
 from meals.models import DietPlan
 from .models import OrderItem, PurchaseOrder
-
 
 CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
 
