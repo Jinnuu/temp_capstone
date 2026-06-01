@@ -19,6 +19,9 @@ from .views import (
     remove_diet_menu_api,
     search_menus_api,
     weekly_mealplan_create,
+    weekly_meal_plan_document,
+    monthly_meal_plan_document,
+    export_weekly_mealplan_excel,
 )
 from .views_extra import mealplan_bulk_upload, monthly_mealplan_create
 
@@ -35,6 +38,9 @@ urlpatterns = [
     path("mealplan/weekly/", weekly_mealplan_create, name="weekly_mealplan_create"),
     path("mealplan/upload/", mealplan_bulk_upload, name="mealplan_bulk_upload"),
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
+    path("document/weekly/", weekly_meal_plan_document, name="weekly_meal_plan_document"),
+    path("document/monthly/", monthly_meal_plan_document, name="monthly_meal_plan_document"),
+    path("document/weekly/export/", export_weekly_mealplan_excel, name="export_weekly_mealplan_excel"),
 
     path("menu/upload-excel/", recipe_upload_api, name="recipe_upload_api"),
     path("api/ingredients/search/", search_ingredients_api, name="search_ingredients_api"),

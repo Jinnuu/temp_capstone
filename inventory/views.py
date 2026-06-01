@@ -1,9 +1,12 @@
-import re
-from decimal import Decimal, InvalidOperation
-
 import openpyxl
-from django.contrib import messages
+from openpyxl.styles import Alignment, Border, Side, Font
+from django.http import HttpResponse  
+import re
+from datetime import timedelta
+from django.utils import timezone
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth import get_user_model
+from django.contrib import messages  
 from django.core.paginator import Paginator
 from django.db.models import (
     BooleanField,
@@ -359,3 +362,211 @@ def ingredient_stock_adjust(request, pk=None):
         messages.error(request, f"오류가 발생했습니다: {exc}")
 
     return redirect("inventory:ingredient_list")
+
+# --- 수불 현황 보고서 및 엑셀 출력 ---
+
+def weekly_inventory_report(request):
+    """주간수불명세서 조회 뷰 (월~일 집계)"""
+    target_date_str = request.GET.get('date', timezone.now().date().isoformat())
+    try:
+        requested_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        requested_date = timezone.now().date()
+
+    # 해당 주의 월요일 계산
+    monday = requested_date - timedelta(days=requested_date.weekday())
+    sunday = monday + timedelta(days=6)
+    
+    # 시간대 고려한 범위 설정 (월요일 00:00:00 ~ 일요일 23:59:59)
+    start_dt = timezone.make_aware(datetime.combine(monday, datetime.min.time()))
+    end_dt = timezone.make_aware(datetime.combine(sunday, datetime.max.time()))
+
+    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    report_data = []
+
+    for item in ingredients:
+        # 기초 재고 (월요일 시작 전)
+        prev_stock = InventoryLog.objects.filter(ingredient=item, transaction_date__lt=start_dt).aggregate(
+            total=Sum(Case(
+                When(log_type='입고', then=F('quantity')),
+                When(log_type='출고', then=-F('quantity')),
+                When(log_type='폐기', then=-F('quantity')),
+                When(log_type='조정', then=F('quantity')),
+                default=Value(0),
+                output_field=DecimalField()
+            ))
+        )['total'] or Decimal('0.00')
+
+        # 주간 수불 내역 (%)
+        week_logs = InventoryLog.objects.filter(ingredient=item, transaction_date__range=(start_dt, end_dt))
+        in_qty = week_logs.filter(log_type='입고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+        out_qty = (week_logs.filter(log_type='출고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')) + \
+                  (week_logs.filter(log_type='폐기').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00'))
+        adj_qty = week_logs.filter(log_type='조정').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+
+        curr_stock = prev_stock + in_qty - out_qty + adj_qty
+
+        if prev_stock != 0 or in_qty != 0 or out_qty != 0 or adj_qty != 0:
+            report_data.append({
+                'ingredient': item,
+                'prev_stock': prev_stock,
+                'in_qty': in_qty,
+                'out_qty': out_qty,
+                'adj_qty': adj_qty,
+                'curr_stock': curr_stock,
+            })
+
+    context = {
+        'monday': monday,
+        'sunday': sunday,
+        'target_date': requested_date,
+        'report_data': report_data,
+        'prev_week_date': (monday - timedelta(days=7)).isoformat(),
+        'next_week_date': (monday + timedelta(days=7)).isoformat(),
+    }
+    return render(request, 'docs/weekly_inventory_report.html', context)
+
+def monthly_inventory_report(request):
+    """월수불명세서 조회 뷰"""
+    year = int(request.GET.get('year', timezone.now().year))
+    month = int(request.GET.get('month', timezone.now().month))
+    
+    start_date = date(year, month, 1)
+    if month == 12:
+        end_date = date(year + 1, 1, 1)
+    else:
+        end_date = date(year, month + 1, 1)
+
+    start_dt = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+    end_dt = timezone.make_aware(datetime.combine(end_date, datetime.min.time()))
+
+    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    report_data = []
+
+    for item in ingredients:
+        # 기초 재고 (월초 이전)
+        prev_stock = InventoryLog.objects.filter(ingredient=item, transaction_date__lt=start_dt).aggregate(
+            total=Sum(Case(
+                When(log_type='입고', then=F('quantity')),
+                When(log_type='출고', then=-F('quantity')),
+                When(log_type='폐기', then=-F('quantity')),
+                When(log_type='조정', then=F('quantity')),
+                default=Value(0),
+                output_field=DecimalField()
+            ))
+        )['total'] or Decimal('0.00')
+
+        # 당월 수불 내역
+        month_logs = InventoryLog.objects.filter(ingredient=item, transaction_date__range=(start_dt, end_dt))
+        in_qty = month_logs.filter(log_type='입고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+        out_qty = (month_logs.filter(log_type='출고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')) + \
+                  (month_logs.filter(log_type='폐기').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00'))
+        adj_qty = month_logs.filter(log_type='조정').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+
+        curr_stock = prev_stock + in_qty - out_qty + adj_qty
+
+        if prev_stock != 0 or in_qty != 0 or out_qty != 0 or adj_qty != 0:
+            report_data.append({
+                'ingredient': item,
+                'prev_stock': prev_stock,
+                'in_qty': in_qty,
+                'out_qty': out_qty,
+                'adj_qty': adj_qty,
+                'curr_stock': curr_stock,
+            })
+
+    context = {
+        'year': year,
+        'month': month,
+        'report_data': report_data,
+    }
+    return render(request, 'docs/monthly_inventory_report.html', context)
+
+def export_inventory_excel(request):
+    """수불 내역 엑셀 다운로드 (주간/월간 지원)"""
+    report_type = request.GET.get('type', 'weekly')
+    target_date_str = request.GET.get('date', timezone.now().date().isoformat())
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "수불명세서"
+
+    # 헤더 스타일
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = openpyxl.styles.PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+    alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+    headers = ["No", "분류", "식재료명", "규격", "단위", "기초재고", "입고합계", "출고합계", "보정액", "기말재고", "비고"]
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = alignment
+        cell.border = thin_border
+
+    # 범위 설정
+    if report_type == 'monthly':
+        year = int(request.GET.get('year', timezone.now().year))
+        month = int(request.GET.get('month', timezone.now().month))
+        start_date = date(year, month, 1)
+        if month == 12:
+            end_date = date(year + 1, 1, 1)
+        else:
+            end_date = date(year, month + 1, 1)
+        filename = f"Inventory_Report_Monthly_{year}_{month}.xlsx"
+    else: # weekly
+        requested_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+        monday = requested_date - timedelta(days=requested_date.weekday())
+        sunday = monday + timedelta(days=6)
+        start_date = monday
+        end_date = sunday + timedelta(days=1)
+        filename = f"Inventory_Report_Weekly_{monday.isoformat()}.xlsx"
+
+    start_dt = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+    if report_type == 'monthly':
+        end_dt = timezone.make_aware(datetime.combine(end_date, datetime.min.time()))
+    else:
+        end_dt = timezone.make_aware(datetime.combine(sunday, datetime.max.time()))
+
+    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    row_num = 2
+    for idx, item in enumerate(ingredients, 1):
+        # 기초 재고
+        prev_stock = InventoryLog.objects.filter(ingredient=item, transaction_date__lt=start_dt).aggregate(
+            total=Sum(Case(
+                When(log_type='입고', then=F('quantity')),
+                When(log_type='출고', then=-F('quantity')),
+                When(log_type='폐기', then=-F('quantity')),
+                When(log_type='조정', then=F('quantity')),
+                default=Value(0),
+                output_field=DecimalField()
+            ))
+        )['total'] or Decimal('0.00')
+
+        # 범위 내 수불
+        logs = InventoryLog.objects.filter(ingredient=item, transaction_date__range=(start_dt, end_dt))
+        in_qty = logs.filter(log_type='입고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+        out_qty = (logs.filter(log_type='출고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')) + \
+                  (logs.filter(log_type='폐기').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00'))
+        adj_qty = logs.filter(log_type='조정').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0.00')
+        curr_stock = prev_stock + in_qty - out_qty + adj_qty
+
+        if prev_stock != 0 or in_qty != 0 or out_qty != 0 or adj_qty != 0:
+            ws.cell(row=row_num, column=1, value=row_num-1).border = thin_border
+            ws.cell(row=row_num, column=2, value=item.category).border = thin_border
+            ws.cell(row=row_num, column=3, value=item.name).border = thin_border
+            ws.cell(row=row_num, column=4, value=item.spec).border = thin_border
+            ws.cell(row=row_num, column=5, value=item.unit).border = thin_border
+            ws.cell(row=row_num, column=6, value=prev_stock).border = thin_border
+            ws.cell(row=row_num, column=7, value=in_qty).border = thin_border
+            ws.cell(row=row_num, column=8, value=out_qty).border = thin_border
+            ws.cell(row=row_num, column=9, value=adj_qty).border = thin_border
+            ws.cell(row=row_num, column=10, value=curr_stock).border = thin_border
+            ws.cell(row=row_num, column=11, value="").border = thin_border
+            row_num += 1
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f"attachment; filename={filename}"
+    wb.save(response)
+    return response

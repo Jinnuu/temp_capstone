@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}검수서(주문) | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 프린트 설정 */
+@media print {
+    body * { visibility: hidden; }
+    .a4-preview, .a4-preview * { visibility: visible; }
+    .a4-preview {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 210mm;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .no-print { display: none !important; }
+}
+
+/* A4 미리보기 스타일 */
+.a4-preview {
+    width: 794px; 
+    min-height: 1123px;
+    margin: 2rem auto;
+    padding: 10mm 15mm;
+    background: #fff;
+    border: 1px solid #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-size: 11px;
+    color: #000;
+    box-sizing: border-box;
+}
+
+/* 3단 Flex 헤더 레이아웃 */
+.report-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 35px; /* 헤더와 아래 정보행 사이 간격 확보 */
+}
+
+.header-left-space {
+    width: 250px; /* 결재란과 동일한 너비로 균형 유지 */
+}
+
+.header-center-title {
+    flex: 1;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.header-center-title h1 {
+    font-size: 26px; /* 폰트 크기 약간 축소 */
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 8px; /* 자간 조절 */
+    text-indent: 8px;
+}
+
+.header-right-approval {
+    width: 250px;
+}
+
+.approval-table {
+    border-collapse: collapse;
+    margin-left: auto; /* 우측 끝 정렬 */
+}
+
+.approval-table td {
+    border: 1px solid #000;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    font-size: 10px;
+}
+
+.approval-table .label {
+    height: 22px;
+    background-color: #f1f3f5 !important;
+    font-weight: bold;
+    print-color-adjust: exact;
+}
+
+.meta-info {
+    display: flex;
+    justify-content: flex-start;
+    gap: 3.5rem;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.inspection-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.8px solid #000;
+}
+
+.inspection-table th, .inspection-table td {
+    border: 1px solid #000;
+    padding: 8px 3px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+}
+
+.inspection-table th {
+    background-color: #f1f3f5 !important; /* 더 연한 회색 */
+    color: #333;
+    font-weight: 700;
+    font-size: 10px;
+    height: 25px;
+    print-color-adjust: exact;
+}
+
+.inspection-table td {
+    height: 32px;
+}
+
+.inspection-table td.left {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.control-panel {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.empty-state {
+    padding: 3rem;
+    color: #888;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 no-print">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">검수서(주문) 관리</h1>
+            <p class="text-muted mb-0">현장 검수용 양식을 확인하고 출력합니다.</p>
+        </div>
+        <a href="{% url 'docs_index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> 돌아가기
+        </a>
+    </div>
+
+    <div class="control-panel shadow-sm">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label class="fw-bold">입고일자:</label>
+                <input type="date" name="date" class="form-control" value="{{ target_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+            </div>
+            <div class="col-auto">
+                <div class="btn-group">
+                    <a href="?date={{ prev_day_date }}&supplier_id={{ current_supplier_id|default:'' }}" class="btn btn-outline-primary">이전 날</a>
+                    <a href="?date={{ next_day_date }}&supplier_id={{ current_supplier_id|default:'' }}" class="btn btn-outline-primary">다음 날</a>
+                </div>
+            </div>
+            <div class="col-auto ms-auto">
+                <label class="fw-bold">납품업체:</label>
+                <select name="supplier_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">전체 업체</option>
+                    {% for s in suppliers %}
+                        <option value="{{ s.id }}" {% if current_supplier_id == s.id|stringformat:"s" %}selected{% endif %}>
+                            {{ s.name|default:s.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'procurement:export_daily_inspection_excel' %}?date={{ target_date|date:'Y-m-d' }}&supplier_id={{ current_supplier_id|default:'' }}" class="btn btn-success btn-icon">
+                    <i class="bi bi-file-earmark-excel"></i> 엑셀 다운로드
+                </a>
+                <button type="button" onclick="window.print()" class="btn btn-primary btn-icon">
+                    <i class="bi bi-printer"></i> 인쇄하기
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="a4-preview">
+    <!-- 3단 Flex 헤더 구역 -->
+    <div class="report-header-flex">
+        <div class="header-left-space">
+            <!-- 왼쪽 여백 공간 -->
+        </div>
+        
+        <div class="header-center-title">
+            <h1>검 수 서 (주 문)</h1>
+        </div>
+        
+        <div class="header-right-approval">
+            <table class="approval-table">
+                <tr>
+                    <td class="label" style="width: 25px;">결<br>제</td>
+                    <td class="label">담당</td>
+                    <td class="label">팀장</td>
+                    <td class="label">점장</td>
+                </tr>
+                <tr>
+                    <td rowspan="1"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 정보행 구역 -->
+    <div class="meta-info">
+        <div>납품업체 : {% if selected_supplier %}{{ selected_supplier.name|default:selected_supplier.username }}{% else %}전체{% endif %}</div>
+        <div>사업장 : S&P 급식소</div>
+        <div>입고일자 : {{ target_date|date:"Y-m-d" }}</div>
+    </div>
+
+    <table class="inspection-table">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 45px;">구분</th>
+                <th rowspan="2" style="width: 130px;">품명</th>
+                <th rowspan="2" style="width: 80px;">규격</th>
+                <th rowspan="2" style="width: 35px;">단위</th>
+                <th rowspan="2" style="width: 45px;">주문량</th>
+                <th rowspan="2" style="width: 70px;">주문비고</th>
+                <th rowspan="2" style="width: 50px;">원산지</th>
+                <th colspan="6">검수 결과 (현장 수기 작성용)</th>
+            </tr>
+            <tr>
+                <th style="width: 45px;">검수량</th>
+                <th style="width: 50px;">포장상태<br>(O,X)</th>
+                <th style="width: 45px;">품온<br>(℃)</th>
+                <th style="width: 75px;">소비기한</th>
+                <th style="width: 50px;">품질상태<br>(O,X)</th>
+                <th style="width: 55px;">조치</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in report_items %}
+            <tr>
+                <td>{{ item.ingredient.category|default:"-" }}</td>
+                <td class="left">{{ item.ingredient.name }}</td>
+                <td>{{ item.ingredient.spec|default:"-" }}</td>
+                <td>{{ item.ingredient.unit }}</td>
+                <td style="font-weight:bold;">{{ item.missing_qty|floatformat:1 }}</td>
+                <td>-</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="13" class="empty-state">해당 일자에 예정된 검수 품목이 없습니다.</td>
+            </tr>
+            {% endfor %}
+            
+            <!-- 최소 줄 수 유지 -->
+            {% if report_items|length < 15 %}
+                {% with ""|center:15 as range %}
+                {% for _ in range %}
+                    {% if forloop.counter > report_items|length %}
+                    <tr>
+                        {% for j in "1234567890123"|make_list %}
+                        <td></td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                {% endwith %}
+            {% endif %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 1.5rem; font-size: 10px; color: #444; font-weight: 500;">
+        ※ 포장상태/품질상태: 양호(O), 불량(X) | 품온: 냉장(5℃이하), 냉동(-18℃이하) 기준 | 조치: 반품, 즉시사용, 폐기 등
+    </div>
+</div>
+{% endblock %}

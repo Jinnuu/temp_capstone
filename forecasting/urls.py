@@ -18,4 +18,6 @@ urlpatterns = [
     path("results/", prediction_list_view, name="prediction_list"),
     path("results/<int:prediction_id>/", prediction_result_view, name="prediction_result"),
     path("requirement/", views.ingredient_requirement_view, name="ingredient_requirement"),
+    path("weekly-forecast-report/", views.weekly_forecast_report_view, name="weekly_forecast_report"),
+    path("export-weekly-forecast-excel/", views.export_weekly_forecast_excel, name="export_weekly_forecast_excel"),
 ]

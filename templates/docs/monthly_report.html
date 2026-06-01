@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}월간 식단표 보고서 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ERP Style Layout */
+    .sp-report-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 64px);
+        background-color: #f8f9fa;
+    }
+
+    /* Top Control Toolbar */
+    .sp-report-toolbar {
+        background: white;
+        padding: 12px 24px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        z-index: 10;
+    }
+
+    .sp-toolbar-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    /* Document Preview Area */
+    .sp-report-preview {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* A4 Document Box (Vertical for Monthly) */
+    .a4-document {
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        padding: 20mm 15mm;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        position: relative;
+        color: #333;
+    }
+
+    .report-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 15px;
+    }
+
+    .report-header h1 {
+        font-size: 2.2rem;
+        margin: 0;
+        letter-spacing: 8px;
+        font-weight: 800;
+    }
+
+    .report-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    /* Monthly Calendar Table */
+    .report-calendar {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .report-calendar th, .report-calendar td {
+        border: 1px solid #000;
+        padding: 4px;
+        height: 100px;
+        vertical-align: top;
+    }
+
+    .report-calendar th {
+        height: 30px;
+        background-color: #f2f2f2;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: bold;
+    }
+
+    .day-num {
+        font-weight: bold;
+        margin-bottom: 4px;
+        display: block;
+        font-size: 0.85rem;
+    }
+
+    .meal-mini {
+        font-size: 0.7rem;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-bottom: 1px;
+    }
+
+    .meal-mini b {
+        color: #555;
+        margin-right: 2px;
+    }
+
+    td.empty {
+        background-color: #fafafa;
+    }
+
+    /* Print optimization */
+    @media print {
+        header, .sp-report-toolbar {
+            display: none !important;
+        }
+        .sp-report-container {
+            height: auto;
+            background: white;
+        }
+        .sp-report-preview {
+            padding: 0;
+            overflow: visible;
+        }
+        .a4-document {
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-report-container">
+    <!-- 상단 컨트롤 영역 -->
+    <div class="sp-report-toolbar">
+        <div class="sp-toolbar-group">
+            <span class="sp-kicker">보고서 조회</span>
+            <form method="get" class="sp-toolbar-group">
+                <select name="year" class="sp-input" style="width:100px;">
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}년</option>
+                    {% endfor %}
+                </select>
+                <select name="month" class="sp-input" style="width:80px;">
+                    {% for m in months %}
+                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}월</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="sp-btn primary">조회</button>
+            </form>
+        </div>
+        <div class="sp-toolbar-group">
+            <button onclick="window.print()" class="sp-btn">
+                인쇄하기
+            </button>
+            <a href="{% url 'docs_index' %}" class="sp-btn gray">뒤로가기</a>
+        </div>
+    </div>
+
+    <!-- 하단 문서 미리보기 영역 -->
+    <div class="sp-report-preview">
+        <article class="a4-document">
+            <div class="report-header">
+                <h1>월간 식단표</h1>
+            </div>
+
+            <div class="report-meta">
+                <span>대상 년월: {{ selected_year }}년 {{ selected_month }}월</span>
+                <span>출력일: {% now "Y-m-d H:i" %}</span>
+            </div>
+
+            <table class="report-calendar">
+                <thead>
+                    <tr>
+                        <th style="color:red;">일</th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
+                        <th style="color:blue;">토</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in calendar_weeks %}
+                    <tr>
+                        {% for cell in week %}
+                        {% if cell %}
+                        <td>
+                            <span class="day-num">{{ cell.day }}</span>
+                            {% if cell.meals.breakfast %}
+                            <div class="meal-mini"><b>B:</b> {{ cell.meals.breakfast|join:", " }}</div>
+                            {% endif %}
+                            {% if cell.meals.lunch %}
+                            <div class="meal-mini"><b>L:</b> {{ cell.meals.lunch|join:", " }}</div>
+                            {% endif %}
+                            {% if cell.meals.dinner %}
+                            <div class="meal-mini"><b>D:</b> {{ cell.meals.dinner|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        {% else %}
+                        <td class="empty"></td>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 40px; text-align: right; padding-right: 20px;">
+                <p>위와 같이 {{ selected_month }}월 월간 식단을 보고합니다.</p>
+                <div style="margin-top: 25px;">
+                    <span style="border-bottom: 1px solid #000; padding: 0 30px;">관리자: (인)</span>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}

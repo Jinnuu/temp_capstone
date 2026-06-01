@@ -25,11 +25,18 @@
     <div class="sp-card-head">
       <div>
         <p class="sp-kicker">Week Range</p>
-        <h2>{{ start_date_str }} 시작 주간 식단</h2>
+        <h2>{{ start_date_str }} ~ {{ end_date_str }} 주간 식단</h2>
       </div>
       <div class="sp-actions">
-        <a class="sp-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
-        <a class="sp-btn" href="?start_date={{ next_week }}">다음 주 »</a>
+        <form method="get" style="display:flex; gap:8px; align-items:center;">
+          <input type="date" name="date" value="{{ start_date_str }}" class="sp-input" style="width:150px;">
+          <button type="submit" class="sp-btn primary">조회</button>
+          <a href="{% url 'meals:export_weekly_mealplan_excel' %}?date={{ start_date_str }}" class="sp-btn ok">엑셀 다운로드</a>
+        </form>
+        <div style="margin-left:16px;">
+          <a class="sp-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
+          <a class="sp-btn" href="?start_date={{ next_week }}">다음 주 »</a>
+        </div>
       </div>
     </div>
 
@@ -90,6 +97,24 @@
               <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="석식">
               <button type="button" onclick="addWeeklyMenu(this)">+</button>
             </div>
+          </div>
+        {% endfor %}
+
+        <div class="sp-week-cell meal-head">비고</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell">
+            {% if forloop.last %}
+              <div class="sp-week-menu-list next-mon-breakfast">
+                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7;">[다음주 월요일 조식]</p>
+                {% for menu in day.remarks %}
+                  <span style="background:#e7f5ff; border-color:#a5d8ff; color:#1971c2;">{{ menu }}</span>
+                {% empty %}
+                  <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="sp-note" style="color:#adb5bd;">-</p>
+            {% endif %}
           </div>
         {% endfor %}
       </div>

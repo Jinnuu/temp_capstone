@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}월수불명세서 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}">
+<style>
+  /* A4 Preview Styling */
+  .a4-preview-container {
+    background-color: #f1f3f5;
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+  .a4-page {
+    width: 794px;
+    min-height: 1123px;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    padding: 60px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  .report-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .report-header h1 {
+    font-size: 2rem;
+    color: #212529;
+    letter-spacing: 0.5rem;
+    border-bottom: 3px double #212529;
+    display: inline-block;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .report-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .report-table th, .report-table td {
+    border: 1px solid #343a40;
+    padding: 6px 4px;
+    text-align: center;
+  }
+  .report-table th {
+    background-color: #f8f9fa;
+  }
+
+  @media print {
+    body * { visibility: hidden; }
+    .a4-preview-container, .a4-preview-container * { visibility: visible; }
+    .a4-preview-container { position: absolute; left: 0; top: 0; padding: 0; }
+    .a4-page { box-shadow: none; margin: 0; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-page">
+  <!-- Control Panel -->
+  <section class="sp-hero">
+    <div>
+      <p class="sp-kicker">Monthly Inventory Summary</p>
+      <h1>월수불명세서</h1>
+      <p>월간 식재료 수불 합계와 기말 재고 현황을 요약하여 표시합니다.</p>
+    </div>
+    <div class="sp-actions">
+      <a href="{% url 'docs_index' %}" class="sp-btn">돌아가기</a>
+      <form method="get" class="sp-actions" style="gap:10px; display:inline-flex;">
+        <select name="year" class="sp-input" style="width:100px;">
+          <option value="2025" {% if year == 2025 %}selected{% endif %}>2025년</option>
+          <option value="2026" {% if year == 2026 %}selected{% endif %}>2026년</option>
+        </select>
+        <select name="month" class="sp-input" style="width:100px;">
+          {% for m in "123456789"|make_list %}
+            <option value="{{ forloop.counter }}" {% if month == forloop.counter %}selected{% endif %}>{{ forloop.counter }}월</option>
+          {% endfor %}
+          <option value="10" {% if month == 10 %}selected{% endif %}>10월</option>
+          <option value="11" {% if month == 11 %}selected{% endif %}>11월</option>
+          <option value="12" {% if month == 12 %}selected{% endif %}>12월</option>
+        </select>
+        <button type="submit" class="sp-btn primary">조회</button>
+        <a href="{% url 'inventory:export_inventory_excel' %}?type=monthly&year={{ year }}&month={{ month }}" class="sp-btn ok">엑셀 다운로드</a>
+        <button type="button" class="sp-btn" onclick="window.print()">인쇄</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- A4 Preview -->
+  <div class="a4-preview-container">
+    <div class="a4-page">
+      <div class="report-header">
+        <h1>월 수 불 명 세 서</h1>
+      </div>
+      
+      <div class="report-info">
+        <div><strong>기간:</strong> {{ year }}년 {{ month }}월</div>
+        <div><strong>사업장:</strong> S&P 급식소</div>
+      </div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>분류</th>
+            <th>식재료명</th>
+            <th>규격</th>
+            <th>단위</th>
+            <th>기초재고</th>
+            <th>입고합계</th>
+            <th>출고합계</th>
+            <th>보정액</th>
+            <th>기말재고</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in report_data %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.ingredient.category|default:"-" }}</td>
+              <td style="text-align:left;">{{ item.ingredient.name }}</td>
+              <td>{{ item.ingredient.spec|default:"-" }}</td>
+              <td>{{ item.ingredient.unit }}</td>
+              <td>{{ item.prev_stock }}</td>
+              <td style="color: #2b8a3e;">{{ item.in_qty }}</td>
+              <td style="color: #c92a2a;">{{ item.out_qty }}</td>
+              <td>{{ item.adj_qty }}</td>
+              <td><strong>{{ item.curr_stock }}</strong></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="10" style="padding: 100px 0; color: #adb5bd;">해당 월에 수불 내역이 없습니다.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div style="margin-top: auto; display: flex; justify-content: flex-end; gap: 40px; padding-top: 50px;">
+        <div style="text-align: center;">
+          <p>작성자</p>
+          <div style="width: 80px; height: 80px; border: 1px solid #dee2e6; margin-top: 5px; display: flex; align-items: center; justify-content: center; color: #adb5bd;">(인)</div>
+        </div>
+        <div style="text-align: center;">
+          <p>검토자</p>
+          <div style="width: 80px; height: 80px; border: 1px solid #dee2e6; margin-top: 5px; display: flex; align-items: center; justify-content: center; color: #adb5bd;">(인)</div>
+        </div>
+        <div style="text-align: center;">
+          <p>승인자</p>
+          <div style="width: 80px; height: 80px; border: 1px solid #dee2e6; margin-top: 5px; display: flex; align-items: center; justify-content: center; color: #adb5bd;">(인)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

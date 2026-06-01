@@ -5,10 +5,10 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Case, IntegerField, Sum, Value, When
-from django.shortcuts import get_object_or_404, redirect, render
+from datetime import datetime, date, timedelta
 
-from forecasting.models import AttendancePrediction
+from .models import PurchaseOrder, OrderItem
+from inventory.models import Ingredient, InventoryLog
 from forecasting.services.ingredient_calc import get_all_day_requirements
 from inventory.models import Ingredient, InventoryLog
 from meals.models import DietPlan
@@ -110,11 +110,13 @@ def get_serving_count(plan):
 
 
 def order_create(request):
-    """간편주문 생성. GET 파라미터 또는 날짜 기준 부족분을 수량에 자동 채운다."""
-    if request.method == "POST":
-        ingredient_ids = request.POST.getlist("ingredient_id[]")
-        quantities = request.POST.getlist("quantity[]")
-
+    """
+    간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 로드 기능 포함
+    """
+    if request.method == 'POST':
+        ingredient_ids = request.POST.getlist('ingredient_id[]')
+        quantities = request.POST.getlist('quantity[]')
+        
         if ingredient_ids and quantities:
             user = get_or_create_dummy_user(request)
             po = PurchaseOrder.objects.create(
@@ -137,6 +139,7 @@ def order_create(request):
                 OrderItem.objects.create(
                     purchase_order=po,
                     ingredient=ing,
+                    target_date=target_date_val if target_date_val else None,
                     required_qty=q,
                     missing_qty=q,
                     order_unit_price=ing.unit_price,
@@ -507,3 +510,363 @@ def order_from_mealplan(request):
             "all_ingredients": Ingredient.objects.all().order_by("name"),
         },
     )
+
+
+def get_monday_sunday_range(date_str):
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            target_date = date.today()
+    else:
+        target_date = date.today()
+
+    monday = target_date - timedelta(days=target_date.weekday())
+    sunday = monday + timedelta(days=6)
+    return target_date, monday, sunday
+
+
+def weekly_procurement_report(request):
+    target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+
+    # Use Coalesce to fallback to purchase_order__created_at__date if target_date is NULL
+    order_items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday]
+    ).select_related("ingredient", "purchase_order__supplier").order_by("display_date", "ingredient__name")
+
+    # Group by date
+    analysis_data = defaultdict(list)
+    for item in order_items:
+        analysis_data[item.display_date].append(item)
+
+    report_data = [
+        {"date": dt, "items": analysis_data[dt]}
+        for dt in sorted(analysis_data.keys())
+    ]
+
+    context = {
+        "report_data": report_data,
+        "monday": monday,
+        "sunday": sunday,
+        "target_date": target_date,
+        "prev_week_date": (monday - timedelta(days=7)).isoformat(),
+        "next_week_date": (monday + timedelta(days=7)).isoformat(),
+    }
+    return render(request, "docs/weekly_procurement_report.html", context)
+
+
+def vendor_procurement_report(request):
+    target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    supplier_id = request.GET.get("supplier_id", "").strip()
+
+    # 빈 문자열이나 문자열 'None'이 넘어온 경우 필터링하지 않는다.
+    if supplier_id in ("", "None", "none"):
+        supplier_id = ""
+
+    suppliers = get_user_model().objects.filter(purchase_orders__isnull=False).distinct()
+    selected_supplier = None
+    report_data = []
+
+    if supplier_id:
+        selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        order_items = OrderItem.objects.annotate(
+            display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+        ).filter(
+            display_date__range=[monday, sunday],
+            purchase_order__supplier=selected_supplier
+        ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
+
+        analysis_data = defaultdict(list)
+        for item in order_items:
+            analysis_data[item.display_date].append(item)
+
+        report_data = [
+            {"date": dt, "items": analysis_data[dt]}
+            for dt in sorted(analysis_data.keys())
+        ]
+
+    context = {
+        "suppliers": suppliers,
+        "selected_supplier": selected_supplier,
+        "current_supplier_id": supplier_id,
+        "report_data": report_data,
+        "monday": monday,
+        "sunday": sunday,
+        "target_date": target_date,
+        "prev_week_date": (monday - timedelta(days=7)).isoformat(),
+        "next_week_date": (monday + timedelta(days=7)).isoformat(),
+    }
+    return render(request, "docs/vendor_procurement_report.html", context)
+
+
+def export_weekly_procurement_excel(request):
+    _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday]
+    ).select_related("ingredient", "purchase_order__supplier").order_by("display_date", "ingredient__name")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "주간발주서"
+
+    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "공급처", "주문일자"]
+    ws.append(headers)
+
+    for i, item in enumerate(items, 1):
+        ws.append([
+            i,
+            item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
+            item.ingredient.category or "-",
+            item.ingredient.name,
+            item.ingredient.spec or "-",
+            item.ingredient.unit,
+            item.order_unit_price,
+            float(item.required_qty),
+            float(item.missing_qty),
+            item.estimated_price,
+            item.purchase_order.supplier.name or item.purchase_order.supplier.username,
+            item.purchase_order.created_at.strftime("%Y-%m-%d")
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="weekly_procurement_{monday}.xlsx"'
+    wb.save(response)
+    return response
+
+
+def export_vendor_procurement_excel(request):
+    _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    supplier_id = request.GET.get("supplier_id", "").strip()
+
+    # 빈 문자열이나 문자열 'None'이 넘어온 경우 업체 미선택으로 처리한다.
+    if supplier_id in ("None", "none"):
+        supplier_id = ""
+
+    if not supplier_id:
+        return HttpResponse("업체를 선택해주세요.", status=400)
+
+    supplier = get_object_or_404(get_user_model(), id=supplier_id)
+    items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date__range=[monday, sunday],
+        purchase_order__supplier=supplier
+    ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"발주명세서_{supplier.name or supplier.username}"
+
+    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "주문일자"]
+    ws.append(headers)
+
+    for i, item in enumerate(items, 1):
+        ws.append([
+            i,
+            item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
+            item.ingredient.category or "-",
+            item.ingredient.name,
+            item.ingredient.spec or "-",
+            item.ingredient.unit,
+            item.order_unit_price,
+            float(item.required_qty),
+            float(item.missing_qty),
+            item.estimated_price,
+            item.purchase_order.created_at.strftime("%Y-%m-%d")
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    filename = f"vendor_procurement_{supplier.name or supplier.username}_{monday}.xlsx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
+
+
+def daily_inspection_report(request):
+    date_str = request.GET.get("date")
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            target_date = date.today()
+    else:
+        target_date = date.today()
+
+    supplier_id = request.GET.get("supplier_id")
+    suppliers = get_user_model().objects.filter(purchase_orders__isnull=False).distinct()
+    selected_supplier = None
+    report_items = []
+
+    order_items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date=target_date
+    ).select_related("ingredient", "purchase_order__supplier").order_by("ingredient__category", "ingredient__name")
+
+    if supplier_id:
+        selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        order_items = order_items.filter(purchase_order__supplier=selected_supplier)
+
+    report_items = order_items
+    total_amount = sum(item.estimated_price for item in report_items)
+
+    context = {
+        "target_date": target_date,
+        "prev_day_date": (target_date - timedelta(days=1)).isoformat(),
+        "next_day_date": (target_date + timedelta(days=1)).isoformat(),
+        "suppliers": suppliers,
+        "selected_supplier": selected_supplier,
+        "current_supplier_id": supplier_id,
+        "report_items": report_items,
+        "total_amount": total_amount,
+    }
+    return render(request, "docs/daily_inspection_report.html", context)
+
+
+def export_daily_inspection_excel(request):
+    date_str = request.GET.get("date")
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            target_date = date.today()
+    else:
+        target_date = date.today()
+
+    supplier_id = request.GET.get("supplier_id")
+    
+    order_items = OrderItem.objects.annotate(
+        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
+    ).filter(
+        display_date=target_date
+    ).select_related("ingredient", "purchase_order__supplier").order_by("ingredient__category", "ingredient__name")
+
+    filename_suffix = "전체"
+    selected_supplier_name = "전체"
+    if supplier_id:
+        supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        order_items = order_items.filter(purchase_order__supplier=supplier)
+        selected_supplier_name = supplier.name or supplier.username
+        filename_suffix = selected_supplier_name
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "검수서_주문"
+
+    # Set Column Widths
+    col_widths = [10, 25, 15, 8, 10, 15, 10, 10, 8, 8, 12, 8, 10]
+    for i, width in enumerate(col_widths, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+
+    # Title
+    ws.merge_cells("A1:M2")
+    ws["A1"] = "검 수 서 (주 문)"
+    ws["A1"].font = Font(size=20, bold=True)
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+    # Approval Table (Top Right)
+    # Row 1: Label
+    ws.merge_cells("J1:J2")
+    ws["J1"] = "결재"
+    ws["K1"] = "담당"
+    ws["L1"] = "팀장"
+    ws["M1"] = "점장"
+    # Row 2: Empty for signatures
+    # (J1:J2 merged carries the label)
+    
+    # Style Approval Label
+    for cell_coord in ["J1", "K1", "L1", "M1"]:
+        ws[cell_coord].alignment = Alignment(horizontal="center", vertical="center")
+        ws[cell_coord].font = Font(bold=True)
+        ws[cell_coord].border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
+        ws[cell_coord].fill = openpyxl.styles.PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+
+    # Style Approval Content Boxes (Below)
+    for row_idx in [2]:
+        for col_letter in ["K", "L", "M"]:
+            cell = ws[f"{col_letter}{row_idx}"]
+            cell.border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
+    ws.row_dimensions[2].height = 40
+
+    # Meta Info
+    ws["A3"] = f"납품업체 : {selected_supplier_name}"
+    ws["A4"] = "사업장 : S&P 급식소"
+    ws["A5"] = f"입고일자 : {target_date}"
+    for row in [3, 4, 5]:
+        ws[f"A{row}"].font = Font(bold=True)
+
+    # Table Headers (Double Row)
+    # Row 6: Main Headers
+    ws.merge_cells("A6:A7")
+    ws["A6"] = "구분"
+    ws.merge_cells("B6:B7")
+    ws["B6"] = "품명"
+    ws.merge_cells("C6:C7")
+    ws["C6"] = "규격"
+    ws.merge_cells("D6:D7")
+    ws["D6"] = "단위"
+    ws.merge_cells("E6:E7")
+    ws["E6"] = "주문량"
+    ws.merge_cells("F6:F7")
+    ws["F6"] = "주문비고"
+    ws.merge_cells("G6:G7")
+    ws["G6"] = "원산지"
+    
+    ws.merge_cells("H6:M6")
+    ws["H6"] = "검수 결과 (현장 수기 작성용)"
+    
+    # Row 7: Sub Headers
+    ws["H7"] = "검수량"
+    ws["I7"] = "포장"
+    ws["J7"] = "품온"
+    ws["K7"] = "소비기한"
+    ws["L7"] = "품질"
+    ws["M7"] = "조치"
+
+    # Style Headers
+    header_font = Font(color="FFFFFF", bold=True)
+    header_fill = openpyxl.styles.PatternFill(start_color="444444", end_color="444444", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    header_border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
+
+    for row_idx in [6, 7]:
+        for col_idx in range(1, 14):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = header_border
+
+    # Data Rows
+    current_row = 8
+    for item in order_items:
+        ws.cell(row=current_row, column=1, value=item.ingredient.category or "-")
+        ws.cell(row=current_row, column=2, value=item.ingredient.name)
+        ws.cell(row=current_row, column=3, value=item.ingredient.spec or "-")
+        ws.cell(row=current_row, column=4, value=item.ingredient.unit)
+        ws.cell(row=current_row, column=5, value=float(item.missing_qty))
+        ws.cell(row=current_row, column=6, value="-") # 주문비고
+        ws.cell(row=current_row, column=7, value="-") # 원산지
+        # H to M are blank
+        for col_idx in range(1, 14):
+            cell = ws.cell(row=current_row, column=col_idx)
+            cell.border = header_border
+            cell.alignment = Alignment(horizontal="center")
+        current_row += 1
+
+    # Fill empty rows up to 20 if needed
+    while current_row < 25:
+        for col_idx in range(1, 14):
+            cell = ws.cell(row=current_row, column=col_idx)
+            cell.border = header_border
+        current_row += 1
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    filename = f"daily_inspection_{target_date}_{filename_suffix}.xlsx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
