@@ -26185,7 +26185,147 @@
   "fields": {
     "target_date": "2026-06-01",
     "meal_type": "Á¶½Ä",
-    "headcount": 0,
+    "headcount": 80,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 23,
+  "fields": {
+    "target_date": "2026-06-01",
+    "meal_type": "Áß½Ä",
+    "headcount": 120,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 24,
+  "fields": {
+    "target_date": "2026-06-01",
+    "meal_type": "¼®½Ä",
+    "headcount": 70,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 25,
+  "fields": {
+    "target_date": "2026-06-02",
+    "meal_type": "Á¶½Ä",
+    "headcount": 82,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 26,
+  "fields": {
+    "target_date": "2026-06-02",
+    "meal_type": "Áß½Ä",
+    "headcount": 115,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 27,
+  "fields": {
+    "target_date": "2026-06-02",
+    "meal_type": "¼®½Ä",
+    "headcount": 68,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 28,
+  "fields": {
+    "target_date": "2026-06-03",
+    "meal_type": "Á¶½Ä",
+    "headcount": 78,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 29,
+  "fields": {
+    "target_date": "2026-06-03",
+    "meal_type": "Áß½Ä",
+    "headcount": 118,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 30,
+  "fields": {
+    "target_date": "2026-06-03",
+    "meal_type": "¼®½Ä",
+    "headcount": 72,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 31,
+  "fields": {
+    "target_date": "2026-06-04",
+    "meal_type": "Á¶½Ä",
+    "headcount": 81,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 32,
+  "fields": {
+    "target_date": "2026-06-04",
+    "meal_type": "Áß½Ä",
+    "headcount": 122,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 33,
+  "fields": {
+    "target_date": "2026-06-04",
+    "meal_type": "¼®½Ä",
+    "headcount": 70,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 34,
+  "fields": {
+    "target_date": "2026-06-05",
+    "meal_type": "Á¶½Ä",
+    "headcount": 79,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 35,
+  "fields": {
+    "target_date": "2026-06-05",
+    "meal_type": "Áß½Ä",
+    "headcount": 119,
+    "is_served": false
+  }
+},
+{
+  "model": "meals.dietplan",
+  "pk": 36,
+  "fields": {
+    "target_date": "2026-06-05",
+    "meal_type": "¼®½Ä",
+    "headcount": 69,
     "is_served": false
   }
 },
@@ -26415,26 +26555,218 @@
 },
 {
   "model": "meals.dietmenu",
-  "pk": 33,
-  "fields": {
-    "diet_plan": 22,
-    "menu": 3
-  }
-},
-{
-  "model": "meals.dietmenu",
-  "pk": 34,
-  "fields": {
-    "diet_plan": 22,
-    "menu": 4
-  }
-},
-{
-  "model": "meals.dietmenu",
-  "pk": 35,
+  "pk": 36,
   "fields": {
     "diet_plan": 22,
     "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 37,
+  "fields": {
+    "diet_plan": 22,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 38,
+  "fields": {
+    "diet_plan": 23,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 39,
+  "fields": {
+    "diet_plan": 23,
+    "menu": 77
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 40,
+  "fields": {
+    "diet_plan": 23,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 41,
+  "fields": {
+    "diet_plan": 24,
+    "menu": 143
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 42,
+  "fields": {
+    "diet_plan": 25,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 43,
+  "fields": {
+    "diet_plan": 26,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 44,
+  "fields": {
+    "diet_plan": 26,
+    "menu": 77
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 45,
+  "fields": {
+    "diet_plan": 27,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 46,
+  "fields": {
+    "diet_plan": 27,
+    "menu": 22
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 47,
+  "fields": {
+    "diet_plan": 28,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 48,
+  "fields": {
+    "diet_plan": 28,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 49,
+  "fields": {
+    "diet_plan": 29,
+    "menu": 143
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 50,
+  "fields": {
+    "diet_plan": 29,
+    "menu": 22
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 51,
+  "fields": {
+    "diet_plan": 30,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 52,
+  "fields": {
+    "diet_plan": 30,
+    "menu": 77
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 53,
+  "fields": {
+    "diet_plan": 31,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 54,
+  "fields": {
+    "diet_plan": 32,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 55,
+  "fields": {
+    "diet_plan": 32,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 56,
+  "fields": {
+    "diet_plan": 33,
+    "menu": 143
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 57,
+  "fields": {
+    "diet_plan": 34,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 58,
+  "fields": {
+    "diet_plan": 34,
+    "menu": 22
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 59,
+  "fields": {
+    "diet_plan": 35,
+    "menu": 77
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 60,
+  "fields": {
+    "diet_plan": 35,
+    "menu": 19
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 61,
+  "fields": {
+    "diet_plan": 36,
+    "menu": 5
+  }
+},
+{
+  "model": "meals.dietmenu",
+  "pk": 62,
+  "fields": {
+    "diet_plan": 36,
+    "menu": 19
   }
 },
 {
@@ -46498,6 +46830,153 @@
       ]
     },
     "created_at": "2026-05-25T20:58:03.510Z"
+  }
+},
+{
+  "model": "forecasting.attendanceprediction",
+  "pk": 56,
+  "fields": {
+    "prediction_date": "2026-06-02",
+    "meal_type": "breakfast",
+    "predicted_count": 39,
+    "model_name": "best_model_breakfast.pkl",
+    "input_features": {
+      "test_mae": 8.594339618843566,
+      "feature_values": {
+        "ewm_5": 54.46106271889027,
+        "lag_1": 34.0,
+        "lag_2": 41.0,
+        "lunch": 0.0,
+        "dinner": 0.0,
+        "weekday": 1.0,
+        "emb_mean": -0.0016286509344354272,
+        "is_day_off": 0.0,
+        "is_holiday": 0.0,
+        "is_weekend": 0.0,
+        "menu_cluster": 5.0,
+        "d_day_holiday": 1.0,
+        "tomorrow_is_day_off": 1.0
+      },
+      "menu_text_used": "Â÷Á¶¹ä,È£¹Ú°íÃßÀåÂî°³,Á¦À°ººÀ½,°¡ÀÚ¹ÌÄ«·¹±¸ÀÌ,¹èÃß±èÄ¡",
+      "artifact_target": "breakfast",
+      "best_model_name": "Vote(XGB+Pas)",
+      "feature_columns": [
+        "lunch",
+        "dinner",
+        "weekday",
+        "is_weekend",
+        "is_holiday",
+        "is_day_off",
+        "tomorrow_is_day_off",
+        "d_day_holiday",
+        "menu_cluster",
+        "emb_mean",
+        "lag_1",
+        "lag_2",
+        "ewm_5"
+      ]
+    },
+    "created_at": "2026-06-01T11:40:44.765Z"
+  }
+},
+{
+  "model": "forecasting.attendanceprediction",
+  "pk": 57,
+  "fields": {
+    "prediction_date": "2026-06-02",
+    "meal_type": "lunch",
+    "predicted_count": 84,
+    "model_name": "best_model_lunch.pkl",
+    "input_features": {
+      "test_mae": 13.452524236483717,
+      "feature_values": {
+        "ewm_3": 200.81664089780588,
+        "ewm_7": 215.0652659620344,
+        "lag_1": 157.0,
+        "lag_2": 249.0,
+        "lag_3": 242.0,
+        "lag_7": 223.0,
+        "dinner": 0.0,
+        "ewm_14": 213.82986764183707,
+        "weekday": 1.0,
+        "emb_mean": -0.00172945240046829,
+        "breakfast": 0.0,
+        "is_day_off": 0.0,
+        "is_holiday": 0.0,
+        "is_weekend": 0.0,
+        "menu_cluster": 4.0,
+        "d_day_holiday": 1.0,
+        "tomorrow_is_day_off": 1.0
+      },
+      "menu_text_used": "ÇÜ±èÄ¡ººÀ½¹ä,¾çÆÄ´Þ°¿±¹,´ß°¡½¿»ì»ø·¯µå,¸ðµë¶±,±ïµÎ±â",
+      "artifact_target": "lunch",
+      "best_model_name": "Vote(Bag+MLP)",
+      "feature_columns": [
+        "breakfast",
+        "dinner",
+        "weekday",
+        "is_weekend",
+        "is_holiday",
+        "is_day_off",
+        "tomorrow_is_day_off",
+        "d_day_holiday",
+        "lag_1",
+        "lag_2",
+        "lag_3",
+        "lag_7",
+        "ewm_3",
+        "ewm_7",
+        "ewm_14",
+        "menu_cluster",
+        "emb_mean"
+      ]
+    },
+    "created_at": "2026-06-01T11:40:58.852Z"
+  }
+},
+{
+  "model": "forecasting.attendanceprediction",
+  "pk": 58,
+  "fields": {
+    "prediction_date": "2026-06-02",
+    "meal_type": "dinner",
+    "predicted_count": 141,
+    "model_name": "best_model_dinner.pkl",
+    "input_features": {
+      "test_mae": 11.006650645038476,
+      "feature_values": {
+        "ewm_7": 201.3876555618348,
+        "lag_1": 120.0,
+        "lunch": 0.0,
+        "weekday": 1.0,
+        "breakfast": 0.0,
+        "d_day_min": 1.0,
+        "d_day_exam": 365.0,
+        "is_day_off": 0.0,
+        "is_holiday": 0.0,
+        "is_weekend": 0.0,
+        "d_day_holiday": 1.0,
+        "tomorrow_is_day_off": 1.0
+      },
+      "menu_text_used": "Â÷Á¶¹ä,µ·µî»À°¨ÀÚÅÁ,¿ÀÂ¡¾î¾ßÃ¤ººÀ½,¶±ººÀÌ,±è¸»ÀÌÆ¢±è,¹èÃß±èÄ¡",
+      "artifact_target": "dinner",
+      "best_model_name": "Stack(His+Ext|SVR)",
+      "feature_columns": [
+        "breakfast",
+        "lunch",
+        "weekday",
+        "is_weekend",
+        "is_holiday",
+        "is_day_off",
+        "tomorrow_is_day_off",
+        "d_day_holiday",
+        "d_day_exam",
+        "lag_1",
+        "ewm_7",
+        "d_day_min"
+      ]
+    },
+    "created_at": "2026-06-01T11:41:02.601Z"
   }
 },
 {
