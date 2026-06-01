@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}재고 차감 미리보기 | S&P{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/upload_final.css' %}?v=sprint7-deduct-preview">{% endblock %}
+{% block content %}
+<div class="upload-page">
+  <section class="upload-hero">
+    <div><p>Inventory Deduction</p><h1>식사 완료 재고 차감</h1><span>{{ target_date }} {{ meal_type }} · {{ headcount }}명 기준으로 차감 예정 품목을 확인합니다.</span></div>
+    <div class="upload-actions"><a href="{% url 'meals:mealplan_list' %}">식단 달력</a><a href="{% url 'inventory:ingredient_list' %}">재고 현황</a></div>
+  </section>
+  <section class="upload-card">
+    <h2>차감 예정 목록</h2>
+    <table class="upload-table">
+      <thead><tr><th>식재료</th><th>연결 메뉴</th><th>현재고</th><th>차감량</th><th>차감 후</th><th>상태</th></tr></thead>
+      <tbody>
+      {% for row in preview_rows %}
+        <tr>
+          <td>{{ row.ingredient.name }}</td><td>{{ row.menu_names }}</td><td>{{ row.current_stock|floatformat:2 }} {{ row.ingredient.unit }}</td><td>{{ row.required_qty|floatformat:2 }} {{ row.ingredient.unit }}</td><td>{{ row.after_stock|floatformat:2 }} {{ row.ingredient.unit }}</td><td>{% if row.is_short %}<span class="bad">부족</span>{% else %}<span class="good">가능</span>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">차감할 레시피 데이터가 없습니다.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+      {% csrf_token %}<input type="hidden" name="date" value="{{ target_date|date:'Y-m-d' }}"><input type="hidden" name="meal_type" value="{{ meal_type }}"><input type="hidden" name="headcount" value="{{ headcount }}"><input type="hidden" name="confirm" value="1">
+      <a class="secondary" href="{% url 'meals:mealplan_list' %}">취소</a><button type="submit">최종 차감</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

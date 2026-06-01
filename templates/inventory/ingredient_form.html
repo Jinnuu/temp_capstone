@@ -1,50 +1,59 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}식자재 등록 | S&P{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/final_sprint7_hotfix.css' %}?v=ingredient-final-v1">
+{% endblock %}
+
 {% block content %}
-<section class="sp-page-title">
-  <h1>식자재 등록</h1>
-  <p>재고 관리 및 발주처 정보가 포함된 식자재 기준정보를 등록합니다.</p>
-</section>
-
-<section class="sp-action-row">
-  <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">식자재 목록</a>
-  <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
-</section>
-
-<section class="sp-panel sp-narrow-panel">
-  <div class="sp-panel-head">
+<div class="final-page final-narrow">
+  <section class="final-hero">
     <div>
-      <p>Ingredient</p>
-      <h2>식자재 정보 입력</h2>
+      <p class="final-kicker">Ingredient Master</p>
+      <h1>식자재 등록</h1>
+      <p>재고 관리, 레시피, 식단 기반 발주에 사용할 식자재 기준정보를 등록합니다.</p>
     </div>
-  </div>
+    <div class="final-actions">
+      <a class="final-btn" href="{% url 'inventory:ingredient_list' %}">식자재 목록</a>
+      <a class="final-btn primary" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
+    </div>
+  </section>
 
-  <form method="post" class="sp-form">
+  <form method="post" class="final-card">
     {% csrf_token %}
 
+    <div class="final-card-head">
+      <div>
+        <p class="final-kicker">Basic Information</p>
+        <h2>식자재 정보 입력</h2>
+      </div>
+    </div>
+
     {% if form.non_field_errors %}
-      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      <div class="final-alert error">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    {% for field in form %}
-      <label>
-        <span>{{ field.label }}</span>
-        {{ field }}
-        {% if field.help_text %}
-          <small class="sp-help">{{ field.help_text }}</small>
-        {% endif %}
-        {% if field.errors %}
-          <small class="text-danger">{{ field.errors }}</small>
-        {% endif %}
-      </label>
-    {% endfor %}
+    <div class="final-form-grid">
+      {% for field in form %}
+        <div class="final-field {% if field.name == 'description' %}full{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <small>{{ field.help_text }}</small>
+          {% endif %}
+          {% if field.errors %}
+            <div class="final-field-error">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
 
-    <div class="sp-filter-actions">
-      <button type="submit" class="sp-btn sp-btn-primary">저장하기</button>
-      <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">취소</a>
+    <div class="final-submit-row">
+      <button type="submit" class="final-btn primary">저장하기</button>
+      <a class="final-btn" href="{% url 'inventory:ingredient_list' %}">취소</a>
     </div>
   </form>
-</section>
+</div>
 {% endblock %}

@@ -4,199 +4,217 @@
 {% block title %}운영현황 | S&P{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/dashboard_professor.css' %}?v=sprint7-professor-v1">
 {% endblock %}
 
 {% block content %}
-<div class="sp-page">
-  <section class="sp-hero center">
-    <div>
-      <h1>운영현황</h1>
-      <p>오늘 식단, 예측 식수, 부족 재고, 발주 대기 상태를 한 화면에서 확인합니다.</p>
-    </div>
-  </section>
+<div class="pf-page">
+  <header class="pf-title">
+    <h1>운영현황</h1>
+    <p>오늘 식단, 예측 식수, 부족 재고, 발주 대기 상태를 한 화면에서 확인합니다.</p>
+  </header>
 
-  <section class="sp-stat-grid">
-    <article class="sp-stat">
-      <span>선택 날짜</span>
-      <strong>{{ selected_date|date:"Y.m.d" }}</strong>
-      <small>날짜를 클릭하면 상세 요약이 변경됩니다.</small>
-    </article>
-    <article class="sp-stat">
-      <span>부족 재고</span>
-      <strong style="color:var(--sp-red);">{{ low_stock_items|length }}개</strong>
-      <small>안전재고 이하 품목 기준</small>
-    </article>
-    <article class="sp-stat">
-      <span>발주 대기</span>
-      <strong>{{ pending_order_count }}건</strong>
-      <small>현재 대기 상태 발주서</small>
-    </article>
-    <article class="sp-stat">
-      <span>빠른 작업</span>
-      <div class="sp-actions" style="justify-content:flex-start;margin-top:10px;">
-        <a class="sp-btn primary" href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
-        <a class="sp-btn" href="{% url 'forecasting:prediction_create' %}">식수 예측</a>
-      </div>
-    </article>
-  </section>
+  <div class="pf-shell">
+    <main class="pf-main">
+      <section class="pf-stat-grid" aria-label="운영 요약">
+        <article class="pf-stat">
+          <span>선택 날짜</span>
+          <strong>{{ selected_date|date:"Y.m.d" }}</strong>
+          <small>날짜를 클릭하면 상세 요약이 변경됩니다.</small>
+        </article>
 
-  <section class="sp-dashboard-grid">
-    <div>
-      <section class="sp-card">
-        <div class="sp-calendar-toolbar">
+        <article class="pf-stat">
+          <span>부족 재고</span>
+          <strong class="red">{{ low_stock_items|length }}개</strong>
+          <small>안전재고 이하 품목 기준</small>
+        </article>
+
+        <article class="pf-stat">
+          <span>발주 대기</span>
+          <strong>{{ pending_order_count }}건</strong>
+          <small>현재 대기 상태 발주서</small>
+        </article>
+      </section>
+
+      <section class="pf-card">
+        <div class="pf-card-head">
           <div>
-            <p class="sp-kicker">Monthly Calendar</p>
-            <h2 style="margin:0;font-size:26px;font-weight:900;">{{ selected_year }}년 {{ selected_month }}월 운영 캘린더</h2>
+            <p class="pf-kicker">Monthly Calendar</p>
+            <h2>{{ selected_year }}년 {{ selected_month }}월 운영 캘린더</h2>
           </div>
 
-          <form method="get" class="sp-calendar-controls">
-            <select name="year">
+          <form class="pf-controls" method="get">
+            <select name="year" aria-label="조회 연도">
               {% for year in years %}
                 <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}년</option>
               {% endfor %}
             </select>
-            <select name="month">
+
+            <select name="month" aria-label="조회 월">
               {% for month in months %}
                 <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}월</option>
               {% endfor %}
             </select>
-            <button type="submit" class="sp-btn">조회</button>
+
+            <button type="submit">조회</button>
           </form>
         </div>
 
-        <div class="sp-table-wrap">
-          <table class="sp-calendar">
-            <thead>
-              <tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr>
-            </thead>
-            <tbody>
-              {% for week in calendar_weeks %}
-                <tr>
-                  {% for cell in week %}
-                    {% if cell %}
-                      <td class="{% if cell.is_today %}today{% endif %}{% if cell.date == selected_date %} selected{% endif %}">
-                        <a href="?year={{ selected_year }}&month={{ selected_month }}&date={{ cell.date|date:'Y-m-d' }}">
-                          <div class="sp-day-top">
-                            <strong>{{ cell.day }}</strong>
-                            {% if cell.is_today %}<span class="sp-badge">오늘</span>{% endif %}
-                          </div>
+        <table class="pf-calendar">
+          <thead>
+            <tr>
+              <th>일</th>
+              <th>월</th>
+              <th>화</th>
+              <th>수</th>
+              <th>목</th>
+              <th>금</th>
+              <th>토</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for week in calendar_weeks %}
+              <tr>
+                {% for cell in week %}
+                  {% if cell %}
+                    <td class="{% if cell.is_today %}today{% endif %} {% if cell.is_selected %}selected{% endif %}">
+                      <a href="?year={{ selected_year }}&month={{ selected_month }}&date={{ cell.date|date:'Y-m-d' }}" style="display:block;text-decoration:none;color:inherit;">
+                        <div class="pf-day-top">
+                          <strong>{{ cell.day }}</strong>
+                          {% if cell.is_today %}
+                            <em class="pf-today">오늘</em>
+                          {% endif %}
+                        </div>
+
+                        <div class="pf-meal-preview">
                           {% if cell.meals.breakfast %}
-                            <div class="sp-meal-line"><b>조식</b><span>{{ cell.meals.breakfast|join:", "|truncatechars:24 }}</span></div>
+                            <div>조 {{ cell.meals.breakfast|join:", "|truncatechars:18 }}</div>
                           {% endif %}
+
                           {% if cell.meals.lunch %}
-                            <div class="sp-meal-line"><b>중식</b><span>{{ cell.meals.lunch|join:", "|truncatechars:24 }}</span></div>
+                            <div>중 {{ cell.meals.lunch|join:", "|truncatechars:18 }}</div>
                           {% endif %}
+
                           {% if cell.meals.dinner %}
-                            <div class="sp-meal-line"><b>석식</b><span>{{ cell.meals.dinner|join:", "|truncatechars:24 }}</span></div>
+                            <div>석 {{ cell.meals.dinner|join:", "|truncatechars:18 }}</div>
                           {% endif %}
+
                           {% if not cell.meals.breakfast and not cell.meals.lunch and not cell.meals.dinner %}
-                            <p class="sp-note">식단 없음</p>
+                            <div class="pf-muted">식단 없음</div>
                           {% endif %}
-                        </a>
-                      </td>
-                    {% else %}
-                      <td class="empty"></td>
-                    {% endif %}
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+                        </div>
+                      </a>
+                    </td>
+                  {% else %}
+                    <td class="empty"></td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </section>
 
-      <nav class="sp-quick-grid">
-        <a href="{% url 'meals:mealplan_list' %}">
+      <nav class="pf-shortcuts" aria-label="주요 기능 바로가기">
+        <a class="pf-shortcut" href="{% url 'meals:mealplan_list' %}">
           <strong>식단계획</strong>
           <span>월간 식단표와 날짜별 식단을 확인합니다.</span>
         </a>
-        <a href="{% url 'forecasting:prediction_calendar' %}">
+
+        <a class="pf-shortcut" href="{% url 'forecasting:prediction_calendar' %}">
           <strong>식수예측</strong>
           <span>날짜별 예측 결과를 확인합니다.</span>
         </a>
-        <a href="{% url 'inventory:ingredient_list' %}">
+
+        <a class="pf-shortcut" href="{% url 'inventory:ingredient_list' %}">
           <strong>재고·식자재</strong>
           <span>현재고와 안전재고를 확인합니다.</span>
         </a>
-        <a href="{% url 'procurement:order_from_mealplan' %}">
+
+        <a class="pf-shortcut" href="{% url 'procurement:order_list' %}">
           <strong>발주관리</strong>
           <span>식단 기반 발주량을 산출합니다.</span>
         </a>
       </nav>
-    </div>
+    </main>
 
-    <aside class="sp-card">
-      <section class="sp-side-section">
-        <div class="sp-side-head">
-          <h3>{{ selected_date|date:"Y년 m월 d일" }}</h3>
+    <aside class="pf-aside">
+      <div class="pf-aside-title">
+        <p>Selected Date</p>
+        <h2>{{ selected_date|date:"Y년 m월 d일" }}</h2>
+      </div>
+
+      <section class="pf-section">
+        <div class="pf-section-head">
+          <h3>빠른 작업</h3>
+        </div>
+
+        <div class="pf-quick">
+          <a class="pf-btn primary" href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
+          <a class="pf-btn" href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">식수 예측</a>
+          <a class="pf-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
         </div>
       </section>
 
-      <section class="sp-side-section">
-        <div class="sp-side-head">
+      <section class="pf-section">
+        <div class="pf-section-head">
           <h3>식단</h3>
           <a href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">수정</a>
         </div>
-        <div class="sp-list">
-          {% for plan in selected_plans %}
-            <div class="sp-list-row">
-              <span>{{ plan.meal_type }}</span>
-              <strong>
-                {% for item in plan.diet_menus.all %}
-                  {{ item.menu.name }}{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                  등록된 메뉴 없음
-                {% endfor %}
-              </strong>
-            </div>
-          {% empty %}
-            <div class="sp-list-row"><span>등록된 식단이 없습니다.</span></div>
-          {% endfor %}
-        </div>
+
+        {% for plan in selected_plans %}
+          <div class="pf-meal-row">
+            <b>{{ plan.meal_type }}</b>
+            <span>
+              {% for item in plan.diet_menus.all %}
+                {{ item.menu.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                등록된 메뉴 없음
+              {% endfor %}
+            </span>
+          </div>
+        {% empty %}
+          <p class="pf-empty">등록된 식단이 없습니다.</p>
+        {% endfor %}
       </section>
 
-      <section class="sp-side-section">
-        <div class="sp-side-head">
+      <section class="pf-section">
+        <div class="pf-section-head">
           <h3>예측 식수</h3>
           <a href="{% url 'forecasting:prediction_create' %}?date={{ selected_date|date:'Y-m-d' }}">실행</a>
         </div>
-        <div class="sp-list">
-          {% for prediction in selected_prediction_rows %}
-            <div class="sp-list-row">
-              <span>{{ prediction.meal_label }}</span>
-              <strong>{{ prediction.predicted_count }}명</strong>
-            </div>
-          {% empty %}
-            <div class="sp-list-row"><span>예측 결과가 없습니다.</span></div>
-          {% endfor %}
-        </div>
+
+        {% for prediction in selected_prediction_rows %}
+          <div class="pf-pred-row">
+            <span>{{ prediction.meal_label }}</span>
+            <strong>{{ prediction.predicted_count }}명</strong>
+          </div>
+        {% empty %}
+          <p class="pf-empty">예측 결과가 없습니다.</p>
+        {% endfor %}
       </section>
 
-      <section class="sp-side-section">
-        <div class="sp-side-head">
+      <section class="pf-section">
+        <div class="pf-section-head">
           <h3>재고 부족</h3>
           <a href="{% url 'inventory:ingredient_list' %}">전체</a>
         </div>
-        <div class="sp-list">
-          {% for item in low_stock_items|slice:":5" %}
-            <div class="sp-list-row danger">
-              <span>{{ item.name }}</span>
-              <strong>{{ item.calc_stock|floatformat:1 }} {{ item.unit }}</strong>
-            </div>
-          {% empty %}
-            <div class="sp-list-row"><span>현재 부족 재고가 없습니다.</span></div>
-          {% endfor %}
-        </div>
+
+        {% for item in low_stock_items|slice:":5" %}
+          <div class="pf-stock-row">
+            <span>{{ item.name }}</span>
+            <strong>{{ item.calc_stock|floatformat:1 }} {{ item.unit }}</strong>
+          </div>
+        {% empty %}
+          <p class="pf-empty">현재 부족 재고가 없습니다.</p>
+        {% endfor %}
       </section>
 
-      <section class="sp-side-section">
-        <div class="sp-actions" style="justify-content:flex-start;">
-          <a class="sp-btn primary" href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">식단 수정</a>
-          <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
-        </div>
-      </section>
+      <div class="pf-bottom-actions">
+        <a class="pf-btn primary" href="{% url 'meals:mealplan_create' %}?date={{ selected_date|date:'Y-m-d' }}">식단 수정</a>
+        <a class="pf-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+      </div>
     </aside>
-  </section>
+  </div>
 </div>
 {% endblock %}
