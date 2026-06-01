@@ -26,7 +26,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Ingredient, InventoryLog햐
+from .models import Ingredient, InventoryLog
 
 User = get_user_model()
 

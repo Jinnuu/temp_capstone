@@ -1,142 +1,319 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}식단 등록 | S&P{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/sprint7_assigned_ui.css' %}?v=layout-v2">
+{% endblock %}
+
 {% block content %}
-<style>
-    .meal-create-select {
-        min-height: 180px;
-    }
-
-    .guide-card {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    }
-</style>
-
-<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+<div class="s7-page">
+  <section class="s7-hero">
     <div>
-        <span class="text-uppercase small fw-bold text-primary">Meal Planning</span>
-        <h1 class="h2 fw-bold mb-2">식단 등록 / 수정</h1>
-        <p class="text-muted mb-0">
-            선택한 날짜의 아침, 점심, 저녁 메뉴를 등록하거나 수정할 수 있습니다.
-        </p>
+      <p class="s7-kicker">Meal Planning</p>
+      <h1>식단 등록 / 수정</h1>
+      <p>선택한 날짜의 조식·중식·석식 메뉴를 검색해서 등록합니다.</p>
     </div>
-
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary">월간 식단표</a>
-        <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 등록</a>
-        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
+    <div class="s7-actions">
+      <a class="s7-btn" href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
+      <a class="s7-btn" href="{% url 'meals:menu_create' %}">메뉴 등록</a>
+      <a class="s7-btn" href="{% url 'meals:menu_list' %}">메뉴 목록</a>
     </div>
-</section>
+  </section>
 
-
-
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 p-md-5">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="badge text-bg-primary rounded-pill">Daily Meal Plan</span>
-                    <span class="text-muted small">하루 단위 식단 입력</span>
-                </div>
-
-                <h2 class="h4 fw-bold mb-2">식단 입력</h2>
-                <p class="text-muted mb-4">
-                    날짜를 기준으로 아침, 점심, 저녁 메뉴를 설정한 뒤 저장하세요.
-                </p>
-
-                <form method="post">
-                    {% csrf_token %}
-
-                    <div class="mb-4">
-                        <label for="meal_date" class="form-label fw-semibold">날짜</label>
-                        <input
-                            type="date"
-                            id="meal_date"
-                            name="meal_date"
-                            class="form-control"
-                            value="{{ selected_date|default:'' }}"
-                            required
-                        >
-                    </div>
-
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <label for="breakfast_menu" class="form-label fw-semibold">아침 메뉴</label>
-                            <select name="breakfast_menu" id="breakfast_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.breakfast %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="lunch_menu" class="form-label fw-semibold">점심 메뉴</label>
-                            <select name="lunch_menu" id="lunch_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.lunch %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="dinner_menu" class="form-label fw-semibold">저녁 메뉴</label>
-                            <select name="dinner_menu" id="dinner_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.dinner %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">식단 저장</button>
-                        <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary btn-lg">캘린더로 돌아가기</a>
-                    </div>
-                </form>
-            </div>
+  <form method="post" id="dailyMealForm">
+    {% csrf_token %}
+    <section class="s7-card">
+      <div class="s7-card-head">
+        <div>
+          <p class="s7-kicker">Daily Meal Plan</p>
+          <h2>하루 단위 식단 입력</h2>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 guide-card h-100">
-            <div class="card-body p-4 p-md-5">
-                <span class="text-uppercase small fw-bold text-primary">Quick Guide</span>
-                <h2 class="h4 fw-bold mt-2 mb-3">입력 흐름 안내</h2>
-
-                <div class="d-flex flex-column gap-3">
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">1. 날짜 확인</strong>
-                        <span class="text-muted small">캘린더에서 선택한 날짜가 자동으로 들어갑니다.</span>
-                    </div>
-
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">2. 끼니별 메뉴 선택</strong>
-                        <span class="text-muted small">아침, 점심, 저녁 메뉴를 각각 지정합니다.</span>
-                    </div>
-
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">3. 저장 후 캘린더 확인</strong>
-                        <span class="text-muted small">저장 후 월간 식단표에서 반영 결과를 확인합니다.</span>
-                    </div>
-                </div>
-
-                <div class="mt-4 d-grid gap-2">
-                    <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 먼저 등록하기</a>
-                    <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-secondary">레시피 등록하기</a>
-                    <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary">월간 식단표 보기</a>
-                </div>
-            </div>
+        <div class="s7-actions">
+          <button type="submit" class="s7-btn primary">식단 저장</button>
+          <a class="s7-btn" href="{% url 'meals:mealplan_list' %}">캘린더로 돌아가기</a>
         </div>
-    </div>
-    
+      </div>
+
+      <div class="s7-field" style="max-width:320px;margin-bottom:18px;">
+        <label>날짜</label>
+        <input type="date" name="meal_date" value="{{ selected_date|default:'' }}" required>
+      </div>
+
+      <div class="s7-daily-layout">
+        <section>
+          <article class="s7-meal-card">
+            <div class="s7-meal-head">
+              <h3>조식</h3>
+              <span class="s7-status warn" id="count-breakfast">0개 메뉴</span>
+            </div>
+            <div class="s7-meal-body">
+              <div class="s7-token-area" id="tokens-breakfast"></div>
+              <div id="hidden-breakfast"></div>
+              <div class="s7-add-row">
+                <div class="s7-search-wrap">
+                  <input type="text" class="s7-search-input js-s7-menu-search" data-meal-key="breakfast" placeholder="메뉴 검색 예: 쌀밥" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+                <button type="button" class="s7-btn" onclick="focusMealSearch('breakfast')">검색</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="s7-meal-card">
+            <div class="s7-meal-head">
+              <h3>중식</h3>
+              <span class="s7-status warn" id="count-lunch">0개 메뉴</span>
+            </div>
+            <div class="s7-meal-body">
+              <div class="s7-token-area" id="tokens-lunch"></div>
+              <div id="hidden-lunch"></div>
+              <div class="s7-add-row">
+                <div class="s7-search-wrap">
+                  <input type="text" class="s7-search-input js-s7-menu-search" data-meal-key="lunch" placeholder="메뉴 검색 예: 제육볶음" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+                <button type="button" class="s7-btn" onclick="focusMealSearch('lunch')">검색</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="s7-meal-card">
+            <div class="s7-meal-head">
+              <h3>석식</h3>
+              <span class="s7-status warn" id="count-dinner">0개 메뉴</span>
+            </div>
+            <div class="s7-meal-body">
+              <div class="s7-token-area" id="tokens-dinner"></div>
+              <div id="hidden-dinner"></div>
+              <div class="s7-add-row">
+                <div class="s7-search-wrap">
+                  <input type="text" class="s7-search-input js-s7-menu-search" data-meal-key="dinner" placeholder="메뉴 검색 예: 미역국" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+                <button type="button" class="s7-btn" onclick="focusMealSearch('dinner')">검색</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <aside class="s7-preview">
+          <h3>입력 미리보기</h3>
+          <p style="margin:0 0 14px;color:#6f7785;font-weight:800;">후보를 클릭하면 식단에 메뉴가 추가됩니다.</p>
+
+          <div class="s7-preview-section">
+            <h4>조식</h4>
+            <div class="s7-token-area" id="preview-breakfast"></div>
+          </div>
+          <div class="s7-preview-section">
+            <h4>중식</h4>
+            <div class="s7-token-area" id="preview-lunch"></div>
+          </div>
+          <div class="s7-preview-section">
+            <h4>석식</h4>
+            <div class="s7-token-area" id="preview-dinner"></div>
+          </div>
+
+          <div class="s7-preview-section">
+            <button type="submit" class="s7-btn primary" style="width:100%;">식단 저장</button>
+          </div>
+
+          <div class="s7-preview-section">
+            <form method="post" action="{% url 'meals:deduct_inventory' %}" onsubmit="return syncDeductDate(this)">
+              {% csrf_token %}
+              <input type="hidden" name="target_date" id="deductTargetDate">
+              <button type="submit" class="s7-btn danger" style="width:100%;">식사 완료 후 재고 차감</button>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </form>
 </div>
+
+<script id="existing-meals-data" type="application/json">
+{
+  "breakfast": [
+    {% for menu in menus %}
+      {% if menu.id in existing_meals.breakfast %}
+        {"id": "{{ menu.id }}", "name": "{{ menu.name|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endif %}
+    {% endfor %}
+  ],
+  "lunch": [
+    {% for menu in menus %}
+      {% if menu.id in existing_meals.lunch %}
+        {"id": "{{ menu.id }}", "name": "{{ menu.name|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endif %}
+    {% endfor %}
+  ],
+  "dinner": [
+    {% for menu in menus %}
+      {% if menu.id in existing_meals.dinner %}
+        {"id": "{{ menu.id }}", "name": "{{ menu.name|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const mealInputNameMap = { breakfast: "breakfast_menu", lunch: "lunch_menu", dinner: "dinner_menu" };
+const selectedMenus = { breakfast: [], lunch: [], dinner: [] };
+
+function compactJsonParse(text) {
+  try {
+    const cleaned = text.replace(/,\s*]/g, "]").replace(/,\s*}/g, "}");
+    return JSON.parse(cleaned);
+  } catch (e) {
+    return {};
+  }
+}
+
+function closeMenuResults(wrapper) {
+  const box = wrapper.querySelector(".s7-search-results");
+  if (!box) return;
+  box.classList.remove("is-open");
+  box.innerHTML = "";
+}
+
+function renderMeal(mealKey) {
+  const tokenBox = document.getElementById(`tokens-${mealKey}`);
+  const previewBox = document.getElementById(`preview-${mealKey}`);
+  const hiddenBox = document.getElementById(`hidden-${mealKey}`);
+  const countBox = document.getElementById(`count-${mealKey}`);
+
+  tokenBox.innerHTML = "";
+  previewBox.innerHTML = "";
+  hiddenBox.innerHTML = "";
+
+  selectedMenus[mealKey].forEach((menu) => {
+    const token = document.createElement("span");
+    token.className = "s7-token";
+    token.innerHTML = `<span>${menu.name}</span><button type="button" onclick="removeMenu('${mealKey}', '${menu.id}')">×</button>`;
+    tokenBox.appendChild(token);
+
+    const preview = document.createElement("span");
+    preview.className = "s7-token";
+    preview.textContent = menu.name;
+    previewBox.appendChild(preview);
+
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = mealInputNameMap[mealKey];
+    hidden.value = menu.id;
+    hiddenBox.appendChild(hidden);
+  });
+
+  countBox.textContent = `${selectedMenus[mealKey].length}개 메뉴`;
+  countBox.className = selectedMenus[mealKey].length ? "s7-status" : "s7-status warn";
+}
+
+function addMenu(mealKey, menu) {
+  const exists = selectedMenus[mealKey].some((item) => String(item.id) === String(menu.id));
+  if (!exists) selectedMenus[mealKey].push({ id: menu.id, name: menu.name });
+  renderMeal(mealKey);
+}
+
+function removeMenu(mealKey, menuId) {
+  selectedMenus[mealKey] = selectedMenus[mealKey].filter((item) => String(item.id) !== String(menuId));
+  renderMeal(mealKey);
+}
+
+function focusMealSearch(mealKey) {
+  const input = document.querySelector(`.js-s7-menu-search[data-meal-key="${mealKey}"]`);
+  if (input) input.focus();
+}
+
+function bindMenuSearch(input) {
+  const wrapper = input.closest(".s7-search-wrap");
+  const results = wrapper.querySelector(".s7-search-results");
+  const mealKey = input.dataset.mealKey;
+  let timer = null;
+
+  input.addEventListener("input", function () {
+    const q = input.value.trim();
+    clearTimeout(timer);
+
+    if (!q) {
+      closeMenuResults(wrapper);
+      return;
+    }
+
+    timer = setTimeout(async function () {
+      try {
+        const response = await fetch("{% url 'meals:search_menus_api' %}?q=" + encodeURIComponent(q));
+        const data = await response.json();
+        const items = data.results || data.menus || [];
+
+        results.innerHTML = "";
+
+        if (!items.length) {
+          const empty = document.createElement("button");
+          empty.type = "button";
+          empty.className = "s7-result empty";
+          empty.textContent = "검색 결과가 없습니다. 먼저 메뉴를 등록해 주세요.";
+          results.appendChild(empty);
+          results.classList.add("is-open");
+          return;
+        }
+
+        items.slice(0, 10).forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "s7-result";
+          btn.textContent = `${item.name}${item.category ? " / " + item.category : ""}`;
+          btn.addEventListener("click", function () {
+            addMenu(mealKey, { id: item.id, name: item.name });
+            input.value = "";
+            closeMenuResults(wrapper);
+          });
+          results.appendChild(btn);
+        });
+
+        results.classList.add("is-open");
+      } catch (error) {
+        closeMenuResults(wrapper);
+      }
+    }, 180);
+  });
+
+  input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") event.preventDefault();
+  });
+}
+
+function syncDeductDate() {
+  const dateInput = document.querySelector('input[name="meal_date"]');
+  const target = document.getElementById("deductTargetDate");
+  target.value = dateInput ? dateInput.value : "";
+  if (!target.value) {
+    alert("재고 차감 기준 날짜를 먼저 선택해 주세요.");
+    return false;
+  }
+  return confirm(`${target.value} 기준으로 식사 완료 후 재고 차감을 진행할까요?`);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const raw = document.getElementById("existing-meals-data").textContent || "{}";
+  const existing = compactJsonParse(raw);
+
+  ["breakfast", "lunch", "dinner"].forEach((key) => {
+    selectedMenus[key] = existing[key] || [];
+    renderMeal(key);
+  });
+
+  document.querySelectorAll(".js-s7-menu-search").forEach(bindMenuSearch);
+
+  document.addEventListener("click", function (event) {
+    document.querySelectorAll(".s7-search-wrap").forEach((wrapper) => {
+      if (!wrapper.contains(event.target)) closeMenuResults(wrapper);
+    });
+  });
+});
+</script>
 {% endblock %}

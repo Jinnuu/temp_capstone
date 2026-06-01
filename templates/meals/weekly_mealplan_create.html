@@ -5,119 +5,118 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
+<link rel="stylesheet" href="{% static 'css/sprint7_assigned_ui.css' %}?v=fuzzy-search-v3">
 {% endblock %}
 
 {% block content %}
-<div class="sp-page">
-  <section class="sp-hero">
+<div class="s7-page">
+  <section class="s7-hero">
     <div>
-      <p class="sp-kicker">Weekly Meal Planning</p>
+      <p class="s7-kicker">Weekly Meal Planning</p>
       <h1>주간 식단 등록</h1>
-      <p>월요일부터 일요일까지 일주일 단위로 조식·중식·석식을 입력합니다. 각 칸에서 메뉴를 입력하고 Enter를 누르면 저장됩니다.</p>
+      <p>월요일부터 일요일까지 조식·중식·석식을 검색 방식으로 빠르게 입력합니다.</p>
     </div>
-    <div class="sp-actions">
-      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">월간 달력 보기</a>
-      <a class="sp-btn primary" href="{% url 'meals:menu_create' %}">메뉴 추가 등록</a>
+    <div class="s7-actions">
+      <a class="s7-btn" href="{% url 'meals:mealplan_list' %}">월간 달력 보기</a>
+      <a class="s7-btn primary" href="{% url 'meals:menu_create' %}">메뉴 추가 등록</a>
+      <a class="s7-btn" href="{% url 'meals:export_weekly_mealplan_excel' %}?start_date={{ start_date_str }}">엑셀 다운로드</a>
     </div>
   </section>
 
-  <section class="sp-card">
-    <div class="sp-card-head">
+  <section class="s7-card">
+    <div class="s7-card-head">
       <div>
-        <p class="sp-kicker">Week Range</p>
-        <h2>{{ start_date_str }} ~ {{ end_date_str }} 주간 식단</h2>
+        <p class="s7-kicker">Week Range</p>
+        <h2>{{ start_date_str }} 주간 식단</h2>
       </div>
-      <div class="sp-actions">
-        <form method="get" style="display:flex; gap:8px; align-items:center;">
-          <input type="date" name="date" value="{{ start_date_str }}" class="sp-input" style="width:150px;">
-          <button type="submit" class="sp-btn primary">조회</button>
-          <a href="{% url 'meals:export_weekly_mealplan_excel' %}?date={{ start_date_str }}" class="sp-btn ok">엑셀 다운로드</a>
-        </form>
-        <div style="margin-left:16px;">
-          <a class="sp-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
-          <a class="sp-btn" href="?start_date={{ next_week }}">다음 주 »</a>
-        </div>
+      <div class="s7-actions">
+        <a class="s7-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
+        <a class="s7-btn" href="?start_date={{ next_week }}">다음 주 »</a>
       </div>
     </div>
 
-    <div class="sp-table-wrap">
-      <div class="sp-week-editor">
-        <div class="sp-week-cell head">구분</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell head">
-            {{ day.date|date:"m/d" }}<br>({{ day.weekday }})
-          </div>
-        {% endfor %}
+    <div class="s7-note">
+      메뉴명을 입력하면 관련 메뉴만 유사도 순으로 표시됩니다. 예를 들어 ‘살밥’처럼 입력해도 ‘쌀밥’을 후보로 찾도록 처리했습니다.
+    </div>
 
-        <div class="sp-week-cell meal-head">조식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-조식">
-              {% for menu in day.breakfast %}
-                <span>{{ menu.name }}</span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="조식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
+    <div class="s7-week-wrap">
+      <table class="s7-week-table">
+        <thead>
+          <tr>
+            <th class="meal-head">구분</th>
+            {% for day in days_context|slice:":7" %}
+              <th>{{ day.date|date:"m/d" }}<br>({{ day.weekday }})</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="meal-head">조식</th>
+            {% for day in days_context|slice:":7" %}
+              <td class="s7-week-cell">
+                <div class="s7-token-area js-week-token-area" id="week-{{ day.date_str }}-breakfast">
+                  {% for menu in day.breakfast %}
+                    <span class="s7-token" data-menu-id="{{ menu.id }}">
+                      <span>{{ menu.name }}</span>
+                      <button type="button" onclick="removeWeeklyMenu('{{ day.date_str }}', '조식', '{{ menu.id }}', this)">×</button>
+                    </span>
+                  {% empty %}
+                    <span class="s7-status warn js-empty">미등록</span>
+                  {% endfor %}
+                </div>
+                <div class="s7-search-wrap" style="margin-top:7px;">
+                  <input type="text" class="s7-search-input js-week-menu-search" data-date="{{ day.date_str }}" data-meal-type="조식" data-target="week-{{ day.date_str }}-breakfast" placeholder="메뉴 검색" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
 
-        <div class="sp-week-cell meal-head">중식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-중식">
-              {% for menu in day.lunch %}
-                <span>{{ menu.name }}</span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="중식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
+          <tr>
+            <th class="meal-head">중식</th>
+            {% for day in days_context|slice:":7" %}
+              <td class="s7-week-cell">
+                <div class="s7-token-area js-week-token-area" id="week-{{ day.date_str }}-lunch">
+                  {% for menu in day.lunch %}
+                    <span class="s7-token" data-menu-id="{{ menu.id }}">
+                      <span>{{ menu.name }}</span>
+                      <button type="button" onclick="removeWeeklyMenu('{{ day.date_str }}', '중식', '{{ menu.id }}', this)">×</button>
+                    </span>
+                  {% empty %}
+                    <span class="s7-status warn js-empty">미등록</span>
+                  {% endfor %}
+                </div>
+                <div class="s7-search-wrap" style="margin-top:7px;">
+                  <input type="text" class="s7-search-input js-week-menu-search" data-date="{{ day.date_str }}" data-meal-type="중식" data-target="week-{{ day.date_str }}-lunch" placeholder="메뉴 검색" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
 
-        <div class="sp-week-cell meal-head">석식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-석식">
-              {% for menu in day.dinner %}
-                <span>{{ menu.name }}</span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="석식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
-
-        <div class="sp-week-cell meal-head">비고</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            {% if forloop.last %}
-              <div class="sp-week-menu-list next-mon-breakfast">
-                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7;">[다음주 월요일 조식]</p>
-                {% for menu in day.remarks %}
-                  <span style="background:#e7f5ff; border-color:#a5d8ff; color:#1971c2;">{{ menu }}</span>
-                {% empty %}
-                  <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-                {% endfor %}
-              </div>
-            {% else %}
-              <p class="sp-note" style="color:#adb5bd;">-</p>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
+          <tr>
+            <th class="meal-head">석식</th>
+            {% for day in days_context|slice:":7" %}
+              <td class="s7-week-cell">
+                <div class="s7-token-area js-week-token-area" id="week-{{ day.date_str }}-dinner">
+                  {% for menu in day.dinner %}
+                    <span class="s7-token" data-menu-id="{{ menu.id }}">
+                      <span>{{ menu.name }}</span>
+                      <button type="button" onclick="removeWeeklyMenu('{{ day.date_str }}', '석식', '{{ menu.id }}', this)">×</button>
+                    </span>
+                  {% empty %}
+                    <span class="s7-status warn js-empty">미등록</span>
+                  {% endfor %}
+                </div>
+                <div class="s7-search-wrap" style="margin-top:7px;">
+                  <input type="text" class="s7-search-input js-week-menu-search" data-date="{{ day.date_str }}" data-meal-type="석식" data-target="week-{{ day.date_str }}-dinner" placeholder="메뉴 검색" autocomplete="off">
+                  <div class="s7-search-results"></div>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </div>
@@ -125,65 +124,140 @@
 
 {% block extra_js %}
 <script>
-function renderWeeklyMenus(dateStr, mealType, menus) {
-  const box = document.getElementById(`week-${dateStr}-${mealType}`);
+function closeWeekResults(wrapper) {
+  const box = wrapper.querySelector(".s7-search-results");
+  if (!box) return;
+  box.classList.remove("is-open");
+  box.innerHTML = "";
+}
+
+function renderWeekMenus(targetId, dateStr, mealType, menus) {
+  const box = document.getElementById(targetId);
   if (!box) return;
 
   box.innerHTML = "";
 
   if (!menus || menus.length === 0) {
     const empty = document.createElement("span");
+    empty.className = "s7-status warn js-empty";
     empty.textContent = "미등록";
-    empty.style.background = "#f1f3f5";
-    empty.style.color = "#868e96";
     box.appendChild(empty);
     return;
   }
 
   menus.forEach((menu) => {
-    const chip = document.createElement("span");
-    chip.textContent = menu.name;
-    box.appendChild(chip);
+    const token = document.createElement("span");
+    token.className = "s7-token";
+    token.dataset.menuId = menu.id;
+    token.innerHTML = `<span>${menu.name}</span><button type="button">×</button>`;
+    token.querySelector("button").addEventListener("click", function () {
+      removeWeeklyMenu(dateStr, mealType, menu.id, this);
+    });
+    box.appendChild(token);
   });
 }
 
-async function addWeeklyMenu(button) {
-  const row = button.closest(".sp-week-add");
-  const input = row.querySelector("input");
-  const menuName = input.value.trim();
-  const dateStr = input.dataset.date;
-  const mealType = input.dataset.meal;
-
-  if (!menuName) return;
-
+async function addWeeklyMenu(dateStr, mealType, menu) {
   const response = await fetch("{% url 'meals:add_diet_menu_api' %}", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      date: dateStr,
-      meal_type: mealType,
-      menu_name: menuName
-    })
+    body: JSON.stringify({ date: dateStr, meal_type: mealType, menu_id: menu.id })
   });
 
   const data = await response.json();
-
   if (data.status !== "success") {
-    alert(data.message || "메뉴 저장에 실패했습니다.");
+    alert(data.message || "메뉴 추가에 실패했습니다.");
+    return null;
+  }
+  return data.menus || [];
+}
+
+async function removeWeeklyMenu(dateStr, mealType, menuId, button) {
+  const response = await fetch("{% url 'meals:remove_diet_menu_api' %}", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ date: dateStr, meal_type: mealType, menu_id: menuId })
+  });
+
+  const data = await response.json();
+  if (data.status !== "success") {
+    alert(data.message || "메뉴 삭제에 실패했습니다.");
     return;
   }
 
-  input.value = "";
-  renderWeeklyMenus(dateStr, mealType, data.menus || []);
+  const area = button.closest(".js-week-token-area");
+  renderWeekMenus(area.id, dateStr, mealType, data.menus || []);
+}
+
+function bindWeekSearch(input) {
+  const wrapper = input.closest(".s7-search-wrap");
+  const results = wrapper.querySelector(".s7-search-results");
+  let timer = null;
+
+  input.addEventListener("input", function () {
+    const q = input.value.trim();
+    clearTimeout(timer);
+
+    if (!q) {
+      closeWeekResults(wrapper);
+      return;
+    }
+
+    timer = setTimeout(async function () {
+      try {
+        const response = await fetch("{% url 'meals:search_menus_api' %}?q=" + encodeURIComponent(q));
+        const data = await response.json();
+        const items = data.results || data.menus || [];
+
+        results.innerHTML = "";
+
+        if (!items.length) {
+          const empty = document.createElement("button");
+          empty.type = "button";
+          empty.className = "s7-result empty";
+          empty.textContent = "관련 메뉴가 없습니다.";
+          results.appendChild(empty);
+          results.classList.add("is-open");
+          return;
+        }
+
+        items.slice(0, 8).forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "s7-result";
+          btn.innerHTML = `<strong>${item.name}</strong>${item.category ? `<small>${item.category}</small>` : ""}`;
+          btn.addEventListener("click", async function () {
+            const dateStr = input.dataset.date;
+            const mealType = input.dataset.mealType;
+            const targetId = input.dataset.target;
+            const menus = await addWeeklyMenu(dateStr, mealType, item);
+            if (menus) {
+              renderWeekMenus(targetId, dateStr, mealType, menus);
+              input.value = "";
+              closeWeekResults(wrapper);
+            }
+          });
+          results.appendChild(btn);
+        });
+
+        results.classList.add("is-open");
+      } catch (error) {
+        closeWeekResults(wrapper);
+      }
+    }, 180);
+  });
+
+  input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") event.preventDefault();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".sp-week-add input").forEach((input) => {
-    input.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        addWeeklyMenu(input.closest(".sp-week-add").querySelector("button"));
-      }
+  document.querySelectorAll(".js-week-menu-search").forEach(bindWeekSearch);
+
+  document.addEventListener("click", function (event) {
+    document.querySelectorAll(".s7-search-wrap").forEach((wrapper) => {
+      if (!wrapper.contains(event.target)) closeWeekResults(wrapper);
     });
   });
 });

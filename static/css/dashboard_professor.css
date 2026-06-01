@@ -1,0 +1,482 @@
+/* Sprint7 dashboard presentation fix
+   Clean, presentation-safe dashboard.
+   Uses pf-* classes only to avoid old dashboard CSS conflicts.
+*/
+
+.pf-page,
+.pf-page * {
+  box-sizing: border-box;
+}
+
+.pf-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 46px 24px 72px;
+}
+
+.pf-title {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.pf-title h1 {
+  margin: 0;
+  color: #20242a;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+}
+
+.pf-title p {
+  margin: 8px 0 0;
+  color: #687180;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pf-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.pf-main {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 14px;
+}
+
+.pf-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pf-stat,
+.pf-card,
+.pf-aside,
+.pf-shortcut {
+  background: #fff;
+  border: 1px solid #d7dce5;
+  box-shadow: 0 10px 26px rgba(20, 28, 38, 0.045);
+}
+
+.pf-stat {
+  min-height: 92px;
+  padding: 16px 18px;
+}
+
+.pf-stat span {
+  display: block;
+  margin-bottom: 8px;
+  color: #6f7785;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pf-stat strong {
+  display: block;
+  color: #101828;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.pf-stat strong.red {
+  color: #e03131;
+}
+
+.pf-stat small {
+  display: block;
+  margin-top: 8px;
+  color: #6f7785;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.pf-card {
+  padding: 22px;
+}
+
+.pf-card-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid #20242a;
+}
+
+.pf-kicker {
+  margin: 0 0 5px;
+  color: #2448d8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pf-card-head h2 {
+  margin: 0;
+  color: #20242a;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.pf-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pf-controls select,
+.pf-controls button {
+  height: 34px;
+  min-width: 64px;
+  padding: 0 8px;
+  border: 1px solid #cfd6e4;
+  background: #fff;
+  color: #20242a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pf-controls button {
+  min-width: 58px;
+  border-color: #2448d8;
+  color: #2448d8;
+  cursor: pointer;
+}
+
+.pf-calendar {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 7px;
+}
+
+.pf-calendar th {
+  height: 24px;
+  color: #687180;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.pf-calendar td {
+  height: 86px;
+  padding: 8px 9px;
+  border: 1px solid #d7dce5;
+  border-radius: 9px;
+  background: #fff;
+  vertical-align: top;
+}
+
+.pf-calendar td.empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.pf-calendar td.today,
+.pf-calendar td.selected {
+  border-color: #91a7ff;
+  background: #eef2ff;
+}
+
+.pf-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.pf-day-top strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.pf-today {
+  min-width: 28px;
+  height: 18px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dbe4ff;
+  color: #2448d8;
+  font-size: 10px;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.pf-meal-preview {
+  color: #495057;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.42;
+}
+
+.pf-meal-preview div {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pf-muted {
+  color: #868e96;
+}
+
+.pf-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pf-shortcut {
+  min-height: 70px;
+  padding: 14px;
+  display: block;
+  text-decoration: none;
+}
+
+.pf-shortcut strong {
+  display: block;
+  color: #20242a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.pf-shortcut span {
+  display: block;
+  margin-top: 8px;
+  color: #687180;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.pf-aside {
+  min-height: 100%;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-aside-title {
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 3px solid #20242a;
+}
+
+.pf-aside-title p {
+  margin: 0 0 6px;
+  color: #2448d8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pf-aside-title h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.pf-section {
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e8ef;
+}
+
+.pf-section:first-of-type {
+  padding-top: 0;
+}
+
+.pf-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pf-section-head h3 {
+  margin: 0;
+  color: #20242a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.pf-section-head a {
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.pf-quick {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pf-btn {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2448d8;
+  background: #fff;
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.pf-btn.primary {
+  background: #2448d8;
+  color: #fff;
+}
+
+.pf-meal-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+}
+
+.pf-meal-row b {
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f1f3f5;
+  color: #495057;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.pf-meal-row span {
+  min-width: 0;
+  color: #495057;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.pf-pred-row,
+.pf-stock-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.pf-pred-row span,
+.pf-stock-row span {
+  min-width: 0;
+  color: #495057;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pf-pred-row strong {
+  color: #2f9e44;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.pf-stock-row strong {
+  color: #e03131;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pf-empty {
+  color: #868e96;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pf-bottom-actions {
+  margin-top: auto;
+  padding-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 1120px) {
+  .pf-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-aside {
+    min-height: auto;
+  }
+
+  .pf-quick {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pf-bottom-actions {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 840px) {
+  .pf-page {
+    padding: 30px 16px 60px;
+  }
+
+  .pf-title {
+    text-align: left;
+  }
+
+  .pf-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pf-card-head {
+    display: block;
+  }
+
+  .pf-controls {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pf-shortcuts,
+  .pf-quick,
+  .pf-bottom-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-calendar {
+    border-spacing: 5px;
+  }
+
+  .pf-calendar td {
+    height: 78px;
+    padding: 7px;
+  }
+}

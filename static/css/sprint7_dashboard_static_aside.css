@@ -1,0 +1,532 @@
+/* Sprint7 dashboard aside span patch
+   Goal:
+   - aside top aligns with the top of selected date / low stock / pending order stats
+   - aside bottom aligns with the bottom of the shortcut cards below calendar
+   - quick actions remain inside aside
+   - no sticky behavior
+*/
+
+.sp-dashboard-page,
+.sp-dashboard-page * {
+  box-sizing: border-box;
+}
+
+.sp-dashboard-page {
+  width: min(100%, 1480px);
+  margin: 0 auto;
+  padding: 42px 24px 72px;
+}
+
+.sp-dashboard-title {
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.sp-dashboard-title h1 {
+  margin: 0;
+  color: #20242a;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.sp-dashboard-title p {
+  margin: 8px 0 0;
+  color: #687180;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 전체 묶음 기준 정렬.
+   main + aside를 하나의 dashboard block으로 보고 가운데 배치한다. */
+.sp-dashboard-shell {
+  width: 1232px; /* 920 main + 22 gap + 290 aside */
+  max-width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 920px 290px;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.sp-dashboard-main {
+  width: 920px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* aside 핵심:
+   - stat row와 top을 맞추기 위해 margin-top 제거
+   - main column 전체 높이와 맞추기 위해 align-self: stretch
+   - sticky/absolute 제거 */
+.sp-dashboard-shell > .selected-card {
+  position: static !important;
+  width: 290px;
+  margin-top: 0 !important;
+  align-self: stretch;
+  min-height: 100%;
+}
+
+.sp-card.selected-card {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* aside 내부 여백을 균일하게 잡아서 아래 액션이 바닥과 자연스럽게 맞도록 */
+.sp-card.selected-card .sp-side-actions {
+  margin-top: auto;
+}
+
+.sp-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sp-stat {
+  min-height: 96px;
+  padding: 16px 18px;
+  border: 1px solid #d7dce5;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(20, 28, 38, 0.045);
+}
+
+.sp-stat span {
+  display: block;
+  margin-bottom: 8px;
+  color: #6f7785;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sp-stat strong {
+  display: block;
+  color: #101828;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.sp-stat strong.red {
+  color: #e03131;
+}
+
+.sp-stat small {
+  display: block;
+  margin-top: 8px;
+  color: #6f7785;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.sp-card {
+  border: 1px solid #d7dce5;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(20, 28, 38, 0.045);
+}
+
+.sp-card.calendar-card {
+  width: 920px;
+  max-width: 100%;
+  padding: 22px 22px 18px;
+  flex: 0 0 auto;
+}
+
+.sp-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid #1f2329;
+}
+
+.sp-kicker {
+  margin: 0 0 5px;
+  color: #2448d8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.sp-card-head h2 {
+  margin: 0;
+  color: #20242a;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.sp-calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.sp-calendar-controls select,
+.sp-calendar-controls button {
+  height: 34px;
+  border: 1px solid #2448d8;
+  background: #fff;
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sp-calendar-controls select {
+  min-width: 76px;
+  padding: 0 8px;
+  border-color: #cfd6e4;
+  color: #20242a;
+}
+
+.sp-calendar-controls button {
+  min-width: 58px;
+  cursor: pointer;
+}
+
+.sp-calendar {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 8px;
+}
+
+.sp-calendar th {
+  height: 26px;
+  padding: 0;
+  color: #687180;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.sp-calendar td {
+  height: 96px;
+  padding: 9px 10px;
+  border: 1px solid #d7dce5;
+  border-radius: 10px;
+  background: #fff;
+  vertical-align: top;
+}
+
+.sp-calendar td.empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.sp-calendar td.today,
+.sp-calendar td.selected {
+  border-color: #91a7ff;
+  background: #eef2ff;
+}
+
+.sp-day-num {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 7px;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.sp-today-badge {
+  min-width: 28px;
+  height: 18px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dbe4ff;
+  color: #2448d8;
+  font-size: 10px;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.sp-meal-preview {
+  color: #495057;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.sp-meal-preview div {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sp-meal-preview .muted {
+  color: #868e96;
+}
+
+.sp-module-links {
+  width: 920px;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+  flex: 0 0 auto;
+}
+
+.sp-module-link {
+  min-height: 74px;
+  padding: 14px;
+  display: block;
+  border: 1px solid #d7dce5;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(20, 28, 38, 0.035);
+}
+
+.sp-module-link strong {
+  display: block;
+  color: #20242a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.sp-module-link span {
+  display: block;
+  margin-top: 8px;
+  color: #687180;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.sp-selected-date {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #d7dce5;
+}
+
+.sp-selected-date h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.sp-side-section {
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e8ef;
+}
+
+.sp-side-section:first-of-type {
+  padding-top: 0;
+}
+
+.sp-side-section:last-child {
+  border-bottom: 0;
+}
+
+.sp-side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sp-side-head h3 {
+  margin: 0;
+  color: #20242a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.sp-side-head a {
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.sp-meal-row,
+.sp-pred-row,
+.sp-stock-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+}
+
+.sp-pred-row,
+.sp-stock-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.sp-meal-row b {
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f1f3f5;
+  color: #495057;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.sp-meal-row span,
+.sp-pred-row span,
+.sp-stock-row span {
+  min-width: 0;
+  color: #495057;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.sp-pred-row strong {
+  color: #2f9e44;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sp-stock-row strong {
+  color: #e03131;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sp-empty-text {
+  color: #868e96;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sp-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.sp-quick-grid a,
+.sp-side-actions a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2448d8;
+  background: #fff;
+  color: #2448d8;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.sp-quick-grid a.primary,
+.sp-side-actions a.primary {
+  background: #2448d8;
+  color: #fff;
+}
+
+.sp-side-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding-top: 15px;
+}
+
+/* 화면 폭이 부족하면 aside를 아래로 내려서 깨짐 방지 */
+@media (max-width: 1260px) {
+  .sp-dashboard-shell {
+    width: 920px;
+    grid-template-columns: 1fr;
+  }
+
+  .sp-dashboard-main {
+    width: 920px;
+  }
+
+  .sp-dashboard-shell > .selected-card {
+    width: 920px;
+    min-height: auto;
+    align-self: auto;
+  }
+
+  .sp-quick-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .sp-dashboard-page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sp-dashboard-shell,
+  .sp-dashboard-main,
+  .sp-card.calendar-card,
+  .sp-module-links,
+  .sp-dashboard-shell > .selected-card {
+    width: 100%;
+  }
+
+  .sp-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sp-module-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .sp-dashboard-page {
+    padding: 28px 16px 56px;
+  }
+
+  .sp-dashboard-title {
+    text-align: left;
+  }
+
+  .sp-dashboard-title h1 {
+    font-size: 32px;
+  }
+
+  .sp-stat-grid,
+  .sp-module-links,
+  .sp-quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sp-card-head {
+    display: block;
+  }
+
+  .sp-calendar-controls {
+    margin-top: 12px;
+  }
+
+  .sp-calendar {
+    border-spacing: 5px;
+  }
+
+  .sp-calendar td {
+    height: 82px;
+    padding: 7px;
+  }
+
+  .sp-side-actions {
+    grid-template-columns: 1fr;
+  }
+}
