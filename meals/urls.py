@@ -28,9 +28,7 @@ from .views import (
 )
 from .views_extra import mealplan_bulk_upload, monthly_mealplan_create
 
-
 app_name = "meals"
-
 
 urlpatterns = [
     path("", meal_home, name="meal_home"),
@@ -39,7 +37,6 @@ urlpatterns = [
     path("menu_list/", menu_list, name="menu_list"),
     path("recipe_create/", recipe_create, name="recipe_create"),
 
-    # 레시피 엑셀 업로드: 사용자 페이지 + 기존 API 둘 다 유지
     path("menu/upload-excel/", recipe_upload_page, name="recipe_upload_page"),
     path("api/recipe/upload-excel/", recipe_upload_api, name="recipe_upload_api"),
 
@@ -62,6 +59,5 @@ urlpatterns = [
     path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
 
-    # 식사 완료 후 재고 차감: preview-confirm 방식
     path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory"),
 ]

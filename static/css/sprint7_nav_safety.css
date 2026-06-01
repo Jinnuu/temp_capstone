@@ -1,0 +1,7 @@
+/* Optional nav safety patch. Use if dropdown/mega menu stays expanded. */
+.sp-nav{display:flex!important;align-items:stretch!important;justify-content:center!important;gap:34px!important}
+.sp-nav-item{position:relative!important;display:flex!important;align-items:stretch!important}
+.sp-dropdown{display:none!important;position:absolute!important;top:56px!important;left:50%!important;transform:translateX(-50%)!important;min-width:220px!important;padding:8px 0!important;background:#fff!important;border:1px solid #d7dce5!important;box-shadow:0 18px 34px rgba(20,28,38,.13)!important;z-index:1000!important}
+.sp-nav-item:hover .sp-dropdown{display:block!important}
+.sp-dropdown a{height:38px!important;padding:0 16px!important;display:flex!important;align-items:center!important;color:#20242a!important;font-size:13px!important;font-weight:800!important;white-space:nowrap!important}
+.sp-dropdown a:hover{background:#eef3ff!important;color:#2448d8!important}

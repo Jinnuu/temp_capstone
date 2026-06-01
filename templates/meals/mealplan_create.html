@@ -1,142 +1,231 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}식단 등록 | S&P{% endblock %}
+{% block title %}일간 식단 등록 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sprint7_meal_search.css' %}?v=meal-search-v1">
+{% endblock %}
 
 {% block content %}
-<style>
-    .meal-create-select {
-        min-height: 180px;
-    }
-
-    .guide-card {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    }
-</style>
-
-<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+<div class="sp-meal-page">
+  <section class="sp-meal-hero">
     <div>
-        <span class="text-uppercase small fw-bold text-primary">Meal Planning</span>
-        <h1 class="h2 fw-bold mb-2">식단 등록 / 수정</h1>
-        <p class="text-muted mb-0">
-            선택한 날짜의 아침, 점심, 저녁 메뉴를 등록하거나 수정할 수 있습니다.
-        </p>
+      <p class="sp-meal-kicker">Daily Meal Plan</p>
+      <h1>일간 식단 등록</h1>
+      <p>메뉴명을 검색해 후보를 선택하면 조식·중식·석식 식단에 바로 추가됩니다.</p>
     </div>
-
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary">월간 식단표</a>
-        <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 등록</a>
-        <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
+    <div class="sp-meal-actions">
+      <a class="sp-meal-btn" href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
+      <a class="sp-meal-btn" href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
+      <a class="sp-meal-btn" href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄 등록</a>
     </div>
-</section>
+  </section>
 
+  <form method="post" class="sp-meal-grid" id="dailyMealForm">
+    {% csrf_token %}
 
-
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 p-md-5">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="badge text-bg-primary rounded-pill">Daily Meal Plan</span>
-                    <span class="text-muted small">하루 단위 식단 입력</span>
-                </div>
-
-                <h2 class="h4 fw-bold mb-2">식단 입력</h2>
-                <p class="text-muted mb-4">
-                    날짜를 기준으로 아침, 점심, 저녁 메뉴를 설정한 뒤 저장하세요.
-                </p>
-
-                <form method="post">
-                    {% csrf_token %}
-
-                    <div class="mb-4">
-                        <label for="meal_date" class="form-label fw-semibold">날짜</label>
-                        <input
-                            type="date"
-                            id="meal_date"
-                            name="meal_date"
-                            class="form-control"
-                            value="{{ selected_date|default:'' }}"
-                            required
-                        >
-                    </div>
-
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <label for="breakfast_menu" class="form-label fw-semibold">아침 메뉴</label>
-                            <select name="breakfast_menu" id="breakfast_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.breakfast %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="lunch_menu" class="form-label fw-semibold">점심 메뉴</label>
-                            <select name="lunch_menu" id="lunch_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.lunch %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="dinner_menu" class="form-label fw-semibold">저녁 메뉴</label>
-                            <select name="dinner_menu" id="dinner_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.dinner %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">식단 저장</button>
-                        <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary btn-lg">캘린더로 돌아가기</a>
-                    </div>
-                </form>
-            </div>
+    <main class="sp-meal-card">
+      <div class="sp-meal-card-head">
+        <div>
+          <p class="sp-meal-kicker">Meal Input</p>
+          <h2>끼니별 메뉴 입력</h2>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 guide-card h-100">
-            <div class="card-body p-4 p-md-5">
-                <span class="text-uppercase small fw-bold text-primary">Quick Guide</span>
-                <h2 class="h4 fw-bold mt-2 mb-3">입력 흐름 안내</h2>
+        <button type="submit" class="sp-meal-btn primary">식단 저장</button>
+      </div>
 
-                <div class="d-flex flex-column gap-3">
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">1. 날짜 확인</strong>
-                        <span class="text-muted small">캘린더에서 선택한 날짜가 자동으로 들어갑니다.</span>
-                    </div>
+      <div class="sp-meal-field">
+        <label for="meal_date">날짜</label>
+        <input id="meal_date" type="date" name="meal_date" value="{{ selected_date|default:'' }}" required>
+      </div>
 
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">2. 끼니별 메뉴 선택</strong>
-                        <span class="text-muted small">아침, 점심, 저녁 메뉴를 각각 지정합니다.</span>
-                    </div>
-
-                    <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">3. 저장 후 캘린더 확인</strong>
-                        <span class="text-muted small">저장 후 월간 식단표에서 반영 결과를 확인합니다.</span>
-                    </div>
-                </div>
-
-                <div class="mt-4 d-grid gap-2">
-                    <a href="{% url 'meals:menu_create' %}" class="btn btn-outline-primary">메뉴 먼저 등록하기</a>
-                    <a href="{% url 'meals:recipe_create' %}" class="btn btn-outline-secondary">레시피 등록하기</a>
-                    <a href="{% url 'meals:mealplan_list' %}" class="btn btn-outline-secondary">월간 식단표 보기</a>
-                </div>
-            </div>
+      <section class="sp-meal-row-card" data-meal-block data-field-name="breakfast_menu" data-meal-label="조식">
+        <div class="sp-meal-row-head">
+          <h3>조식</h3>
+          <span class="sp-meal-count" data-count>0개 메뉴</span>
         </div>
-    </div>
-    
+        <div class="sp-token-area" data-token-area></div>
+        <div class="sp-search-wrap">
+          <input class="sp-menu-search" type="text" placeholder="메뉴 검색 예: 쌀밥, 살밥, 제육" autocomplete="off">
+          <div class="sp-menu-suggest" data-suggest></div>
+        </div>
+      </section>
+
+      <section class="sp-meal-row-card" data-meal-block data-field-name="lunch_menu" data-meal-label="중식">
+        <div class="sp-meal-row-head">
+          <h3>중식</h3>
+          <span class="sp-meal-count" data-count>0개 메뉴</span>
+        </div>
+        <div class="sp-token-area" data-token-area></div>
+        <div class="sp-search-wrap">
+          <input class="sp-menu-search" type="text" placeholder="메뉴 검색 예: 돈까스, 제육볶음" autocomplete="off">
+          <div class="sp-menu-suggest" data-suggest></div>
+        </div>
+      </section>
+
+      <section class="sp-meal-row-card" data-meal-block data-field-name="dinner_menu" data-meal-label="석식">
+        <div class="sp-meal-row-head">
+          <h3>석식</h3>
+          <span class="sp-meal-count" data-count>0개 메뉴</span>
+        </div>
+        <div class="sp-token-area" data-token-area></div>
+        <div class="sp-search-wrap">
+          <input class="sp-menu-search" type="text" placeholder="메뉴 검색 예: 카레라이스, 미역국" autocomplete="off">
+          <div class="sp-menu-suggest" data-suggest></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="sp-preview-panel">
+      <h2>입력 미리보기</h2>
+      <p>후보를 클릭하면 선택 메뉴가 아래에 표시됩니다.</p>
+
+      <div class="sp-preview-section">
+        <h3>조식</h3>
+        <ul class="sp-preview-list" data-preview="breakfast_menu"></ul>
+      </div>
+
+      <div class="sp-preview-section">
+        <h3>중식</h3>
+        <ul class="sp-preview-list" data-preview="lunch_menu"></ul>
+      </div>
+
+      <div class="sp-preview-section">
+        <h3>석식</h3>
+        <ul class="sp-preview-list" data-preview="dinner_menu"></ul>
+      </div>
+
+      <div class="sp-preview-section">
+        <a class="sp-meal-btn gray" href="{% url 'meals:menu_create' %}">메뉴 먼저 등록하기</a>
+      </div>
+    </aside>
+  </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const selectedIds = {
+    breakfast_menu: new Set({{ existing_meals.breakfast|default:"[]" }}),
+    lunch_menu: new Set({{ existing_meals.lunch|default:"[]" }}),
+    dinner_menu: new Set({{ existing_meals.dinner|default:"[]" }}),
+  };
+
+  const menuMap = new Map([
+    {% for menu in menus %}
+      [{{ menu.id }}, { id: {{ menu.id }}, name: "{{ menu.name|escapejs }}", category: "{{ menu.category|default:''|escapejs }}" }],
+    {% endfor %}
+  ]);
+
+  function renderBlock(block) {
+    const fieldName = block.dataset.fieldName;
+    const area = block.querySelector("[data-token-area]");
+    const count = block.querySelector("[data-count]");
+    const preview = document.querySelector(`[data-preview="${fieldName}"]`);
+    area.innerHTML = "";
+    preview.innerHTML = "";
+
+    selectedIds[fieldName].forEach((id) => {
+      const menu = menuMap.get(Number(id));
+      if (!menu) return;
+
+      const token = document.createElement("span");
+      token.className = "sp-token";
+      token.innerHTML = `${menu.name} <button type="button" aria-label="삭제">×</button>`;
+      token.querySelector("button").addEventListener("click", () => {
+        selectedIds[fieldName].delete(Number(id));
+        renderBlock(block);
+      });
+      area.appendChild(token);
+
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = fieldName;
+      hidden.value = menu.id;
+      area.appendChild(hidden);
+
+      const li = document.createElement("li");
+      li.textContent = menu.name;
+      preview.appendChild(li);
+    });
+
+    if (selectedIds[fieldName].size === 0) {
+      const empty = document.createElement("span");
+      empty.className = "sp-muted";
+      empty.textContent = "선택된 메뉴가 없습니다.";
+      area.appendChild(empty);
+
+      const li = document.createElement("li");
+      li.textContent = "미등록";
+      preview.appendChild(li);
+    }
+
+    count.textContent = `${selectedIds[fieldName].size}개 메뉴`;
+  }
+
+  function renderSuggest(block, results) {
+    const box = block.querySelector("[data-suggest]");
+    box.innerHTML = "";
+
+    if (!results.length) {
+      const item = document.createElement("div");
+      item.className = "sp-suggest-item";
+      item.innerHTML = "<strong>검색 결과 없음</strong><span>메뉴 등록 필요</span>";
+      box.appendChild(item);
+      box.classList.add("open");
+      return;
+    }
+
+    results.forEach((menu) => {
+      const item = document.createElement("div");
+      item.className = "sp-suggest-item";
+      item.innerHTML = `<strong>${menu.name}</strong><span>${menu.category || "기타"}</span>`;
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        selectedIds[block.dataset.fieldName].add(Number(menu.id));
+        menuMap.set(Number(menu.id), menu);
+        block.querySelector(".sp-menu-search").value = "";
+        box.classList.remove("open");
+        renderBlock(block);
+      });
+      box.appendChild(item);
+    });
+
+    box.classList.add("open");
+  }
+
+  async function searchMenus(block, query) {
+    const res = await fetch(`{% url 'meals:search_menus_api' %}?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    return data.results || [];
+  }
+
+  document.querySelectorAll("[data-meal-block]").forEach((block) => {
+    renderBlock(block);
+
+    const input = block.querySelector(".sp-menu-search");
+    const suggest = block.querySelector("[data-suggest]");
+    let timer;
+
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      timer = setTimeout(async () => {
+        const results = await searchMenus(block, q);
+        renderSuggest(block, results);
+      }, 120);
+    });
+
+    input.addEventListener("focus", async () => {
+      const results = await searchMenus(block, input.value.trim());
+      renderSuggest(block, results);
+    });
+
+    input.addEventListener("blur", () => {
+      setTimeout(() => suggest.classList.remove("open"), 160);
+    });
+  });
+})();
+</script>
 {% endblock %}

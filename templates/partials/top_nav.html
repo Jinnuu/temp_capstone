@@ -1,61 +1,72 @@
-<ul class="sp-nav sp-nav-dropdown">
-  <li>
-    <a href="{% url 'home' %}">홈</a>
-  </li>
+<nav class="sp-nav" aria-label="주요 메뉴">
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'home' %}">홈</a>
+  </div>
 
-  <li>
-    <a href="{% url 'inventory:ingredient_list' %}">식자재</a>
-    <div class="sp-submenu">
-      <a href="{% url 'inventory:ingredient_list' %}#stock">재고 현황</a>
-      <a href="{% url 'inventory:ingredient_list' %}#ingredient-master">식자재 기준정보</a>
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'inventory:ingredient_list' %}">식자재</a>
+    <div class="sp-dropdown">
+      <a href="{% url 'inventory:ingredient_list' %}">재고 현황</a>
       <a href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
       <a href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
       <a href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
+      <a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a>
+      <a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
     </div>
-  </li>
+  </div>
 
-  <li>
-    <a href="{% url 'meals:mealplan_list' %}">식단</a>
-    <div class="sp-submenu">
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'meals:mealplan_list' %}">식단</a>
+    <div class="sp-dropdown">
       <a href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
       <a href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a>
       <a href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
-      <a href="{% url 'meals:monthly_mealplan_create' %}">월간 식단 등록</a>
       <a href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄 등록</a>
       <a href="{% url 'meals:menu_list' %}">메뉴·레시피</a>
     </div>
-  </li>
+  </div>
 
-  <li>
-    <a href="{% url 'forecasting:prediction_calendar' %}">식수 예측</a>
-    <div class="sp-submenu">
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'forecasting:forecasting_home' %}">식수 예측</a>
+    <div class="sp-dropdown">
       <a href="{% url 'forecasting:prediction_calendar' %}">예측 캘린더</a>
       <a href="{% url 'forecasting:prediction_create' %}">예측 실행</a>
       <a href="{% url 'forecasting:prediction_list' %}">결과 목록</a>
       <a href="{% url 'forecasting:ingredient_requirement' %}">식재료 산출</a>
+      <a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a>
     </div>
-  </li>
+  </div>
 
-  <li>
-    <a href="{% url 'procurement:home' %}">발주</a>
-    <div class="sp-submenu">
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'procurement:order_list' %}">발주</a>
+    <div class="sp-dropdown">
       <a href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
       <a href="{% url 'procurement:order_create' %}">간편 발주</a>
       <a href="{% url 'procurement:order_list' %}">발주 목록</a>
+      <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
+      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 발주 명세서</a>
+      <a href="{% url 'procurement:daily_inspection_report' %}">검수서</a>
     </div>
-  </li>
+  </div>
 
-  <li>
-    <a href="{% url 'docs_index' %}">문서화</a>
-    <div class="sp-submenu">
+  <div class="sp-nav-item">
+    <a class="sp-nav-link" href="{% url 'docs_index' %}">문서화</a>
+    <div class="sp-dropdown">
       <a href="{% url 'docs_index' %}">문서화 홈</a>
-      <a href="{% url 'docs_index' %}#meal-docs">식단 문서화</a>
-      <a href="{% url 'docs_index' %}#stock-docs">수불 현황</a>
-      <a href="{% url 'docs_index' %}#order-docs">발주 내역</a>
+      <a href="{% url 'meals:weekly_meal_plan_document' %}">주간 식단 문서</a>
+      <a href="{% url 'meals:monthly_meal_plan_document' %}">월간 식단 문서</a>
+      <a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a>
+      <a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
+      <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
+      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 발주 명세서</a>
+      <a href="{% url 'procurement:daily_inspection_report' %}">검수서</a>
+      <a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a>
     </div>
-  </li>
+  </div>
 
   {% if user.is_staff %}
-    <li><a href="/admin/">관리</a></li>
+    <div class="sp-nav-item">
+      <a class="sp-nav-link" href="/admin/">관리</a>
+    </div>
   {% endif %}
-</ul>
+</nav>

@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 app_name = "procurement"
@@ -11,7 +12,6 @@ urlpatterns = [
     path("orders/<int:pk>/", views.order_detail, name="order_detail"),
     path("orders/<int:pk>/status/", views.order_status_update, name="order_status_update"),
 
-    # Reports
     path("weekly-report/", views.weekly_procurement_report, name="weekly_procurement_report"),
     path("vendor-report/", views.vendor_procurement_report, name="vendor_procurement_report"),
     path("daily-report/", views.daily_inspection_report, name="daily_inspection_report"),

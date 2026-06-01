@@ -1,25 +1,119 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block title %}식단 엑셀 업로드 | S&P{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/upload_final.css' %}?v=sprint7-upload-final">{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sprint7_mealplan_upload_blue.css' %}?v=sprint7-meal-upload-inline-v1">
+{% endblock %}
+
 {% block content %}
-<div class="upload-page">
-  <section class="upload-hero">
-    <div><p>Excel Upload</p><h1>식단 엑셀 업로드</h1><span>일간 행 단위 또는 주간 가로형 양식을 지원합니다.</span></div>
-    <div class="upload-actions"><a href="{% url 'meals:mealplan_list' %}">식단 달력</a><a href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a></div>
+<div class="meal-upload-page">
+  <section class="meal-upload-hero">
+    <div>
+      <p class="meal-upload-kicker">Excel Upload</p>
+      <h1>식단 엑셀 업로드</h1>
+      <p>일간 행 단위 또는 주간 가로형 양식을 지원합니다. 업로드 후 월간 식단표에서 결과를 확인하세요.</p>
+    </div>
+
+    <nav class="meal-upload-actions" aria-label="식단 관련 바로가기">
+      <a class="meal-upload-btn" href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
+      <a class="meal-upload-btn" href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a>
+      <a class="meal-upload-btn" href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
+    </nav>
   </section>
-  <div class="upload-grid">
-    <form class="upload-card" method="post" enctype="multipart/form-data">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="meal-upload-alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="meal-upload-grid">
+    <form method="post" enctype="multipart/form-data" class="meal-upload-card">
       {% csrf_token %}
-      <h2>XLSX / CSV 파일 선택</h2>
-      <input type="file" name="mealplan_file" accept=".xlsx,.xlsm,.csv" required>
-      <button type="submit">식단 일괄 등록</button>
+
+      <div class="meal-upload-card-head">
+        <p class="meal-upload-kicker">Upload File</p>
+        <h2>XLSX / CSV 파일 선택</h2>
+      </div>
+
+      <div class="meal-upload-box">
+        <label for="file">식단 업로드 파일</label>
+        <input id="file" type="file" name="file" accept=".xlsx,.xls,.csv" required>
+        <p>
+          날짜, 끼니, 메뉴명을 기준으로 식단을 생성합니다.
+          같은 날짜와 끼니에 메뉴가 여러 개면 쉼표로 구분하거나 행을 나누어 입력할 수 있습니다.
+        </p>
+      </div>
+
+      <div class="meal-upload-submit">
+        <button type="submit" class="meal-upload-btn primary">식단 일괄 등록</button>
+        <a class="meal-upload-btn gray" href="{% url 'meals:mealplan_list' %}">취소</a>
+      </div>
     </form>
-    <aside class="upload-card">
-      <h2>지원 컬럼</h2>
-      <div class="upload-chips"><span>날짜</span><span>끼니</span><span>메뉴명</span><span>기준식수</span><span>조식</span><span>중식</span><span>석식</span></div>
-      <p>날짜/끼니/메뉴명 방식과 날짜/조식/중식/석식 방식 둘 다 처리합니다. 메뉴가 여러 개면 쉼표로 구분하세요.</p>
+
+    <aside class="meal-upload-card">
+      <div class="meal-upload-card-head">
+        <p class="meal-upload-kicker">Required Columns</p>
+        <h2>지원 컬럼</h2>
+      </div>
+
+      <div class="meal-upload-chip-wrap">
+        <span>날짜</span>
+        <span>끼니</span>
+        <span>메뉴명</span>
+        <span>기준식수</span>
+        <span>조식</span>
+        <span>중식</span>
+        <span>석식</span>
+      </div>
+
+      <p class="meal-upload-guide">
+        권장 양식은 <strong>날짜 / 끼니 / 메뉴명 / 기준식수</strong>입니다.
+        주간 가로형 양식은 <strong>날짜 / 조식 / 중식 / 석식</strong>도 지원합니다.
+      </p>
     </aside>
   </div>
+
+  <section class="meal-upload-template">
+    <div class="meal-upload-card-head">
+      <p class="meal-upload-kicker">Template Preview</p>
+      <h2>권장 입력 예시</h2>
+    </div>
+
+    <div class="meal-upload-table-wrap">
+      <table class="meal-upload-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>끼니</th>
+            <th class="left">메뉴명</th>
+            <th>기준식수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-06-01</td>
+            <td>조식</td>
+            <td class="left">쌀밥, 미역국</td>
+            <td>80</td>
+          </tr>
+          <tr>
+            <td>2026-06-01</td>
+            <td>중식</td>
+            <td class="left">쌀밥, 제육볶음, 배추김치</td>
+            <td>120</td>
+          </tr>
+          <tr>
+            <td>2026-06-01</td>
+            <td>석식</td>
+            <td class="left">카레라이스</td>
+            <td>70</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
 {% endblock %}
