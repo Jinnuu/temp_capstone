@@ -1,113 +1,92 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}등록 메뉴 관리 | S&P{% endblock %}
+{% block title %}메뉴 목록 | S&P{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/sp_aligned_pages.css' %}?v=aligned-subpages-v1">
+<link rel="stylesheet" href="{% static 'css/sprint7_release_patch.css' %}?v=recipe-deduct-v1">
 {% endblock %}
 
 {% block content %}
-<div class="sp-align-page">
-  <section class="sp-align-hero">
+<div class="sp-release-page">
+  <section class="sp-release-hero">
     <div>
-      <p class="sp-align-kicker">Menu Management</p>
-      <h1>등록 메뉴 관리</h1>
-      <p>시스템에 등록된 전체 메뉴를 확인하고, 수정하거나 삭제할 수 있습니다.</p>
+      <p class="sp-release-kicker">Menu Management</p>
+      <h1>메뉴 목록</h1>
+      <p>메뉴와 레시피 구성 여부를 확인하고, 엑셀로 레시피를 일괄 등록합니다.</p>
     </div>
-
-    <div class="sp-align-actions">
-      <a class="sp-btn sp-btn-primary" href="{% url 'meals:menu_create' %}">새 메뉴 등록</a>
-      <a class="sp-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
-      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">식단표 보기</a>
+    <div class="sp-release-actions">
+      <a class="sp-release-btn primary" href="{% url 'meals:menu_create' %}">새 메뉴 등록</a>
+      <a class="sp-release-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
+      <a class="sp-release-btn" href="{% url 'meals:recipe_upload_page' %}">레시피 엑셀 업로드</a>
+      <a class="sp-release-btn" href="{% url 'meals:mealplan_list' %}">식단표 보기</a>
     </div>
   </section>
 
-  <section class="sp-align-card">
-    <div class="sp-align-card-head">
+  <form method="get" class="sp-release-card sp-filter-card">
+    <div class="sp-field">
+      <label>메뉴명</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="예: 제육볶음">
+    </div>
+    <div class="sp-field">
+      <label>카테고리</label>
+      <input type="text" name="category" value="{{ request.GET.category }}" placeholder="예: 주반찬">
+    </div>
+    <div class="sp-field action">
+      <button type="submit" class="sp-release-btn primary">조회</button>
+    </div>
+  </form>
+
+  <section class="sp-release-card">
+    <div class="sp-release-card-head">
       <div>
-        <p class="sp-align-kicker">Search</p>
-        <h2>메뉴 조회</h2>
+        <p class="sp-release-kicker">Menu List</p>
+        <h2>등록 메뉴</h2>
       </div>
     </div>
 
-    <form method="get" class="sp-align-filter">
-      <div class="sp-align-field">
-        <label>메뉴명 검색</label>
-        <input type="search" name="q" value="{{ request.GET.q }}" placeholder="예: 제육볶음">
-      </div>
-
-      <div class="sp-align-field">
-        <label>카테고리</label>
-        <select name="category">
-          <option value="">전체</option>
-          <option value="밥">밥</option>
-          <option value="국">국</option>
-          <option value="주반찬">주반찬</option>
-          <option value="부반찬">부반찬</option>
-          <option value="김치">김치</option>
-          <option value="간식">간식</option>
-          <option value="기타">기타</option>
-        </select>
-      </div>
-
-      <div class="sp-align-submit-row">
-        <button type="submit" class="sp-btn sp-btn-primary">조회</button>
-        <a class="sp-btn" href="{% url 'meals:menu_list' %}">초기화</a>
-      </div>
-    </form>
-  </section>
-
-  <section class="sp-align-card">
-    <div class="sp-align-card-head">
-      <div>
-        <p class="sp-align-kicker">Menu List</p>
-        <h2>메뉴 목록</h2>
-      </div>
-      <span class="sp-align-note" style="margin:0;">레시피 개수와 카테고리를 함께 확인합니다.</span>
-    </div>
-
-    {% if menus %}
-      <div class="sp-table-wrap">
-        <table class="sp-data-table sp-align-table">
-          <thead>
+    <div class="sp-table-wrap">
+      <table class="sp-release-table">
+        <thead>
+          <tr>
+            <th>메뉴명</th>
+            <th>카테고리</th>
+            <th>레시피 수</th>
+            <th>연결 식재료</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for menu in menus %}
             <tr>
-              <th>ID</th>
-              <th>메뉴명</th>
-              <th>카테고리</th>
-              <th>레시피</th>
-              <th>관리</th>
+              <td class="left"><strong>{{ menu.name }}</strong></td>
+              <td>{{ menu.category|default:"-" }}</td>
+              <td>
+                {% if menu.recipes.all|length == 0 %}
+                  <span class="sp-status danger">Recipe 0 items</span>
+                {% else %}
+                  <span class="sp-status ok">Recipe {{ menu.recipes.all|length }} items</span>
+                {% endif %}
+              </td>
+              <td class="left">
+                {% for recipe in menu.recipes.all %}
+                  <span class="sp-mini-chip">{{ recipe.ingredient.name }} {{ recipe.required_amount }}</span>
+                {% empty %}
+                  <span class="sp-muted">등록된 식재료가 없습니다.</span>
+                {% endfor %}
+              </td>
+              <td>
+                <a class="sp-release-btn small" href="{% url 'meals:menu_update' menu.id %}">수정</a>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {% for menu in menus %}
-              <tr>
-                <td>#{{ menu.id }}</td>
-                <td>
-                  <div class="sp-align-menu-title">
-                    <strong>{{ menu.name }}</strong>
-                    <span>Recipe {{ menu.recipes.count }} items</span>
-                  </div>
-                </td>
-                <td>{{ menu.category|default:"미분류" }}</td>
-                <td>{{ menu.recipes.count }}개 항목</td>
-                <td>
-                  <div class="sp-align-submit-row" style="justify-content:center;">
-                    <a class="sp-btn" href="{% url 'meals:menu_update' menu.id %}">수정</a>
-                    <form method="post" action="{% url 'meals:menu_delete' menu.id %}" class="sp-align-inline-form">
-                      {% csrf_token %}
-                      <button type="submit" class="sp-btn" onclick="return confirm('이 메뉴를 삭제할까요?');">삭제</button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="sp-align-empty">등록된 메뉴가 없습니다.</div>
-    {% endif %}
+          {% empty %}
+            <tr>
+              <td colspan="5">등록된 메뉴가 없습니다.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 </div>
 {% endblock %}

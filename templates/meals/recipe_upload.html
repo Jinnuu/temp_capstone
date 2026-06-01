@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}레시피 엑셀 업로드 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sprint7_release_patch.css' %}?v=recipe-deduct-final-v2">
+{% endblock %}
+
+{% block content %}
+<div class="sp-release-page">
+  <section class="sp-release-hero">
+    <div>
+      <p class="sp-release-kicker">Recipe Excel Upload</p>
+      <h1>레시피 엑셀 업로드</h1>
+      <p>메뉴명, 카테고리, 식재료명, 1인 사용량, 단위를 검증하여 레시피를 일괄 등록합니다.</p>
+    </div>
+    <div class="sp-release-actions">
+      <a class="sp-release-btn" href="{% url 'meals:menu_list' %}">메뉴 목록</a>
+      <a class="sp-release-btn" href="{% url 'meals:recipe_create' %}">레시피 수정</a>
+    </div>
+  </section>
+
+  <div class="sp-release-grid">
+    <form method="post" enctype="multipart/form-data" class="sp-release-card">
+      {% csrf_token %}
+      <div class="sp-release-card-head">
+        <div>
+          <p class="sp-release-kicker">Upload</p>
+          <h2>파일 선택</h2>
+        </div>
+      </div>
+
+      <div class="sp-upload-box">
+        <label for="file">레시피 엑셀 파일</label>
+        <input id="file" type="file" name="file" accept=".xlsx,.xls" required>
+        <p>권장 컬럼: 메뉴명, 카테고리, 식재료명, 사용량, 단위</p>
+      </div>
+
+      <div class="sp-release-submit">
+        <button class="sp-release-btn primary" type="submit">레시피 일괄 등록</button>
+        <a class="sp-release-btn" href="{% url 'meals:menu_list' %}">취소</a>
+      </div>
+    </form>
+
+    <aside class="sp-release-card">
+      <div class="sp-release-card-head">
+        <div>
+          <p class="sp-release-kicker">Template</p>
+          <h2>엑셀 양식</h2>
+        </div>
+      </div>
+
+      <div class="sp-chip-wrap">
+        <span>메뉴명</span>
+        <span>카테고리</span>
+        <span>식재료명</span>
+        <span>사용량</span>
+        <span>단위</span>
+      </div>
+
+      <p class="sp-guide-text">
+        같은 메뉴는 여러 행으로 작성합니다. 예를 들어 제육볶음은 돼지고기, 양파, 대파처럼 식재료별로 행을 나누면 됩니다.
+      </p>
+    </aside>
+  </div>
+
+  {% if errors %}
+    <section class="sp-release-card">
+      <div class="sp-release-card-head">
+        <div>
+          <p class="sp-release-kicker">Validation</p>
+          <h2>업로드 오류</h2>
+        </div>
+      </div>
+      <ul class="sp-error-list">
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if result_rows %}
+    <section class="sp-release-card">
+      <div class="sp-release-card-head">
+        <div>
+          <p class="sp-release-kicker">Result</p>
+          <h2>저장 결과</h2>
+        </div>
+      </div>
+
+      <div class="sp-table-wrap">
+        <table class="sp-release-table">
+          <thead>
+            <tr>
+              <th>행</th>
+              <th>메뉴명</th>
+              <th>카테고리</th>
+              <th>식재료명</th>
+              <th>사용량</th>
+              <th>단위</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result_rows %}
+              <tr>
+                <td>{{ row.row_no }}</td>
+                <td>{{ row.menu }}</td>
+                <td>{{ row.category }}</td>
+                <td>{{ row.ingredient }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.unit }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
