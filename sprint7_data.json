@@ -5120,6 +5120,14 @@
   }
 },
 {
+  "model": "meals.menu",
+  "pk": 728,
+  "fields": {
+    "name": "밥",
+    "category": "기타"
+  }
+},
+{
   "model": "meals.recipe",
   "pk": 5,
   "fields": {
@@ -26770,6 +26778,14 @@
   }
 },
 {
+  "model": "meals.dietmenu",
+  "pk": 63,
+  "fields": {
+    "diet_plan": 22,
+    "menu": 728
+  }
+},
+{
   "model": "inventory.ingredient",
   "pk": 758,
   "fields": {
@@ -28052,17 +28068,15 @@
   "pk": 829,
   "fields": {
     "name": "건미역",
-    "spec": "KG,국산",
-    "description": null,
+    "spec": "건조 1kg/봉",
+    "description": "미역국 주재료",
     "unit": "kg",
-    "unit_price": 19030,
-    "safe_stock_level": "10.00",
-    "supplier": [
-      "samsung_welstory"
-    ],
+    "unit_price": 18500,
+    "safe_stock_level": "3.00",
+    "supplier": null,
     "category": "수산/수산가공품",
-    "yearly_demand": 30,
-    "total_amount": 570900
+    "yearly_demand": 60,
+    "total_amount": 1110000
   }
 },
 {
@@ -31374,15 +31388,15 @@
   "pk": 1014,
   "fields": {
     "name": "양파",
-    "spec": null,
-    "description": null,
-    "unit": "g",
-    "unit_price": 0,
-    "safe_stock_level": "0.00",
+    "spec": "국내산 10kg/박스",
+    "description": "제육볶음·카레 등 공통 사용",
+    "unit": "kg",
+    "unit_price": 2300,
+    "safe_stock_level": "10.00",
     "supplier": null,
-    "category": null,
-    "yearly_demand": null,
-    "total_amount": null
+    "category": "채소/농가공품",
+    "yearly_demand": 600,
+    "total_amount": 1380000
   }
 },
 {
@@ -31646,15 +31660,15 @@
   "pk": 1031,
   "fields": {
     "name": "배추김치",
-    "spec": null,
-    "description": null,
-    "unit": "g",
-    "unit_price": 0,
-    "safe_stock_level": "0.00",
+    "spec": "10kg/박스",
+    "description": "공통 반찬",
+    "unit": "kg",
+    "unit_price": 5400,
+    "safe_stock_level": "15.00",
     "supplier": null,
-    "category": null,
-    "yearly_demand": null,
-    "total_amount": null
+    "category": "김치/절임류",
+    "yearly_demand": 800,
+    "total_amount": 4320000
   }
 },
 {
@@ -41047,6 +41061,54 @@
     "category": null,
     "yearly_demand": null,
     "total_amount": null
+  }
+},
+{
+  "model": "inventory.ingredient",
+  "pk": 1693,
+  "fields": {
+    "name": "쌀",
+    "spec": "국내산 20kg/포",
+    "description": "밥류 기본 식재료",
+    "unit": "kg",
+    "unit_price": 3200,
+    "safe_stock_level": "50.00",
+    "supplier": null,
+    "category": "곡류",
+    "yearly_demand": 1200,
+    "total_amount": 3840000
+  }
+},
+{
+  "model": "inventory.ingredient",
+  "pk": 1694,
+  "fields": {
+    "name": "돼지고기",
+    "spec": "냉장 전지 1kg",
+    "description": "제육볶음 주재료",
+    "unit": "kg",
+    "unit_price": 10700,
+    "safe_stock_level": "10.00",
+    "supplier": null,
+    "category": "축산/축산가공품",
+    "yearly_demand": 350,
+    "total_amount": 3745000
+  }
+},
+{
+  "model": "inventory.ingredient",
+  "pk": 1695,
+  "fields": {
+    "name": "카레분말",
+    "spec": "1kg/봉",
+    "description": "카레라이스 조리용",
+    "unit": "kg",
+    "unit_price": 6400,
+    "safe_stock_level": "5.00",
+    "supplier": null,
+    "category": "가공식품",
+    "yearly_demand": 90,
+    "total_amount": 576000
   }
 },
 {

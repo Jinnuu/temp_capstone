@@ -124,6 +124,8 @@ def order_create(request):
     """
     간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 로드 기능 포함
     """
+
+    target_date = request.GET.get("target_date")
     if request.method == 'POST':
         ingredient_ids = request.POST.getlist('ingredient_id[]')
         quantities = request.POST.getlist('quantity[]')
@@ -150,7 +152,7 @@ def order_create(request):
                 OrderItem.objects.create(
                     purchase_order=po,
                     ingredient=ing,
-                    target_date=target_date_val if target_date_val else None,
+                    target_date=target_date if target_date else None,
                     required_qty=q,
                     missing_qty=q,
                     order_unit_price=ing.unit_price,
@@ -172,7 +174,6 @@ def order_create(request):
     amounts = request.GET.getlist("amounts")
     shortage_map = dict(zip(items_names, amounts))
 
-    target_date = request.GET.get("target_date")
 
     if target_date:
         requirements = get_all_day_requirements(target_date)
