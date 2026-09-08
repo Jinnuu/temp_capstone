@@ -12,7 +12,7 @@
   <article class="sp-summary-card">
     <span>조회 품목</span>
     <strong>{{ page_obj.paginator.count }}개</strong>
-    <small>현재 필터 기준</small>
+    <small>현재 필터 기준 ({{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 페이지)</small>
   </article>
   <article class="sp-summary-card">
     <span>부족분 일괄 발주</span>
@@ -26,9 +26,9 @@
   </article>
   <article class="sp-summary-actions">
     {% if all_low_stock_ids %}
-      <a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_create' %}?items={{ all_low_stock_ids }}">부족분 발주</a>
+    <a class="sp-btn sp-btn-primary" href="{% url 'procurement:order_create' %}?items={{ all_low_stock_ids }}">부족분 발주</a>
     {% else %}
-      <span class="sp-btn disabled">부족분 없음</span>
+    <span class="sp-btn disabled">부족분 없음</span>
     {% endif %}
     <a class="sp-btn" href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
     <a class="sp-btn" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
@@ -48,7 +48,7 @@
       <select name="category">
         <option value="">전체 카테고리</option>
         {% for cat in categories %}
-          <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
         {% endfor %}
       </select>
     </label>
@@ -58,9 +58,9 @@
       <select name="supplier">
         <option value="">전체 발주처</option>
         {% for sup in suppliers %}
-          <option value="{{ sup.username }}" {% if selected_supplier == sup.username %}selected{% endif %}>
-            {{ sup.name|default:sup.username }}
-          </option>
+        <option value="{{ sup.username }}" {% if selected_supplier == sup.username %}selected{% endif %}>
+          {{ sup.name|default:sup.username }}
+        </option>
         {% endfor %}
       </select>
     </label>
@@ -68,6 +68,7 @@
     <label>
       <span>정렬</span>
       <select name="sort">
+        <option value="latest" {% if sort_by == "latest" %}selected{% endif %}>최신순 (최근 등록/수정)</option>
         <option value="status_priority" {% if sort_by == "status_priority" %}selected{% endif %}>부족 우선</option>
         <option value="name" {% if sort_by == "name" %}selected{% endif %}>품목명순</option>
         <option value="supplier" {% if sort_by == "supplier" %}selected{% endif %}>발주처순</option>
@@ -81,83 +82,11 @@
   </form>
 </section>
 
-<section class="sp-panel" id="stock">
-  <div class="sp-panel-head">
-    <div>
-      <p>Inventory</p>
-      <h2>재고 현황</h2>
-    </div>
-  </div>
-
-  <div class="sp-table-wrap">
-    <table class="sp-data-table">
-      <thead>
-        <tr>
-          <th>대분류</th>
-          <th>품목명</th>
-          <th>발주처</th>
-          <th>단가</th>
-          <th>입고</th>
-          <th>출고</th>
-          <th>폐기</th>
-          <th>현재고</th>
-          <th>안전재고</th>
-          <th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ingredient in page_obj %}
-          <tr>
-            <td>{{ ingredient.category|default:"-" }}</td>
-            <td class="fw-bold">{{ ingredient.name }}</td>
-            <td>
-              {% if ingredient.supplier %}
-                {{ ingredient.supplier.name|default:ingredient.supplier.username }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
-            <td>{{ ingredient.in_qty|floatformat:1 }}</td>
-            <td>{{ ingredient.out_qty|floatformat:1 }}</td>
-            <td>{{ ingredient.waste_qty|floatformat:1 }}</td>
-            <td>{{ ingredient.calc_stock|floatformat:1 }} {{ ingredient.unit }}</td>
-            <td>{{ ingredient.safe_stock_level|floatformat:1 }} {{ ingredient.unit }}</td>
-            <td>
-              {% if ingredient.is_low_stock %}
-                <span class="sp-status danger">부족</span>
-              {% else %}
-                <span class="sp-status ok">정상</span>
-              {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="10" class="sp-empty-cell">조회된 식자재가 없습니다.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="sp-pagination">
-    {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}&category={{ selected_category }}&supplier={{ selected_supplier }}&search={{ search_query }}&sort={{ sort_by }}">이전</a>
-    {% endif %}
-    <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}&category={{ selected_category }}&supplier={{ selected_supplier }}&search={{ search_query }}&sort={{ sort_by }}">다음</a>
-    {% endif %}
-  </div>
-</section>
-
 <section class="sp-panel" id="ingredient-master">
   <div class="sp-panel-head">
     <div>
       <p>Ingredient Master</p>
-      <h2>식자재 기준정보</h2>
-    </div>
-    <div class="sp-filter-actions">
-      <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
-      <a class="sp-btn sp-btn-primary" href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
+      <h2>식자재 기준정보 목록</h2>
     </div>
   </div>
 
@@ -177,27 +106,47 @@
       </thead>
       <tbody>
         {% for ingredient in page_obj %}
-          <tr>
-            <td>{{ ingredient.category|default:"-" }}</td>
-            <td class="fw-bold">{{ ingredient.name }}</td>
-            <td>{{ ingredient.unit }}</td>
-            <td>{{ ingredient.spec|default:"-" }}</td>
-            <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
-            <td>
-              {% if ingredient.supplier %}
-                {{ ingredient.supplier.name|default:ingredient.supplier.username }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ ingredient.safe_stock_level|floatformat:1 }} {{ ingredient.unit }}</td>
-            <td><a class="sp-text-link" href="{% url 'inventory:ingredient_create' %}">수정</a></td>
-          </tr>
+        <tr>
+          <td>{{ ingredient.category|default:"-" }}</td>
+          <td class="fw-bold">{{ ingredient.name }}</td>
+          <td>{{ ingredient.unit }}</td>
+          <td>{{ ingredient.spec|default:"-" }}</td>
+          <td>{{ ingredient.unit_price|floatformat:0 }}원</td>
+          <td>
+            {% if ingredient.supplier %}
+            {{ ingredient.supplier.name|default:ingredient.supplier.username }}
+            {% else %}
+            -
+            {% endif %}
+          </td>
+          <td>{{ ingredient.safe_stock_level|floatformat:1 }} {{ ingredient.unit }}</td>
+          <td><a class="sp-text-link" href="{% url 'inventory:ingredient_create' %}">수정</a></td>
+        </tr>
         {% empty %}
-          <tr><td colspan="8" class="sp-empty-cell">조회된 식자재가 없습니다.</td></tr>
+        <tr>
+          <td colspan="8" class="sp-empty-cell">조회된 식자재가 없습니다.</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="sp-pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; padding: 10px;">
+    {% if page_obj.has_previous %}
+      <a class="sp-btn" href="?page=1&search={{ search_query }}&category={{ selected_category }}&supplier={{ selected_supplier }}&sort={{ sort_by }}">&laquo; 처음</a>
+      <a class="sp-btn" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&category={{ selected_category }}&supplier={{ selected_supplier }}&sort={{ sort_by }}">이전</a>
+    {% endif %}
+
+    <span style="margin: 0 10px; font-weight: bold; font-size: 0.95rem;">
+      {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a class="sp-btn" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&category={{ selected_category }}&supplier={{ selected_supplier }}&sort={{ sort_by }}">다음</a>
+      <a class="sp-btn" href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}&category={{ selected_category }}&supplier={{ selected_supplier }}&sort={{ sort_by }}">마지막 &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
 </section>
 {% endblock %}

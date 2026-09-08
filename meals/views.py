@@ -1,8 +1,9 @@
 import calendar
+import re
 import json
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
-
+from openpyxl import load_workbook
 from django.contrib import messages
 from django.core.management import call_command
 from django.db import transaction
@@ -20,13 +21,6 @@ from inventory.models import Ingredient
 from .models import DietMenu, DietPlan, Menu, Recipe
 
 
-CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
-
-SORT_ORDER = Case(
-    *[When(menu__category=cat, then=Value(pos)) for pos, cat in enumerate(CATEGORY_ORDER)],
-    default=Value(len(CATEGORY_ORDER)),
-    output_field=IntegerField(),
-)
 
 
 def to_decimal(value):
@@ -58,20 +52,21 @@ def mealplan_create(request):
         )
 
         for plan in plans:
-            menu_ids = [item.menu_id for item in plan.diet_menus.all()]
+            sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by("id")
+            menu_data = [{"id": dm.menu.id, "name": dm.menu.name} for dm in sorted_diet_menus]
 
             if plan.meal_type == "조식":
-                existing_meals["breakfast"] = menu_ids
+                existing_meals["breakfast"] = menu_data
             elif plan.meal_type == "중식":
-                existing_meals["lunch"] = menu_ids
+                existing_meals["lunch"] = menu_data
             elif plan.meal_type == "석식":
-                existing_meals["dinner"] = menu_ids
+                existing_meals["dinner"] = menu_data
 
     if request.method == "POST":
         meal_date = request.POST.get("meal_date")
-        breakfast_menu_ids = request.POST.getlist("breakfast_menu")
-        lunch_menu_ids = request.POST.getlist("lunch_menu")
-        dinner_menu_ids = request.POST.getlist("dinner_menu")
+        breakfast_menus = request.POST.getlist("breakfast_menu")
+        lunch_menus = request.POST.getlist("lunch_menu")
+        dinner_menus = request.POST.getlist("dinner_menu")
 
         if not meal_date:
             messages.error(request, "날짜를 선택해주세요.")
@@ -81,24 +76,32 @@ def mealplan_create(request):
 
         created_count = 0
         meal_type_map = {
-            "조식": breakfast_menu_ids,
-            "중식": lunch_menu_ids,
-            "석식": dinner_menu_ids,
+            "조식": breakfast_menus,
+            "중식": lunch_menus,
+            "석식": dinner_menus,
         }
 
-        for meal_type, menu_ids in meal_type_map.items():
-            valid_menu_ids = [menu_id for menu_id in menu_ids if menu_id]
+        for meal_type, menu_items in meal_type_map.items():
+            valid_items = [m.strip() for m in menu_items if m and m.strip()]
 
-            if valid_menu_ids:
+            if valid_items:
                 diet_plan = DietPlan.objects.create(
                     target_date=meal_date,
                     meal_type=meal_type,
                 )
 
-                for menu_id in valid_menu_ids:
-                    DietMenu.objects.create(
+                for item in valid_items:
+                    if item.isdigit():
+                        try:
+                            menu = Menu.objects.get(id=int(item))
+                        except Menu.DoesNotExist:
+                            menu, _ = Menu.objects.get_or_create(name=item, defaults={"category": "기타"})
+                    else:
+                        menu, _ = Menu.objects.get_or_create(name=item, defaults={"category": "기타"})
+
+                    DietMenu.objects.get_or_create(
                         diet_plan=diet_plan,
-                        menu_id=menu_id,
+                        menu=menu,
                     )
 
                 created_count += 1
@@ -149,7 +152,7 @@ def mealplan_list(request):
             },
         )
 
-        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
+        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by("id")
         menu_names = [item.menu.name for item in sorted_diet_menus]
         menu_dicts = [{"id": item.menu.id, "name": item.menu.name} for item in sorted_diet_menus]
 
@@ -457,8 +460,8 @@ def add_diet_menu_api(request):
 
             DietMenu.objects.get_or_create(diet_plan=plan, menu=menu)
 
-            sorted_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
-            menu_data = [{"id": dm.menu.id, "name": dm.menu.name} for dm in sorted_menus]
+            sorted_menus = plan.diet_menus.all().select_related("menu").order_by("id")
+            menu_data = [{"id": dm.menu.id, "name": dm.menu.name, "diet_menu_id": dm.id} for dm in sorted_menus]
 
             return JsonResponse(
                 {
@@ -491,8 +494,8 @@ def remove_diet_menu_api(request):
                 plan.delete()
                 return JsonResponse({"status": "success", "menus": []})
 
-            sorted_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
-            menu_data = [{"id": dm.menu.id, "name": dm.menu.name} for dm in sorted_menus]
+            sorted_menus = plan.diet_menus.all().select_related("menu").order_by("id")
+            menu_data = [{"id": dm.menu.id, "name": dm.menu.name, "diet_menu_id": dm.id} for dm in sorted_menus]
 
             return JsonResponse({"status": "success", "menus": menu_data})
         except DietPlan.DoesNotExist:
@@ -522,11 +525,12 @@ def weekly_mealplan_create(request):
         return redirect(f"{reverse('meals:weekly_mealplan_create')}?start_date={post_start_date_str}")
 
     dates = [start_date + timedelta(days=i) for i in range(7)]
+    next_monday = start_date + timedelta(days=7)
 
     all_plans = (
         DietPlan.objects.filter(
             target_date__gte=dates[0],
-            target_date__lte=dates[-1],
+            target_date__lte=next_monday,
         )
         .prefetch_related("diet_menus__menu")
     )
@@ -539,15 +543,29 @@ def weekly_mealplan_create(request):
             "중식": [],
             "석식": [],
         }
+    weekly_data[next_monday] = {
+        "조식": [],
+        "중식": [],
+        "석식": [],
+    }
 
     for plan_obj in all_plans:
         if plan_obj.target_date in weekly_data:
-            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
-            menus = [dm.menu for dm in sorted_diet_menus]
-            weekly_data[plan_obj.target_date][plan_obj.meal_type] = menus
+            # Use model-level sorted method: 밥→국→주반찬→부반찬→과일/간식→음료→기타
+            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by("id")
+            # Pass dict with id (menu_id), diet_menu_id, and name for template use
+            weekly_data[plan_obj.target_date][plan_obj.meal_type] = [
+                {"id": dm.menu.id, "name": dm.menu.name, "diet_menu_id": dm.id}
+                for dm in sorted_diet_menus
+            ]
 
+    end_date = dates[-1]
     days_context = []
     weekdays_list = ["월", "화", "수", "목", "금", "토", "일"]
+
+    next_monday_str = next_monday.strftime("%Y-%m-%d")
+    next_monday_breakfast = weekly_data[next_monday].get("조식", [])
+    next_monday_lunch = weekly_data[next_monday].get("중식", [])
 
     for i, d in enumerate(dates):
         days_context.append(
@@ -559,12 +577,16 @@ def weekly_mealplan_create(request):
                 "lunch": weekly_data[d].get("중식", []),
                 "dinner": weekly_data[d].get("석식", []),
                 "is_next_monday": False,
+                "next_monday_str": next_monday_str if i == 6 else "",
+                "next_monday_breakfast": next_monday_breakfast if i == 6 else [],
+                "next_monday_lunch": next_monday_lunch if i == 6 else [],
             }
         )
 
     context = {
         "start_date": start_date,
         "start_date_str": start_date.strftime("%Y-%m-%d"),
+        "end_date_str": end_date.strftime("%Y-%m-%d"),
         "prev_week": (start_date - timedelta(days=7)).strftime("%Y-%m-%d"),
         "next_week": (start_date + timedelta(days=7)).strftime("%Y-%m-%d"),
         "days_context": days_context,
@@ -612,7 +634,7 @@ def weekly_meal_plan_document(request):
     for plan_obj in all_plans:
         if plan_obj.target_date in weekly_data:
             # 카테고리 순서(SORT_ORDER)에 따라 메뉴 정렬
-            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
+            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by("id")
             menus = [dm.menu.name for dm in sorted_diet_menus]
             weekly_data[plan_obj.target_date][plan_obj.meal_type] = menus
 
@@ -677,7 +699,7 @@ def monthly_meal_plan_document(request):
         day = plan.target_date.day
         meal_map.setdefault(day, {"breakfast": [], "lunch": [], "dinner": []})
 
-        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
+        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by("id")
         menu_names = [item.menu.name for item in sorted_diet_menus]
 
         if plan.meal_type == "조식":
@@ -745,7 +767,7 @@ def export_weekly_mealplan_excel(request):
     weekly_data = {d: {"조식": [], "중식": [], "석식": []} for d in dates}
     for plan_obj in all_plans:
         if plan_obj.target_date in weekly_data:
-            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
+            sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by("id")
             menus = [dm.menu.name for dm in sorted_diet_menus]
             weekly_data[plan_obj.target_date][plan_obj.meal_type] = menus
 
@@ -822,3 +844,203 @@ def export_weekly_mealplan_excel(request):
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+
+@csrf_exempt
+def delete_diet_menu_api(request, diet_menu_id):
+    """
+    AJAX: 개별 DietMenu 레코드를 삭제합니다.
+    성공 시 해당 끼니의 (정렬된) 메뉴 목록을 반환합니다.
+    """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST만 허용됩니다."}, status=405)
+
+    try:
+        dm = get_object_or_404(DietMenu, pk=diet_menu_id)
+        plan = dm.diet_plan
+        dm.delete()
+
+        if not plan.diet_menus.exists():
+            plan.delete()
+            return JsonResponse({"status": "success", "menus": []})
+
+        sorted_menus = plan.diet_menus.all().select_related("menu").order_by("id")
+        menu_data = [{"id": item.menu.id, "name": item.menu.name, "diet_menu_id": item.id} for item in sorted_menus]
+        return JsonResponse({"status": "success", "menus": menu_data})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+def bulk_delete_mealplans(request):
+    """
+    주간 또는 월간 식단 데이터를 일괄로 삭제합니다.
+    - 주간 삭제: POST { start_date, end_date } 또는 GET start_date + end_date
+    - 월간 삭제: POST { year, month } 또는 GET year + month
+    """
+    if request.method not in ("POST", "GET"):
+        return JsonResponse({"status": "error"}, status=405)
+
+    params = request.POST if request.method == "POST" else request.GET
+    redirect_url = params.get("redirect_url") or reverse("meals:mealplan_list")
+
+    try:
+        # 주간 삭제
+        start_date_str = params.get("start_date")
+        end_date_str = params.get("end_date")
+        year_str = params.get("year")
+        month_str = params.get("month")
+
+        if start_date_str and end_date_str:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            deleted_count, _ = DietPlan.objects.filter(
+                target_date__gte=start_date, target_date__lte=end_date
+            ).delete()
+            messages.success(request, f"{start_date_str}~{end_date_str} 기간의 식단 {deleted_count}건이 삭제되었습니다.")
+        elif year_str and month_str:
+            year = int(year_str)
+            month = int(month_str)
+            deleted_count, _ = DietPlan.objects.filter(
+                target_date__year=year, target_date__month=month
+            ).delete()
+            messages.success(request, f"{year}년 {month}월 전체 식단 {deleted_count}건이 삭제되었습니다.")
+        else:
+            messages.error(request, "삭제할 기간 정보가 올바르지 않습니다.")
+    except Exception as e:
+        messages.error(request, f"식단 삭제 중 오류가 발생했습니다: {str(e)}")
+
+    return redirect(redirect_url)
+
+
+def weekly_recipe_report(request):
+    """
+    주간 레시피(식재료 총량) 문서화 신규 뷰.
+    파라미터로 기간(start_date, end_date)과 지정 인원수(headcount)를 받아
+    일자 -> 끼니 -> 메뉴 -> 식재료 필요 총량을 계산하여 전달합니다.
+    """
+    start_date_str = request.GET.get("start_date", "").strip()
+    end_date_str = request.GET.get("end_date", "").strip()
+    date_str = request.GET.get("date", "").strip()
+    headcount_str = request.GET.get("headcount", "100").strip()
+
+    try:
+        headcount = int(headcount_str)
+        if headcount <= 0:
+            headcount = 100
+    except (ValueError, TypeError):
+        headcount = 100
+
+    today = date.today()
+    if date_str and not start_date_str:
+        try:
+            ref_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            ref_date = today
+        start_date = ref_date - timedelta(days=ref_date.weekday())
+        end_date = start_date + timedelta(days=6)
+    else:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else today - timedelta(days=today.weekday())
+        except ValueError:
+            start_date = today - timedelta(days=today.weekday())
+
+        try:
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else start_date + timedelta(days=6)
+        except ValueError:
+            end_date = start_date + timedelta(days=6)
+
+    if end_date < start_date:
+        end_date = start_date
+
+    meal_order = Case(
+        When(meal_type="조식", then=Value(1)),
+        When(meal_type="중식", then=Value(2)),
+        When(meal_type="석식", then=Value(3)),
+        default=Value(4),
+        output_field=IntegerField(),
+    )
+    category_order = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
+    sort_order = Case(
+        *[When(menu__category=cat, then=Value(pos)) for pos, cat in enumerate(category_order)],
+        default=Value(len(category_order)),
+        output_field=IntegerField(),
+    )
+    weekdays_ko = ["월", "화", "수", "목", "금", "토", "일"]
+
+    plans = (
+        DietPlan.objects.filter(target_date__range=[start_date, end_date])
+        .prefetch_related("diet_menus__menu__recipes__ingredient")
+        .order_by("target_date", meal_order)
+    )
+
+    report_data = []
+    for plan in plans:
+        dt = plan.target_date
+        dt_display = f"{dt.strftime('%m/%d')}({weekdays_ko[dt.weekday()]})"
+        meal_display = f"{dt_display} {plan.meal_type}"
+
+        plan_item = {
+            "target_date": dt,
+            "target_date_display": dt_display,
+            "meal_type": plan.meal_type,
+            "meal_display": meal_display,
+            "menus": [],
+            "total_rows": 0,
+        }
+
+        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(sort_order)
+        plan_total_rows = 0
+
+        for diet_menu in sorted_diet_menus:
+            menu = diet_menu.menu
+            recipes = list(menu.recipes.all().select_related("ingredient"))
+            ing_count = len(recipes) if recipes else 1
+            plan_total_rows += ing_count
+
+            menu_item = {
+                "name": menu.name,
+                "category": menu.category or "-",
+                "ingredients": [],
+                "row_span": ing_count,
+            }
+
+            for recipe in recipes:
+                ing = recipe.ingredient
+                req_amount = recipe.required_amount or Decimal("0")
+                total_needed = req_amount * Decimal(headcount)
+
+                if total_needed % 1 == 0:
+                    needed_qty_display = int(total_needed)
+                else:
+                    needed_qty_display = round(float(total_needed), 2)
+
+                if req_amount % 1 == 0:
+                    req_amount_display = int(req_amount)
+                else:
+                    req_amount_display = float(req_amount)
+
+                menu_item["ingredients"].append(
+                    {
+                        "name": ing.name,
+                        "spec": ing.spec or "-",
+                        "unit": ing.unit,
+                        "required_amount": req_amount_display,
+                        "needed_qty": needed_qty_display,
+                    }
+                )
+
+            plan_item["menus"].append(menu_item)
+
+        plan_item["total_rows"] = plan_total_rows if plan_total_rows > 0 else 1
+        report_data.append(plan_item)
+
+    context = {
+        "report_data": report_data,
+        "start_date": start_date,
+        "end_date": end_date,
+        "start_date_str": start_date.strftime("%Y-%m-%d"),
+        "end_date_str": end_date.strftime("%Y-%m-%d"),
+        "headcount": headcount,
+    }
+    return render(request, "docs/weekly_recipe_report.html", context)
+

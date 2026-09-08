@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "accounts",
     "meals",
     "inventory",
@@ -103,3 +104,6 @@ CSRF_TRUSTED_ORIGINS = [
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+# 대용량 폼 전송 (식자재 1200개 이상 등록 시 TooManyFieldsSent 에러 해결)
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240

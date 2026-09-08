@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}급식재료 수불현황 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body {
+    background-color: #f4f6f9;
+    color: #212529;
+  }
+
+  .document-toolbar {
+    background: #ffffff;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  .a4-container {
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .a4-page {
+    width: 297mm;
+    min-height: 210mm;
+    background: #ffffff;
+    padding: 12mm 15mm;
+    box-shadow: 0 0 15px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* Header & Approval */
+  .doc-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .doc-title-box {
+    flex: 1;
+    text-align: center;
+    padding-top: 5px;
+  }
+
+  .doc-title-box h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    margin: 0 0 4px 0;
+    color: #111;
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .approval-table {
+    border-collapse: collapse;
+    margin-left: auto;
+  }
+
+  .approval-table th, .approval-table td {
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  .approval-table th {
+    background-color: #f1f3f5;
+    padding: 3px 10px;
+    font-weight: bold;
+    width: 55px;
+  }
+
+  .approval-table td {
+    height: 42px;
+    vertical-align: middle;
+  }
+
+  .doc-info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+
+  /* 2-line per item table structure */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: fixed;
+  }
+
+  .doc-table th, .doc-table td {
+    border: 1px solid #222;
+    padding: 5px 4px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+  }
+
+  .doc-table th {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    color: #111;
+  }
+
+  .row-primary {
+    background-color: #ffffff;
+  }
+
+  .row-sub {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-size: 10.5px;
+  }
+
+  .sub-label {
+    font-weight: bold;
+    color: #2b8a3e;
+  }
+
+  .total-row {
+    background-color: #e7f5ff !important;
+    font-weight: bold;
+  }
+
+  .text-left { text-align: left !important; padding-left: 6px !important; }
+  .text-right { text-align: right !important; padding-right: 6px !important; }
+
+  @media print {
+    header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+    }
+    .a4-container {
+      padding: 0 !important;
+    }
+    .a4-page {
+      box-shadow: none !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    .doc-table tr {
+      display: table-row !important;
+    }
+    .doc-table th {
+      background-color: #e9ecef !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .row-sub {
+      background-color: #f8f9fa !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .total-row {
+      background-color: #e7f5ff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-toolbar no-print">
+  <div class="d-flex align-items-center gap-3">
+    <h5 class="m-0 fw-bold">[실무 양식] 급식재료 수불현황</h5>
+    <span class="badge bg-secondary">A4 가로 (Landscape / 2줄 수불 양식)</span>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2 m-0">
+      <input type="month" name="month" value="{{ target_month|default:'' }}" class="form-control form-control-sm" style="width: 160px;">
+      <button type="submit" class="btn btn-sm btn-primary">조회</button>
+    </form>
+    <button onclick="window.print()" class="btn btn-sm btn-dark"><i class="bi bi-printer"></i> 인쇄하기</button>
+    <a href="{% url 'docs_index' %}" class="btn btn-sm btn-outline-secondary">돌아가기</a>
+  </div>
+</div>
+
+<div class="a4-container">
+  <div class="a4-page">
+    
+    <!-- 헤더 & 결재란 -->
+    <div class="doc-header-wrap">
+      <div style="width: 200px;"></div>
+      
+      <div class="doc-title-box">
+        <h1>급 식 재 료 수 불 현 황</h1>
+        <div style="font-size: 13px; color: #495057; margin-top: 4px;">( 2줄 세부 수불 및 재고 자산 평가 명세 )</div>
+      </div>
+
+      <div>
+        <table class="approval-table">
+          <tr>
+            <th style="width: 20px;" rowspan="2">결<br>재</th>
+            <th>담당</th>
+            <th>팀장</th>
+            <th>점장</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 정보 바 -->
+    <div class="doc-info-bar">
+      <div>사업장명 : S&P 급식사업부</div>
+      <div>대상월 : {{ year|default:"2026" }}년 {{ month|default:"08" }}월</div>
+      <div>출력일시 : {% now "Y-m-d H:i" %}</div>
+    </div>
+
+    <!-- 2줄 수불 양식 테이블 -->
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th style="width: 10%;">품목(대분류)</th>
+          <th style="width: 18%;">식재료명</th>
+          <th style="width: 12%;">규격</th>
+          <th style="width: 6%;">단위</th>
+          <th style="width: 9%;">전월이월(수량)</th>
+          <th style="width: 9%;">당월입고(수량)</th>
+          <th style="width: 9%;">당월출고(수량)</th>
+          <th style="width: 8%;">재고조정</th>
+          <th style="width: 10%;">당월재고(수량)</th>
+          <th style="width: 9%;">비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if inventory_list %}
+          {% for item in inventory_list %}
+          <!-- 줄 1: 수량 수불 -->
+          <tr class="row-primary">
+            <td rowspan="2" class="fw-bold">{{ item.category }}</td>
+            <td class="text-left fw-bold">{{ item.name }}</td>
+            <td>{{ item.spec }}</td>
+            <td>{{ item.unit }}</td>
+            <td class="text-right">{{ item.prev_qty }}</td>
+            <td class="text-right text-success fw-bold">{{ item.in_qty }}</td>
+            <td class="text-right text-danger">{{ item.out_qty }}</td>
+            <td class="text-right">{{ item.adj_qty }}</td>
+            <td class="text-right fw-bold" style="color: #0b7285;">{{ item.curr_qty }}</td>
+            <td rowspan="2">
+              {% if item.remark == "보충필요" %}
+                <span class="text-danger fw-bold">보충필요</span>
+              {% else %}
+                정상재고
+              {% endif %}
+            </td>
+          </tr>
+          <!-- 줄 2: 금액 및 자산 세부 정보 -->
+          <tr class="row-sub">
+            <td colspan="3" class="text-left">
+              <span class="sub-label">[금액/재고]</span> 단가: {{ item.unit_price|intcomma }}원 | 안전재고: {{ item.safe_stock }}{{ item.unit }}
+            </td>
+            <td class="text-right">{{ item.prev_amount|intcomma }}원</td>
+            <td class="text-right">{{ item.in_amount|intcomma }}원</td>
+            <td class="text-right">{{ item.out_amount|intcomma }}원</td>
+            <td>-</td>
+            <td class="text-right fw-bold" style="color: #0b7285;">{{ item.curr_amount|intcomma }}원</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" class="text-center py-4 text-muted">해당 월에 등록된 수불 데이터가 없습니다.</td>
+          </tr>
+        {% endif %}
+
+        <!-- 합계 행 -->
+        <tr class="total-row">
+          <td colspan="4" class="text-center">월간 누계 합계 ( Monthly Summary )</td>
+          <td class="text-right">{{ totals.prev_amount|intcomma }}원</td>
+          <td class="text-right">{{ totals.in_amount|intcomma }}원</td>
+          <td class="text-right">{{ totals.out_amount|intcomma }}원</td>
+          <td class="text-right">0원</td>
+          <td class="text-right fw-bold" style="color: #0b7285;">{{ totals.curr_amount|intcomma }}원</td>
+          <td>자산합계</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- JS Pagination Controls -->
+    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
+
+    <div style="margin-top: 15px; font-size: 11px; color: #495057;">
+      * 재고자산 평가방식: 이동평균법 | 안전재고 미달 품목 발생 시 자동 발주 시스템 연동 처리됨.
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.doc-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    // In 2-row table, primary rows have class 'row-primary'
+    const primaryRows = Array.from(tbody.querySelectorAll('tr.row-primary'));
+    if (primaryRows.length === 0) return;
+
+    const pageSize = 10; // 10 items (20 rows) per page
+    const totalPages = Math.ceil(primaryRows.length / pageSize);
+    if (totalPages <= 1) return;
+
+    let currentPage = 1;
+    const container = document.getElementById('docPagination');
+
+    function renderPage(page) {
+      currentPage = page;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      primaryRows.forEach((pRow, idx) => {
+        const subRow = pRow.nextElementSibling;
+        const show = (idx >= start && idx < end);
+        pRow.style.display = show ? '' : 'none';
+        if (subRow && subRow.classList.contains('row-sub')) {
+          subRow.style.display = show ? '' : 'none';
+        }
+      });
+
+      renderControls();
+    }
+
+    function renderControls() {
+      if (!container) return;
+      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
+
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = startPage + maxButtons - 1;
+
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
+      container.innerHTML = html;
+    }
+
+    window.changeDocPage = function(page) {
+      if (page < 1 || page > totalPages) return;
+      renderPage(page);
+    };
+
+    renderPage(1);
+  });
+</script>
+{% endblock %}
+{% endblock %}

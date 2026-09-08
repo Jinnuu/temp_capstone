@@ -12,8 +12,8 @@
   <section class="sp-align-hero">
     <div>
       <p class="sp-align-kicker">Ingredient Upload</p>
-      <h1>식자재 엑셀 일괄 등록</h1>
-      <p>식자재 기준정보를 XLSX 파일로 한 번에 등록하거나 수정합니다.</p>
+      <h1>식자재 일괄 등록 (CSV / XLS / XLSX)</h1>
+      <p>식자재 기준정보를 CSV, XLS, XLSX 파일로 한 번에 등록하거나 수정합니다.</p>
     </div>
 
     <div class="sp-align-actions">
@@ -26,21 +26,22 @@
   <section class="sp-align-card">
     <div class="sp-align-card-head">
       <div>
-        <p class="sp-align-kicker">Excel Upload</p>
-        <h2>XLSX 파일 업로드</h2>
+        <p class="sp-align-kicker">File Upload</p>
+        <h2>파일 업로드 (.csv, .xls, .xlsx)</h2>
       </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="sp-align-form">
+    <form action="{% url 'inventory:ingredient_upload' %}" method="post" enctype="multipart/form-data"
+      class="sp-align-form">
       {% csrf_token %}
 
       <div class="sp-align-field">
-        <label>식자재 엑셀 파일</label>
-        <input type="file" name="file" accept=".xlsx" required>
+        <label>식자재 파일 선택 (.csv, .xls, .xlsx)</label>
+        <input type="file" name="file" accept=".csv, .xls, .xlsx" required>
       </div>
 
       <div class="sp-align-submit-row">
-        <button type="submit" class="sp-btn sp-btn-primary">엑셀 일괄 등록</button>
+        <button type="submit" class="sp-btn sp-btn-primary">일괄 등록</button>
         <a class="sp-btn" href="{% url 'inventory:ingredient_list' %}">취소</a>
       </div>
     </form>

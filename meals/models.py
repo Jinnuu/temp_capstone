@@ -45,6 +45,7 @@ class DietPlan(models.Model):
     def __str__(self):
         return f"{self.target_date} {self.meal_type}"
 
+
 # 6. Diet_Menu (식단 상세 - 한 끼니에 여러 메뉴 구성)
 class DietMenu(models.Model):
     diet_plan = models.ForeignKey(DietPlan, on_delete=models.CASCADE, related_name='diet_menus')

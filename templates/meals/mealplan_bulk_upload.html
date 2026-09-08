@@ -31,21 +31,21 @@
       </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="sp-align-form">
+    <form method="POST" action="{% url 'meals:mealplan_bulk_upload' %}" enctype="multipart/form-data" class="sp-align-form">
       {% csrf_token %}
 
       <div class="sp-align-grid-2">
         <div class="sp-align-field">
           <label>파일 형식</label>
           <select name="file_type">
-            <option value="xlsx">XLSX</option>
+            <option value="xlsx">XLSX / XLTX</option>
             <option value="csv">CSV</option>
           </select>
         </div>
 
         <div class="sp-align-field">
           <label>식단 파일</label>
-          <input type="file" name="mealplan_file" accept=".csv,.xlsx" required>
+          <input type="file" name="mealplan_file" accept=".csv,.xlsx,.xltx" required>
         </div>
       </div>
 

@@ -22,7 +22,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         z-index: 10;
         flex-shrink: 0;
     }
@@ -54,14 +54,43 @@
         transition: all 0.2s;
     }
 
-    .sp-btn.primary { background: #4dabf7; color: white; }
-    .sp-btn.primary:hover { background: #339af0; }
-    .sp-btn.ok { background: #51cf66; color: white; }
-    .sp-btn.ok:hover { background: #40c057; }
-    .sp-btn.gray { background: #f1f3f5; color: #495057; border-color: #dee2e6; }
-    .sp-btn.gray:hover { background: #e9ecef; }
-    .sp-btn-outline { background: white; color: #4dabf7; border-color: #4dabf7; }
-    .sp-btn-outline:hover { background: #f0f8ff; }
+    .sp-btn.primary {
+        background: #4dabf7;
+        color: white;
+    }
+
+    .sp-btn.primary:hover {
+        background: #339af0;
+    }
+
+    .sp-btn.ok {
+        background: #51cf66;
+        color: white;
+    }
+
+    .sp-btn.ok:hover {
+        background: #40c057;
+    }
+
+    .sp-btn.gray {
+        background: #f1f3f5;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    .sp-btn.gray:hover {
+        background: #e9ecef;
+    }
+
+    .sp-btn-outline {
+        background: white;
+        color: #4dabf7;
+        border-color: #4dabf7;
+    }
+
+    .sp-btn-outline:hover {
+        background: #f0f8ff;
+    }
 
     /* Document Preview Area */
     .sp-report-preview {
@@ -78,7 +107,7 @@
         min-height: 297mm;
         background: white;
         padding: 15mm 20mm;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         position: relative;
         color: #333;
         box-sizing: border-box;
@@ -115,7 +144,8 @@
         border: 1.5px solid #000;
     }
 
-    .report-table th, .report-table td {
+    .report-table th,
+    .report-table td {
         border: 1px solid #000;
         padding: 12px 6px;
         text-align: center;
@@ -129,9 +159,19 @@
         color: #212529;
     }
 
-    .error-up { color: #f03e3e; font-weight: 700; }
-    .error-down { color: #1c7ed6; font-weight: 700; }
-    .error-zero { color: #868e96; }
+    .error-up {
+        color: #f03e3e;
+        font-weight: 700;
+    }
+
+    .error-down {
+        color: #1c7ed6;
+        font-weight: 700;
+    }
+
+    .error-zero {
+        color: #868e96;
+    }
 
     .menu-text {
         text-align: left;
@@ -142,24 +182,31 @@
 
     /* Print optimization */
     @media print {
-        header, .sp-report-toolbar, .no-print {
+
+        header,
+        .sp-report-toolbar,
+        .no-print {
             display: none !important;
         }
+
         .sp-report-container {
             height: auto;
             background: white;
             overflow: visible;
         }
+
         .sp-report-preview {
             padding: 0;
             overflow: visible;
         }
+
         .a4-document {
             box-shadow: none;
             margin: 0;
             width: 100% !important;
             padding: 10mm;
         }
+
         body {
             background: white;
         }
@@ -183,7 +230,8 @@
             </form>
         </div>
         <div class="sp-toolbar-group">
-            <a href="{% url 'forecasting:export_weekly_forecast_excel' %}?date={{ target_date|date:'Y-m-d' }}" class="sp-btn ok">
+            <a href="{% url 'forecasting:export_weekly_forecast_excel' %}?date={{ target_date|date:'Y-m-d' }}"
+                class="sp-btn ok">
                 <i class="bi bi-file-earmark-excel"></i> 엑셀 다운로드
             </a>
             <button onclick="window.print()" class="sp-btn-outline sp-btn">
@@ -227,18 +275,19 @@
                         <td style="background-color: #fcfcfc;">{{ item.meal_type }}</td>
                         <td class="menu-text">
                             {% for menu in item.menus %}
-                                {{ menu }}{% if not forloop.last %}, {% endif %}
+                            {{ menu }}{% if not forloop.last %}, {% endif %}
                             {% empty %}
-                                -
+                            -
                             {% endfor %}
                         </td>
                         <td style="font-weight: 600;">{{ item.predicted_count }}</td>
                         <td style="font-weight: 600;">{{ item.actual_count|default:"-" }}</td>
-                        <td class="{% if item.error_rate > 0 %}error-up{% elif item.error_rate < 0 %}error-down{% else %}error-zero{% endif %}">
+                        <td
+                            class="{% if item.error_rate > 0 %}error-up{% elif item.error_rate < 0 %}error-down{% else %}error-zero{% endif %}">
                             {% if item.actual_count != None %}
-                                {{ item.error_rate|floatformat:1 }}%
+                            {{ item.error_rate|floatformat:1 }}%
                             {% else %}
-                                -
+                            -
                             {% endif %}
                         </td>
                     </tr>
@@ -257,9 +306,9 @@
                     <span>확인자: ______________ (인)</span>
                 </div>
             </div>
-            
-            <div style="position: absolute; bottom: 15mm; left: 0; width: 100%; text-align: center; font-size: 0.8rem; color: #888;">
-                FOODSENSE ERP - AI FORECASTING SYSTEM
+
+            <div
+                style="position: absolute; bottom: 15mm; left: 0; width: 100%; text-align: center; font-size: 0.8rem; color: #888;">
             </div>
         </article>
     </div>

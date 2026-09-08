@@ -6,6 +6,12 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
 <link rel="stylesheet" href="{% static 'css/sp_final_fix_v2.css' %}?v=sprint7-final-fix-v2">
+<style>
+  .sp-meal-line { margin-bottom: 6px; }
+  .sp-meal-line b.breakfast { background: #e7f5ff; color: #1971c2; border: 1px solid #a5d8ff; }
+  .sp-meal-line b.lunch { background: #ebfbee; color: #2b8a3e; border: 1px solid #b2f2bb; }
+  .sp-meal-line b.dinner { background: #fff4e6; color: #d9480f; border: 1px solid #ffd8a6; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -26,6 +32,14 @@
       <a class="sp-btn" href="{% url 'meals:weekly_mealplan_create' %}">주간식단 등록</a>
       <a class="sp-btn" href="{% url 'meals:monthly_mealplan_create' %}">월간식단 등록</a>
       <a class="sp-btn" href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄등록</a>
+      <form method="post" action="{% url 'meals:bulk_delete_mealplans' %}" style="display:inline;"
+            onsubmit="return confirm('{{ selected_year }}년 {{ selected_month }}월의 식단을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');">
+        {% csrf_token %}
+        <input type="hidden" name="year" value="{{ selected_year }}">
+        <input type="hidden" name="month" value="{{ selected_month }}">
+        <input type="hidden" name="redirect_url" value="{% url 'meals:mealplan_list' %}?year={{ selected_year }}&month={{ selected_month }}">
+        <button type="submit" class="sp-btn" style="background:#fa5252;color:#fff;border-color:#fa5252;">🗑 이 달 식단 일괄 삭제</button>
+      </form>
     </div>
   </section>
 
@@ -93,13 +107,13 @@
                         {% if cell.is_today %}<span class="sp-badge">오늘</span>{% endif %}
                       </div>
                       {% if cell.meals.breakfast %}
-                        <div class="sp-meal-line"><b>B</b><span>{{ cell.meals.breakfast|join:", "|truncatechars:22 }}</span></div>
+                        <div class="sp-meal-line"><b class="breakfast">B</b><span>{{ cell.meals.breakfast|join:", "|truncatechars:22 }}</span></div>
                       {% endif %}
                       {% if cell.meals.lunch %}
-                        <div class="sp-meal-line"><b>L</b><span>{{ cell.meals.lunch|join:", "|truncatechars:22 }}</span></div>
+                        <div class="sp-meal-line"><b class="lunch">L</b><span>{{ cell.meals.lunch|join:", "|truncatechars:22 }}</span></div>
                       {% endif %}
                       {% if cell.meals.dinner %}
-                        <div class="sp-meal-line"><b>D</b><span>{{ cell.meals.dinner|join:", "|truncatechars:22 }}</span></div>
+                        <div class="sp-meal-line"><b class="dinner">D</b><span>{{ cell.meals.dinner|join:", "|truncatechars:22 }}</span></div>
                       {% endif %}
                       {% if not cell.meals.breakfast and not cell.meals.lunch and not cell.meals.dinner %}
                         <p class="sp-note">데이터 없음</p>
@@ -240,6 +254,52 @@ function closeMealModal() {
   document.getElementById("mealModalBackdrop").style.display = "none";
 }
 
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function updateCalendarCellDOM(button) {
+  if (!button) return;
+
+  const bMenus = parseMealData(button.dataset.breakfast);
+  const lMenus = parseMealData(button.dataset.lunch);
+  const dMenus = parseMealData(button.dataset.dinner);
+
+  const dayTop = button.querySelector(".sp-day-top");
+  const dayTopHTML = dayTop ? dayTop.outerHTML : "";
+
+  let html = dayTopHTML;
+
+  const bNames = bMenus.map(m => m.name || m).join(", ");
+  const lNames = lMenus.map(m => m.name || m).join(", ");
+  const dNames = dMenus.map(m => m.name || m).join(", ");
+
+  let hasMeal = false;
+
+  if (bNames) {
+    hasMeal = true;
+    const truncated = bNames.length > 22 ? bNames.substring(0, 22) + "…" : bNames;
+    html += `<div class="sp-meal-line"><b class="breakfast">B</b><span>${escapeHtml(truncated)}</span></div>`;
+  }
+  if (lNames) {
+    hasMeal = true;
+    const truncated = lNames.length > 22 ? lNames.substring(0, 22) + "…" : lNames;
+    html += `<div class="sp-meal-line"><b class="lunch">L</b><span>${escapeHtml(truncated)}</span></div>`;
+  }
+  if (dNames) {
+    hasMeal = true;
+    const truncated = dNames.length > 22 ? dNames.substring(0, 22) + "…" : dNames;
+    html += `<div class="sp-meal-line"><b class="dinner">D</b><span>${escapeHtml(truncated)}</span></div>`;
+  }
+
+  if (!hasMeal) {
+    html += `<p class="sp-note">데이터 없음</p>`;
+  }
+
+  button.innerHTML = html;
+}
+
 async function addMealMenu(mealType, menuNameOverride) {
   const key = mealKeyMap[mealType];
   const input = document.getElementById(`mealInput-${key}`);
@@ -267,11 +327,18 @@ async function addMealMenu(mealType, menuNameOverride) {
   input.value = "";
   closeMenuCandidates(key);
   renderMealTokens(mealType, data.menus || []);
+
+  const cellBtn = document.querySelector(`.sp-cell-button[data-date="${currentMealDate}"]`);
+  if (cellBtn) {
+    cellBtn.dataset[key] = JSON.stringify(data.menus || []);
+    updateCalendarCellDOM(cellBtn);
+  }
 }
 
 async function removeMealMenu(mealType, menuId) {
   if (!currentMealDate || !menuId) return;
 
+  const key = mealKeyMap[mealType];
   const response = await fetch("{% url 'meals:remove_diet_menu_api' %}", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -290,6 +357,12 @@ async function removeMealMenu(mealType, menuId) {
   }
 
   renderMealTokens(mealType, data.menus || []);
+
+  const cellBtn = document.querySelector(`.sp-cell-button[data-date="${currentMealDate}"]`);
+  if (cellBtn) {
+    cellBtn.dataset[key] = JSON.stringify(data.menus || []);
+    updateCalendarCellDOM(cellBtn);
+  }
 }
 
 function closeMenuCandidates(key) {

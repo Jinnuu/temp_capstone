@@ -2,6 +2,18 @@
 
 {% block title %}간편 발주 | S&P{% endblock %}
 
+{% block extra_css %}
+<style>
+  .sp-order-table tbody tr[data-name] {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .sp-order-table tbody tr[data-name]:hover {
+    background-color: #f8f9fa;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="sp-page-title">
   <h1>간편 발주</h1>
@@ -189,6 +201,25 @@
       qtyInput.value = numericValue;
     });
   }
+
+  document.addEventListener("click", (event) => {
+    // 1. 체크박스, 수량 입력 input 등 구체적 인터랙티브 요소 클릭 시 중복 처리 및 이벤트 버블링 방지
+    const interactiveTarget = event.target.closest("input, select, button, a");
+    if (interactiveTarget) {
+      event.stopPropagation();
+      return;
+    }
+
+    // 2. 테이블 행(tr) 어느 곳을 클릭해도 체크박스 토글 처리
+    const row = event.target.closest(".sp-order-table tbody tr[data-name]");
+    if (!row) return;
+
+    const check = row.querySelector(".sp-order-check");
+    if (check) {
+      check.checked = !check.checked;
+      check.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  });
 
   document.addEventListener("change", (event) => {
     if (event.target.matches(".sp-order-check")) {

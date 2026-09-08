@@ -60,41 +60,98 @@
                         >
                     </div>
 
+                    <datalist id="menu-list-options">
+                        {% for menu in menus %}
+                        <option value="{{ menu.name }}">
+                        {% endfor %}
+                    </datalist>
+
                     <div class="row g-4">
+                        <!-- 아침 메뉴 -->
                         <div class="col-md-4">
-                            <label for="breakfast_menu" class="form-label fw-semibold">아침 메뉴</label>
-                            <select name="breakfast_menu" id="breakfast_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.breakfast %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label fw-semibold text-primary d-flex align-items-center gap-1 mb-2">
+                                        🌅 아침 메뉴
+                                    </label>
+                                    <div class="sp-meal-badge-list p-2 bg-light rounded border mb-3 d-flex flex-wrap gap-2 align-content-start" id="breakfast-badge-list" style="min-height:140px;">
+                                        {% for m in existing_meals.breakfast %}
+                                        <span class="badge bg-white text-dark border shadow-sm p-2 d-inline-flex align-items-center gap-2 rounded-pill fs-6">
+                                            <span>{{ m.name }}</span>
+                                            <input type="hidden" name="breakfast_menu" value="{{ m.name }}">
+                                            <button type="button" class="btn-close btn-close-sm remove-meal-chip" aria-label="삭제" style="font-size:0.7rem;"></button>
+                                        </span>
+                                        {% empty %}
+                                        <span class="text-muted small empty-msg w-100 text-center py-4">등록된 메뉴가 없습니다.</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control meal-typing-input" list="menu-list-options" placeholder="메뉴 입력 후 Enter" data-target="breakfast">
+                                        <button type="button" class="btn btn-primary add-meal-chip-btn" data-target="breakfast">+</button>
+                                    </div>
+                                    <div class="form-text">메뉴 입력 후 [+] 또는 Enter를 누르세요.</div>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- 점심 메뉴 -->
                         <div class="col-md-4">
-                            <label for="lunch_menu" class="form-label fw-semibold">점심 메뉴</label>
-                            <select name="lunch_menu" id="lunch_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.lunch %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label fw-semibold text-warning d-flex align-items-center gap-1 mb-2">
+                                        ☀️ 점심 메뉴
+                                    </label>
+                                    <div class="sp-meal-badge-list p-2 bg-light rounded border mb-3 d-flex flex-wrap gap-2 align-content-start" id="lunch-badge-list" style="min-height:140px;">
+                                        {% for m in existing_meals.lunch %}
+                                        <span class="badge bg-white text-dark border shadow-sm p-2 d-inline-flex align-items-center gap-2 rounded-pill fs-6">
+                                            <span>{{ m.name }}</span>
+                                            <input type="hidden" name="lunch_menu" value="{{ m.name }}">
+                                            <button type="button" class="btn-close btn-close-sm remove-meal-chip" aria-label="삭제" style="font-size:0.7rem;"></button>
+                                        </span>
+                                        {% empty %}
+                                        <span class="text-muted small empty-msg w-100 text-center py-4">등록된 메뉴가 없습니다.</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control meal-typing-input" list="menu-list-options" placeholder="메뉴 입력 후 Enter" data-target="lunch">
+                                        <button type="button" class="btn btn-warning text-dark add-meal-chip-btn" data-target="lunch">+</button>
+                                    </div>
+                                    <div class="form-text">메뉴 입력 후 [+] 또는 Enter를 누르세요.</div>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- 저녁 메뉴 -->
                         <div class="col-md-4">
-                            <label for="dinner_menu" class="form-label fw-semibold">저녁 메뉴</label>
-                            <select name="dinner_menu" id="dinner_menu" class="form-select meal-create-select" multiple>
-                                {% for menu in menus %}
-                                <option value="{{ menu.id }}" {% if menu.id in existing_meals.dinner %}selected{% endif %}>
-                                    {{ menu.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">여러 메뉴를 선택할 수 있습니다.</div>
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label fw-semibold d-flex align-items-center gap-1 mb-2" style="color:#4c6ef5;">
+                                        🌙 저녁 메뉴
+                                    </label>
+                                    <div class="sp-meal-badge-list p-2 bg-light rounded border mb-3 d-flex flex-wrap gap-2 align-content-start" id="dinner-badge-list" style="min-height:140px;">
+                                        {% for m in existing_meals.dinner %}
+                                        <span class="badge bg-white text-dark border shadow-sm p-2 d-inline-flex align-items-center gap-2 rounded-pill fs-6">
+                                            <span>{{ m.name }}</span>
+                                            <input type="hidden" name="dinner_menu" value="{{ m.name }}">
+                                            <button type="button" class="btn-close btn-close-sm remove-meal-chip" aria-label="삭제" style="font-size:0.7rem;"></button>
+                                        </span>
+                                        {% empty %}
+                                        <span class="text-muted small empty-msg w-100 text-center py-4">등록된 메뉴가 없습니다.</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control meal-typing-input" list="menu-list-options" placeholder="메뉴 입력 후 Enter" data-target="dinner">
+                                        <button type="button" class="btn btn-dark add-meal-chip-btn" data-target="dinner">+</button>
+                                    </div>
+                                    <div class="form-text">메뉴 입력 후 [+] 또는 Enter를 누르세요.</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -114,13 +171,13 @@
 
                 <div class="d-flex flex-column gap-3">
                     <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">1. 날짜 확인</strong>
-                        <span class="text-muted small">캘린더에서 선택한 날짜가 자동으로 들어갑니다.</span>
+                        <strong class="d-block mb-1">1. 날짜 선택</strong>
+                        <span class="text-muted small">날짜를 선택하면 해당 날짜의 기존 식단이 자동으로 불러와집니다.</span>
                     </div>
 
                     <div class="p-3 rounded-4 bg-light border">
-                        <strong class="d-block mb-1">2. 끼니별 메뉴 선택</strong>
-                        <span class="text-muted small">아침, 점심, 저녁 메뉴를 각각 지정합니다.</span>
+                        <strong class="d-block mb-1">2. 끼니별 메뉴 입력</strong>
+                        <span class="text-muted small">메뉴명을 타이핑하고 Enter 또는 [+] 버튼을 눌러 직관적으로 배지를 추가하세요.</span>
                     </div>
 
                     <div class="p-3 rounded-4 bg-light border">
@@ -137,6 +194,80 @@
             </div>
         </div>
     </div>
-    
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Date change auto-redirect to load existing meal plans
+    const dateInput = document.getElementById("meal_date");
+    if (dateInput) {
+        dateInput.addEventListener("change", function() {
+            if (this.value) {
+                window.location.href = "{% url 'meals:mealplan_create' %}?date=" + this.value;
+            }
+        });
+    }
+
+    // 2. Add meal chip function
+    function addMealChip(target, menuName) {
+        const name = menuName.trim();
+        if (!name) return;
+
+        const listContainer = document.getElementById(`${target}-badge-list`);
+        if (!listContainer) return;
+
+        const emptyMsg = listContainer.querySelector(".empty-msg");
+        if (emptyMsg) {
+            emptyMsg.remove();
+        }
+
+        const chip = document.createElement("span");
+        chip.className = "badge bg-white text-dark border shadow-sm p-2 d-inline-flex align-items-center gap-2 rounded-pill fs-6";
+        chip.innerHTML = `
+            <span>${name}</span>
+            <input type="hidden" name="${target}_menu" value="${name}">
+            <button type="button" class="btn-close btn-close-sm remove-meal-chip" aria-label="삭제" style="font-size:0.7rem;"></button>
+        `;
+        listContainer.appendChild(chip);
+    }
+
+    // 3. Add [+] button click handler
+    document.querySelectorAll(".add-meal-chip-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const target = this.dataset.target;
+            const input = document.querySelector(`.meal-typing-input[data-target="${target}"]`);
+            if (input) {
+                addMealChip(target, input.value);
+                input.value = "";
+                input.focus();
+            }
+        });
+    });
+
+    // 4. Enter key handler inside input fields
+    document.querySelectorAll(".meal-typing-input").forEach(input => {
+        input.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const target = this.dataset.target;
+                addMealChip(target, this.value);
+                this.value = "";
+            }
+        });
+    });
+
+    // 5. Delete meal badge delegation
+    document.addEventListener("click", function(e) {
+        if (e.target && e.target.classList.contains("remove-meal-chip")) {
+            const chip = e.target.closest(".badge");
+            const container = chip.parentElement;
+            chip.remove();
+
+            if (container && container.querySelectorAll(".badge").length === 0) {
+                container.innerHTML = '<span class="text-muted small empty-msg w-100 text-center py-4">등록된 메뉴가 없습니다.</span>';
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

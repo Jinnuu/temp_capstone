@@ -8,6 +8,8 @@ from .recipe_file_views import (
 from .views import (
     add_diet_menu_api,
     deduct_inventory_view,
+    delete_diet_menu_api,
+    bulk_delete_mealplans,
     meal_home,
     mealplan_create,
     mealplan_list,
@@ -22,8 +24,10 @@ from .views import (
     weekly_meal_plan_document,
     monthly_meal_plan_document,
     export_weekly_mealplan_excel,
+    weekly_recipe_report,
 )
 from .views_extra import mealplan_bulk_upload, monthly_mealplan_create
+from .views_new_docs import doc_menu_overview
 
 app_name = "meals"
 
@@ -39,8 +43,10 @@ urlpatterns = [
     path("mealplan/upload/", mealplan_bulk_upload, name="mealplan_bulk_upload"),
     path("mealplan_list/", mealplan_list, name="mealplan_list"),
     path("document/weekly/", weekly_meal_plan_document, name="weekly_meal_plan_document"),
+    path("document/weekly-recipe/", weekly_recipe_report, name="weekly_recipe_report"),
     path("document/monthly/", monthly_meal_plan_document, name="monthly_meal_plan_document"),
     path("document/weekly/export/", export_weekly_mealplan_excel, name="export_weekly_mealplan_excel"),
+    path("document/menu-overview/", doc_menu_overview, name="doc_menu_overview"),
 
     path("menu/upload-excel/", recipe_upload_api, name="recipe_upload_api"),
     path("api/ingredients/search/", search_ingredients_api, name="search_ingredients_api"),
@@ -48,6 +54,8 @@ urlpatterns = [
     path("api/menus/search/", search_menus_api, name="search_menus_api"),
     path("api/menus/add/", add_diet_menu_api, name="add_diet_menu_api"),
     path("api/menus/remove/", remove_diet_menu_api, name="remove_diet_menu_api"),
+    path("api/diet-menu/<int:diet_menu_id>/delete/", delete_diet_menu_api, name="delete_diet_menu_api"),
+    path("mealplan/bulk-delete/", bulk_delete_mealplans, name="bulk_delete_mealplans"),
 
     path("menus/<int:menu_id>/edit/", menu_update, name="menu_update"),
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),

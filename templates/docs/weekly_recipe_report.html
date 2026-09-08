@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}주간 레시피 보고서 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ERP Style Layout */
+    .sp-report-container {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 64px);
+        background-color: #f8f9fa;
+    }
+
+    /* Top Control Toolbar */
+    .sp-report-toolbar {
+        background: white;
+        padding: 12px 24px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        z-index: 10;
+    }
+
+    .sp-toolbar-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .sp-input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .sp-input-group label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #495057;
+        margin: 0;
+    }
+
+    /* Document Preview Area */
+    .sp-report-preview {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* A4 Document Box */
+    .a4-document {
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        padding: 15mm 15mm;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        position: relative;
+        color: #333;
+        box-sizing: border-box;
+    }
+
+    .report-header {
+        text-align: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 15px;
+    }
+
+    .report-header h1 {
+        font-size: 2.2rem;
+        margin: 0 0 8px 0;
+        letter-spacing: 4px;
+        font-weight: 800;
+    }
+
+    .report-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    /* Table Styles */
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .report-table th, .report-table td {
+        border: 1px solid #333;
+        padding: 8px 6px;
+        text-align: center;
+        vertical-align: middle;
+        word-break: break-all;
+        font-size: 0.85rem;
+    }
+
+    .report-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .cell-left {
+        text-align: left !important;
+        padding-left: 10px !important;
+    }
+
+    .cell-right {
+        text-align: right !important;
+        padding-right: 10px !important;
+    }
+
+    .needed-qty-text {
+        font-weight: bold;
+        color: #111;
+    }
+
+    /* Print optimization */
+    @media print {
+        header, .sp-report-toolbar, nav, .navbar {
+            display: none !important;
+        }
+        .sp-report-container {
+            height: auto;
+            background: white;
+        }
+        .sp-report-preview {
+            padding: 0;
+            overflow: visible;
+        }
+        .a4-document {
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+            padding: 10mm;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-report-container">
+    <!-- 상단 컨트롤 영역 -->
+    <div class="sp-report-toolbar">
+        <div class="sp-toolbar-group">
+            <span class="sp-kicker">주간 레시피 보고서 조회</span>
+            <form method="get" class="sp-toolbar-group">
+                <div class="sp-input-group">
+                    <label>시작일:</label>
+                    <input type="date" name="start_date" value="{{ start_date_str }}" class="sp-input">
+                </div>
+                <div class="sp-input-group">
+                    <label>종료일:</label>
+                    <input type="date" name="end_date" value="{{ end_date_str }}" class="sp-input">
+                </div>
+                <div class="sp-input-group">
+                    <label>기준 인원수(식수):</label>
+                    <input type="number" name="headcount" value="{{ headcount }}" min="1" class="sp-input" style="width: 90px;">
+                    <span>명</span>
+                </div>
+                <button type="submit" class="sp-btn primary">조회</button>
+            </form>
+        </div>
+        <div class="sp-toolbar-group">
+            <button onclick="window.print()" class="sp-btn">
+                인쇄하기
+            </button>
+            <a href="{% url 'docs_index' %}" class="sp-btn gray">뒤로가기</a>
+        </div>
+    </div>
+
+    <!-- 하단 문서 미리보기 영역 -->
+    <div class="sp-report-preview">
+        <article class="a4-document">
+            <div class="report-header">
+                <h1>주간 레시피 명세서</h1>
+            </div>
+
+            <div class="report-meta">
+                <div>
+                    <span><strong>조회 기간:</strong> {{ start_date_str }} ~ {{ end_date_str }}</span>
+                    <span style="margin-left: 15px;"><strong>기준 인원수:</strong> {{ headcount }}명</span>
+                </div>
+                <div>
+                    <span><strong>출력일:</strong> {% now "Y-m-d H:i" %}</span>
+                </div>
+            </div>
+
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">일자/끼니</th>
+                        <th style="width: 22%;">메뉴명</th>
+                        <th style="width: 25%;">식재료명</th>
+                        <th style="width: 17%;">규격/단위</th>
+                        <th style="width: 18%;">필요 총량</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan in report_data %}
+                        {% for menu in plan.menus %}
+                            {% for ing in menu.ingredients %}
+                            <tr>
+                                {% if forloop.parentloop.first and forloop.first %}
+                                <td rowspan="{{ plan.total_rows }}" style="background-color: #fafafa; font-weight: bold;">
+                                    {{ plan.meal_display }}
+                                </td>
+                                {% endif %}
+                                {% if forloop.first %}
+                                <td rowspan="{{ menu.row_span }}" class="cell-left" style="font-weight: 600;">
+                                    {{ menu.name }}
+                                </td>
+                                {% endif %}
+                                <td class="cell-left">{{ ing.name }}</td>
+                                <td>{{ ing.spec }} / {{ ing.unit }}</td>
+                                <td class="cell-right needed-qty-text">{{ ing.needed_qty }} {{ ing.unit }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                {% if forloop.parentloop.first %}
+                                <td rowspan="{{ plan.total_rows }}" style="background-color: #fafafa; font-weight: bold;">
+                                    {{ plan.meal_display }}
+                                </td>
+                                {% endif %}
+                                <td class="cell-left" style="font-weight: 600;">{{ menu.name }}</td>
+                                <td colspan="3" style="color: #888;">연결된 식재료 없음</td>
+                            </tr>
+                            {% endfor %}
+                        {% empty %}
+                        <tr>
+                            <td style="background-color: #fafafa; font-weight: bold;">{{ plan.meal_display }}</td>
+                            <td colspan="4" style="color: #888;">등록된 메뉴 없음</td>
+                        </tr>
+                        {% endfor %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 30px; color: #888;">지정된 기간 내 식단 데이터가 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 40px; text-align: right; padding-right: 10px; font-size: 0.9rem;">
+                <p>위와 같이 주간 레시피 식재료 소요량을 보고합니다.</p>
+                <div style="margin-top: 25px;">
+                    <span style="border-bottom: 1px solid #000; padding: 0 30px; font-weight: bold;">작성자: (인)</span>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}

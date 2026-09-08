@@ -1,0 +1,14 @@
+=== ORDER DATE: 2026-08-31 (weekday=0) ===
+  Target Date: 2026-08-31, Meal: 석식
+  Target Date: 2026-09-01, Meal: 조식
+  Target Date: 2026-09-01, Meal: 중식
+=== ORDER DATE: 2026-08-28 (weekday=4) ===
+  Target Date: 2026-08-28, Meal: 석식
+  Target Date: 2026-08-29, Meal: 석식
+  Target Date: 2026-08-29, Meal: 조식
+  Target Date: 2026-08-29, Meal: 중식
+  Target Date: 2026-08-30, Meal: 석식
+  Target Date: 2026-08-30, Meal: 조식
+  Target Date: 2026-08-30, Meal: 중식
+  Target Date: 2026-08-31, Meal: 조식
+  Target Date: 2026-08-31, Meal: 중식

@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}급식물품 구입요구서 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background-color: #f4f6f9;
+    color: #212529;
+  }
+
+  .document-toolbar {
+    background: #ffffff;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  .a4-container {
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    padding: 15mm;
+    box-shadow: 0 0 15px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* Header & Approval */
+  .doc-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .doc-title-box {
+    flex: 1;
+    text-align: center;
+    padding-top: 10px;
+  }
+
+  .doc-title-box h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    margin: 0 0 8px 0;
+    color: #111;
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .approval-table {
+    border-collapse: collapse;
+    margin-left: auto;
+  }
+
+  .approval-table th, .approval-table td {
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  .approval-table th {
+    background-color: #f1f3f5;
+    padding: 4px 8px;
+    font-weight: bold;
+    width: 50px;
+  }
+
+  .approval-table td {
+    height: 48px;
+    vertical-align: middle;
+  }
+
+  .doc-info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+
+  /* Table Grid */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: fixed;
+  }
+
+  .doc-table th, .doc-table td {
+    border: 1px solid #222;
+    padding: 6px 4px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+  }
+
+  .doc-table th {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    color: #111;
+  }
+
+  .doc-table tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  .total-row {
+    background-color: #e7f5ff !important;
+    font-weight: bold;
+  }
+
+  .text-left { text-align: left !important; padding-left: 6px !important; }
+  .text-right { text-align: right !important; padding-right: 6px !important; }
+
+  @media print {
+    header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+    }
+    .a4-container {
+      padding: 0 !important;
+    }
+    .a4-page {
+      box-shadow: none !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    .doc-table tr {
+      display: table-row !important;
+    }
+    .doc-table th {
+      background-color: #e9ecef !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .total-row {
+      background-color: #e7f5ff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-toolbar no-print">
+  <div class="d-flex align-items-center gap-3">
+    <h5 class="m-0 fw-bold">[실무 양식] 급식물품 구입요구서</h5>
+    <span class="badge bg-secondary">A4 세로 (Portrait)</span>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2 m-0 align-items-center">
+      <label class="form-label m-0 small fw-bold text-nowrap">기간:</label>
+      <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="form-control form-control-sm" style="width: 140px;">
+      <span class="small">~</span>
+      <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="form-control form-control-sm" style="width: 140px;">
+      <button type="submit" class="btn btn-sm btn-primary">조회</button>
+    </form>
+    <button onclick="window.print()" class="btn btn-sm btn-dark"><i class="bi bi-printer"></i> 인쇄하기</button>
+    <a href="{% url 'docs_index' %}" class="btn btn-sm btn-outline-secondary">돌아가기</a>
+  </div>
+</div>
+
+<div class="a4-container">
+  <div class="a4-page">
+    
+    <!-- 헤더 & 결재란 -->
+    <div class="doc-header-wrap">
+      <div style="width: 220px;"></div>
+      
+      <div class="doc-title-box">
+        <h1>급 식 물 품 구 입 요 구 서</h1>
+        <div class="doc-subtitle">( 구매 청구 및 구매 승인용 )</div>
+      </div>
+
+      <div>
+        <table class="approval-table">
+          <tr>
+            <th style="width: 20px;" rowspan="2">결<br>재</th>
+            <th>담당</th>
+            <th>팀장</th>
+            <th>점장</th>
+            <th>관리자</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 정보 바 -->
+    <div class="doc-info-bar">
+      <div>요구부서 : 급식운영팀</div>
+      <div>요구기간 : {{ start_date|default:"2026-08-27" }} ~ {{ end_date|default:"2026-08-27" }}</div>
+      <div>납품희망일 : {{ delivery_date|default:"2026-08-28" }}</div>
+    </div>
+
+    <!-- 구입요구서 8개 컬럼 -->
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th style="width: 12%;">품목(대분류)</th>
+          <th style="width: 24%;">식재료명</th>
+          <th style="width: 14%;">규격</th>
+          <th style="width: 8%;">단위</th>
+          <th style="width: 10%;">수량</th>
+          <th style="width: 11%;">단가(원)</th>
+          <th style="width: 12%;">금액(원)</th>
+          <th style="width: 9%;">비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if items %}
+          {% regroup items by category as category_list %}
+          {% for group in category_list %}
+            <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+              <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">
+                ■ [품목 대분류] {{ group.grouper }} (총 {{ group.list|length }}개 품목)
+              </td>
+            </tr>
+            {% for item in group.list %}
+            <tr>
+              <td>{{ item.category }}</td>
+              <td class="text-left fw-bold">{{ item.name }}</td>
+              <td>{{ item.spec }}</td>
+              <td>{{ item.unit }}</td>
+              <td class="text-right fw-bold">{{ item.quantity }}</td>
+              <td class="text-right">{{ item.unit_price }}</td>
+              <td class="text-right fw-bold">{{ item.amount }}</td>
+              <td>{{ item.remark|default:"" }}</td>
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        {% else %}
+          <!-- 더미 데이터 (현업 실무 표준 카테고리 그룹화 예시) -->
+          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 육류</td>
+          </tr>
+          <tr>
+            <td>육류</td>
+            <td class="text-left fw-bold">돼지고기(전지)</td>
+            <td>냉장 / kg</td>
+            <td>kg</td>
+            <td class="text-right fw-bold">60.0</td>
+            <td class="text-right">14,500</td>
+            <td class="text-right fw-bold">870,000</td>
+            <td>국산 (한돈)</td>
+          </tr>
+          <tr>
+            <td>육류</td>
+            <td class="text-left fw-bold">쇠고기(양지)</td>
+            <td>냉장 / kg</td>
+            <td>kg</td>
+            <td class="text-right fw-bold">17.5</td>
+            <td class="text-right">28,000</td>
+            <td class="text-right fw-bold">490,000</td>
+            <td>국산 (한우)</td>
+          </tr>
+          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 채소류</td>
+          </tr>
+          <tr>
+            <td>채소류</td>
+            <td class="text-left fw-bold">양파</td>
+            <td>20kg / 망</td>
+            <td>망</td>
+            <td class="text-right fw-bold">3.0</td>
+            <td class="text-right">24,000</td>
+            <td class="text-right fw-bold">72,000</td>
+            <td>국내산</td>
+          </tr>
+          <tr>
+            <td>채소류</td>
+            <td class="text-left fw-bold">대파</td>
+            <td>1kg / 단</td>
+            <td>단</td>
+            <td class="text-right fw-bold">15.0</td>
+            <td class="text-right">3,200</td>
+            <td class="text-right fw-bold">48,000</td>
+            <td>국내산</td>
+          </tr>
+          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 수산물</td>
+          </tr>
+          <tr>
+            <td>수산물</td>
+            <td class="text-left fw-bold">오징어(손질)</td>
+            <td>냉동 / 5kg</td>
+            <td>box</td>
+            <td class="text-right fw-bold">4.0</td>
+            <td class="text-right">45,000</td>
+            <td class="text-right fw-bold">180,000</td>
+            <td>원양산</td>
+          </tr>
+          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 양념류</td>
+          </tr>
+          <tr>
+            <td>양념류</td>
+            <td class="text-left fw-bold">고추장</td>
+            <td>14kg / 통</td>
+            <td>통</td>
+            <td class="text-right fw-bold">2.0</td>
+            <td class="text-right">38,000</td>
+            <td class="text-right fw-bold">76,000</td>
+            <td>HACCP</td>
+          </tr>
+          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
+            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 곡류</td>
+          </tr>
+          <tr>
+            <td>곡류</td>
+            <td class="text-left fw-bold">쌀(백미)</td>
+            <td>20kg / 포</td>
+            <td>포</td>
+            <td class="text-right fw-bold">10.0</td>
+            <td class="text-right">55,000</td>
+            <td class="text-right fw-bold">550,000</td>
+            <td>2025년 신곡</td>
+          </tr>
+
+          <!-- Empty filler rows for clean printable form layout -->
+          {% for _ in "123"|make_list %}
+          <tr>
+            <td>&nbsp;</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+
+        <!-- 합계 행 -->
+        <tr class="total-row">
+          <td colspan="4" class="text-center">합 계 ( Total Amount )</td>
+          <td class="text-right">{{ total_qty|default:"109.5" }}</td>
+          <td>-</td>
+          <td class="text-right fw-bold" style="color: #0b7285;">{{ total_amount|default:"2,286,000" }}</td>
+          <td>원</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- JS Pagination Controls -->
+    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
+
+    <div style="margin-top: 25px; display: flex; justify-content: space-between; font-size: 11px; color: #495057;">
+      <div>* 특기사항: 당일 품질 검수 기준 미달 시 즉시 교환 및 반품 조치함.</div>
+      <div>작성자: S&P 영양사 (인)</div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.doc-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    // Filter out total-row and empty placeholder td rows
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => {
+      if (r.classList.contains('total-row')) return false;
+      const firstTd = r.querySelector('td');
+      if (firstTd && firstTd.innerHTML === '&nbsp;') return false;
+      return true;
+    });
+
+    if (rows.length === 0) return;
+
+    const pageSize = 15;
+    const totalPages = Math.ceil(rows.length / pageSize);
+    if (totalPages <= 1) return;
+
+    let currentPage = 1;
+    const container = document.getElementById('docPagination');
+
+    function renderPage(page) {
+      currentPage = page;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      rows.forEach((r, idx) => {
+        r.style.display = (idx >= start && idx < end) ? '' : 'none';
+      });
+
+      renderControls();
+    }
+
+    function renderControls() {
+      if (!container) return;
+      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
+
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = startPage + maxButtons - 1;
+
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
+      container.innerHTML = html;
+    }
+
+    window.changeDocPage = function(page) {
+      if (page < 1 || page > totalPages) return;
+      renderPage(page);
+    };
+
+    renderPage(1);
+  });
+</script>
+{% endblock %}
+{% endblock %}

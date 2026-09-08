@@ -27,26 +27,39 @@
   <section class="sp-card">
     <div class="sp-card-head">
       <div>
-        <p class="sp-kicker">Date Range</p>
-        <h2>발주 대상 기간</h2>
+        <p class="sp-kicker">Order Date Range & Filter</p>
+        <h2>발주 신청일(주문일) 선택 및 요일 설정</h2>
       </div>
     </div>
 
-    <form method="get" class="sp-filter" style="grid-template-columns: 1fr 1fr auto auto;">
-      <div class="sp-field">
-        <label>시작 일자</label>
+    <form method="get" class="sp-filter" style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end;">
+      <div class="sp-field" style="min-width:160px;">
+        <label>발주 신청 시작일</label>
         <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
       </div>
-      <div class="sp-field">
-        <label>종료 일자</label>
+      <div class="sp-field" style="min-width:160px;">
+        <label>발주 신청 종료일</label>
         <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
       </div>
-      <button type="submit" class="sp-btn primary">조회하기</button>
-      <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">초기화</a>
+      <div class="sp-field" style="flex:1; min-width:280px;">
+        <label>발주 신청 요일 선택</label>
+        <div style="display:flex; gap:12px; align-items:center; height:38px; flex-wrap:wrap;">
+          {% for code, name in day_choices %}
+            <label style="display:inline-flex; align-items:center; gap:4px; font-size:14px; font-weight:500; cursor:pointer;">
+              <input type="checkbox" name="days" value="{{ code }}" {% if code in selected_days %}checked{% endif %}>
+              {{ name }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="submit" class="sp-btn primary">조회하기</button>
+        <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">초기화</a>
+      </div>
     </form>
   </section>
 
-  {% if analysis_data %}
+  {% if grouped_orders %}
     <form method="post" id="smartOrderForm">
       {% csrf_token %}
 
@@ -62,25 +75,39 @@
           </div>
         </div>
 
+        <div style="background:#f8f9fa; border:1px solid #e9ecef; border-radius:8px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label for="batchServingInput" style="font-weight:600; font-size:14px; color:#333;">일괄 기준 식수 입력:</label>
+            <input type="number" id="batchServingInput" placeholder="예: 100" min="0" style="width:120px; padding:6px 10px; border:1px solid #ced4da; border-radius:4px; font-size:14px;">
+            <button type="button" id="applyBatchServingBtn" class="sp-btn secondary" style="padding:6px 14px; font-size:14px;">적용</button>
+          </div>
+          <p class="sp-smart-note" style="margin:0; font-size:13px;">
+            * 식수 변경 시 <strong>필요량</strong>과 <strong>발주수량</strong>이 실시간 재계산됩니다.
+          </p>
+        </div>
+
         <p class="sp-smart-note">
           필요량은 <strong>식수 예측 결과</strong>를 우선 사용합니다. 예측 결과가 없으면 식단의 목표 식수(headcount)를 사용합니다.
           발주수량은 <strong>필요량 + 안전재고 - 현재고</strong>를 기준으로 자동 입력됩니다.
         </p>
 
-        {% for day in analysis_data %}
+        {% for group in grouped_orders %}
           <section style="margin-bottom:28px;">
             <div class="sp-card-head" style="border-bottom:1px solid #d7dce5;">
               <div>
-                <p class="sp-kicker">Target Date</p>
-                <h2>{{ day.date|date:"Y년 m월 d일" }}</h2>
+                <p class="sp-kicker">Order Date</p>
+                <h2>[발주 신청일] {{ group.order_date_display }}</h2>
               </div>
-              <span class="sp-status blue">식단 {{ day.plans|length }}건</span>
+              <span class="sp-status blue">식단 {{ group.plans|length }}건</span>
             </div>
 
             <div class="sp-table-wrap">
               <table class="sp-table smart-order-table">
                 <thead>
                   <tr>
+                    <th style="width:40px; text-align:center;">
+                      <input type="checkbox" class="js-check-all" checked title="전체 선택/해제">
+                    </th>
                     <th>끼니</th>
                     <th>예측/기준 식수</th>
                     <th>메뉴</th>
@@ -97,14 +124,23 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for plan in day.plans %}
+                  {% for plan in group.plans %}
                     {% for menu in plan.menus %}
                       {% for ing in menu.ingredients %}
-                        <tr data-price="{{ ing.price }}">
-                          <td>{{ plan.meal_type }}</td>
+                        <tr
+                          data-price="{{ ing.price }}"
+                          data-per-person="{{ ing.required_per_person }}"
+                          data-current-stock="{{ ing.current_stock }}"
+                          data-safe-stock="{{ ing.safe_stock }}"
+                          data-unit="{{ ing.unit }}"
+                        >
+                          <td style="text-align:center;">
+                            <input type="checkbox" class="js-item-check" checked>
+                          </td>
+                          <td>{{ plan.meal_type_display }}</td>
                           <td>
-                            <span class="sp-forecast-count">{{ plan.serving_count }}명</span>
-                            <div class="sp-note">{{ plan.serving_source }}</div>
+                            <span class="sp-forecast-count js-serving-count">{{ plan.serving_count }}명</span>
+                            <div class="sp-note js-serving-source">{{ plan.serving_source }}</div>
                           </td>
                           <td>{{ menu.name }}</td>
                           <td class="left">
@@ -120,11 +156,11 @@
                           <td>{{ ing.unit }}</td>
                           <td>{{ ing.current_stock }} {{ ing.unit }}</td>
                           <td>{{ ing.safe_stock }} {{ ing.unit }}</td>
-                          <td>{{ ing.needed_qty }} {{ ing.unit }}</td>
+                          <td class="js-needed-qty">{{ ing.needed_qty }} {{ ing.unit }}</td>
                           <td>
                             <div class="sp-order-qty">
                               <input type="hidden" name="ingredient_id[]" value="{{ ing.id }}">
-                              <input type="hidden" name="target_date[]" value="{{ day.date|date:'Y-m-d' }}">
+                              <input type="hidden" name="target_date[]" value="{{ plan.target_date|date:'Y-m-d' }}">
                               <input type="hidden" name="meal_type[]" value="{{ plan.meal_type }}">
                               <input
                                 type="number"
@@ -153,7 +189,8 @@
                         </tr>
                       {% empty %}
                         <tr>
-                          <td>{{ plan.meal_type }}</td>
+                          <td></td>
+                          <td>{{ plan.meal_type_display }}</td>
                           <td>{{ plan.serving_count }}명</td>
                           <td>{{ menu.name }}</td>
                           <td colspan="10">연결된 레시피 식재료가 없습니다.</td>
@@ -161,7 +198,8 @@
                       {% endfor %}
                     {% empty %}
                       <tr>
-                        <td>{{ plan.meal_type }}</td>
+                        <td></td>
+                        <td>{{ plan.meal_type_display }}</td>
                         <td>{{ plan.serving_count }}명</td>
                         <td colspan="11">등록된 메뉴가 없습니다.</td>
                       </tr>
@@ -196,10 +234,10 @@
       <div class="sp-card-head">
         <div>
           <p class="sp-kicker">No Data</p>
-          <h2>선택한 기간에 등록된 식단이 없습니다.</h2>
+          <h2>선택한 조건에 해당하는 등록된 식단이 없습니다.</h2>
         </div>
       </div>
-      <p class="sp-note">날짜 범위를 다시 설정하거나 식단표를 먼저 작성해 주세요.</p>
+      <p class="sp-note">날짜 범위나 요일 필터를 다시 설정하거나 식단표를 먼저 작성해 주세요.</p>
       <div class="sp-actions" style="justify-content:flex-start;margin-top:16px;">
         <a class="sp-btn primary" href="{% url 'meals:mealplan_create' %}">식단 등록하러 가기</a>
       </div>
@@ -218,8 +256,21 @@ function updateSmartOrderTotals() {
   let subtotal = 0;
 
   document.querySelectorAll(".smart-order-table tbody tr[data-price]").forEach((row) => {
+    const chk = row.querySelector('.js-item-check');
     const qtyInput = row.querySelector('input[name="quantity[]"]');
     if (!qtyInput) return;
+
+    if (chk && !chk.checked) {
+      row.style.opacity = '0.4';
+    } else {
+      row.style.opacity = '1';
+    }
+
+    if (chk && !chk.checked) {
+      const lineTotal = row.querySelector(".js-line-total");
+      if (lineTotal) lineTotal.textContent = "0원";
+      return;
+    }
 
     const price = Number(qtyInput.dataset.price || 0);
     const qty = Number(qtyInput.value || 0);
@@ -240,11 +291,144 @@ function updateSmartOrderTotals() {
   if (totalEl) totalEl.textContent = spMoney(subtotal + vat);
 }
 
+function applyBatchServing(count) {
+  const newCount = parseFloat(count);
+  if (isNaN(newCount) || newCount < 0) return;
+
+  // 모든 식수 표시 업데이트
+  document.querySelectorAll(".js-serving-count").forEach((el) => {
+    el.textContent = newCount + "명";
+  });
+  document.querySelectorAll(".js-serving-source").forEach((el) => {
+    el.textContent = "수동 입력";
+  });
+
+  // 행별 필요량 & 발주수량 실시간 재계산
+  document.querySelectorAll(".smart-order-table tbody tr[data-price]").forEach((row) => {
+    const perPerson = parseFloat(row.dataset.perPerson || 0);
+    const currentStock = parseFloat(row.dataset.currentStock || 0);
+    const safeStock = parseFloat(row.dataset.safeStock || 0);
+    const unit = row.dataset.unit || "";
+
+    // 필요량 = 식수 * 1인분 제공량
+    const neededQty = Math.round(newCount * perPerson * 100) / 100;
+    const neededCell = row.querySelector(".js-needed-qty");
+    if (neededCell) {
+      neededCell.textContent = neededQty + " " + unit;
+    }
+
+    // 최종 발주수량 = 필요량 + 안전재고 - 현재고
+    const shortage = neededQty + safeStock - currentStock;
+    const orderQty = shortage > 0 ? Math.round(shortage * 100) / 100 : 0;
+
+    const qtyInput = row.querySelector('input[name="quantity[]"]');
+    if (qtyInput) {
+      qtyInput.value = orderQty;
+      if (orderQty > 0) {
+        qtyInput.classList.add("needs-order");
+      } else {
+        qtyInput.classList.remove("needs-order");
+      }
+    }
+
+    // 상태 안내문구 및 태그 업데이트
+    const qtyWrap = row.querySelector(".sp-order-qty");
+    if (qtyWrap) {
+      const noteEl = qtyWrap.querySelector("small");
+      if (noteEl) {
+        if (orderQty > 0) {
+          noteEl.textContent = "부족분 자동 입력";
+          noteEl.style.color = "";
+        } else {
+          noteEl.textContent = "재고 충분";
+          noteEl.style.color = "#2f9e44";
+        }
+      }
+    }
+
+    const statusTd = row.children[row.children.length - 1];
+    if (statusTd) {
+      if (orderQty > 0) {
+        statusTd.innerHTML = '<span class="sp-status danger">발주필요</span>';
+      } else {
+        statusTd.innerHTML = '<span class="sp-status ok">재고충분</span>';
+      }
+    }
+  });
+
+  updateSmartOrderTotals();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  // 일괄 기준 식수 입력 이벤트 리스너
+  const batchInput = document.getElementById("batchServingInput");
+  const applyBtn = document.getElementById("applyBatchServingBtn");
+
+  if (applyBtn && batchInput) {
+    applyBtn.addEventListener("click", function () {
+      applyBatchServing(batchInput.value);
+    });
+    batchInput.addEventListener("keyup", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        applyBatchServing(batchInput.value);
+      }
+    });
+  }
+
+  // 발주수량 직접 변경 이벤트
   document.querySelectorAll('.smart-order-table input[name="quantity[]"]').forEach((input) => {
     input.addEventListener("input", updateSmartOrderTotals);
   });
+
+  // 전체 선택/해제 및 개별 체크박스 토글 이벤트
+  document.querySelectorAll(".js-check-all").forEach((masterChk) => {
+    masterChk.addEventListener("change", function () {
+      const isChecked = this.checked;
+      document.querySelectorAll(".js-check-all").forEach((c) => (c.checked = isChecked));
+      document.querySelectorAll(".js-item-check").forEach((chk) => {
+        chk.checked = isChecked;
+      });
+      updateSmartOrderTotals();
+    });
+  });
+
+  document.querySelectorAll(".js-item-check").forEach((chk) => {
+    chk.addEventListener("change", function () {
+      const allItemChks = document.querySelectorAll(".js-item-check");
+      const checkedItemChks = document.querySelectorAll(".js-item-check:checked");
+      document.querySelectorAll(".js-check-all").forEach((masterChk) => {
+        masterChk.checked = allItemChks.length === checkedItemChks.length;
+      });
+      updateSmartOrderTotals();
+    });
+  });
+
+  // 폼 제출 시 체크된 항목만 전달되도록 미체크 항목 disabled 처리
+  const form = document.getElementById("smartOrderForm");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      const checkedItems = document.querySelectorAll(".js-item-check:checked");
+      if (checkedItems.length === 0) {
+        e.preventDefault();
+        alert("선택된 발주 품목이 없습니다. 최소 1개 이상의 품목을 선택해 주세요.");
+        return;
+      }
+
+      document.querySelectorAll(".smart-order-table tbody tr").forEach((row) => {
+        const chk = row.querySelector(".js-item-check");
+        const inputs = row.querySelectorAll('input[name="ingredient_id[]"], input[name="target_date[]"], input[name="meal_type[]"], input[name="quantity[]"]');
+        if (chk && !chk.checked) {
+          inputs.forEach((input) => (input.disabled = true));
+        } else {
+          inputs.forEach((input) => (input.disabled = false));
+        }
+      });
+    });
+  }
+
   updateSmartOrderTotals();
 });
 </script>
 {% endblock %}
+
