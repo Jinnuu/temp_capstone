@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}급식물품 검수일지 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  body {
+    background-color: #f4f6f9;
+    color: #212529;
+  }
+
+  .document-toolbar {
+    background: #ffffff;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  .a4-container {
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .a4-page {
+    width: 297mm;
+    min-height: 210mm;
+    background: #ffffff;
+    padding: 10mm 12mm;
+    box-shadow: 0 0 15px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* Header */
+  .doc-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .doc-title-box {
+    flex: 1;
+    text-align: center;
+  }
+
+  .doc-title-box h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    margin: 0 0 4px 0;
+    color: #111;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+
+  .approval-table {
+    border-collapse: collapse;
+  }
+
+  .approval-table th, .approval-table td {
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 10px;
+  }
+
+  .approval-table th {
+    background-color: #f1f3f5;
+    padding: 3px 8px;
+    font-weight: bold;
+    width: 48px;
+  }
+
+  .approval-table td {
+    height: 40px;
+    vertical-align: middle;
+  }
+
+  .doc-info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+
+  /* 13-column wide table */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    table-layout: fixed;
+  }
+
+  .doc-table th, .doc-table td {
+    border: 1px solid #222;
+    padding: 5px 3px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+  }
+
+  .doc-table th {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    color: #111;
+    line-height: 1.4;
+  }
+
+  .doc-table tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  .text-left { text-align: left !important; padding-left: 5px !important; }
+  .text-right { text-align: right !important; padding-right: 5px !important; }
+  .status-ok { color: #2b8a3e; font-weight: bold; }
+  .status-fail { color: #c92a2a; font-weight: bold; }
+
+  @media print {
+    header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+    }
+    .a4-container {
+      padding: 0 !important;
+    }
+    .a4-page {
+      box-shadow: none !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    .doc-table tr {
+      display: table-row !important;
+    }
+    .doc-table th {
+      background-color: #e9ecef !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-toolbar no-print">
+  <div class="d-flex align-items-center gap-3">
+    <h5 class="m-0 fw-bold">[실무 양식] 급식물품 검수일지</h5>
+    <span class="badge bg-secondary">A4 가로 (Landscape / 11개 컬럼)</span>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2 m-0 align-items-center">
+      <label class="form-label m-0 small fw-bold text-nowrap">기간:</label>
+      <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="form-control form-control-sm" style="width: 140px;">
+      <span class="small">~</span>
+      <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="form-control form-control-sm" style="width: 140px;">
+      <select name="supplier_id" class="form-select form-select-sm" style="width: 160px;">
+        <option value="">전체 발주처</option>
+        {% for s in suppliers %}
+          <option value="{{ s.id }}" {% if current_supplier_id == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name|default:s.username }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-sm btn-primary">조회</button>
+    </form>
+    <button onclick="window.print()" class="btn btn-sm btn-dark"><i class="bi bi-printer"></i> 인쇄하기</button>
+    <a href="{% url 'docs_index' %}" class="btn btn-sm btn-outline-secondary">돌아가기</a>
+  </div>
+</div>
+
+<div class="a4-container">
+  <div class="a4-page">
+
+    <!-- 헤더 & 결재란 -->
+    <div class="doc-header-wrap">
+      <div style="width: 200px;"></div>
+
+      <div class="doc-title-box">
+        <h1>급 식 물 품 검 수 일 지</h1>
+        <div style="font-size: 12px; color: #495057; margin-top: 3px;">( 납품 현장 검수 및 품질 기록용 )</div>
+      </div>
+
+      <div>
+        <table class="approval-table">
+          <tr>
+            <th style="width: 18px;" rowspan="2">결<br>재</th>
+            <th>담당</th>
+            <th>팀장</th>
+            <th>점장</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 정보 바 -->
+    <div class="doc-info-bar">
+      <div>사업장 : S&P 중앙 급식소</div>
+      <div>검수기간 : {{ start_date|default:"2026-08-27" }} ~ {{ end_date|default:"2026-08-27" }}</div>
+      <div>납품업체 : {{ supplier_name|default:"전체" }}</div>
+      <div>담당 영양사 : (인)</div>
+    </div>
+
+    <!-- 11개 컬럼 검수일지 테이블 -->
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th style="width: 4%;">No</th>
+          <th style="width: 9%;">품목(대분류)</th>
+          <th style="width: 16%;">식재료명</th>
+          <th style="width: 10%;">규격</th>
+          <th style="width: 6%;">단위</th>
+          <th style="width: 8%;">수량</th>
+          <th style="width: 8%;">신선도</th>
+          <th style="width: 11%;">유통기한</th>
+          <th style="width: 8%;">온도</th>
+          <th style="width: 10%;">반품 및 교환</th>
+          <th style="width: 10%;">비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if supplier_groups %}
+          {% for group in supplier_groups %}
+            <!-- 발주처/납품업체 구분 헤더 행 -->
+            <tr style="background-color: #e7f5ff; border-top: 2px solid #339af0;">
+              <td colspan="11" class="text-left fw-bold" style="font-size: 11px; color: #1c7ed6;">
+                ■ [발주처 / 납품업체] {{ group.supplier_name }} (총 {{ group.items|length }}개 품목)
+              </td>
+            </tr>
+            {% for item in group.items %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.category }}</td>
+              <td class="text-left fw-bold">{{ item.name }}</td>
+              <td>{{ item.spec }}</td>
+              <td>{{ item.unit }}</td>
+              <td class="text-right fw-bold">{{ item.quantity }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="11" class="text-center py-4 text-muted">선택한 기간에 등록된 발주/검수 물품이 없습니다.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- JS Pagination Controls -->
+    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
+
+    <div style="margin-top: 12px; font-size: 10px; color: #495057; display: flex; justify-content: space-between;">
+      <div>* 검수 항목 중 [신선도, 온도, 반품 및 교환, 비고] 4개 칸은 검수자 수기 작성 란입니다.</div>
+      <div>검수자: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (인)</div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.doc-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.querySelector('td[colspan="11"]'));
+    if (rows.length === 0) return;
+
+    const pageSize = 15;
+    const totalPages = Math.ceil(rows.length / pageSize);
+    if (totalPages <= 1) return;
+
+    let currentPage = 1;
+    const container = document.getElementById('docPagination');
+
+    function renderPage(page) {
+      currentPage = page;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      rows.forEach((r, idx) => {
+        r.style.display = (idx >= start && idx < end) ? '' : 'none';
+      });
+
+      renderControls();
+    }
+
+    function renderControls() {
+      if (!container) return;
+      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
+
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = startPage + maxButtons - 1;
+
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
+      container.innerHTML = html;
+    }
+
+    window.changeDocPage = function(page) {
+      if (page < 1 || page > totalPages) return;
+      renderPage(page);
+    };
+
+    renderPage(1);
+  });
+</script>
+{% endblock %}
+{% endblock %}

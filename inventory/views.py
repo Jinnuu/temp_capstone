@@ -29,6 +29,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import IngredientForm, InventoryLogForm
 from .models import Ingredient, InventoryLog
+from .services import process_ingredient_file_upload
 
 User = get_user_model()
 
@@ -59,7 +60,7 @@ def _clean_header(value):
 def get_ingredient_stock_queryset():
     """재고 로그를 합산하여 실시간 현재고와 부족 상태를 계산한다."""
     return (
-        Ingredient.objects.all()
+        Ingredient.objects.exclude(name__icontains="테스트")
         .annotate(
             in_qty=Coalesce(
                 Sum(
@@ -156,11 +157,13 @@ def ingredient_list(request):
     )
 
     if sort_by == "supplier":
-        ingredients = ingredients.order_by("status_priority", "supplier__username", "id")
+        ingredients = ingredients.order_by("supplier__username", "-id")
     elif sort_by == "name":
-        ingredients = ingredients.order_by("status_priority", "name")
-    else:
+        ingredients = ingredients.order_by("name", "-id")
+    elif sort_by == "status_priority":
         ingredients = ingredients.order_by("status_priority", "-id")
+    else:  # "latest" 또는 기본값 (최근 등록/수정 역순)
+        ingredients = ingredients.order_by("-id")
 
     categories = (
         Ingredient.objects.exclude(category__isnull=True)
@@ -171,7 +174,7 @@ def ingredient_list(request):
     )
     suppliers = User.objects.filter(supplied_ingredients__isnull=False).distinct()
 
-    paginator = Paginator(ingredients, 10)
+    paginator = Paginator(ingredients, 15)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     context = {
@@ -203,103 +206,9 @@ def ingredient_create(request):
 
 
 def ingredient_upload(request):
-    """식자재 기준정보를 엑셀 파일로 일괄 등록/수정한다."""
-    if request.method == "GET":
-        return render(request, "inventory/ingredient_upload.html")
-
-    excel_file = request.FILES.get("file")
-
-    if not excel_file:
-        messages.error(request, "업로드할 엑셀(.xlsx) 파일을 선택해 주세요.")
-        return redirect("inventory:ingredient_upload")
-
-    if not excel_file.name.lower().endswith(".xlsx"):
-        messages.error(request, "현재는 .xlsx 파일만 지원합니다.")
-        return redirect("inventory:ingredient_upload")
-
-    try:
-        workbook = openpyxl.load_workbook(excel_file, data_only=True)
-        sheet = workbook.active
-
-        headers = [_clean_header(cell.value) for cell in sheet[1]]
-
-        col_map = {
-            "식재료명": "name",
-            "발주처": "supplier",
-            "규격": "spec",
-            "단위": "unit",
-            "단가": "unit_price",
-            "안전재고": "safe_stock_level",
-            "대분류": "category",
-            "연간예상소요량": "yearly_demand",
-            "금액": "total_amount",
-            "식품 설명": "description",
-            "설명": "description",
-        }
-
-        positions = {}
-        for excel_name, field_name in col_map.items():
-            if excel_name in headers and field_name not in positions:
-                positions[field_name] = headers.index(excel_name)
-
-        if "name" not in positions:
-            messages.error(request, "엑셀 파일에 '식재료명' 컬럼이 포함되어야 합니다.")
-            return redirect("inventory:ingredient_upload")
-
-        success_count = 0
-        skipped_count = 0
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            def get_value(field_name):
-                index = positions.get(field_name)
-                return row[index] if index is not None else None
-
-            name = get_value("name")
-
-            if not name:
-                skipped_count += 1
-                continue
-
-            supplier_value = get_value("supplier")
-            supplier_obj = None
-
-            if supplier_value:
-                supplier_obj = User.objects.filter(
-                    Q(username=str(supplier_value).strip())
-                    | Q(name=str(supplier_value).strip())
-                ).first()
-
-            defaults = {
-                "supplier": supplier_obj,
-                "spec": get_value("spec") or "",
-                "unit": get_value("unit") or "EA",
-                "unit_price": int(_to_decimal(get_value("unit_price"))),
-                "safe_stock_level": _to_decimal(get_value("safe_stock_level")),
-                "category": get_value("category") or "",
-                "yearly_demand": int(_to_decimal(get_value("yearly_demand"))),
-                "total_amount": int(_to_decimal(get_value("total_amount"))),
-            }
-
-            description = get_value("description")
-            if description is not None:
-                defaults["description"] = str(description)
-
-            Ingredient.objects.update_or_create(
-                name=str(name).strip(),
-                defaults=defaults,
-            )
-            success_count += 1
-
-        messages.success(
-            request,
-            f"식자재 엑셀 업로드 완료: {success_count}건 처리, {skipped_count}건 건너뜀.",
-        )
-
-    except Exception as exc:
-        messages.error(request, f"엑셀 업로드 중 오류가 발생했습니다: {exc}")
-        return redirect("inventory:ingredient_upload")
-
-    return redirect("inventory:ingredient_list")
+    # Both legacy and new routes use the preserved release patch entry point.
+    from .release_patch_views import ingredient_upload_flexible
+    return ingredient_upload_flexible(request)
 
 
 def inventory_log_create(request):
@@ -384,7 +293,7 @@ def weekly_inventory_report(request):
     start_dt = timezone.make_aware(datetime.combine(monday, datetime.min.time()))
     end_dt = timezone.make_aware(datetime.combine(sunday, datetime.max.time()))
 
-    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    ingredients = Ingredient.objects.exclude(name__icontains="테스트").order_by('category', 'name')
     report_data = []
 
     for item in ingredients:
@@ -443,7 +352,7 @@ def monthly_inventory_report(request):
     start_dt = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
     end_dt = timezone.make_aware(datetime.combine(end_date, datetime.min.time()))
 
-    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    ingredients = Ingredient.objects.exclude(name__icontains="테스트").order_by('category', 'name')
     report_data = []
 
     for item in ingredients:
@@ -532,7 +441,7 @@ def export_inventory_excel(request):
     else:
         end_dt = timezone.make_aware(datetime.combine(sunday, datetime.max.time()))
 
-    ingredients = Ingredient.objects.all().order_by('category', 'name')
+    ingredients = Ingredient.objects.exclude(name__icontains="테스트").order_by('category', 'name')
     row_num = 2
     for idx, item in enumerate(ingredients, 1):
         # 기초 재고

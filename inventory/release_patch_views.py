@@ -91,119 +91,19 @@ def _find_supplier(value):
 
 
 def ingredient_upload_flexible(request):
-    """상단 제목행/공백/괄호가 있어도 식재료 엑셀을 읽는 업로드 view."""
+    """기존 URL을 유지하며 제목행·다중 시트·CSV/XLS/XLSX를 처리한다."""
+    from .services import process_ingredient_file_upload
+
     if request.method == "GET":
         return render(request, "inventory/ingredient_upload.html")
-
-    excel_file = request.FILES.get("file")
-    if not excel_file:
-        messages.error(request, "업로드할 엑셀 파일을 선택해 주세요.")
+    uploaded = request.FILES.get("file") or next(iter(request.FILES.values()), None)
+    if not uploaded:
+        messages.error(request, "업로드할 식재료 파일을 선택해 주세요.")
         return redirect("inventory:ingredient_upload")
-
-    if not excel_file.name.lower().endswith((".xlsx", ".xls")):
-        messages.error(request, "엑셀 파일(.xlsx, .xls)만 업로드할 수 있습니다.")
-        return redirect("inventory:ingredient_upload")
-
-    alias = {
-        "식재료명": "name",
-        "재료명": "name",
-        "품목명": "name",
-        "대분류": "category",
-        "분류": "category",
-        "카테고리": "category",
-        "발주처": "supplier",
-        "공급업체": "supplier",
-        "업체": "supplier",
-        "규격": "spec",
-        "단위": "unit",
-        "단가": "unit_price",
-        "안전재고": "safe_stock_level",
-        "연간예상소요량": "yearly_demand",
-        "연간예상사용량": "yearly_demand",
-        "금액": "total_amount",
-        "식품설명": "description",
-        "식품 설명": "description",
-        "설명": "description",
-        "비고": "description",
-    }
-
     try:
-        df = _read_excel_with_flexible_header(excel_file)
-
-        positions = {}
-        for col in df.columns:
-            key = _norm(col)
-            for label, field in alias.items():
-                if key == _norm(label) and field not in positions:
-                    positions[field] = col
-
-        if "name" not in positions:
-            messages.error(
-                request,
-                "엑셀 파일에서 식재료명 컬럼을 찾지 못했습니다. 헤더명은 '식재료명', '재료명', '품목명' 중 하나로 작성해 주세요.",
-            )
-            return redirect("inventory:ingredient_upload")
-
-        success_count = 0
-        skipped_count = 0
-        error_rows = []
-
-        for row_no, (_, row) in enumerate(df.iterrows(), start=1):
-            def get_value(field_name):
-                col = positions.get(field_name)
-                if col is None:
-                    return None
-                value = row.get(col)
-                if pd.isna(value):
-                    return None
-                return value
-
-            name = get_value("name")
-            if not name or str(name).strip().lower() == "nan":
-                skipped_count += 1
-                continue
-
-            try:
-                supplier_obj = _find_supplier(get_value("supplier"))
-
-                defaults = {
-                    "supplier": supplier_obj,
-                    "spec": str(get_value("spec") or "").strip(),
-                    "unit": str(get_value("unit") or "EA").strip(),
-                    "unit_price": _to_int(get_value("unit_price"), default=0),
-                    "safe_stock_level": _to_decimal(get_value("safe_stock_level"), default="0"),
-                    "category": str(get_value("category") or "").strip(),
-                    "yearly_demand": _to_int(get_value("yearly_demand"), default=0),
-                    "total_amount": _to_int(get_value("total_amount"), default=0),
-                }
-
-                description = get_value("description")
-                if description is not None:
-                    defaults["description"] = str(description).strip()
-
-                Ingredient.objects.update_or_create(
-                    name=str(name).strip(),
-                    defaults=defaults,
-                )
-                success_count += 1
-
-            except Exception as row_exc:
-                skipped_count += 1
-                error_rows.append(f"{row_no}행 {name}: {row_exc}")
-
-        if success_count:
-            messages.success(
-                request,
-                f"식자재 엑셀 업로드 완료: {success_count}건 처리, {skipped_count}건 건너뜀.",
-            )
-        else:
-            messages.warning(request, "저장된 식자재가 없습니다. 엑셀 컬럼과 데이터를 확인해 주세요.")
-
-        if error_rows:
-            messages.warning(request, "일부 행은 제외되었습니다: " + " / ".join(error_rows[:5]))
-
+        created, updated = process_ingredient_file_upload(uploaded)
+        messages.success(request, f"식재료 업로드 완료: 신규 {created}건, 수정 {updated}건")
     except Exception as exc:
-        messages.error(request, f"엑셀 업로드 중 오류가 발생했습니다: {exc}")
+        messages.error(request, f"식재료 업로드 중 오류가 발생했습니다: {exc}")
         return redirect("inventory:ingredient_upload")
-
     return redirect("inventory:ingredient_list")

@@ -1,3 +1,4 @@
+from .views_new_docs import doc_inventory_status
 from django.urls import path
 
 from . import views
@@ -15,4 +16,5 @@ urlpatterns = [
     path("reports/weekly/", views.weekly_inventory_report, name="weekly_inventory_report"),
     path("reports/monthly/", views.monthly_inventory_report, name="monthly_inventory_report"),
     path("reports/export/excel/", views.export_inventory_excel, name="export_inventory_excel"),
+    path('docs/inventory-status/', doc_inventory_status, name='doc_inventory_status'),
 ]

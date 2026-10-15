@@ -1,0 +1,280 @@
+{
+  "python": "3.12.13",
+  "packages": {
+    "annotated-doc": {
+      "expected": "0.0.4",
+      "actual": "0.0.4",
+      "matches": true
+    },
+    "anyio": {
+      "expected": "4.13.0",
+      "actual": "4.13.0",
+      "matches": true
+    },
+    "asgiref": {
+      "expected": "3.11.1",
+      "actual": "3.11.1",
+      "matches": true
+    },
+    "certifi": {
+      "expected": "2026.2.25",
+      "actual": "2026.2.25",
+      "matches": true
+    },
+    "click": {
+      "expected": "8.3.1",
+      "actual": "8.3.1",
+      "matches": true
+    },
+    "colorama": {
+      "expected": "0.4.6",
+      "actual": "0.4.6",
+      "matches": true
+    },
+    "Django": {
+      "expected": "6.0.3",
+      "actual": "6.0.3",
+      "matches": true
+    },
+    "django-environ": {
+      "expected": "0.13.0",
+      "actual": "0.13.0",
+      "matches": true
+    },
+    "et_xmlfile": {
+      "expected": "2.0.0",
+      "actual": "2.0.0",
+      "matches": true
+    },
+    "filelock": {
+      "expected": "3.25.2",
+      "actual": "3.25.2",
+      "matches": true
+    },
+    "fsspec": {
+      "expected": "2026.2.0",
+      "actual": "2026.2.0",
+      "matches": true
+    },
+    "h11": {
+      "expected": "0.16.0",
+      "actual": "0.16.0",
+      "matches": true
+    },
+    "hf-xet": {
+      "expected": "1.4.2",
+      "actual": "1.4.2",
+      "matches": true
+    },
+    "holidays": {
+      "expected": "0.93",
+      "actual": "0.93",
+      "matches": true
+    },
+    "httpcore": {
+      "expected": "1.0.9",
+      "actual": "1.0.9",
+      "matches": true
+    },
+    "httpx": {
+      "expected": "0.28.1",
+      "actual": "0.28.1",
+      "matches": true
+    },
+    "huggingface_hub": {
+      "expected": "1.8.0",
+      "actual": "1.8.0",
+      "matches": true
+    },
+    "idna": {
+      "expected": "3.11",
+      "actual": "3.11",
+      "matches": true
+    },
+    "Jinja2": {
+      "expected": "3.1.6",
+      "actual": "3.1.6",
+      "matches": true
+    },
+    "joblib": {
+      "expected": "1.5.3",
+      "actual": "1.5.3",
+      "matches": true
+    },
+    "markdown-it-py": {
+      "expected": "4.0.0",
+      "actual": "4.0.0",
+      "matches": true
+    },
+    "MarkupSafe": {
+      "expected": "3.0.3",
+      "actual": "3.0.3",
+      "matches": true
+    },
+    "mdurl": {
+      "expected": "0.1.2",
+      "actual": "0.1.2",
+      "matches": true
+    },
+    "mpmath": {
+      "expected": "1.3.0",
+      "actual": "1.3.0",
+      "matches": true
+    },
+    "mysqlclient": {
+      "expected": "2.2.8",
+      "actual": "2.2.8",
+      "matches": true
+    },
+    "networkx": {
+      "expected": "3.6.1",
+      "actual": "3.6.1",
+      "matches": true
+    },
+    "numpy": {
+      "expected": "2.4.3",
+      "actual": "2.4.3",
+      "matches": true
+    },
+    "openpyxl": {
+      "expected": "3.1.5",
+      "actual": "3.1.5",
+      "matches": true
+    },
+    "packaging": {
+      "expected": "26.0",
+      "actual": "26.0",
+      "matches": true
+    },
+    "pandas": {
+      "expected": "3.0.1",
+      "actual": "3.0.1",
+      "matches": true
+    },
+    "Pygments": {
+      "expected": "2.19.2",
+      "actual": "2.19.2",
+      "matches": true
+    },
+    "python-dateutil": {
+      "expected": "2.9.0.post0",
+      "actual": "2.9.0.post0",
+      "matches": true
+    },
+    "PyYAML": {
+      "expected": "6.0.3",
+      "actual": "6.0.3",
+      "matches": true
+    },
+    "regex": {
+      "expected": "2026.2.28",
+      "actual": "2026.2.28",
+      "matches": true
+    },
+    "rich": {
+      "expected": "14.3.3",
+      "actual": "14.3.3",
+      "matches": true
+    },
+    "safetensors": {
+      "expected": "0.7.0",
+      "actual": "0.7.0",
+      "matches": true
+    },
+    "scikit-learn": {
+      "expected": "1.7.2",
+      "actual": "1.7.2",
+      "matches": true
+    },
+    "scipy": {
+      "expected": "1.17.1",
+      "actual": "1.17.1",
+      "matches": true
+    },
+    "sentence-transformers": {
+      "expected": "5.3.0",
+      "actual": "5.3.0",
+      "matches": true
+    },
+    "setuptools": {
+      "expected": "79.0.1",
+      "actual": "79.0.1",
+      "matches": true
+    },
+    "shellingham": {
+      "expected": "1.5.4",
+      "actual": "1.5.4",
+      "matches": true
+    },
+    "six": {
+      "expected": "1.17.0",
+      "actual": "1.17.0",
+      "matches": true
+    },
+    "sqlparse": {
+      "expected": "0.5.5",
+      "actual": "0.5.5",
+      "matches": true
+    },
+    "sympy": {
+      "expected": "1.14.0",
+      "actual": "1.14.0",
+      "matches": true
+    },
+    "threadpoolctl": {
+      "expected": "3.6.0",
+      "actual": "3.6.0",
+      "matches": true
+    },
+    "tokenizers": {
+      "expected": "0.22.2",
+      "actual": "0.22.2",
+      "matches": true
+    },
+    "torch": {
+      "expected": "2.11.0",
+      "actual": "2.11.0",
+      "matches": true
+    },
+    "tqdm": {
+      "expected": "4.67.3",
+      "actual": "4.67.3",
+      "matches": true
+    },
+    "transformers": {
+      "expected": "5.4.0",
+      "actual": "5.4.0",
+      "matches": true
+    },
+    "typer": {
+      "expected": "0.24.1",
+      "actual": "0.24.1",
+      "matches": true
+    },
+    "typing_extensions": {
+      "expected": "4.15.0",
+      "actual": "4.15.0",
+      "matches": true
+    },
+    "tzdata": {
+      "expected": "2025.3",
+      "actual": "2025.3",
+      "matches": true
+    },
+    "xgboost": {
+      "expected": "3.2.0",
+      "actual": "3.2.0",
+      "matches": true
+    },
+    "xlrd": {
+      "expected": "2.0.2",
+      "actual": "2.0.2",
+      "matches": true
+    }
+  },
+  "model_sha256": {
+    "best_model_dinner.pkl": "c7a6d0b97c9f3a0dddde98edc8b96d5f6e115bbd8a3dba4026c95448c22ae3bf",
+    "best_model_breakfast.pkl": "bf2fdfe01b19b25e50d8b2b302c9fa3e631c894a169b1aa22401d30742dc0a77",
+    "best_model_lunch.pkl": "3cbd67a14b9629a7af4b987efad924ec1584b50d51fd8a05a36f71d1635a6055"
+  }
+}

@@ -104,6 +104,26 @@
         </tr>
       </tbody>
     </table>
+
+    {% for day in days_context %}{% if forloop.last %}
+    <h3>다음 월요일 조식·중식 ({{ day.next_monday_str }})</h3>
+    <table class="sp-week-table"><tbody><tr>
+      <th>조식</th>
+      <td class="sp-week-cell" data-week-cell data-date="{{ day.next_monday_str }}" data-meal-type="조식">
+        <div class="sp-token-area" data-token-area>
+          {% for menu in day.next_monday_breakfast %}<span class="sp-token" data-menu-id="{{ menu.id }}">{{ menu.name }} <button type="button">×</button></span>{% empty %}<span class="sp-muted" data-empty>미등록</span>{% endfor %}
+        </div>
+        <div class="sp-search-wrap"><input class="sp-menu-search" type="text" placeholder="메뉴 검색 또는 입력 후 Enter" autocomplete="off"><div class="sp-menu-suggest" data-suggest></div></div>
+      </td>
+      <th>중식</th>
+      <td class="sp-week-cell" data-week-cell data-date="{{ day.next_monday_str }}" data-meal-type="중식">
+        <div class="sp-token-area" data-token-area>
+          {% for menu in day.next_monday_lunch %}<span class="sp-token" data-menu-id="{{ menu.id }}">{{ menu.name }} <button type="button">×</button></span>{% empty %}<span class="sp-muted" data-empty>미등록</span>{% endfor %}
+        </div>
+        <div class="sp-search-wrap"><input class="sp-menu-search" type="text" placeholder="메뉴 검색 또는 입력 후 Enter" autocomplete="off"><div class="sp-menu-suggest" data-suggest></div></div>
+      </td>
+    </tr></tbody></table>
+    {% endif %}{% endfor %}
   </section>
 </div>
 {% endblock %}
@@ -137,7 +157,8 @@
     const payload = {
       date: cell.dataset.date,
       meal_type: cell.dataset.mealType,
-      menu_id: menu.id
+      menu_id: menu.id,
+      menu_name: menu.name
     };
 
     const res = await fetch("{% url 'meals:add_diet_menu_api' %}", {
@@ -234,6 +255,15 @@
     const input = cell.querySelector(".sp-menu-search");
     const suggest = cell.querySelector("[data-suggest]");
     let timer;
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && input.value.trim()) {
+        event.preventDefault();
+        addMenu(cell, {name: input.value.trim()});
+        input.value = "";
+        suggest.classList.remove("open");
+      }
+    });
 
     input.addEventListener("input", () => {
       clearTimeout(timer);

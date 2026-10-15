@@ -1,30 +1,26 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-
-import openpyxl
+from functools import reduce
+import operator
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import (
-    Case,
-    DateField,
-    F,
-    IntegerField,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import Case, DateField, F, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+import openpyxl
+from openpyxl.styles import Alignment, Border, Font, Side
 
 from forecasting.models import AttendancePrediction
 from forecasting.services.ingredient_calc import get_all_day_requirements
 from inventory.models import Ingredient, InventoryLog
+from inventory.views import get_ingredient_stock_queryset
 from meals.models import DietPlan
 from .models import OrderItem, PurchaseOrder
+
 
 CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
 
@@ -121,17 +117,11 @@ def get_serving_count(plan):
 
 
 def order_create(request):
-    """
-    간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 및 재고 페이지 ID 일괄 연동 포함
-    """
-    target_date = request.GET.get("target_date")
-    
-    # --------------------------------------------------------------------------
-    # 1. POST 요청 처리 구역 (재석님의 원본 로직 무결성 100% 유지)
-    # --------------------------------------------------------------------------
-    if request.method == 'POST':
-        ingredient_ids = request.POST.getlist('ingredient_id[]')
-        quantities = request.POST.getlist('quantity[]')
+    """간편주문 생성. GET 파라미터 또는 날짜 기준 부족분을 수량에 자동 채운다."""
+    if request.method == "POST":
+        ingredient_ids = request.POST.getlist("ingredient_id[]")
+        quantities = request.POST.getlist("quantity[]")
+        target_date_val = request.POST.get("target_date")
 
         if ingredient_ids and quantities:
             user = get_or_create_dummy_user(request)
@@ -155,7 +145,7 @@ def order_create(request):
                 OrderItem.objects.create(
                     purchase_order=po,
                     ingredient=ing,
-                    target_date=target_date if target_date else None,
+                    target_date=target_date_val if target_date_val else None,
                     required_qty=q,
                     missing_qty=q,
                     order_unit_price=ing.unit_price,
@@ -173,53 +163,32 @@ def order_create(request):
             messages.success(request, f"발주서 #{po.id} 건이 성공적으로 전송되었습니다.")
             return redirect("procurement:order_detail", pk=po.id)
 
-    # --------------------------------------------------------------------------
-    # 2. GET 요청 데이터 파싱 구역 (하이브리드 분기 처리 가드레일 가동)
-    # --------------------------------------------------------------------------
     items_names = request.GET.getlist("items")
     amounts = request.GET.getlist("amounts")
+    target_date = request.GET.get("target_date")
     shortage_map = {}
 
-    # 🎯 [루트 A] 재고 현황 페이지에서 "부족분 발주" 버튼을 눌러 ID 리스트(['43,44,45'])가 온 경우
-    if items_names and len(items_names) == 1 and "," in items_names[0]:
-        try:
-            # 콤마 문자열을 정수형 ID 리스트로 분해
-            raw_ids = [int(x.strip()) for x in items_names[0].split(",") if x.strip().isdigit()]
-            low_stock_ingredients = Ingredient.objects.filter(id__in=raw_ids)
-            
-            for ing in low_stock_ingredients:
-                current_stock = ing.calc_stock if hasattr(ing, 'calc_stock') else 0
-                shortage_qty = float(ing.safe_stock_level) - float(current_stock)
-                
-                # 재고 기준 부족량을 맵에 주입 (이름 기둥)
-                if shortage_qty > 0:
-                    shortage_map[ing.name] = f"{shortage_qty:.2f}"
-                else:
-                    shortage_map[ing.name] = "1.00"  # 최소 방어 수량
-        except Exception as e:
-            print(f"[재고 현황 연동 ID 파싱 에러]: {e}")
-
-    # 🎯 [루트 B] 식재료 산출(예측 결과) 화면에서 이름과 수량이 1:1로 넘어온 경우
-    elif items_names and amounts:
+    # Explicit name/amount pairs take priority, including numeric ingredient names.
+    if items_names and amounts:
         shortage_map = dict(zip(items_names, amounts))
+    elif items_names:
+        raw_ids = [part.strip() for item in items_names for part in item.split(",")]
+        ingredient_ids = [int(part) for part in raw_ids if part.isdigit()]
+        for ing in get_ingredient_stock_queryset().filter(pk__in=ingredient_ids):
+            shortage = ing.safe_stock_level - ing.calc_stock
+            if shortage > 0:
+                shortage_map[ing.name] = str(shortage.quantize(Decimal("0.01")))
+    elif target_date:
+        requirements = get_all_day_requirements(target_date)
+        for name, data in requirements.get("items", {}).items():
+            order_amount = to_decimal(data.get("order_amount", 0))
+            if order_amount > 0:
+                shortage_map[name] = str(order_amount)
 
-    # 🎯 [루트 C] 주소창 인자는 없지만 날짜 필터 로드로 AI 예측 엔진 데이터를 긁어와야 하는 경우
-    elif target_date and not items_names:
-        try:
-            requirements = get_all_day_requirements(target_date)
-            for name, data in requirements.get("items", {}).items():
-                order_amount = data.get("order_amount", 0)
-                if order_amount and float(order_amount) > 0:
-                    shortage_map[name] = str(order_amount)
-        except Exception as e:
-            print(f"[식단 날짜 기반 예측 데이터 로드 에러]: {e}")
-
-    # --------------------------------------------------------------------------
-    # 3. 마스터 기준정보 렌더링 준비 구역 (기존 유지)
-    # --------------------------------------------------------------------------
-    ingredients = Ingredient.objects.all().order_by("name")
+    ingredients = Ingredient.objects.exclude(name__icontains="테스트").order_by("name")
     categories = (
-        Ingredient.objects.exclude(category__isnull=True)
+        Ingredient.objects.exclude(name__icontains="테스트")
+        .exclude(category__isnull=True)
         .exclude(category__exact="")
         .values_list("category", flat=True)
         .distinct()
@@ -236,6 +205,7 @@ def order_create(request):
             "target_date": target_date or date.today().isoformat(),
         },
     )
+
 
 def order_list(request):
     orders = PurchaseOrder.objects.all().order_by("-created_at")
@@ -436,113 +406,165 @@ def order_from_mealplan(request):
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
 
+    DAY_CHOICES = [
+        ("0", "월"),
+        ("1", "화"),
+        ("2", "수"),
+        ("3", "목"),
+        ("4", "금"),
+        ("5", "토"),
+        ("6", "일"),
+    ]
+
+    if "start_date" in request.GET:
+        selected_days = request.GET.getlist("days")
+    else:
+        selected_days = ["0", "1", "2", "3", "4", "5", "6"]
+
+    today = date.today()
+
     if start_date_str:
         try:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         except ValueError:
-            start_date = date.today()
+            start_date = today
     else:
-        start_date = date.today()
+        start_date = today
 
     if end_date_str:
         try:
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
         except ValueError:
-            end_date = start_date + timedelta(days=6)
+            end_date = start_date
     else:
-        end_date = start_date + timedelta(days=6)
+        end_date = start_date
+
+    if end_date < start_date:
+        end_date = start_date
 
     meal_order = Case(
-        When(meal_type="조식", then=Value(1)),
-        When(meal_type="중식", then=Value(2)),
-        When(meal_type="석식", then=Value(3)),
+        When(meal_type=DietPlan.MealType.BREAKFAST, then=Value(1)),
+        When(meal_type=DietPlan.MealType.LUNCH, then=Value(2)),
+        When(meal_type=DietPlan.MealType.DINNER, then=Value(3)),
         default=Value(4),
         output_field=IntegerField(),
     )
 
-    plans = (
-        DietPlan.objects.filter(
-            target_date__gte=start_date,
-            target_date__lte=end_date,
-        )
-        .prefetch_related("diet_menus__menu__recipes__ingredient__supplier")
-        .order_by("target_date", meal_order)
-    )
+    WEEKDAYS_KO = ["월", "화", "수", "목", "금", "토", "일"]
 
-    # 기간 내에서 같은 식재료가 여러 번 쓰일 때 현재고를 순차 차감해 중복 과소/과대 계산을 줄인다.
     stock_balance = {
         ingredient.id: get_current_stock(ingredient)
-        for ingredient in Ingredient.objects.all()
+        for ingredient in Ingredient.objects.exclude(name__icontains="테스트")
     }
 
-    analysis_data = {}
+    initial_stock_balance = stock_balance.copy()
+    grouped_orders = []
 
-    for plan in plans:
-        dt = plan.target_date
+    curr_date = start_date
+    while curr_date <= end_date:
+        if curr_date.weekday() in (5, 6):
+            curr_date += timedelta(days=1)
+            continue
 
-        if dt not in analysis_data:
-            analysis_data[dt] = []
+        if str(curr_date.weekday()) not in selected_days:
+            curr_date += timedelta(days=1)
+            continue
 
-        serving_count, serving_source = get_serving_count(plan)
+        order_date = curr_date
+        next_day = order_date + timedelta(days=1)
 
-        plan_item = {
-            "meal_type": plan.meal_type,
-            "headcount": plan.headcount,
-            "serving_count": serving_count,
-            "serving_source": serving_source,
-            "menus": [],
-        }
+        if order_date.weekday() == 4:  # 금요일
+            query = (
+                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
+                | Q(target_date=order_date + timedelta(days=1))  # 토요일 전체
+                | Q(target_date=order_date + timedelta(days=2))  # 일요일 전체
+                | Q(target_date=order_date + timedelta(days=3), meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])  # 차주 월요일
+            )
+        else:  # 월, 화, 수, 목
+            query = (
+                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
+                | Q(target_date=next_day, meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])
+            )
 
-        sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
+        plans = (
+            DietPlan.objects.filter(query)
+            .distinct()
+            .prefetch_related("diet_menus__menu__recipes__ingredient__supplier")
+            .order_by("target_date", meal_order)
+        )
 
-        for diet_menu in sorted_diet_menus:
-            menu = diet_menu.menu
-            menu_item = {
-                "id": menu.id,
-                "name": menu.name,
-                "ingredients": [],
+        date_plans = []
+        for plan in plans:
+            serving_count, serving_source = get_serving_count(plan)
+
+            dt = plan.target_date
+            dt_str = f"{dt.strftime('%d일')}({WEEKDAYS_KO[dt.weekday()]})"
+            meal_type_display = f"{dt_str} {plan.meal_type}"
+
+            plan_item = {
+                "target_date": plan.target_date,
+                "meal_type": plan.meal_type,
+                "meal_type_display": meal_type_display,
+                "headcount": plan.headcount,
+                "serving_count": serving_count,
+                "serving_source": serving_source,
+                "menus": [],
             }
 
-            for recipe in menu.recipes.all():
-                ing = recipe.ingredient
-                current_before = stock_balance.get(ing.id, Decimal("0"))
-                required_per_person = to_decimal(recipe.required_amount)
-                needed_qty = to_decimal(serving_count) * required_per_person
-                safe_stock = to_decimal(ing.safe_stock_level)
-                shortage_qty = needed_qty + safe_stock - current_before
-                order_qty = shortage_qty if shortage_qty > 0 else Decimal("0")
+            sorted_diet_menus = plan.diet_menus.all().select_related("menu").order_by(SORT_ORDER)
 
-                # 현재 끼니 소비량만큼 재고를 차감한다. 음수는 0으로 고정한다.
-                stock_balance[ing.id] = max(Decimal("0"), current_before - needed_qty)
+            for diet_menu in sorted_diet_menus:
+                menu = diet_menu.menu
+                menu_item = {
+                    "id": menu.id,
+                    "name": menu.name,
+                    "ingredients": [],
+                }
 
-                menu_item["ingredients"].append(
-                    {
-                        "id": ing.id,
-                        "name": ing.name,
-                        "unit": ing.unit,
-                        "price": ing.unit_price,
-                        "category": ing.category,
-                        "spec": ing.spec,
-                        "description": ing.description,
-                        "supplier_name": ing.supplier.name if ing.supplier else "미정",
-                        "current_stock": round(current_before, 2),
-                        "safe_stock": round(safe_stock, 2),
-                        "needed_qty": round(needed_qty, 2),
-                        "order_qty": round(order_qty, 2),
-                    }
-                )
+                for recipe in menu.recipes.all():
+                    ing = recipe.ingredient
+                    current_before = stock_balance.get(ing.id, Decimal("0"))
+                    required_per_person = to_decimal(recipe.required_amount)
+                    needed_qty = to_decimal(serving_count) * required_per_person
+                    safe_stock = to_decimal(ing.safe_stock_level)
+                    shortage_qty = needed_qty + safe_stock - current_before
+                    order_qty = shortage_qty if shortage_qty > 0 else Decimal("0")
 
-            plan_item["menus"].append(menu_item)
+                    # 현재 끼니 소비량만큼 재고를 차감한다. 음수는 0으로 고정한다.
+                    stock_balance[ing.id] = current_before + order_qty - needed_qty
 
-        analysis_data[dt].append(plan_item)
+                    menu_item["ingredients"].append(
+                        {
+                            "id": ing.id,
+                            "name": ing.name,
+                            "unit": ing.unit,
+                            "price": ing.unit_price,
+                            "category": ing.category,
+                            "spec": ing.spec,
+                            "description": ing.description,
+                            "supplier_name": ing.supplier.name if ing.supplier else "미정",
+                            "current_stock": round(current_before, 2),
+                            "initial_stock": round(initial_stock_balance.get(ing.id, Decimal("0")), 2),
+                            "safe_stock": round(safe_stock, 2),
+                            "needed_qty": round(needed_qty, 2),
+                            "order_qty": round(order_qty, 2),
+                            "required_per_person": float(required_per_person),
+                        }
+                    )
 
-    sorted_analysis = [
-        {
-            "date": dt,
-            "plans": analysis_data[dt],
-        }
-        for dt in sorted(analysis_data.keys())
-    ]
+                plan_item["menus"].append(menu_item)
+
+            date_plans.append(plan_item)
+
+        if date_plans:
+            order_date_display = f"{curr_date.strftime('%Y년 %m월 %d일')} ({WEEKDAYS_KO[curr_date.weekday()]})"
+            grouped_orders.append({
+                "order_date": curr_date,
+                "order_date_display": order_date_display,
+                "plans": date_plans,
+            })
+
+        curr_date += timedelta(days=1)
 
     return render(
         request,
@@ -550,8 +572,10 @@ def order_from_mealplan(request):
         {
             "start_date": start_date,
             "end_date": end_date,
-            "analysis_data": sorted_analysis,
-            "all_ingredients": Ingredient.objects.all().order_by("name"),
+            "grouped_orders": grouped_orders,
+            "all_ingredients": Ingredient.objects.exclude(name__icontains="테스트").order_by("name"),
+            "selected_days": selected_days,
+            "day_choices": DAY_CHOICES,
         },
     )
 
@@ -601,46 +625,146 @@ def weekly_procurement_report(request):
     return render(request, "docs/weekly_procurement_report.html", context)
 
 
+def get_vendor_procurement_data(start_date, end_date, supplier=None):
+    WEEKDAYS_KO = ["월", "화", "수", "목", "금", "토", "일"]
+    meal_order = Case(
+        When(meal_type=DietPlan.MealType.BREAKFAST, then=Value(1)),
+        When(meal_type=DietPlan.MealType.LUNCH, then=Value(2)),
+        When(meal_type=DietPlan.MealType.DINNER, then=Value(3)),
+        default=Value(4),
+        output_field=IntegerField(),
+    )
+
+    base_qs = OrderItem.objects.select_related("ingredient", "purchase_order__supplier")
+    if supplier:
+        base_qs = base_qs.filter(purchase_order__supplier=supplier)
+
+    grouped_orders = []
+    seen_item_ids = set()
+
+    total_item_count = 0
+    total_order_qty = Decimal("0")
+    total_amount = 0
+
+    curr_date = start_date
+    while curr_date <= end_date:
+        if curr_date.weekday() in (5, 6):
+            curr_date += timedelta(days=1)
+            continue
+
+        order_date = curr_date
+        next_day = order_date + timedelta(days=1)
+
+        if order_date.weekday() == 4:  # 금요일
+            query = (
+                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
+                | Q(target_date=order_date + timedelta(days=1))  # 토요일 전체
+                | Q(target_date=order_date + timedelta(days=2))  # 일요일 전체
+                | Q(target_date=order_date + timedelta(days=3), meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])  # 차주 월요일
+            )
+        else:  # 월, 화, 수, 목
+            query = (
+                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
+                | Q(target_date=next_day, meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])
+            )
+
+        date_qs = base_qs.filter(query).distinct()
+
+        if seen_item_ids:
+            date_qs = date_qs.exclude(id__in=seen_item_ids)
+
+        date_items = list(date_qs.order_by("target_date", meal_order, "ingredient__name"))
+
+        if date_items:
+            for item in date_items:
+                seen_item_ids.add(item.id)
+                if item.target_date and item.meal_type:
+                    item.meal_date_display = f"{item.target_date.strftime('%m/%d')} {item.meal_type}"
+                elif item.target_date:
+                    item.meal_date_display = item.target_date.strftime("%m/%d")
+                else:
+                    item.meal_date_display = "-"
+
+                total_item_count += 1
+                total_order_qty += to_decimal(item.missing_qty)
+                total_amount += (item.estimated_price or 0)
+
+            order_date_display = f"{curr_date.strftime('%Y-%m-%d')} ({WEEKDAYS_KO[curr_date.weekday()]})"
+            grouped_orders.append({
+                "date": curr_date,
+                "order_date": curr_date,
+                "order_date_display": order_date_display,
+                "items": date_items,
+            })
+
+        curr_date += timedelta(days=1)
+
+    subtotal = int(total_amount / 1.1) if total_amount > 0 else 0
+    vat = total_amount - subtotal
+
+    return {
+        "grouped_orders": grouped_orders,
+        "report_data": grouped_orders,
+        "total_item_count": total_item_count,
+        "total_order_qty": total_order_qty,
+        "total_amount": total_amount,
+        "subtotal": subtotal,
+        "vat": vat,
+    }
+
+
 def vendor_procurement_report(request):
-    target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    start_date_str = request.GET.get("start_date", "").strip()
+    end_date_str = request.GET.get("end_date", "").strip()
     supplier_id = request.GET.get("supplier_id", "").strip()
 
-    # 빈 문자열이나 문자열 'None'이 넘어온 경우 필터링하지 않는다.
     if supplier_id in ("", "None", "none"):
         supplier_id = ""
 
-    suppliers = get_user_model().objects.filter(purchase_orders__isnull=False).distinct()
+    target_date, default_monday, default_sunday = get_monday_sunday_range(request.GET.get("date"))
+
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else default_monday
+    except ValueError:
+        start_date = default_monday
+
+    try:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else default_sunday
+    except ValueError:
+        end_date = default_sunday
+
+    user_model = get_user_model()
+    supplier_qs = user_model.objects.filter(is_superuser=False).filter(
+        Q(purchase_orders__isnull=False) | Q(supplied_ingredients__isnull=False)
+    ).distinct()
+
+    if hasattr(user_model, "name"):
+        suppliers = supplier_qs.order_by("name", "username")
+    else:
+        suppliers = supplier_qs.order_by("username")
     selected_supplier = None
-    report_data = []
 
     if supplier_id:
         selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
-        order_items = OrderItem.objects.annotate(
-            display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
-        ).filter(
-            display_date__range=[monday, sunday],
-            purchase_order__supplier=selected_supplier
-        ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
 
-        analysis_data = defaultdict(list)
-        for item in order_items:
-            analysis_data[item.display_date].append(item)
-
-        report_data = [
-            {"date": dt, "items": analysis_data[dt]}
-            for dt in sorted(analysis_data.keys())
-        ]
+    proc_data = get_vendor_procurement_data(start_date, end_date, selected_supplier)
 
     context = {
         "suppliers": suppliers,
         "selected_supplier": selected_supplier,
         "current_supplier_id": supplier_id,
-        "report_data": report_data,
-        "monday": monday,
-        "sunday": sunday,
+        "report_data": proc_data["report_data"],
+        "grouped_orders": proc_data["grouped_orders"],
+        "start_date": start_date,
+        "end_date": end_date,
+        "monday": start_date,
+        "sunday": end_date,
         "target_date": target_date,
-        "prev_week_date": (monday - timedelta(days=7)).isoformat(),
-        "next_week_date": (monday + timedelta(days=7)).isoformat(),
+        "total_item_count": proc_data["total_item_count"],
+        "total_order_qty": proc_data["total_order_qty"],
+        "total_amount": proc_data["total_amount"],
+        "subtotal": proc_data["subtotal"],
+        "vat": proc_data["vat"],
     }
     return render(request, "docs/vendor_procurement_report.html", context)
 
@@ -683,48 +807,67 @@ def export_weekly_procurement_excel(request):
 
 
 def export_vendor_procurement_excel(request):
-    _, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
+    start_date_str = request.GET.get("start_date", "").strip()
+    end_date_str = request.GET.get("end_date", "").strip()
     supplier_id = request.GET.get("supplier_id", "").strip()
 
-    # 빈 문자열이나 문자열 'None'이 넘어온 경우 업체 미선택으로 처리한다.
-    if supplier_id in ("None", "none"):
+    if supplier_id in ("", "None", "none"):
         supplier_id = ""
 
-    if not supplier_id:
-        return HttpResponse("업체를 선택해주세요.", status=400)
+    _, default_monday, default_sunday = get_monday_sunday_range(request.GET.get("date"))
 
-    supplier = get_object_or_404(get_user_model(), id=supplier_id)
-    items = OrderItem.objects.annotate(
-        display_date=Coalesce(F("target_date"), Cast(F("purchase_order__created_at"), DateField()))
-    ).filter(
-        display_date__range=[monday, sunday],
-        purchase_order__supplier=supplier
-    ).select_related("ingredient", "purchase_order").order_by("display_date", "ingredient__name")
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else default_monday
+    except ValueError:
+        start_date = default_monday
+
+    try:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else default_sunday
+    except ValueError:
+        end_date = default_sunday
+
+    supplier = None
+    if supplier_id:
+        supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        supplier_title = supplier.name or supplier.username
+    else:
+        supplier_title = "전체납품업체통합"
+
+    proc_data = get_vendor_procurement_data(start_date, end_date, supplier)
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = f"발주명세서_{supplier.name or supplier.username}"
+    ws.title = f"발주명세서_{supplier_title}"
 
-    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "주문일자"]
+    headers = ["No", "식단일", "공급처", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "주문일자"]
     ws.append(headers)
 
-    for i, item in enumerate(items, 1):
-        ws.append([
-            i,
-            item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
-            item.ingredient.category or "-",
-            item.ingredient.name,
-            item.ingredient.spec or "-",
-            item.ingredient.unit,
-            item.order_unit_price,
-            float(item.required_qty),
-            float(item.missing_qty),
-            item.estimated_price,
-            item.purchase_order.created_at.strftime("%Y-%m-%d")
-        ])
+    item_idx = 1
+    for date_group in proc_data["grouped_orders"]:
+        order_date_str = date_group["order_date"].strftime("%Y-%m-%d")
+        for item in date_group["items"]:
+            supplier_name = "-"
+            if item.purchase_order and item.purchase_order.supplier:
+                supplier_name = getattr(item.purchase_order.supplier, "name", None) or item.purchase_order.supplier.username
+
+            ws.append([
+                item_idx,
+                item.meal_date_display,
+                supplier_name,
+                item.ingredient.category or "-",
+                item.ingredient.name,
+                item.ingredient.spec or "-",
+                item.ingredient.unit,
+                item.order_unit_price,
+                float(item.required_qty),
+                float(item.missing_qty),
+                item.estimated_price,
+                order_date_str
+            ])
+            item_idx += 1
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    filename = f"vendor_procurement_{supplier.name or supplier.username}_{monday}.xlsx"
+    filename = f"vendor_procurement_{supplier_title}_{start_date}.xlsx"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
@@ -807,7 +950,7 @@ def export_daily_inspection_excel(request):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
 
     # Title
-    ws.merge_cells("A1:M2")
+    ws.merge_cells("A1:I2")
     ws["A1"] = "검 수 서 (주 문)"
     ws["A1"].font = Font(size=20, bold=True)
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")

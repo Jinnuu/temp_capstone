@@ -1,0 +1,248 @@
+Found 37 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_bulk_upload_update_or_create_overwrite (meals.tests.MealPlanBulkUploadTestCase.test_bulk_upload_update_or_create_overwrite) ... FAIL
+test_csv_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_csv_bulk_upload_success) ... FAIL
+test_grid_calendar_excel_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_excel_upload_success) ... FAIL
+test_grid_calendar_with_title_and_disclaimer_noise (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_with_title_and_disclaimer_noise) ... FAIL
+test_invalid_date_format (meals.tests.MealPlanBulkUploadTestCase.test_invalid_date_format) ... ok
+test_invalid_meal_type (meals.tests.MealPlanBulkUploadTestCase.test_invalid_meal_type) ... ok
+test_menu_sorting_by_category_priority (meals.tests.MealPlanBulkUploadTestCase.test_menu_sorting_by_category_priority) ... FAIL
+test_missing_required_headers (meals.tests.MealPlanBulkUploadTestCase.test_missing_required_headers) ... ok
+test_xlsx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xlsx_bulk_upload_success) ... FAIL
+test_xltx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xltx_bulk_upload_success) ... FAIL
+test_all_documents_and_main_screens_render (integration_tests.test_workflows.WorkflowCase.test_all_documents_and_main_screens_render) ...
+  test_all_documents_and_main_screens_render (integration_tests.test_workflows.WorkflowCase.test_all_documents_and_main_screens_render) (route='accounts:login') ... ERROR
+test_comma_ids_use_all_inventory_log_types (integration_tests.test_workflows.WorkflowCase.test_comma_ids_use_all_inventory_log_types) ... ok
+test_csv_ingredient_upload_preserves_missing_columns (integration_tests.test_workflows.WorkflowCase.test_csv_ingredient_upload_preserves_missing_columns) ... ok
+test_dashboard_total_is_not_capped_at_eight (integration_tests.test_workflows.WorkflowCase.test_dashboard_total_is_not_capped_at_eight) ... ok
+test_date_requirement_fallback (integration_tests.test_workflows.WorkflowCase.test_date_requirement_fallback) ... ok
+test_excel_exports_open_as_real_workbooks (integration_tests.test_workflows.WorkflowCase.test_excel_exports_open_as_real_workbooks) ...
+  test_excel_exports_open_as_real_workbooks (integration_tests.test_workflows.WorkflowCase.test_excel_exports_open_as_real_workbooks) (route='procurement:export_daily_inspection_excel') ... ERROR
+test_friday_group_covers_weekend_and_next_monday (integration_tests.test_workflows.WorkflowCase.test_friday_group_covers_weekend_and_next_monday) ... ok
+test_ingredient_upload_rolls_back_on_bad_number (integration_tests.test_workflows.WorkflowCase.test_ingredient_upload_rolls_back_on_bad_number) ... ok
+test_migration_graph_has_no_conflicts (integration_tests.test_workflows.WorkflowCase.test_migration_graph_has_no_conflicts) ... ok
+test_named_amounts_take_priority_over_date (integration_tests.test_workflows.WorkflowCase.test_named_amounts_take_priority_over_date) ... ok
+test_new_menu_name_api_and_delete_endpoint (integration_tests.test_workflows.WorkflowCase.test_new_menu_name_api_and_delete_endpoint) ... ok
+test_order_creation_receipt_and_repeated_confirmation (integration_tests.test_workflows.WorkflowCase.test_order_creation_receipt_and_repeated_confirmation) ... ok
+test_predicted_headcount_is_used_in_smart_order (integration_tests.test_workflows.WorkflowCase.test_predicted_headcount_is_used_in_smart_order) ... ok
+test_preserved_release_patch_routes (integration_tests.test_workflows.WorkflowCase.test_preserved_release_patch_routes) ... ok
+test_recipe_release_upload_to_deduction_flow_is_idempotent (integration_tests.test_workflows.WorkflowCase.test_recipe_release_upload_to_deduction_flow_is_idempotent) ... ok
+test_repeated_ids_and_nonshortage_do_not_force_minimum (integration_tests.test_workflows.WorkflowCase.test_repeated_ids_and_nonshortage_do_not_force_minimum) ... ok
+test_safety_reserve_not_duplicated_across_menus_or_days (integration_tests.test_workflows.WorkflowCase.test_safety_reserve_not_duplicated_across_menus_or_days) ... ok
+test_selected_weekday_and_no_duplicate_meals (integration_tests.test_workflows.WorkflowCase.test_selected_weekday_and_no_duplicate_meals) ... ok
+test_simple_order_preserves_post_date (integration_tests.test_workflows.WorkflowCase.test_simple_order_preserves_post_date) ... ok
+test_single_ingredient_id_uses_annotated_stock (integration_tests.test_workflows.WorkflowCase.test_single_ingredient_id_uses_annotated_stock) ... ok
+test_sufficient_stock_yields_no_order (integration_tests.test_workflows.WorkflowCase.test_sufficient_stock_yields_no_order) ... ok
+test_titled_multisheet_ingredient_upload_matches_supplier_name (integration_tests.test_workflows.WorkflowCase.test_titled_multisheet_ingredient_upload_matches_supplier_name) ... ok
+test_unknown_supplier_does_not_erase_existing_mapping (integration_tests.test_workflows.WorkflowCase.test_unknown_supplier_does_not_erase_existing_mapping) ... ok
+test_weekday_order_group_uses_dinner_then_next_breakfast_lunch (integration_tests.test_workflows.WorkflowCase.test_weekday_order_group_uses_dinner_then_next_breakfast_lunch) ... ok
+test_weekend_only_has_no_order_day_group (integration_tests.test_workflows.WorkflowCase.test_weekend_only_has_no_order_day_group) ... ok
+test_weekly_recipe_document_links_menu_recipe_and_explicit_headcount (integration_tests.test_workflows.WorkflowCase.test_weekly_recipe_document_links_menu_recipe_and_explicit_headcount) ... ok
+test_wide_upload_keeps_headcount_and_row_upload_overwrites (integration_tests.test_workflows.WorkflowCase.test_wide_upload_keeps_headcount_and_row_upload_overwrites) ... FAIL
+
+======================================================================
+ERROR: test_all_documents_and_main_screens_render (integration_tests.test_workflows.WorkflowCase.test_all_documents_and_main_screens_render) (route='accounts:login')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 81, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'accounts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_workflows.py", line 245, in test_all_documents_and_main_screens_render
+    response=self.client.get(reverse(name),{'date':str(self.monday),'start_date':str(self.monday),'end_date':str(self.monday)})
+                             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 92, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'accounts' is not a registered namespace
+
+======================================================================
+ERROR: test_excel_exports_open_as_real_workbooks (integration_tests.test_workflows.WorkflowCase.test_excel_exports_open_as_real_workbooks) (route='procurement:export_daily_inspection_excel')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_workflows.py", line 252, in test_excel_exports_open_as_real_workbooks
+    response=self.client.get(reverse(name),{'date':str(self.monday),'start_date':str(self.monday),'end_date':str(self.monday)})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/client.py", line 1124, in get
+    response = super().get(
+               ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/client.py", line 475, in get
+    return self.generic(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/client.py", line 671, in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/client.py", line 1087, in request
+    self.check_exception(response)
+  File "/usr/local/lib/python3.12/site-packages/django/test/client.py", line 802, in check_exception
+    raise exc_value
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/procurement/views.py", line 959, in export_daily_inspection_excel
+    ws["J1"] = "결재"
+    ~~^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/openpyxl/worksheet/worksheet.py", line 317, in __setitem__
+    self[key].value = value
+    ^^^^^^^^^^^^^^^
+AttributeError: 'MergedCell' object attribute 'value' is read-only
+
+======================================================================
+FAIL: test_bulk_upload_update_or_create_overwrite (meals.tests.MealPlanBulkUploadTestCase.test_bulk_upload_update_or_create_overwrite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 209, in test_bulk_upload_update_or_create_overwrite
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_csv_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_csv_bulk_upload_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 27, in test_csv_bulk_upload_success
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_grid_calendar_excel_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_excel_upload_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 108, in test_grid_calendar_excel_upload_success
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_grid_calendar_with_title_and_disclaimer_noise (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_with_title_and_disclaimer_noise)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 145, in test_grid_calendar_with_title_and_disclaimer_noise
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_menu_sorting_by_category_priority (meals.tests.MealPlanBulkUploadTestCase.test_menu_sorting_by_category_priority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 182, in test_menu_sorting_by_category_priority
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_xlsx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xlsx_bulk_upload_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 58, in test_xlsx_bulk_upload_success
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_xltx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xltx_bulk_upload_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/meals/tests.py", line 82, in test_xltx_bulk_upload_success
+    self.assertRedirects(response, self.list_url)
+AssertionError: '/meals/mealplan/upload/' != '/meals/mealplan_list/'
+- /meals/mealplan/upload/
+?                ^^^ ^^^
++ /meals/mealplan_list/
+?                ^ ^^^
+ : Response redirected to '/meals/mealplan/upload/', expected '/meals/mealplan_list/': Expected '/meals/mealplan/upload/' to equal '/meals/mealplan_list/'.
+
+======================================================================
+FAIL: test_wide_upload_keeps_headcount_and_row_upload_overwrites (integration_tests.test_workflows.WorkflowCase.test_wide_upload_keeps_headcount_and_row_upload_overwrites)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_workflows.py", line 220, in test_wide_upload_keeps_headcount_and_row_upload_overwrites
+    self.assertEqual(list(DietPlan.objects.get(meal_type='중식').diet_menus.values_list('menu__name',flat=True)),['새메뉴'])
+AssertionError: Lists differ: ['쌀밥'] != ['새메뉴']
+
+First differing element 0:
+'쌀밥'
+'새메뉴'
+
+- ['쌀밥']
++ ['새메뉴']
+
+----------------------------------------------------------------------
+Ran 37 tests in 0.995s
+
+FAILED (failures=8, errors=2)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

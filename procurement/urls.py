@@ -1,3 +1,4 @@
+from .views_new_docs import doc_purchase_requisition, doc_inspection_log
 from django.urls import path
 
 from . import views
@@ -18,4 +19,6 @@ urlpatterns = [
     path("weekly-report/excel/", views.export_weekly_procurement_excel, name="export_weekly_procurement_excel"),
     path("vendor-report/excel/", views.export_vendor_procurement_excel, name="export_vendor_procurement_excel"),
     path("daily-report/excel/", views.export_daily_inspection_excel, name="export_daily_inspection_excel"),
+    path("docs/purchase-requisition/", doc_purchase_requisition, name="doc_purchase_requisition"),
+    path("docs/inspection-log/", doc_inspection_log, name="doc_inspection_log"),
 ]

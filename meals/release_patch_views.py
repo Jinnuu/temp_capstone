@@ -232,13 +232,15 @@ def _current_stock(ingredient):
     return in_qty + adj_qty - out_qty - waste_qty
 
 
-def _build_deduct_preview(target_date, meal_type=None, override_headcount=None):
-    plans = DietPlan.objects.filter(target_date=target_date).prefetch_related(
+def _build_deduct_preview(target_date, meal_type=None, override_headcount=None, *, lock=False):
+    plans = DietPlan.objects.filter(target_date=target_date, is_served=False).prefetch_related(
         "diet_menus__menu__recipes__ingredient"
     )
 
     if meal_type:
         plans = plans.filter(meal_type=meal_type)
+    if lock:
+        plans = plans.select_for_update()
 
     rows_by_ingredient = {}
     plan_rows = []
@@ -314,6 +316,10 @@ def deduct_inventory_view(request):
             return redirect("meals:deduct_inventory")
 
         with transaction.atomic():
+            # Re-read under row locks so duplicate confirmations cannot deduct twice.
+            rows, plan_rows, warnings = _build_deduct_preview(
+                target_date, meal_type or None, override_headcount, lock=True,
+            )
             for row in rows:
                 qty = row["deduct_qty"].quantize(Decimal("0.01"))
                 if qty <= 0:
@@ -326,10 +332,7 @@ def deduct_inventory_view(request):
                     description=f"{target_date} {meal_type or '전체'} 식사 완료 재고 차감",
                 )
 
-            plans = DietPlan.objects.filter(target_date=target_date)
-            if meal_type:
-                plans = plans.filter(meal_type=meal_type)
-            plans.update(is_served=True)
+            DietPlan.objects.filter(pk__in=[item["plan"].pk for item in plan_rows]).update(is_served=True)
 
         messages.success(request, f"{target_date} {meal_type or '전체'} 재고 차감이 완료되었습니다.")
         return redirect("meals:mealplan_list")

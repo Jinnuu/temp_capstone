@@ -1,3 +1,5 @@
+from .views import delete_diet_menu_api, bulk_delete_mealplans, weekly_recipe_report
+from .views_new_docs import doc_menu_overview
 from django.urls import path
 
 from .recipe_file_views import (
@@ -60,4 +62,8 @@ urlpatterns = [
     path("menus/<int:menu_id>/delete/", menu_delete, name="menu_delete"),
 
     path("deduct_inventory/", deduct_inventory_view, name="deduct_inventory"),
+    path("document/weekly-recipe/", weekly_recipe_report, name="weekly_recipe_report"),
+    path("document/menu-overview/", doc_menu_overview, name="doc_menu_overview"),
+    path("api/diet-menu/<int:diet_menu_id>/delete/", delete_diet_menu_api, name="delete_diet_menu_api"),
+    path("mealplan/bulk-delete/", bulk_delete_mealplans, name="bulk_delete_mealplans"),
 ]

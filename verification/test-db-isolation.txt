@@ -1,0 +1,1 @@
+/sprint7-integration-db-audit network=none ports={} mounts=[{"Type":"bind","Source":"/tmp/sprint7-integration-db-socket","Destination":"/run/mysqld","Mode":"","RW":true,"Propagation":"rprivate"}]

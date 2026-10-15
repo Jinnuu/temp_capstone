@@ -1,0 +1,63 @@
+{
+  "original_branch": "sprint7",
+  "original_head": "a8f5adbe3c971e00f7c14a60160ee926abf7a0e2",
+  "original_status": "M config/views.py\n M procurement/views.py\n M templates/home.html\n M templates/procurement/order_create.html",
+  "original_files": {
+    "config/views.py": {
+      "sha256": "02fa53e4d0a3376703f3de3ac81d7d6501fd68d1963381cf6cd4e463fa1ca94b",
+      "matches_original": true
+    },
+    "procurement/views.py": {
+      "sha256": "7dff97fa4f83222a6ee312921c81a8dc03512b4e3c6cdd2bb310ff82c74ecffb",
+      "matches_original": true
+    },
+    "templates/home.html": {
+      "sha256": "fe3b771d88c69bffae4ade68bc8eaf1cedd8b541f2485e9af74e364666328954",
+      "matches_original": true
+    },
+    "templates/procurement/order_create.html": {
+      "sha256": "5c1284912d41a94d0ce414cc423994020a72b12699b34acaa22b7a6202881594",
+      "matches_original": true
+    }
+  },
+  "existing_containers": [
+    {
+      "name": "/my-capstone",
+      "status": "running",
+      "started_at": "2026-09-05T02:38:46.467089255Z",
+      "restart_count": 0,
+      "image": "sha256:19badeda32155f84d93d22097b7da4404a10cd6188b15a12ae9790e78131afbb",
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "8000"
+          },
+          {
+            "HostIp": "::",
+            "HostPort": "8000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "/my-capstone-sprint7",
+      "status": "running",
+      "started_at": "2026-09-05T02:38:46.436661546Z",
+      "restart_count": 0,
+      "image": "sha256:8b128d4a45565b0a80c623b923c83d0441632ecfd759fb20f768be0da91947b3",
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "8007"
+          },
+          {
+            "HostIp": "::",
+            "HostPort": "8007"
+          }
+        ]
+      }
+    }
+  ]
+}
