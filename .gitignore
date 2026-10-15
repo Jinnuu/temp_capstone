@@ -13,3 +13,6 @@ env/
 # 데이터베이스
 db.sqlite3
 .env
+
+# Local reference documents are evidence, not application source.
+/docs/reference/
