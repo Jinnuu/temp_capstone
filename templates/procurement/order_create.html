@@ -64,8 +64,7 @@
               <th>합계금액</th>
             </tr>
           </thead>
-          <tbody>
-            {% for ing in ingredients %}
+          <tbody id="orderTableBody"> {% for ing in ingredients %}
               <tr data-category="{{ ing.category|default:'일반' }}" data-name="{{ ing.name }}">
                 <td><input type="checkbox" class="sp-order-check"></td>
                 <td class="fw-bold">
@@ -78,8 +77,6 @@
                 <td><input type="number" min="0" step="0.01" name="quantity[]" value="0" class="sp-qty-input" disabled></td>
                 <td class="sp-row-total">0원</td>
               </tr>
-            {% empty %}
-              <tr><td colspan="7" class="sp-empty-cell">등록된 식재료가 없습니다.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -134,6 +131,7 @@
 
       if (!check.checked) {
         rowTotalEl.textContent = "0원";
+        row.classList.remove("sp-highlight-row"); // 체크 해제 시 스타일 복구
         return;
       }
 
@@ -187,14 +185,38 @@
 
       check.checked = true;
       qtyInput.value = numericValue;
+      row.classList.add("sp-highlight-row"); // 🌟 부족분 매칭 행 스타일 식별자 주입
     });
+  }
+
+  // 🌟 [신규 엔진] 부족분 품목(체크된 품목)을 최상단으로 재정렬하는 함수
+  function sortSelectedRowsToTop() {
+    const tbody = document.getElementById("orderTableBody");
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    
+    // 체크박스가 켜진 행을 연동 우선순위(1), 안 켜진 행을 일반(0)으로 두어 내림차순 정렬
+    rows.sort((a, b) => {
+      const aChecked = a.querySelector(".sp-order-check")?.checked ? 1 : 0;
+      const bChecked = b.querySelector(".sp-order-check")?.checked ? 1 : 0;
+      return bChecked - aChecked; 
+    });
+
+    // 정렬된 순서대로 tbody에 다시 순차 빌드 (DOM 노드 이동)
+    rows.forEach(row => tbody.appendChild(row));
   }
 
   document.addEventListener("change", (event) => {
     if (event.target.matches(".sp-order-check")) {
       const row = event.target.closest("tr");
       const qtyInput = row.querySelector('input[name="quantity[]"]');
-      if (event.target.checked && Number(qtyInput.value || 0) <= 0) qtyInput.value = 1;
+      if (event.target.checked && Number(qtyInput.value || 0) <= 0) {
+          qtyInput.value = 1;
+          row.classList.add("sp-highlight-row");
+      } else if (!event.target.checked) {
+          row.classList.remove("sp-highlight-row");
+      }
       updateOrderTotals();
     }
 
@@ -211,8 +233,20 @@
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    applyShortageMap();
-    updateOrderTotals();
+    applyShortageMap();     // 1. 부족분 매칭 및 체크 활성화
+    sortSelectedRowsToTop(); // 2. 🌟 부족분 품목 전체 최상단 강제 배치
+    updateOrderTotals();     // 3. 합계 금액 갱신
   });
 </script>
+
+<style>
+  /* 🌟 가시성을 극대화하기 위해 자동 연동된 부족분 행에 은은한 하이라이팅 효과 부여 */
+  .sp-highlight-row {
+    background-color: #fff9db !important; /* 부드러운 노란색 계열 배경 */
+    border-left: 4px solid #fcc419 !important;
+  }
+  .sp-highlight-row td {
+    color: #212529 !important;
+  }
+</style>
 {% endblock %}

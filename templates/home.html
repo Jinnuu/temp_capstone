@@ -23,11 +23,11 @@
           <small>날짜를 클릭하면 상세 요약이 변경됩니다.</small>
         </article>
 
-        <article class="pf-stat">
-          <span>부족 재고</span>
-          <strong class="red">{{ low_stock_items|length }}개</strong>
-          <small>안전재고 이하 품목 기준</small>
-        </article>
+	<article class="pf-stat">
+  		<span>부족 재고</span>
+  		<strong class="red">{{ total_low_stock_count|default:0 }}개</strong> 
+		<small>안전재고 이하 품목 기준</small>
+	</article>
 
         <article class="pf-stat">
           <span>발주 대기</span>

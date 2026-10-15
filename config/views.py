@@ -136,6 +136,10 @@ def home(request):
             }
         )
 
+# 1. 🌟 [방어선 구축] 슬라이싱이나 필터링이 전혀 걸리지 않은 '진짜 순수 부족 총 개수'를 DB에서 카운트합니다.
+    total_low_stock_count = get_ingredient_stock_queryset().filter(is_low_stock=True).count()
+
+    # 2. 사이드바용 8개 제한 리스트 (기존 디자인 무결성 유지)
     low_stock_items = list(
         get_ingredient_stock_queryset()
         .filter(is_low_stock=True)
@@ -159,11 +163,11 @@ def home(request):
             "calendar_weeks": calendar_weeks,
             "selected_plans": selected_plans,
             "selected_prediction_rows": selected_prediction_rows,
-            "low_stock_items": low_stock_items,
+            "low_stock_items": low_stock_items,          # 사이드바에는 이쁘게 8개 노출
+            "total_low_stock_count": total_low_stock_count, # 🌟 상단 스탯 카드용 진짜 전체 개수 토스!
             "pending_order_count": pending_order_count,
         },
     )
-
 
 def docs_index(request):
     return render(request, "docs/index.html")

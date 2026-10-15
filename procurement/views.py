@@ -122,14 +122,17 @@ def get_serving_count(plan):
 
 def order_create(request):
     """
-    간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 로드 기능 포함
+    간편주문(발주서 작성) 생성 뷰 - 날짜별 부족분 및 재고 페이지 ID 일괄 연동 포함
     """
-
     target_date = request.GET.get("target_date")
+    
+    # --------------------------------------------------------------------------
+    # 1. POST 요청 처리 구역 (재석님의 원본 로직 무결성 100% 유지)
+    # --------------------------------------------------------------------------
     if request.method == 'POST':
         ingredient_ids = request.POST.getlist('ingredient_id[]')
         quantities = request.POST.getlist('quantity[]')
-        
+
         if ingredient_ids and quantities:
             user = get_or_create_dummy_user(request)
             po = PurchaseOrder.objects.create(
@@ -170,20 +173,50 @@ def order_create(request):
             messages.success(request, f"발주서 #{po.id} 건이 성공적으로 전송되었습니다.")
             return redirect("procurement:order_detail", pk=po.id)
 
+    # --------------------------------------------------------------------------
+    # 2. GET 요청 데이터 파싱 구역 (하이브리드 분기 처리 가드레일 가동)
+    # --------------------------------------------------------------------------
     items_names = request.GET.getlist("items")
     amounts = request.GET.getlist("amounts")
-    shortage_map = dict(zip(items_names, amounts))
+    shortage_map = {}
 
+    # 🎯 [루트 A] 재고 현황 페이지에서 "부족분 발주" 버튼을 눌러 ID 리스트(['43,44,45'])가 온 경우
+    if items_names and len(items_names) == 1 and "," in items_names[0]:
+        try:
+            # 콤마 문자열을 정수형 ID 리스트로 분해
+            raw_ids = [int(x.strip()) for x in items_names[0].split(",") if x.strip().isdigit()]
+            low_stock_ingredients = Ingredient.objects.filter(id__in=raw_ids)
+            
+            for ing in low_stock_ingredients:
+                current_stock = ing.calc_stock if hasattr(ing, 'calc_stock') else 0
+                shortage_qty = float(ing.safe_stock_level) - float(current_stock)
+                
+                # 재고 기준 부족량을 맵에 주입 (이름 기둥)
+                if shortage_qty > 0:
+                    shortage_map[ing.name] = f"{shortage_qty:.2f}"
+                else:
+                    shortage_map[ing.name] = "1.00"  # 최소 방어 수량
+        except Exception as e:
+            print(f"[재고 현황 연동 ID 파싱 에러]: {e}")
 
-    if target_date:
-        requirements = get_all_day_requirements(target_date)
+    # 🎯 [루트 B] 식재료 산출(예측 결과) 화면에서 이름과 수량이 1:1로 넘어온 경우
+    elif items_names and amounts:
+        shortage_map = dict(zip(items_names, amounts))
 
-        for name, data in requirements.get("items", {}).items():
-            order_amount = data.get("order_amount", 0)
+    # 🎯 [루트 C] 주소창 인자는 없지만 날짜 필터 로드로 AI 예측 엔진 데이터를 긁어와야 하는 경우
+    elif target_date and not items_names:
+        try:
+            requirements = get_all_day_requirements(target_date)
+            for name, data in requirements.get("items", {}).items():
+                order_amount = data.get("order_amount", 0)
+                if order_amount and float(order_amount) > 0:
+                    shortage_map[name] = str(order_amount)
+        except Exception as e:
+            print(f"[식단 날짜 기반 예측 데이터 로드 에러]: {e}")
 
-            if order_amount and float(order_amount) > 0:
-                shortage_map[name] = str(order_amount)
-
+    # --------------------------------------------------------------------------
+    # 3. 마스터 기준정보 렌더링 준비 구역 (기존 유지)
+    # --------------------------------------------------------------------------
     ingredients = Ingredient.objects.all().order_by("name")
     categories = (
         Ingredient.objects.exclude(category__isnull=True)
@@ -203,7 +236,6 @@ def order_create(request):
             "target_date": target_date or date.today().isoformat(),
         },
     )
-
 
 def order_list(request):
     orders = PurchaseOrder.objects.all().order_by("-created_at")
