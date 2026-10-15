@@ -45,7 +45,7 @@ def doc_purchase_requisition(request):
 
     for item in order_items_qs:
         ing = item.ingredient
-        category = ing.category or "기타"
+        category = ing.category or "미분류"
         key = (category, ing.name)
         qty = float(item.required_qty)
         price = getattr(ing, "price", 0) or getattr(ing, "unit_price", 0) or 0
@@ -120,7 +120,7 @@ def doc_inspection_log(request):
 
     supplier_id = request.GET.get("supplier_id", "").strip()
     User = get_user_model()
-    suppliers = User.objects.filter(is_superuser=False).order_by("username")
+    suppliers = User.objects.filter(is_superuser=False).order_by("name", "username")
     selected_supplier = None
     supplier_name = "전체"
 
@@ -138,7 +138,7 @@ def doc_inspection_log(request):
     if selected_supplier:
         order_items_qs = order_items_qs.filter(purchase_order__supplier=selected_supplier)
 
-    order_items_qs = order_items_qs.order_by("purchase_order__supplier__username", "ingredient__category", "ingredient__name")
+    order_items_qs = order_items_qs.order_by("purchase_order__supplier__name", "ingredient__category", "ingredient__name")
 
     supplier_map = defaultdict(list)
     for item in order_items_qs:
@@ -148,7 +148,8 @@ def doc_inspection_log(request):
         qty = round(float(item.required_qty), 1)
         if qty == int(qty):
             qty = int(qty)
-        expiry_date = (end_date + timedelta(days=7)).strftime("%Y-%m-%d")
+        inspection = getattr(item, "inspection", None)
+        expiry_date = inspection.expiration_date.strftime("%Y-%m-%d") if inspection and inspection.expiration_date else "미기록"
 
         supplier_map[s_name].append({
             "category": category,

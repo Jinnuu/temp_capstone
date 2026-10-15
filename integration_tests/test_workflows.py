@@ -37,14 +37,18 @@ def workbook_file(rows, name='upload.xlsx', extra=None):
 
 class WorkflowCase(TestCase):
     def setUp(self):
+        self.operator = get_user_model().objects.create_user(username='operator', is_staff=True)
+        self.client.force_login(self.operator)
         self.supplier = get_user_model().objects.create_user(username='supplier', name='공급회사', role='SUPPLIER')
         self.ing = Ingredient.objects.create(name='쌀', unit='kg', unit_price=1000, safe_stock_level=5, supplier=self.supplier, description='기존 설명')
+        from inventory.models import SupplySpecification
+        SupplySpecification.objects.create(ingredient=self.ing,supplier=self.supplier,label='1kg',base_quantity=1,base_unit='kg',order_unit='kg',unit_price=1000)
         self.menu = Menu.objects.create(name='쌀밥', category='밥')
         Recipe.objects.create(menu=self.menu, ingredient=self.ing, required_amount=Decimal('0.10'))
         self.monday = date(2026, 10, 12)
 
     def plan(self, day, meal='중식', headcount=100):
-        plan = DietPlan.objects.create(target_date=day, meal_type=meal, headcount=headcount)
+        plan = DietPlan.objects.create(target_date=day, meal_type=meal, headcount=headcount,final_headcount=headcount,is_confirmed=True)
         DietMenu.objects.create(diet_plan=plan, menu=self.menu)
         return plan
 
@@ -189,25 +193,32 @@ class WorkflowCase(TestCase):
         self.stock(50);self.plan(self.monday,'석식')
         self.assertEqual(self.ordered_total(self.smart(self.monday)),0)
 
-    def test_predicted_headcount_is_used_in_smart_order(self):
+    def test_unconfirmed_ai_is_not_used_as_final_smart_order(self):
         self.plan(self.monday,'석식',5)
+        DietPlan.objects.filter(target_date=self.monday).update(final_headcount=None)
         AttendancePrediction.objects.create(prediction_date=self.monday, meal_type='dinner', predicted_count=30, model_name='fixture')
         response=self.smart(self.monday)
-        self.assertEqual(response.context['grouped_orders'][0]['plans'][0]['serving_count'],30)
-        self.assertEqual(self.ordered_total(response),8)
+        self.assertEqual(response.context['grouped_orders'][0]['plans'][0]['serving_count'],5)
+        self.assertEqual(self.ordered_total(response),Decimal("5.5"))
 
     def test_order_creation_receipt_and_repeated_confirmation(self):
-        payload={'ingredient_id[]':[str(self.ing.pk)],'quantity[]':['2.5'],'target_date[]':[str(self.monday)],'meal_type[]':['중식']}
-        response=self.client.post(reverse('procurement:order_from_mealplan'),payload)
-        self.assertEqual(response.status_code,302)
-        order=PurchaseOrder.objects.get();item=order.items.get()
-        self.assertEqual((order.supplier_id,order.total_amount,item.required_qty),(self.supplier.pk,2500,Decimal('2.5')))
-        for _ in range(2):self.client.post(reverse('procurement:order_status_update',args=[order.pk]),{'status':'완료'})
-        self.assertEqual(InventoryLog.objects.filter(log_type='입고').count(),1)
-        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,Decimal('2.5'))
+        from procurement.workflow import create_manual_plan, confirm_orders, inspect_item
+        import uuid
+        snapshot=create_manual_plan([(self.ing.pk,"2.5")],self.monday,self.operator,uuid.uuid4())
+        order=confirm_orders(snapshot.pk,self.operator)[0];item=order.items.get()
+        self.assertEqual((order.supplier_id,order.total_amount,item.required_qty),(self.supplier.pk,3000,Decimal("3")))
+        inspect_item(item.pk,self.operator,"3","3","정상","1kg")
+        for _ in range(2):self.client.post(reverse("procurement:order_status_update",args=[order.pk]),{"status":"완료"})
+        self.assertEqual(InventoryLog.objects.filter(log_type="입고").count(),1)
+        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,Decimal("3"))
 
     def test_simple_order_preserves_post_date(self):
-        self.client.post(reverse('procurement:order_create'),{'ingredient_id[]':[str(self.ing.pk)],'quantity[]':['2'],'target_date':str(self.monday)})
+        import uuid
+        from procurement.models import ProcurementPlan
+        from procurement.workflow import confirm_orders
+        response=self.client.post(reverse("procurement:order_create"),{"ingredient_id[]":[str(self.ing.pk)],"quantity[]":["2"],"target_date":str(self.monday),"request_key":str(uuid.uuid4())})
+        self.assertEqual(response.status_code,302)
+        confirm_orders(ProcurementPlan.objects.get().pk,self.operator)
         self.assertEqual(OrderItem.objects.get().target_date,self.monday)
 
     def test_wide_upload_keeps_headcount_and_row_upload_overwrites(self):
@@ -283,11 +294,14 @@ class WorkflowCase(TestCase):
         quantity=response.context['grouped_orders'][0]['plans'][0]['menus'][0]['ingredients'][0]['order_qty']
         required=Decimal(prediction.predicted_count)*Decimal('0.10')
         self.assertEqual(quantity,required+Decimal('5'))
-        self.client.post(reverse('procurement:order_from_mealplan'),{'ingredient_id[]':[str(self.ing.pk)],'quantity[]':[str(quantity)],'target_date[]':[str(self.monday)],'meal_type[]':['석식']})
-        order=PurchaseOrder.objects.get()
-        self.client.post(reverse('procurement:order_status_update',args=[order.pk]),{'status':'완료'})
+        import uuid
+        from procurement.workflow import create_manual_plan,confirm_orders,inspect_item
+        snapshot=create_manual_plan([(self.ing.pk,str(quantity))],self.monday,self.operator,uuid.uuid4())
+        order=confirm_orders(snapshot.pk,self.operator)[0]
+        received=order.items.get().required_qty
+        inspect_item(order.items.get().pk,self.operator,received,received,'정상','1kg')
         self.client.post(reverse('meals:deduct_inventory'),{'target_date':str(self.monday),'meal_type':'석식','confirm':'1'})
-        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,Decimal('5'))
+        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,received-required)
         response=self.client.get(reverse('meals:weekly_recipe_report'),{'start_date':str(self.monday),'end_date':str(self.monday),'headcount':prediction.predicted_count})
         self.assertEqual(Decimal(str(response.context['report_data'][0]['menus'][0]['ingredients'][0]['needed_qty'])),required)
 

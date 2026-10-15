@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from django import forms
 from .models import Ingredient, InventoryLog
@@ -77,6 +78,14 @@ class IngredientForm(forms.ModelForm):
             "total_amount": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import IngredientCategory
+        known = set(Ingredient.objects.exclude(category__isnull=True).values_list("category", flat=True))
+        known.update(IngredientCategory.objects.values_list("name", flat=True))
+        known.update(value for value, label in self.CATEGORY_CHOICES if value)
+        self.fields["category"].choices = [("", "--- 대분류 선택 ---")] + [(name, name) for name in sorted(known) if name]
+
     # 유효성 검사 로직 통합 및 간소화
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip()
@@ -98,6 +107,7 @@ class IngredientForm(forms.ModelForm):
 
 
 class InventoryLogForm(forms.ModelForm):
+    request_key = forms.UUIDField(initial=uuid.uuid4, widget=forms.HiddenInput)
     # 출고와 폐기만 선택 가능하도록 커스텀 선택지 정의
     OUT_LOG_CHOICES = [
         ('출고', '출고 (사용)'),

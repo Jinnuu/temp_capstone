@@ -10,6 +10,8 @@ from .models import DietMenu, DietPlan, Menu
 
 class MealPlanBulkUploadTestCase(TestCase):
     def setUp(self):
+        from django.contrib.auth import get_user_model
+        self.client.force_login(get_user_model().objects.create_user(username="meal-tester"))
         self.upload_url = reverse("meals:mealplan_bulk_upload")
         self.list_url = reverse("meals:mealplan_list")
 

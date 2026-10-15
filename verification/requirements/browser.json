@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "steps": [
+    "login",
+    "manual/final headcount",
+    "snapshot",
+    "35.1kg -> 8 cans",
+    "manual 9 cans",
+    "vendor order 4500",
+    "45kg delivered / 40kg accepted",
+    "35.1kg consumed",
+    "4.9kg remaining",
+    "FIFO lot",
+    "print PDF"
+  ],
+  "pageErrors": []
+}

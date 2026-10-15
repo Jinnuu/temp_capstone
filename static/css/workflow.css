@@ -1,0 +1,29 @@
+.sp-main { max-width: 1440px; margin: 0 auto; }
+.sp-main h1 { margin: 0 0 18px; font-size: 30px; }
+.sp-main h2 { margin: 30px 0 14px; font-size: 21px; }
+.sp-main p { line-height: 1.7; color: #41536d; }
+.sp-main .table { width: 100%; border-collapse: collapse; margin: 18px 0 26px; background: #fff; font-size: 15px; }
+.sp-main .table th, .sp-main .table td { padding: 12px 14px; border: 1px solid #dbe4f0; text-align: left; vertical-align: top; }
+.sp-main .table th { background: #eef3fb; font-weight: 700; color: #203a61; }
+.sp-main .table tr:nth-child(even) td { background: #fafcff; }
+.sp-main form { background: #fff; border: 1px solid #dbe4f0; border-radius: 12px; padding: 20px; margin: 16px 0 24px; }
+.sp-main form p { margin: 8px 0 18px; }
+.sp-main label { display: inline-block; min-width: 165px; margin-right: 10px; font-weight: 600; }
+.sp-main input, .sp-main select, .sp-main textarea { max-width: 100%; padding: 8px 10px; border: 1px solid #bacbe2; border-radius: 6px; font: inherit; background: white; }
+.sp-main textarea { display: block; width: min(640px, 100%); min-height: 100px; }
+.sp-main input[type=checkbox] { width: auto; }
+.sp-main input[type=number] { width: 140px; }
+.sp-main button, .sp-main a.btn { display: inline-block; background: #2859d7; color: #fff; border: 0; border-radius: 6px; padding: 10px 15px; margin: 4px; cursor: pointer; text-decoration: none; font: inherit; }
+.sp-main button:hover, .sp-main a.btn:hover { background: #1e43a8; }
+.sp-main .errorlist, .sp-main .alert-danger { color: #a12020; background: #fff0f0; padding: 12px 28px; border-radius: 6px; }
+.sp-main .card { border: 1px solid #dbe4f0; border-radius: 10px; background: #fff; padding: 20px; margin-top: 16px; }
+@media (max-width: 800px) { .sp-main { overflow-x: auto; } .sp-main .table { font-size: 13px; } .sp-main label { display: block; } }
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  .sp-header, .sp-footer, .sp-top-button, .sp-main button, .sp-main > a, .sp-main nav { display: none !important; }
+  body, .sp-main { background: white !important; padding: 0 !important; margin: 0 !important; max-width: none; }
+  .sp-main h1 { font-size: 22px; } .sp-main h2 { font-size: 17px; }
+  .sp-main .table { font-size: 11px; } .sp-main .table th, .sp-main .table td { padding: 6px; }
+  .sp-main .table thead { display: table-header-group; } .sp-main .table tr { break-inside: avoid; }
+  .sp-main form { padding: 0; border: 0; } .sp-main input { border: 0; width: 80px; }
+}

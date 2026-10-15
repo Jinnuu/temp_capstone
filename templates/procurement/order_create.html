@@ -45,7 +45,7 @@
 {{ shortage_map|json_script:"shortage-data" }}
 
 <form method="post" id="quickOrderForm">
-  {% csrf_token %}
+  {% csrf_token %}<input type="hidden" name="request_key" value="{{ request_key }}">
   <input type="hidden" name="target_date" value="{{ target_date }}">
 
   <section class="sp-order-grid">

@@ -1,4 +1,5 @@
 <nav class="sp-nav" aria-label="주요 메뉴">
+  <div class="sp-nav-item"><a class="sp-nav-link" href="{% url 'procurement:workflow' %}">영양사 업무 흐름</a></div>
   <div class="sp-nav-item">
     <a class="sp-nav-link" href="{% url 'home' %}">홈</a>
   </div>
@@ -44,8 +45,8 @@
       <a href="{% url 'procurement:order_create' %}">간편 발주</a>
       <a href="{% url 'procurement:order_list' %}">발주 목록</a>
       <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
-      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 발주 명세서</a>
-      <a href="{% url 'procurement:daily_inspection_report' %}">검수서</a>
+      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 구매발주서</a>
+      <a href="{% url 'procurement:daily_inspection_report' %}">급식물품 검수일지</a>
     </div>
   </div>
 
@@ -58,8 +59,8 @@
       <a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a>
       <a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
       <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
-      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 발주 명세서</a>
-      <a href="{% url 'procurement:daily_inspection_report' %}">검수서</a>
+      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 구매발주서</a>
+      <a href="{% url 'procurement:daily_inspection_report' %}">급식물품 검수일지</a>
       <a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a>
     </div>
   </div>

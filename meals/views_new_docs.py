@@ -49,7 +49,7 @@ def doc_menu_overview(request):
 
     for plan in plans:
         date_str = f"{plan.target_date.strftime('%m/%d')} ({WEEKDAYS_KO[plan.target_date.weekday()]})"
-        headcount = plan.headcount or 500
+        headcount = plan.final_headcount if plan.final_headcount is not None else plan.headcount
 
         menus_data = []
         plan_total_rows = 0
@@ -65,18 +65,17 @@ def doc_menu_overview(request):
                     ing = recipe.ingredient
                     req_amt = recipe.required_amount or Decimal("0")
 
-                    if req_amt < Decimal("10"):
-                        portion_g = round(float(req_amt * 1000), 1)
-                        if portion_g == int(portion_g):
-                            portion_g = int(portion_g)
-                        total_qty_val = float(req_amt * headcount)
-                    else:
-                        portion_g = float(req_amt)
-                        if portion_g == int(portion_g):
-                            portion_g = int(portion_g)
-                        total_qty_val = float(req_amt * headcount / 1000)
+                    from procurement.workflow import convert
+                    from django.core.exceptions import ValidationError
+                    unit = ing.unit or "kg"
+                    try:
+                        base_amount = convert(req_amt, recipe.unit or unit, unit)
+                        portion_g = float(convert(req_amt, recipe.unit or unit, "g")) if unit.lower() in ["g", "kg"] else float(base_amount)
+                        total_qty_val = float(base_amount * headcount)
+                    except ValidationError:
+                        portion_g = "환산 확인 필요"
+                        total_qty_val = 0
 
-                    unit = ing.unit if ing.unit else "kg"
                     total_qty_str = f"{round(total_qty_val, 1)} {unit}"
 
                     ing_list.append({
@@ -111,7 +110,7 @@ def doc_menu_overview(request):
         })
         total_ingredient_rows += plan_total_rows
 
-    headcount_val = plans.first().headcount if (plans.exists() and plans.first().headcount) else 500
+    headcount_val = sum(p.final_headcount if p.final_headcount is not None else p.headcount for p in plans)
 
     # Chunk diet_plans into pages for clean pagination and print breaking
     pages = []

@@ -70,7 +70,7 @@
               </td>
               <td class="left">
                 {% for recipe in menu.recipes.all %}
-                  <span class="sp-mini-chip">{{ recipe.ingredient.name }} {{ recipe.required_amount }}</span>
+                  <span class="sp-mini-chip">{{ recipe.ingredient.name }} {{ recipe.required_amount }} {{ recipe.unit|default:recipe.ingredient.unit }}</span>
                 {% empty %}
                   <span class="sp-muted">등록된 식재료가 없습니다.</span>
                 {% endfor %}

@@ -1,5 +1,7 @@
 # Sprint 7 · 강훈 브랜치 통합 보고서
 
+> 최신 결과: 문서 기반 보완 후 SQLite/MariaDB 각각 101개 테스트 통과. 현재 기능 상태는 docs/analysis/FUNCTIONAL_TEST_REPORT.md와 본 문서 하단 추가 작업 절을 따른다. 아래 기존 통합 기록은 변경 이력으로 보존했다.
+
 작성일: 2026-10-15 (Asia/Seoul)
 
 ## 작업 범위와 보존 확인
@@ -188,3 +190,35 @@ docker rm -f sprint7-integration-db-audit
 검증 종료 후 테스트 전용 DB 컨테이너는 제거했다. 앱 테스트 컨테이너는 `--rm`으로 자동 제거됐다. 기존 서비스 컨테이너는 그대로 실행 중이다.
 
 테스트 당시의 패키지 버전·모델 해시는 environment manifest를 기준으로 한다. 이미지 태그가 변경됐다면 동일 이미지 ID로 `SPRINT7_TEST_IMAGE`를 지정한다.
+
+# 2026-10-15 추가 작업: 문서 기반 기능 검증·보완
+
+이 절은 위 e21478b 통합 당시의 결과와 구분되는 후속 작업이다. 당시의 48개 테스트/조리지시서 미통합 기록은 역사적 결과이며, 현재 검증은 `docs/analysis/FUNCTIONAL_TEST_REPORT.md`와 `verification/requirements/`를 기준으로 한다.
+
+- 코드 변경 전 `ab5ed57`에서 요구사항 추적표·계획을 먼저 작성했다.
+- 참조 Markdown 5개와 내장 그림 2개를 확인했다. 원본은 수정하거나 Git에 추가하지 않았다.
+- 추적 항목 196행: 최초 COMPLETE 0 / PARTIAL 123 / MISSING 18 / BROKEN 1 / UNVERIFIED 54 → 현재 COMPLETE 78 / PARTIAL 64 / MISSING 1 / BROKEN 0 / UNVERIFIED 53. 상하위·중복 태스크를 포함한 추적 행 수다.
+- UC 15개 중 9개 COMPLETE, 6개 PARTIAL. 모든 기능의 현장 인수를 완료했다는 뜻은 아니다.
+- 추가 구현: 수동/AI/최종 식수 분리·확정/변경 재검토, 명시 단위/납품규격·발주 간격 환산, 저장형 발주예정서·업체별 확정·요청 중복 방지, 실제 합격량 검수 입고, 안전한 차감, 신규 lot/FIFO/유통기한, 기준정보 관리 UI, 주간 수불/월 정산 연결, 인증 보호, 문서명·정렬·분류 중복·비고/빈 입력란 출력.
+- 기존 간편·식단 발주도 공통 검토 서비스에 연결했다. 기존 완료 버튼만으로 입고되는 동작은 최신 문서 O-04에 따라 검수 기록을 요구하도록 변경했다. AI 값이 최종 값을 대신하지 않도록 legacy 필요량 계산도 정리했다.
+- 기존 release patch 식재료/레시피 업로드 및 재고 차감 경로를 유지했다. 재고 부족·0명·음수 입력과 레시피 업로드의 기준 단위 변경 문제를 보정했다.
+- 새 migration 8개를 추가했다. 테스트 DB에서 전체 적용 및 기존 데이터 보존 업그레이드를 검증했으며 운영 DB에 적용하지 않았다.
+- 최종 검증: **SQLite 101개 / 격리 MariaDB 101개 Django 테스트**, JavaScript 4개 통과. `check`, `makemigrations --check --dry-run`, `migrate --check`, migration graph 및 실제 모델 추론을 포함한다.
+- 실제 Chromium 브라우저에서 최종 351명 → 35.1kg → 8캔 계산 → 9캔 조정 → 45kg 납품/40kg 합격 → 35.1kg 사용 → 4.9kg 수불 잔량/FIFO → PDF 생성까지 수행했다.
+- 모델 3개와 기존 requirements 버전은 변경하지 않았다. 정상 SBERT/OOF/Holdout 정확도는 여전히 미검증이다.
+- 조리지시서 전용 구현은 발견되지 않아 TK-09-004를 MISSING으로 남겼다. 조리 정보 입력 기능이나 주간 레시피 문서를 통합 완료로 대신 표시하지 않는다.
+- 기존 재고 lot 대사, 취소/대체 발주·분할 납품/검수 정정·회계 정책, 월간 전용 작성·독립 구입요구서 초안·영양 데이터·현장 인수 등은 `REMAINING_ISSUES.md`에 명시했다.
+- 원본 네 파일·참조 원본·AI 모델 해시와 기존 두 컨테이너의 시작시각/재시작 횟수 보존을 확인했다 (`verification/requirements/preservation.json`).
+- 원격 push, PR, 기존 서비스 배포 및 기존 DB/볼륨/네트워크 변경은 수행하지 않았다.
+
+상세 결과물:
+
+1. `docs/analysis/REQUIREMENT_TRACEABILITY_MATRIX.md`
+2. `docs/analysis/IMPLEMENTATION_PLAN.md`
+3. `docs/analysis/FUNCTIONAL_TEST_REPORT.md` — 수정 파일/신규 migration 전체 목록 포함
+4. `docs/analysis/REMAINING_ISSUES.md`
+5. `docs/analysis/requirement_catalog.json` — 출처·수용 기준·초기/최종 상태·원본 해시
+
+새 MariaDB 재현 시 전용 컨테이너 이름은 임의로 정하되 `/tmp/sprint7-integration-db-socket`에만 연결한다. 브라우저 검증은 `snp-requirements-test`처럼 새 내부 네트워크와 폐기용 `config.test_settings` 서버를 사용한다. 기존 서비스나 운영 DB를 테스트 대상으로 지정하지 않는다.
+
+검증 종료 후 `snp-requirements-browser-app`, `snp-requirements-db`, `snp-requirements-test`를 정리했다. 기존 서비스에는 정리 명령을 실행하지 않았다.

@@ -180,9 +180,9 @@ def recipe_upload_page(request):
                         created_ingredient_count += 1
                     else:
                         changed = []
-                        if unit and ingredient.unit != unit:
-                            ingredient.unit = unit
-                            changed.append("unit")
+                        # Imported recipe units must never change the inventory base unit.
+                        from procurement.workflow import convert
+                        convert(amount, unit, ingredient.unit)
                         if category and not ingredient.category:
                             ingredient.category = category
                             changed.append("category")
@@ -192,7 +192,7 @@ def recipe_upload_page(request):
                     Recipe.objects.update_or_create(
                         menu=menu,
                         ingredient=ingredient,
-                        defaults={"required_amount": amount},
+                        defaults={"required_amount": amount, "unit": unit},
                     )
                     saved_recipe_count += 1
                     result_rows.append(
@@ -247,10 +247,19 @@ def _build_deduct_preview(target_date, meal_type=None, override_headcount=None, 
     warnings = []
 
     for plan in plans:
+        from procurement.workflow import quantity
+        from django.core.exceptions import ValidationError
+        raw_count = override_headcount if override_headcount is not None else (plan.final_headcount if plan.final_headcount is not None else plan.headcount)
         try:
-            plan_headcount = int(override_headcount or plan.headcount or 1)
-        except ValueError:
-            plan_headcount = int(plan.headcount or 1)
+            numeric = quantity(raw_count, "실제 사용 식수")
+            if numeric != numeric.to_integral_value():
+                raise ValidationError("식수는 정수여야 합니다.")
+            plan_headcount = int(numeric)
+        except ValidationError as exc:
+            warnings.extend(exc.messages)
+            continue
+        if plan.final_headcount is None:
+            warnings.append(f"{plan.target_date} {plan.meal_type}: 최종 식수를 먼저 확정하세요.")
 
         menus = [dm.menu for dm in plan.diet_menus.select_related("menu")]
         plan_rows.append({"plan": plan, "headcount": plan_headcount, "menus": menus})
@@ -264,7 +273,12 @@ def _build_deduct_preview(target_date, meal_type=None, override_headcount=None, 
 
             for recipe in recipes:
                 ingredient = recipe.ingredient
-                need_qty = (recipe.required_amount or Decimal("0")) * Decimal(plan_headcount)
+                from procurement.workflow import convert
+                try:
+                    need_qty = convert(recipe.required_amount, recipe.unit or ingredient.unit, ingredient.unit) * Decimal(plan_headcount)
+                except ValidationError as exc:
+                    warnings.extend(exc.messages)
+                    continue
 
                 if ingredient.id not in rows_by_ingredient:
                     current = _current_stock(ingredient)
@@ -304,6 +318,16 @@ def deduct_inventory_view(request):
     meal_type = request.GET.get("meal_type") or request.POST.get("meal_type") or ""
     override_headcount = request.GET.get("headcount") or request.POST.get("headcount") or None
 
+    from datetime import date
+    from django.core.exceptions import ValidationError
+    try:
+        date.fromisoformat(str(target_date))
+        if meal_type and meal_type not in MEAL_TYPE_CHOICES:
+            raise ValueError()
+    except ValueError:
+        messages.error(request, "올바른 날짜와 식사 구분을 선택하세요.")
+        return redirect("meals:mealplan_list")
+
     rows, plan_rows, warnings = _build_deduct_preview(
         target_date=target_date,
         meal_type=meal_type or None,
@@ -311,6 +335,9 @@ def deduct_inventory_view(request):
     )
 
     if request.method == "POST" and request.POST.get("confirm") == "1":
+        if warnings:
+            messages.error(request, " / ".join(warnings))
+            return redirect("meals:deduct_inventory")
         if not rows:
             messages.warning(request, "차감할 식자재가 없습니다. 식단과 레시피를 먼저 확인해주세요.")
             return redirect("meals:deduct_inventory")
@@ -320,17 +347,30 @@ def deduct_inventory_view(request):
             rows, plan_rows, warnings = _build_deduct_preview(
                 target_date, meal_type or None, override_headcount, lock=True,
             )
+            for row in sorted(rows, key=lambda r: r["ingredient"].pk):
+                Ingredient.objects.select_for_update().get(pk=row["ingredient"].pk)
+            if warnings or any(row["deduct_qty"] > _current_stock(row["ingredient"]) for row in rows):
+                messages.error(request, "재고 부족 또는 미확정 식단입니다. 사용 확정을 제한합니다.")
+                return redirect("meals:deduct_inventory")
             for row in rows:
-                qty = row["deduct_qty"].quantize(Decimal("0.01"))
+                qty = row["deduct_qty"].quantize(Decimal("0.000001"))
                 if qty <= 0:
                     continue
 
-                InventoryLog.objects.create(
+                outgoing_log = InventoryLog.objects.create(
                     ingredient=row["ingredient"],
                     log_type="출고",
                     quantity=qty,
                     description=f"{target_date} {meal_type or '전체'} 식사 완료 재고 차감",
                 )
+
+                from inventory.lot_services import allocate_fifo
+                try:
+                    allocate_fifo(outgoing_log)
+                except ValidationError as exc:
+                    transaction.set_rollback(True)
+                    messages.error(request, " / ".join(exc.messages))
+                    return redirect("meals:deduct_inventory")
 
             DietPlan.objects.filter(pk__in=[item["plan"].pk for item in plan_rows]).update(is_served=True)
 

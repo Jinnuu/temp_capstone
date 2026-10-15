@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import (
     BooleanField,
     Case,
@@ -211,6 +212,7 @@ def ingredient_upload(request):
     return ingredient_upload_flexible(request)
 
 
+@transaction.atomic
 def inventory_log_create(request):
     all_ingredients = get_ingredient_stock_queryset()
     recent_logs = (
@@ -226,12 +228,20 @@ def inventory_log_create(request):
             ingredient = form.cleaned_data["ingredient"]
             quantity = form.cleaned_data["quantity"]
             log_type = form.cleaned_data["log_type"]
+            Ingredient.objects.select_for_update().get(pk=ingredient.pk)
             current_stock = get_current_stock(ingredient.id)
 
             if log_type in ["출고", "폐기"] and quantity > current_stock:
                 form.add_error("quantity", f"현재고({current_stock})가 부족합니다.")
             else:
-                form.save()
+                from procurement.workflow import record_inventory
+                from django.core.exceptions import ValidationError
+                try:
+                    record_inventory(ingredient.pk, log_type, quantity, request.user,
+                                     form.cleaned_data["request_key"], _existing_transaction_time(form.cleaned_data["request_key"]))
+                except ValidationError as exc:
+                    form.add_error("quantity", exc.messages[0])
+                    return render(request, "inventory/inventory_log_form.html", {"form": form, "recent_logs": recent_logs, "ingredients": all_ingredients})
                 messages.success(request, f"[{ingredient.name}] {log_type} 기록 완료.")
                 return redirect("inventory:inventory_log_create")
     else:
@@ -248,29 +258,37 @@ def inventory_log_create(request):
     )
 
 
+@transaction.atomic
 def ingredient_stock_adjust(request, pk=None):
     """수동 재고 보정."""
     if request.method != "POST":
         return redirect("inventory:ingredient_list")
 
-    ingredient = get_object_or_404(Ingredient, pk=pk)
+    ingredient = get_object_or_404(Ingredient.objects.select_for_update(), pk=pk)
 
     try:
-        new_stock = Decimal(request.POST.get("new_stock", 0))
+        from procurement.workflow import quantity
+        new_stock = quantity(request.POST.get("new_stock", 0), "조정 후 재고")
         current_val = get_current_stock(ingredient.id)
         diff = new_stock - current_val
 
         if diff != 0:
-            InventoryLog.objects.create(
+            adjustment_log = InventoryLog.objects.create(
                 ingredient=ingredient,
                 log_type="조정",
                 quantity=diff,
                 description="수동 보정",
             )
+            from .lot_services import register_lot, allocate_fifo
+            if diff > 0:
+                register_lot(adjustment_log)
+            else:
+                allocate_fifo(adjustment_log)
 
         messages.success(request, f"{ingredient.name} 재고가 {new_stock}으로 수동 보정되었습니다.")
 
     except Exception as exc:
+        transaction.set_rollback(True)
         messages.error(request, f"오류가 발생했습니다: {exc}")
 
     return redirect("inventory:ingredient_list")
@@ -482,3 +500,8 @@ def export_inventory_excel(request):
     response["Content-Disposition"] = f"attachment; filename={filename}"
     wb.save(response)
     return response
+
+def _existing_transaction_time(key):
+    from procurement.models import InventoryTransactionKey
+    previous = InventoryTransactionKey.objects.filter(request_key=key).select_related("inventory_log").first()
+    return previous.inventory_log.transaction_date if previous else timezone.now()

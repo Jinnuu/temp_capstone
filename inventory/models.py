@@ -37,10 +37,44 @@ class InventoryLog(models.Model):
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     log_type = models.CharField(max_length=10, choices=LogType.choices)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.DecimalField(max_digits=18, decimal_places=6)
     transaction_date = models.DateTimeField(default=timezone.now)
     expiration_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True, verbose_name='변동 사유')
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.log_type}({self.quantity})"
+
+class IngredientCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class SupplySpecification(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name="supply_specs")
+    supplier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    label = models.CharField(max_length=100, help_text="예: 700g(70g×10개), 브랜드 포함")
+    base_quantity = models.DecimalField(max_digits=14, decimal_places=6)
+    base_unit = models.CharField(max_length=20)
+    order_unit = models.CharField(max_length=20, help_text="예: 캔, 봉, 개, kg")
+    order_increment = models.DecimalField(max_digits=14, decimal_places=6, default=1, help_text="발주 간격: 캔은 1, kg 소수 발주는 0.01 등 명시")
+    unit_price = models.DecimalField(max_digits=14, decimal_places=2, help_text="발주 단위당 가격")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["ingredient", "supplier"], name="unique_supply_spec")]
+
+    def __str__(self):
+        return f"{self.ingredient.name} / {self.supplier.name} / {self.label}"
+
+
+class StockLot(models.Model):
+    incoming_log = models.OneToOneField(InventoryLog, on_delete=models.PROTECT, related_name='stock_lot')
+    remaining_quantity = models.DecimalField(max_digits=18, decimal_places=6)
+
+
+class StockAllocation(models.Model):
+    outgoing_log = models.ForeignKey(InventoryLog, on_delete=models.PROTECT, related_name='lot_allocations')
+    lot = models.ForeignKey(StockLot, on_delete=models.PROTECT, related_name='allocations')
+    quantity = models.DecimalField(max_digits=18, decimal_places=6)

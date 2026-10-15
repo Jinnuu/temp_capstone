@@ -7,6 +7,8 @@ class Menu(models.Model):
     # ✨ 살짝 추가: 메뉴의 카테고리 (예: 한식, 일식, 중식)
     category = models.CharField(max_length=50, blank=True, null=True, verbose_name="메뉴 분류")
 
+    cooking_notes = models.TextField(blank=True, default="", verbose_name="조리 정보")
+
     def __str__(self):
         return self.name
 
@@ -14,7 +16,8 @@ class Menu(models.Model):
 class Recipe(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='recipes')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='used_in_recipes')
-    required_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="1인분 소요량 (예: 0.15)")
+    unit = models.CharField(max_length=20, blank=True, default="", verbose_name="1인분 기준 단위")
+    required_amount = models.DecimalField(max_digits=14, decimal_places=6, help_text="1인분 소요량 (예: 0.15)")
 
     class Meta:
         constraints = [
@@ -35,6 +38,9 @@ class DietPlan(models.Model):
     target_date = models.DateField(verbose_name="식단 날짜")
     meal_type = models.CharField(max_length=10, choices=MealType.choices, verbose_name="끼니")
     headcount = models.IntegerField(default=0, verbose_name="식수(목표/당일인원)")
+    final_headcount = models.PositiveIntegerField(null=True, blank=True, verbose_name="최종 확정 식수")
+    headcount_confirmed_at = models.DateTimeField(null=True, blank=True)
+    is_confirmed = models.BooleanField(default=False, verbose_name="식단 확정")
     is_served = models.BooleanField(default=False, verbose_name="재고 차감 완료 여부")
 
     class Meta:

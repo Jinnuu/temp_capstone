@@ -34,9 +34,16 @@ def meal_home(request):
     return render(request, "meals/meal_home.html")
 
 
+@transaction.atomic
 def mealplan_create(request):
     menus = Menu.objects.all().order_by("name")
     selected_date = request.GET.get("date") or request.POST.get("meal_date")
+    if selected_date:
+        try:
+            date.fromisoformat(selected_date)
+        except (ValueError, TypeError):
+            messages.error(request, "올바른 식단 날짜를 입력하세요.")
+            return redirect("meals:mealplan_list")
 
     existing_meals = {
         "breakfast": [],
@@ -72,7 +79,9 @@ def mealplan_create(request):
             messages.error(request, "날짜를 선택해주세요.")
             return redirect("meals:mealplan_create")
 
-        DietPlan.objects.filter(target_date=meal_date).delete()
+        if DietPlan.objects.filter(target_date=meal_date, is_served=True).exists():
+            messages.error(request, "이미 사용 확정된 식단은 수정할 수 없습니다.")
+            return redirect("meals:mealplan_list")
 
         created_count = 0
         meal_type_map = {
@@ -85,10 +94,12 @@ def mealplan_create(request):
             valid_items = [m.strip() for m in menu_items if m and m.strip()]
 
             if valid_items:
-                diet_plan = DietPlan.objects.create(
-                    target_date=meal_date,
-                    meal_type=meal_type,
-                )
+                diet_plan, _ = DietPlan.objects.get_or_create(target_date=meal_date, meal_type=meal_type)
+                diet_plan.final_headcount = None
+                diet_plan.headcount_confirmed_at = None
+                diet_plan.is_confirmed = False
+                diet_plan.save()
+                diet_plan.diet_menus.all().delete()
 
                 for item in valid_items:
                     if item.isdigit():
@@ -105,6 +116,14 @@ def mealplan_create(request):
                     )
 
                 created_count += 1
+            else:
+                existing = DietPlan.objects.filter(target_date=meal_date, meal_type=meal_type).first()
+                if existing:
+                    existing.diet_menus.all().delete()
+                    existing.final_headcount = None
+                    existing.headcount_confirmed_at = None
+                    existing.is_confirmed = False
+                    existing.save()
 
         if created_count == 0:
             messages.warning(request, "선택된 메뉴가 없어 빈 식단으로 저장되지 않았습니다.")

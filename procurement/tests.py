@@ -9,6 +9,7 @@ class PurchaseOrderStatusUpdateTest(TestCase):
     def setUp(self):
         # 테스트 유저 생성
         self.user = User.objects.create_user(username='test_supplier', password='password123')
+        self.client.force_login(self.user)
         # PENDING 상태의 발주서 생성
         self.order = PurchaseOrder.objects.create(supplier=self.user, status=PurchaseOrder.Status.PENDING)
 
@@ -44,6 +45,7 @@ class DailyInspectionReportTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test_supplier_daily', password='password123')
         self.order = PurchaseOrder.objects.create(supplier=self.user, status=PurchaseOrder.Status.PENDING)
+        self.client.force_login(self.user)
 
     def test_daily_inspection_report_status_code(self):
         """검수일지 페이지가 정상적으로 로드되는지 확인"""

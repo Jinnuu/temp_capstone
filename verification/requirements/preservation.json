@@ -1,0 +1,89 @@
+{
+  "reference_sha256_matches": {
+    "2026-개정-D03-소프트웨어기능아키텍처.md": true,
+    "2026-개정-D04-프로덕트백로그(요구사항정의).md": true,
+    "2026-개정-D02-프로젝트관리계획서(요약).md": true,
+    "2026-개정-D01-시스템정의서.md": true,
+    "2026-개정-D05-N차_스프린트백로그(태스크목록).md": true
+  },
+  "original_four_file_matches": {
+    "config/views.py": true,
+    "procurement/views.py": true,
+    "templates/home.html": true,
+    "templates/procurement/order_create.html": true
+  },
+  "model_sha256_matches": {
+    "best_model_dinner.pkl": true,
+    "best_model_breakfast.pkl": true,
+    "best_model_lunch.pkl": true
+  },
+  "original_head": "a8f5adbe3c971e00f7c14a60160ee926abf7a0e2",
+  "original_status": " M config/views.py\n M procurement/views.py\n M templates/home.html\n M templates/procurement/order_create.html\n",
+  "existing_containers": {
+    "/my-capstone": {
+      "status": "running",
+      "same_started_at": true,
+      "same_restart_count": true,
+      "same_image": true
+    },
+    "/my-capstone-sprint7": {
+      "status": "running",
+      "same_started_at": true,
+      "same_restart_count": true,
+      "same_image": true
+    }
+  },
+  "test_isolation": [
+    {
+      "name": "/snp-requirements-db",
+      "network": "none",
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/tmp/sprint7-integration-db-socket",
+          "Destination": "/run/mysqld",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "ports": {}
+    },
+    {
+      "name": "/snp-requirements-browser-app",
+      "network": "snp-requirements-test",
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration",
+          "Destination": "/workspace",
+          "Mode": "ro",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "ports": {
+        "8000/tcp": null
+      }
+    }
+  ],
+  "final_browser_result": {
+    "passed": true,
+    "steps": [
+      "login",
+      "manual/final headcount",
+      "snapshot",
+      "35.1kg -> 8 cans",
+      "manual 9 cans",
+      "vendor order 4500",
+      "45kg delivered / 40kg accepted",
+      "35.1kg consumed",
+      "4.9kg remaining",
+      "FIFO lot",
+      "print PDF"
+    ],
+    "pageErrors": []
+  },
+  "requirements_unchanged": true,
+  "test_resources_cleaned_up": true
+}

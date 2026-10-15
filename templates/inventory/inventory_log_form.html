@@ -11,7 +11,7 @@
     <div class="card shadow-sm border-primary mb-5">
         <div class="card-body bg-light-subtle p-4">
             <form method="post" id="log-form" class="row g-3">
-                {% csrf_token %}
+                {% csrf_token %}{{ form.request_key }}
                 
                 <div class="col-md-5 position-relative">
                     <label class="form-label fw-bold text-primary">식재료 검색</label>

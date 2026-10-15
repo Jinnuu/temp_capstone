@@ -15,6 +15,7 @@ HEADER_ALIASES = {
     "menu": ["메뉴명", "메뉴", "음식명", "요리명"],
     "category": ["카테고리", "분류", "메뉴분류", "메뉴 분류"],
     "ingredient": ["식재료명", "식재료", "재료명", "재료"],
+    "unit": ["단위", "unit", "기준단위"],
     "amount": ["사용량", "소요량", "1인분소요량", "1인분 사용량", "required_amount"],
 }
 
@@ -34,7 +35,8 @@ def _to_decimal(value):
         return None
 
     try:
-        return Decimal(str(value).replace(",", "").strip())
+        number = Decimal(str(value).replace(",", "").strip())
+        return number if number.is_finite() and number > 0 else None
     except (InvalidOperation, ValueError):
         return None
 
@@ -188,10 +190,18 @@ def recipe_upload_api(request):
 
         ingredient = _get_or_create_ingredient(ingredient_name, created_ingredients)
 
+        unit = _normalize_text(value_for("unit")) or ingredient.unit
+        from procurement.workflow import convert
+        from django.core.exceptions import ValidationError
+        try:
+            convert(amount, unit, ingredient.unit)
+        except ValidationError as exc:
+            skipped_rows.append({"row": row_num, "reason": exc.messages[0]})
+            continue
         Recipe.objects.update_or_create(
             menu=menu,
             ingredient=ingredient,
-            defaults={"required_amount": amount},
+            defaults={"required_amount": amount, "unit": unit},
         )
 
         processed_count += 1
@@ -250,7 +260,7 @@ def get_menu_recipes_api(request, menu_id):
             "ingredient_id": recipe.ingredient_id,
             "ingredient_name": recipe.ingredient.name,
             "required_amount": str(recipe.required_amount),
-            "unit": recipe.ingredient.unit,
+            "unit": recipe.unit or recipe.ingredient.unit,
         }
         for recipe in menu.recipes.all().order_by("ingredient__name")
     ]

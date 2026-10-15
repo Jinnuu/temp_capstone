@@ -1,3 +1,4 @@
+import uuid
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -39,8 +40,9 @@ MEAL_TO_PREDICTION_KEY = {
 
 def to_decimal(value, default="0"):
     try:
-        return Decimal(str(value if value is not None else default))
-    except Exception:
+        result = Decimal(str(value).replace(",", "").strip())
+        return result if result.is_finite() else Decimal(default)
+    except (ValueError, TypeError, ArithmeticError):
         return Decimal(default)
 
 
@@ -92,76 +94,29 @@ def get_current_stock(ingredient):
 
 
 def get_serving_count(plan):
-    """예측 식수 우선, 없으면 MealForecast, 그것도 없으면 DietPlan.headcount 사용."""
-    prediction_key = MEAL_TO_PREDICTION_KEY.get(plan.meal_type)
-
-    if prediction_key:
-        prediction = (
-            AttendancePrediction.objects.filter(
-                prediction_date=plan.target_date,
-                meal_type=prediction_key,
-            )
-            .order_by("-created_at")
-            .first()
-        )
-
-        if prediction:
-            return int(prediction.predicted_count or 0), "예측"
-
-    forecast = getattr(plan, "forecast", None)
-
-    if forecast:
-        return int(forecast.predicted_count or 0), "예측"
-
-    return int(plan.headcount or 0), "식단 기준"
+    """AI is reference information; only nutritionists may confirm operational counts."""
+    if plan.final_headcount is not None:
+        return plan.final_headcount, "영양사 최종 확정"
+    return int(plan.headcount or 0), "미확정 · 직접 예상 참고값"
 
 
+@transaction.atomic
 def order_create(request):
     """간편주문 생성. GET 파라미터 또는 날짜 기준 부족분을 수량에 자동 채운다."""
     if request.method == "POST":
-        ingredient_ids = request.POST.getlist("ingredient_id[]")
-        quantities = request.POST.getlist("quantity[]")
-        target_date_val = request.POST.get("target_date")
-
-        if ingredient_ids and quantities:
-            user = get_or_create_dummy_user(request)
-            po = PurchaseOrder.objects.create(
-                supplier=user,
-                status=PurchaseOrder.Status.PENDING,
-            )
-
-            total_amount = 0
-
-            for ing_id, qty in zip(ingredient_ids, quantities):
-                q = to_decimal(qty)
-
-                if q <= 0:
-                    continue
-
-                ing = get_object_or_404(Ingredient, id=ing_id)
-                estimated = int(q * to_decimal(ing.unit_price))
-                total_amount += estimated
-
-                OrderItem.objects.create(
-                    purchase_order=po,
-                    ingredient=ing,
-                    target_date=target_date_val if target_date_val else None,
-                    required_qty=q,
-                    missing_qty=q,
-                    order_unit_price=ing.unit_price,
-                    estimated_price=estimated,
-                )
-
-            if total_amount <= 0:
-                po.delete()
-                messages.error(request, "발주할 품목이 없습니다.")
-                return redirect("procurement:order_create")
-
-            po.total_amount = total_amount
-            po.save()
-
-            messages.success(request, f"발주서 #{po.id} 건이 성공적으로 전송되었습니다.")
-            return redirect("procurement:order_detail", pk=po.id)
+        from .workflow import create_manual_plan
+        from django.core.exceptions import ValidationError
+        try:
+            ids = request.POST.getlist("ingredient_id[]")
+            amounts = request.POST.getlist("quantity[]")
+            if len(ids) != len(amounts):
+                raise ValidationError("품목과 수량을 확인하세요.")
+            selected_date = date.fromisoformat(request.POST.get("target_date") or date.today().isoformat())
+            plan = create_manual_plan(zip(ids, amounts), selected_date, request.user, request.POST.get("request_key"))
+            return redirect("procurement:workflow_plan", pk=plan.pk)
+        except (ValidationError, ValueError, TypeError) as exc:
+            messages.error(request, " / ".join(exc.messages) if isinstance(exc, ValidationError) else "날짜 또는 요청 식별자가 올바르지 않습니다.")
+            return redirect("procurement:order_create")
 
     items_names = request.GET.getlist("items")
     amounts = request.GET.getlist("amounts")
@@ -202,6 +157,7 @@ def order_create(request):
             "ingredients": ingredients,
             "categories": categories,
             "shortage_map": shortage_map,
+            "request_key": uuid.uuid4(),
             "target_date": target_date or date.today().isoformat(),
         },
     )
@@ -287,121 +243,41 @@ def order_detail(request, pk):
     )
 
 
+@transaction.atomic
 def order_status_update(request, pk):
+    """Legacy status control cannot bypass inspection or create stock receipts."""
     if request.method == "POST":
-        order = get_object_or_404(PurchaseOrder, pk=pk)
-        new_status = request.POST.get("status")
-
-        if new_status in ["배송중", "배송완료", "완료"]:
-            final_status = "완료"
+        order = get_object_or_404(PurchaseOrder.objects.select_for_update(), pk=pk)
+        status = request.POST.get("status")
+        if order.status in ["완료", "배송완료"]:
+            messages.info(request, "완료된 발주의 상태·입고 이력은 변경하지 않습니다.")
+        elif status in ["완료", "배송완료", "배송중"]:
+            messages.error(request, "품목별 검수 기록에서 실제 합격량을 입고 처리하세요.")
+            return redirect("procurement:workflow_inspections")
+        elif status in ["대기", "승인"]:
+            order.status = status
+            order.save(update_fields=["status"])
+            messages.success(request, "발주 상태를 저장했습니다.")
         else:
-            final_status = new_status
-
-        valid_choices = [choice[0] for choice in PurchaseOrder.Status.choices]
-
-        if final_status in valid_choices:
-            if final_status == "완료" and order.status != "완료":
-                for item in order.items.all():
-                    InventoryLog.objects.create(
-                        ingredient=item.ingredient,
-                        log_type=InventoryLog.LogType.IN,
-                        quantity=item.required_qty,
-                        description=f"발주 #{order.id} 배송 완료로 인한 자동 입고",
-                    )
-
-                messages.success(request, "배송 완료 및 실시간 입고 재고 반영이 완료되었습니다.")
-
-            order.status = final_status
-            order.save()
-            messages.success(request, "발주 상태가 변경되었습니다.")
-        else:
-            messages.error(request, f"유효하지 않은 상태 값입니다: {new_status}")
-
+            messages.error(request, "유효하지 않은 상태입니다.")
     return redirect("procurement:order_detail", pk=pk)
 
 
+@transaction.atomic
 def order_from_mealplan(request):
     """식단, 예측 식수, 레시피, 현재고, 안전재고를 기준으로 부족 수량을 자동 계산해 발주한다."""
     if request.method == "POST":
-        ingredient_ids = request.POST.getlist("ingredient_id[]")
-        quantities = request.POST.getlist("quantity[]")
-        target_dates = request.POST.getlist("target_date[]")
-        meal_types = request.POST.getlist("meal_type[]")
-
-        order_data = {}
-
-        for ing_id_str, qty_str, target_date_str, meal_type_str in zip(
-            ingredient_ids,
-            quantities,
-            target_dates,
-            meal_types,
-        ):
-            try:
-                ing_id = int(ing_id_str)
-            except Exception:
-                continue
-
-            q = to_decimal(qty_str)
-
-            if q <= 0:
-                continue
-
-            ing = get_object_or_404(Ingredient, id=ing_id)
-
-            if not ing.supplier:
-                continue
-
-            po_key = (ing.supplier_id, target_date_str or None)
-
-            if po_key not in order_data:
-                order_data[po_key] = {}
-
-            item_key = (ing_id, meal_type_str or None)
-
-            if item_key not in order_data[po_key]:
-                order_data[po_key][item_key] = Decimal("0")
-
-            order_data[po_key][item_key] += q
-
-        if not order_data:
-            messages.error(request, "발주할 품목이 없습니다.")
-            return redirect("procurement:order_from_mealplan")
-
-        with transaction.atomic():
-            created_po_ids = []
-
-            for (supplier_id, target_date_str), items_dict in order_data.items():
-                supplier_user = get_user_model().objects.get(id=supplier_id)
-                po = PurchaseOrder.objects.create(
-                    supplier=supplier_user,
-                    status=PurchaseOrder.Status.PENDING,
-                    total_amount=0,
-                )
-
-                po_total = 0
-
-                for (ing_id, meal_type_str), q in items_dict.items():
-                    ing = Ingredient.objects.get(id=ing_id)
-                    subtotal = int(q * to_decimal(ing.unit_price))
-                    po_total += subtotal
-
-                    OrderItem.objects.create(
-                        purchase_order=po,
-                        ingredient=ing,
-                        target_date=target_date_str if target_date_str else None,
-                        meal_type=meal_type_str,
-                        required_qty=q,
-                        missing_qty=q,
-                        order_unit_price=ing.unit_price,
-                        estimated_price=subtotal,
-                    )
-
-                po.total_amount = po_total
-                po.save()
-                created_po_ids.append(po.id)
-
-        messages.success(request, f"총 {len(created_po_ids)}건의 업체별 발주서가 성공적으로 생성되었습니다.")
-        return redirect("procurement:order_list")
+        from .workflow import create_plan
+        from django.core.exceptions import ValidationError
+        try:
+            start = date.fromisoformat(request.POST.get("order_start_date") or request.GET.get("start_date", ""))
+            end = date.fromisoformat(request.POST.get("order_end_date") or request.GET.get("end_date") or str(start))
+            plan = create_plan(start, end, request.user, request.POST.get("request_key"), request.POST.getlist("days") or None)
+            messages.info(request, "포장규격 환산 결과를 확인하고 업체별 구매발주서를 확정하세요.")
+            return redirect("procurement:workflow_plan", pk=plan.pk)
+        except (ValidationError, ValueError, TypeError) as exc:
+            messages.error(request, " / ".join(exc.messages) if isinstance(exc, ValidationError) else "발주일과 요청 식별자를 확인하세요.")
+            return redirect("procurement:workflow_preview")
 
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
@@ -524,11 +400,12 @@ def order_from_mealplan(request):
                 for recipe in menu.recipes.all():
                     ing = recipe.ingredient
                     current_before = stock_balance.get(ing.id, Decimal("0"))
-                    required_per_person = to_decimal(recipe.required_amount)
+                    from .workflow import convert
+                    required_per_person = convert(recipe.required_amount, recipe.unit or ing.unit, ing.unit)
                     needed_qty = to_decimal(serving_count) * required_per_person
                     safe_stock = to_decimal(ing.safe_stock_level)
                     shortage_qty = needed_qty + safe_stock - current_before
-                    order_qty = shortage_qty if shortage_qty > 0 else Decimal("0")
+                    order_qty = shortage_qty if shortage_qty > 0 and needed_qty > 0 else Decimal("0")
 
                     # 현재 끼니 소비량만큼 재고를 차감한다. 음수는 0으로 고정한다.
                     stock_balance[ing.id] = current_before + order_qty - needed_qty
@@ -573,6 +450,7 @@ def order_from_mealplan(request):
             "start_date": start_date,
             "end_date": end_date,
             "grouped_orders": grouped_orders,
+            "request_key": uuid.uuid4(),
             "all_ingredients": Ingredient.objects.exclude(name__icontains="테스트").order_by("name"),
             "selected_days": selected_days,
             "day_choices": DAY_CHOICES,

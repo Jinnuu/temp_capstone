@@ -183,7 +183,7 @@ def _save_grouped_mealplans(grouped):
         plan, _ = DietPlan.objects.update_or_create(
             target_date=target_date,
             meal_type=meal_type,
-            defaults={"headcount": payload.get("headcount") or 0},
+            defaults={"headcount": payload.get("headcount") or 0, "final_headcount": None, "headcount_confirmed_at": None, "is_confirmed": False},
         )
         DietMenu.objects.filter(diet_plan=plan).delete()
         seen = set()

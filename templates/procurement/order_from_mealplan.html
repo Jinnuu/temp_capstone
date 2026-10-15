@@ -13,7 +13,7 @@
   <section class="sp-hero">
     <div>
       <p class="sp-kicker">Smart Procurement</p>
-      <h1>식단기반 발주</h1>
+      <h1>식단기반 발주</h1><p><a href="{% url 'procurement:workflow' %}">최종 식수 확정</a> 후 <a href="{% url 'procurement:workflow_preview' %}">발주예정서에서 포장수량을 조정·저장</a>하세요. 이 화면의 식수 일괄 변경은 참고용이며 최종 식수를 대체하지 않습니다.</p>
       <p>등록된 식단과 예측 식수를 기준으로 필요한 식재료를 계산하고, 현재고를 반영해 부족분만 발주합니다.</p>
     </div>
     <div class="sp-actions">
@@ -61,7 +61,7 @@
 
   {% if grouped_orders %}
     <form method="post" id="smartOrderForm">
-      {% csrf_token %}
+      {% csrf_token %}<input type="hidden" name="request_key" value="{{ request_key }}"><input type="hidden" name="order_start_date" value="{{ start_date|date:'Y-m-d' }}"><input type="hidden" name="order_end_date" value="{{ end_date|date:'Y-m-d' }}">
 
       <section class="sp-card">
         <div class="sp-card-head">
@@ -71,7 +71,7 @@
           </div>
           <div class="sp-actions">
             <a class="sp-btn" href="{% url 'procurement:order_list' %}">취소</a>
-            <button type="submit" class="sp-btn primary">최종 발주서 생성</button>
+            <button type="submit" class="sp-btn primary">발주예정서 검토로 이동</button>
           </div>
         </div>
 
