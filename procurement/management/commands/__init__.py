@@ -1,1 +1,1 @@
-# Init file for commands
+# Init commands package

@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}소비조합 거래처 현황 | S&P{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-supplier-v1">
+<style>
+  .sp-table th, .sp-table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+  }
+  .sp-supplier-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #e7f5ff;
+    color: #1971c2;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .modal-backdrop-custom {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .modal-card-custom {
+    width: min(600px, calc(100vw - 32px));
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    padding: 24px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-page">
+  <!-- Hero Banner -->
+  <section class="sp-hero">
+    <div>
+      <p class="sp-kicker">Supplier Management</p>
+      <h1>소비조합 거래처 현황</h1>
+      <p>급식 및 식자재 납품 업체(거래처) 정보 및 거래 품목을 통합 관리합니다.</p>
+    </div>
+    <div class="sp-actions">
+      <button type="button" class="sp-btn primary" onclick="openAddModal()">+ 신규 거래처 등록</button>
+      <a class="sp-btn" href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
+      <a class="sp-btn" href="{% url 'procurement:order_list' %}">발주 목록</a>
+    </div>
+  </section>
+
+  {% if messages %}
+    <div style="margin-bottom: 16px;">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Search & Filter Card -->
+  <section class="sp-card">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Search & Filter</p>
+        <h2>거래처 검색</h2>
+      </div>
+    </div>
+
+    <form method="get" class="sp-filter" style="grid-template-columns: 1fr auto auto;">
+      <div class="sp-field">
+        <label>검색어 (상호명, 구분, 거래품목, 연락처 등)</label>
+        <input type="text" name="q" value="{{ query }}" placeholder="예: 해동, 부식업체, 농산물, 010-...">
+      </div>
+      <button type="submit" class="sp-btn primary">검색</button>
+      {% if query %}
+        <a href="{% url 'procurement:supplier_list' %}" class="sp-btn gray">초기화</a>
+      {% endif %}
+    </form>
+  </section>
+
+  <!-- Supplier Table Card -->
+  <section class="sp-card">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Supplier List</p>
+        <h2>등록된 거래처 목록 (총 {{ suppliers|length }}건)</h2>
+      </div>
+    </div>
+
+    <div class="sp-table-wrap">
+      <table class="sp-table">
+        <thead>
+          <tr>
+            <th style="width: 110px;">구분</th>
+            <th style="width: 140px;">상호명</th>
+            <th>거래품목</th>
+            <th style="width: 130px;">전화번호</th>
+            <th style="width: 120px;">팩스</th>
+            <th style="width: 130px;">핸드폰</th>
+            <th>비고(이메일)</th>
+            <th style="width: 120px;">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for supplier in suppliers %}
+            <tr>
+              <td><span class="sp-supplier-tag">{{ supplier.category|default:"부식업체" }}</span></td>
+              <td><strong>{{ supplier.name }}</strong></td>
+              <td class="left">{{ supplier.business_items|default:"-" }}</td>
+              <td>{{ supplier.phone_number|default:"-" }}</td>
+              <td>{{ supplier.fax|default:"-" }}</td>
+              <td>{{ supplier.mobile|default:"-" }}</td>
+              <td class="left">{{ supplier.remarks|default:"-" }}</td>
+              <td>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                  <button
+                    type="button"
+                    class="sp-btn gray"
+                    style="min-width:48px; height:30px; font-size:12px; padding:0 8px;"
+                    onclick='openEditModal({{ supplier.id }}, "{{ supplier.category|escapejs }}", "{{ supplier.name|escapejs }}", "{{ supplier.business_items|escapejs }}", "{{ supplier.phone_number|escapejs }}", "{{ supplier.fax|escapejs }}", "{{ supplier.mobile|escapejs }}", "{{ supplier.remarks|escapejs }}")'
+                  >수정</button>
+                  <form method="post" action="{% url 'procurement:supplier_delete' supplier.id %}" style="display:inline;" onsubmit="return confirm('거래처 [{{ supplier.name }}] 정보를 삭제하시겠습니까?');">
+                    {% csrf_token %}
+                    <button type="submit" class="sp-btn" style="min-width:48px; height:30px; font-size:12px; padding:0 8px; background:#fa5252; color:#fff; border-color:#fa5252;">삭제</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" style="padding: 40px; text-align: center; color: #868e96;">
+                등록된 거래처 정보가 없습니다. [+ 신규 거래처 등록] 버튼을 눌러 등록해 주세요.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Add Modal -->
+<div class="modal-backdrop-custom" id="addModal">
+  <div class="modal-card-custom">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 style="margin:0; font-weight:900;">신규 거래처 등록</h3>
+      <button type="button" onclick="closeAddModal()" style="border:0; background:none; font-size:24px; cursor:pointer;">×</button>
+    </div>
+
+    <form method="post" action="{% url 'procurement:supplier_create' %}">
+      {% csrf_token %}
+      <div class="sp-form-grid cols-2" style="margin-bottom: 12px;">
+        <div class="sp-field">
+          <label>구분 (예: 부식업체, 농산물)</label>
+          <input type="text" name="category" placeholder="예: 부식업체" required>
+        </div>
+        <div class="sp-field">
+          <label>상호명 *</label>
+          <input type="text" name="name" placeholder="예: 행복한식자재" required>
+        </div>
+      </div>
+
+      <div class="sp-field" style="margin-bottom: 12px;">
+        <label>거래품목 (예: 곡류, 농산물, 유제품 등)</label>
+        <input type="text" name="business_items" placeholder="예: 곡류, 농산물, 축산물">
+      </div>
+
+      <div class="sp-form-grid cols-3" style="margin-bottom: 12px;">
+        <div class="sp-field">
+          <label>전화번호</label>
+          <input type="text" name="phone_number" placeholder="02-000-0000">
+        </div>
+        <div class="sp-field">
+          <label>팩스번호</label>
+          <input type="text" name="fax" placeholder="02-000-0000">
+        </div>
+        <div class="sp-field">
+          <label>핸드폰</label>
+          <input type="text" name="mobile" placeholder="010-0000-0000">
+        </div>
+      </div>
+
+      <div class="sp-field" style="margin-bottom: 20px;">
+        <label>비고 (이메일 및 메모)</label>
+        <input type="text" name="remarks" placeholder="supplier@example.com">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="sp-btn gray" onclick="closeAddModal()">취소</button>
+        <button type="submit" class="sp-btn primary">저장하기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop-custom" id="editModal">
+  <div class="modal-card-custom">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 style="margin:0; font-weight:900;">거래처 정보 수정</h3>
+      <button type="button" onclick="closeEditModal()" style="border:0; background:none; font-size:24px; cursor:pointer;">×</button>
+    </div>
+
+    <form method="post" id="editForm">
+      {% csrf_token %}
+      <div class="sp-form-grid cols-2" style="margin-bottom: 12px;">
+        <div class="sp-field">
+          <label>구분</label>
+          <input type="text" id="edit_category" name="category" required>
+        </div>
+        <div class="sp-field">
+          <label>상호명 *</label>
+          <input type="text" id="edit_name" name="name" required>
+        </div>
+      </div>
+
+      <div class="sp-field" style="margin-bottom: 12px;">
+        <label>거래품목</label>
+        <input type="text" id="edit_business_items" name="business_items">
+      </div>
+
+      <div class="sp-form-grid cols-3" style="margin-bottom: 12px;">
+        <div class="sp-field">
+          <label>전화번호</label>
+          <input type="text" id="edit_phone_number" name="phone_number">
+        </div>
+        <div class="sp-field">
+          <label>팩스번호</label>
+          <input type="text" id="edit_fax" name="fax">
+        </div>
+        <div class="sp-field">
+          <label>핸드폰</label>
+          <input type="text" id="edit_mobile" name="mobile">
+        </div>
+      </div>
+
+      <div class="sp-field" style="margin-bottom: 20px;">
+        <label>비고 (이메일 및 메모)</label>
+        <input type="text" id="edit_remarks" name="remarks">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="sp-btn gray" onclick="closeEditModal()">취소</button>
+        <button type="submit" class="sp-btn primary">수정 완료</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openAddModal() {
+  document.getElementById("addModal").style.display = "flex";
+}
+function closeAddModal() {
+  document.getElementById("addModal").style.display = "none";
+}
+
+function openEditModal(id, category, name, items, phone, fax, mobile, remarks) {
+  document.getElementById("editForm").action = "/procurement/suppliers/" + id + "/update/";
+  document.getElementById("edit_category").value = category;
+  document.getElementById("edit_name").value = name;
+  document.getElementById("edit_business_items").value = items;
+  document.getElementById("edit_phone_number").value = phone;
+  document.getElementById("edit_fax").value = fax;
+  document.getElementById("edit_mobile").value = mobile;
+  document.getElementById("edit_remarks").value = remarks;
+  document.getElementById("editModal").style.display = "flex";
+}
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    closeAddModal();
+    closeEditModal();
+  }
+});
+</script>
+{% endblock %}

@@ -686,32 +686,33 @@
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 8px;
+  gap: 12px;
 }
 
 .sp-menu-token {
-  min-height: 40px;
+  min-height: 48px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px 5px 6px;
+  gap: 12px;
+  padding: 8px 18px 8px 10px;
   border-radius: 999px;
   background: #f1f3f5;
   color: #2f3a46;
-  font-size: 14px;
+  font-size: 20px; /* 1.5배 확대 (기존 13-14px -> 20px) */
   font-weight: 900;
+  margin-bottom: 9px; /* 1.5배 상하 간격 */
 }
 
 .sp-menu-mini-thumb {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   border: 1px solid var(--sp-line);
   background: #fff;
   color: var(--sp-blue);
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 900;
 }
 
@@ -719,9 +720,10 @@
   border: 0;
   background: transparent;
   color: #868e96;
-  font-size: 18px;
+  font-size: 24px;
   cursor: pointer;
 }
+
 
 .sp-menu-add-row {
   display: grid;
@@ -788,18 +790,22 @@
 .sp-week-menu-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 9px; /* 1.5배 확대 (기존 6px -> 9px) */
   min-height: 34px;
 }
 
 .sp-week-menu-list span {
-  padding: 4px 8px;
+  padding: 6px 14px; /* 1.5배 좌우 패딩 확대 (기존 4px 8px -> 6px 14px) */
   border-radius: 999px;
   background: #e9f7ef;
   color: var(--sp-green);
-  font-size: 12px;
+  font-size: 18px; /* 1.5배 폰트 크기 확대 (기존 12px -> 18px) */
   font-weight: 900;
+  margin-bottom: 9px; /* 1.5배 상하 간격 확대 */
+  display: inline-flex;
+  align-items: center;
 }
+
 
 .sp-week-add {
   display: grid;

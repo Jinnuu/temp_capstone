@@ -2,8 +2,37 @@ from django.db import models
 from django.conf import settings
 from inventory.models import Ingredient
 
+# 8. Supplier (발주 업체 / 거래처 관리)
+class Supplier(models.Model):
+    category = models.CharField(max_length=50, verbose_name="구분", help_text="예: 부식업체, 농산물, 육류 등")
+    name = models.CharField(max_length=100, verbose_name="상호명")
+    business_items = models.CharField(max_length=200, blank=True, null=True, verbose_name="거래품목", help_text="예: 곡류, 농산물 등")
+    phone_number = models.CharField(max_length=30, blank=True, null=True, verbose_name="전화번호")
+    fax = models.CharField(max_length=30, blank=True, null=True, verbose_name="팩스")
+    mobile = models.CharField(max_length=30, blank=True, null=True, verbose_name="핸드폰")
+    remarks = models.TextField(blank=True, null=True, verbose_name="비고(이메일)")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supplier_profile',
+        verbose_name="연동 계정"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="등록일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "거래처(공급업체)"
+        verbose_name_plural = "거래처(공급업체) 목록"
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"[{self.category or '공급업체'}] {self.name}"
+
 # 9. Purchase_Order (발주서 메인)
 class PurchaseOrder(models.Model):
+
     class Status(models.TextChoices):
         PENDING = '대기', '대기'
         APPROVED = '승인', '승인'

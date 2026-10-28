@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views_new_docs import doc_purchase_requisition, doc_inspection_log
+from .views_new_docs import doc_purchase_requisition, doc_inspection_log, doc_cooking_instruction
 
 app_name = "procurement"
 
@@ -23,4 +23,14 @@ urlpatterns = [
     # [신규] 실무 문서 양식
     path("docs/purchase-requisition/", doc_purchase_requisition, name="doc_purchase_requisition"),
     path("docs/inspection-log/", doc_inspection_log, name="doc_inspection_log"),
-]
+    path("docs/cooking-instruction/", doc_cooking_instruction, name="doc_cooking_instruction"),
+    path("docs/monthly-settlement/", views.monthly_settlement_view, name="doc_monthly_settlement"),
+    path("monthly-settlement/", views.monthly_settlement_view, name="monthly_settlement_view"),
+
+    # [신규] 거래처(발주 업체) 관리
+    path("suppliers/", views.supplier_list, name="supplier_list"),
+    path("suppliers/create/", views.supplier_create, name="supplier_create"),
+    path("suppliers/<int:pk>/update/", views.supplier_update, name="supplier_update"),
+    path("suppliers/<int:pk>/delete/", views.supplier_delete, name="supplier_delete"),
+]
+

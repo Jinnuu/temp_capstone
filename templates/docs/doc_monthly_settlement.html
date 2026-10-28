@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}월말 정산 보고서 | S&P{% endblock %}
+
+{% block extra_css %}
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background-color: #f4f6f9;
+    color: #212529;
+  }
+
+  .document-toolbar {
+    background: #ffffff;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  .a4-container {
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    padding: 15mm;
+    box-shadow: 0 0 15px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* Header & Approval */
+  .doc-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .doc-title-box {
+    flex: 1;
+    text-align: center;
+    padding-top: 10px;
+  }
+
+  .doc-title-box h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    margin: 0 0 6px 0;
+    color: #111;
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .doc-subtitle {
+    font-size: 13px;
+    color: #495057;
+    font-weight: 600;
+  }
+
+  .approval-table {
+    border-collapse: collapse;
+    margin-left: auto;
+  }
+
+  .approval-table th, .approval-table td {
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  .approval-table th {
+    background-color: #f1f3f5;
+    padding: 4px 8px;
+    font-weight: bold;
+    width: 50px;
+  }
+
+  .approval-table td {
+    height: 48px;
+    vertical-align: middle;
+  }
+
+  .doc-info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1b2a4a;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding-left: 8px;
+    border-left: 4px solid #1b2a4a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Table Grid */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: fixed;
+    margin-bottom: 12px;
+  }
+
+  .doc-table th, .doc-table td {
+    border: 1px solid #222;
+    padding: 6px 4px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+  }
+
+  .doc-table th {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    color: #111;
+  }
+
+  .doc-table tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  .total-row {
+    background-color: #e7f5ff !important;
+    font-weight: bold;
+  }
+
+  .summary-card {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .summary-card .val {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0b7285;
+  }
+
+  .text-left { text-align: left !important; padding-left: 6px !important; }
+  .text-right { text-align: right !important; padding-right: 6px !important; }
+
+  @media print {
+    header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+    }
+    .a4-container {
+      padding: 0 !important;
+    }
+    .a4-page {
+      box-shadow: none !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    .doc-table tr {
+      display: table-row !important;
+    }
+    .doc-table th {
+      background-color: #e9ecef !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .total-row {
+      background-color: #e7f5ff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-toolbar no-print">
+  <div class="d-flex align-items-center gap-3">
+    <h5 class="m-0 fw-bold">[9단계 실무 양식] 월말 정산 보고서</h5>
+    <span class="badge bg-primary">A4 세로 (Portrait)</span>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2 m-0 align-items-center">
+      <label class="form-label m-0 small fw-bold text-nowrap">정산 월:</label>
+      <input type="month" name="month" value="{{ target_month|default:'2026-09' }}" class="form-control form-control-sm" style="width: 160px;">
+      <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search"></i> 조회</button>
+    </form>
+    <button onclick="window.print()" class="btn btn-sm btn-dark"><i class="bi bi-printer"></i> 인쇄하기</button>
+    <a href="{% url 'procurement:order_list' %}" class="btn btn-sm btn-outline-secondary">목록으로</a>
+  </div>
+</div>
+
+<div class="a4-container">
+  <div class="a4-page">
+    
+    <!-- 헤더 -->
+    <div class="doc-header-wrap" style="justify-content: center; text-align: center;">
+      <div class="doc-title-box">
+        <h1>월 말 정 산 보 고 서</h1>
+        <div class="doc-subtitle">( 총 식 자 재 소 요 량 및 금 액 정 산 )</div>
+      </div>
+    </div>
+
+    <!-- 정보 바 -->
+    <div class="doc-info-bar">
+      <div>사업장 : S&P 구내식당</div>
+      <div>정산월 : {{ target_month_display|default:"2026년 09월" }}</div>
+      <div>정산기간 : {{ start_date|default:"2026-09-01" }} ~ {{ end_date|default:"2026-09-30" }}</div>
+      <div>보고일자 : {% now "Y-m-d" %}</div>
+    </div>
+
+    <!-- 요약 카드 -->
+    <div class="summary-card">
+      <div>총 품목 수: <span class="val">{{ item_details|length|default:"12" }}</span> 건</div>
+      <div>총 소요/발주량: <span class="val">{{ grand_total_qty|default:"385.50" }}</span> kg/개</div>
+      <div>공급가액: <span class="val">{{ subtotal|default:"3,450,000" }}</span> 원</div>
+      <div>부가세(10%): <span class="val">{{ vat|default:"345,000" }}</span> 원</div>
+      <div>총 청구금액: <span class="val" style="color: #d63384;">{{ grand_total_amount|default:"3,795,000" }}</span> 원</div>
+    </div>
+
+    <!-- 1. 발주처별 정산 요약 -->
+    <div class="section-title">
+      <span>1. 발주처(공급업체)별 정산 요약</span>
+    </div>
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th style="width: 10%;">순번</th>
+          <th style="width: 35%;">발주처 (공급업체명)</th>
+          <th style="width: 15%;">발주 품목 수</th>
+          <th style="width: 20%;">총 발주 수량</th>
+          <th style="width: 20%;">총 청구 금액 (원)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if supplier_summary %}
+          {% for sup in supplier_summary %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="text-left fw-bold">{{ sup.supplier_name }}</td>
+            <td>{{ sup.item_count }} 건</td>
+            <td class="text-right">{{ sup.total_qty|floatformat:2 }}</td>
+            <td class="text-right fw-bold">{{ sup.total_amount }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td>1</td>
+            <td class="text-left fw-bold">CJ프레시웨이</td>
+            <td>5 건</td>
+            <td class="text-right">180.00</td>
+            <td class="text-right fw-bold">1,850,000</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td class="text-left fw-bold">현대그린푸드</td>
+            <td>4 건</td>
+            <td class="text-right">125.50</td>
+            <td class="text-right fw-bold">1,245,000</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td class="text-left fw-bold">동원홈푸드</td>
+            <td>3 건</td>
+            <td class="text-right">80.00</td>
+            <td class="text-right fw-bold">700,000</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- 2. 대분류별 정산 요약 -->
+    <div class="section-title">
+      <span>2. 식재료 대분류별 정산 요약</span>
+    </div>
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th style="width: 10%;">순번</th>
+          <th style="width: 35%;">식재료 대분류</th>
+          <th style="width: 15%;">품목 수</th>
+          <th style="width: 20%;">총 소요 수량</th>
+          <th style="width: 20%;">합산 청구 금액 (원)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if category_summary %}
+          {% for cat in category_summary %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="text-left fw-bold">{{ cat.category_name }}</td>
+            <td>{{ cat.item_count }} 건</td>
+            <td class="text-right">{{ cat.total_qty|floatformat:2 }}</td>
+            <td class="text-right fw-bold">{{ cat.total_amount }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td>1</td>
+            <td class="text-left fw-bold">육류</td>
+            <td>3 건</td>
+            <td class="text-right">95.00</td>
+            <td class="text-right fw-bold">1,620,000</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td class="text-left fw-bold">수산물</td>
+            <td>2 건</td>
+            <td class="text-right">45.00</td>
+            <td class="text-right fw-bold">680,000</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td class="text-left fw-bold">채소류</td>
+            <td>4 건</td>
+            <td class="text-right">150.00</td>
+            <td class="text-right fw-bold">545,000</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td class="text-left fw-bold">곡류/양념류</td>
+            <td>3 건</td>
+            <td class="text-right">95.50</td>
+            <td class="text-right fw-bold">950,000</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- 3. 식재료 세부 정산 내역 -->
+    <div class="section-title">
+      <span>3. 식재료별 세부 정산 내역</span>
+    </div>
+    <table class="doc-table detail-table">
+      <thead>
+        <tr>
+          <th style="width: 6%;">순번</th>
+          <th style="width: 12%;">일자</th>
+          <th style="width: 18%;">공급처</th>
+          <th style="width: 12%;">대분류</th>
+          <th style="width: 22%;">식재료명</th>
+          <th style="width: 8%;">단위</th>
+          <th style="width: 10%;">단가(원)</th>
+          <th style="width: 12%;">발주량</th>
+          <th style="width: 14%;">금액(원)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if item_details %}
+          {% for item in item_details %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.target_date }}</td>
+            <td class="text-left">{{ item.supplier_name }}</td>
+            <td>{{ item.category }}</td>
+            <td class="text-left fw-bold">{{ item.ingredient_name }}</td>
+            <td>{{ item.unit }}</td>
+            <td class="text-right">{{ item.unit_price }}</td>
+            <td class="text-right fw-bold">{{ item.quantity }}</td>
+            <td class="text-right fw-bold">{{ item.amount }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td>1</td>
+            <td>2026-09-07</td>
+            <td class="text-left">CJ프레시웨이</td>
+            <td>육류</td>
+            <td class="text-left fw-bold">돼지고기(전지)</td>
+            <td>kg</td>
+            <td class="text-right">14,500</td>
+            <td class="text-right fw-bold">60.00</td>
+            <td class="text-right fw-bold">870,000</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>2026-09-07</td>
+            <td class="text-left">CJ프레시웨이</td>
+            <td>육류</td>
+            <td class="text-left fw-bold">쇠고기(양지)</td>
+            <td>kg</td>
+            <td class="text-right">28,000</td>
+            <td class="text-right fw-bold">20.00</td>
+            <td class="text-right fw-bold">560,000</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>2026-09-08</td>
+            <td class="text-left">현대그린푸드</td>
+            <td>채소류</td>
+            <td class="text-left fw-bold">양파</td>
+            <td>망</td>
+            <td class="text-right">24,000</td>
+            <td class="text-right fw-bold">10.00</td>
+            <td class="text-right fw-bold">240,000</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>2026-09-08</td>
+            <td class="text-left">현대그린푸드</td>
+            <td>채소류</td>
+            <td class="text-left fw-bold">대파</td>
+            <td>단</td>
+            <td class="text-right">3,200</td>
+            <td class="text-right fw-bold">25.00</td>
+            <td class="text-right fw-bold">80,000</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>2026-09-09</td>
+            <td class="text-left">동원홈푸드</td>
+            <td>수산물</td>
+            <td class="text-left fw-bold">오징어(손질)</td>
+            <td>box</td>
+            <td class="text-right">45,000</td>
+            <td class="text-right fw-bold">8.00</td>
+            <td class="text-right fw-bold">360,000</td>
+          </tr>
+        {% endif %}
+
+        <!-- 총 합계 행 -->
+        <tr class="total-row">
+          <td colspan="7" class="text-center">월 간 총 정 산 합 계 ( Grand Total )</td>
+          <td class="text-right">{{ grand_total_qty|default:"385.50" }}</td>
+          <td class="text-right fw-bold" style="color: #d63384; font-size: 12px;">{{ grand_total_amount|default:"3,795,000" }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- JS Pagination Controls -->
+    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
+
+    <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px; color: #495057; border-top: 1px solid #dee2e6; padding-top: 10px;">
+      <div>* 비고: 본 월말 정산 보고서는 발주서 및 실시간 입고 검수 기록을 근거로 자동 합산 산출되었습니다.</div>
+      <div>작성자: S&P 영양사 (인)</div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.detail-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => {
+      return !r.classList.contains('total-row');
+    });
+
+    if (rows.length === 0) return;
+
+    const pageSize = 15;
+    const totalPages = Math.ceil(rows.length / pageSize);
+    if (totalPages <= 1) return;
+
+    let currentPage = 1;
+    const container = document.getElementById('docPagination');
+
+    function renderPage(page) {
+      currentPage = page;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      rows.forEach((r, idx) => {
+        r.style.display = (idx >= start && idx < end) ? '' : 'none';
+      });
+
+      renderControls();
+    }
+
+    function renderControls() {
+      if (!container) return;
+      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
+
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = startPage + maxButtons - 1;
+
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
+      }
+
+      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
+      container.innerHTML = html;
+    }
+
+    window.changeDocPage = function(page) {
+      if (page < 1 || page > totalPages) return;
+      renderPage(page);
+    };
+
+    renderPage(1);
+  });
+</script>
+{% endblock %}
+{% endblock %}

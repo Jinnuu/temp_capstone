@@ -187,31 +187,11 @@
 <div class="a4-container">
   <div class="a4-page">
     
-    <!-- 헤더 & 결재란 -->
-    <div class="doc-header-wrap">
-      <div style="width: 220px;"></div>
-      
+    <!-- 헤더 -->
+    <div class="doc-header-wrap" style="justify-content: center; text-align: center;">
       <div class="doc-title-box">
         <h1>급 식 물 품 구 입 요 구 서</h1>
         <div class="doc-subtitle">( 구매 청구 및 구매 승인용 )</div>
-      </div>
-
-      <div>
-        <table class="approval-table">
-          <tr>
-            <th style="width: 20px;" rowspan="2">결<br>재</th>
-            <th>담당</th>
-            <th>팀장</th>
-            <th>점장</th>
-            <th>관리자</th>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </table>
       </div>
     </div>
 
@@ -247,7 +227,9 @@
             </tr>
             {% for item in group.list %}
             <tr>
-              <td>{{ item.category }}</td>
+              {% if forloop.first %}
+                <td rowspan="{{ group.list|length }}" class="fw-bold" style="vertical-align: middle; background-color: #ffffff;">{{ group.grouper }}</td>
+              {% endif %}
               <td class="text-left fw-bold">{{ item.name }}</td>
               <td>{{ item.spec }}</td>
               <td>{{ item.unit }}</td>
@@ -259,202 +241,24 @@
             {% endfor %}
           {% endfor %}
         {% else %}
-          <!-- 더미 데이터 (현업 실무 표준 카테고리 그룹화 예시) -->
-          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
-            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 육류</td>
-          </tr>
           <tr>
-            <td>육류</td>
-            <td class="text-left fw-bold">돼지고기(전지)</td>
-            <td>냉장 / kg</td>
-            <td>kg</td>
-            <td class="text-right fw-bold">60.0</td>
-            <td class="text-right">14,500</td>
-            <td class="text-right fw-bold">870,000</td>
-            <td>국산 (한돈)</td>
+            <td colspan="8" class="text-center text-muted py-4">
+              선택한 기간에 등록된 급식물품 구입요구 데이터가 없습니다.
+            </td>
           </tr>
-          <tr>
-            <td>육류</td>
-            <td class="text-left fw-bold">쇠고기(양지)</td>
-            <td>냉장 / kg</td>
-            <td>kg</td>
-            <td class="text-right fw-bold">17.5</td>
-            <td class="text-right">28,000</td>
-            <td class="text-right fw-bold">490,000</td>
-            <td>국산 (한우)</td>
-          </tr>
-          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
-            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 채소류</td>
-          </tr>
-          <tr>
-            <td>채소류</td>
-            <td class="text-left fw-bold">양파</td>
-            <td>20kg / 망</td>
-            <td>망</td>
-            <td class="text-right fw-bold">3.0</td>
-            <td class="text-right">24,000</td>
-            <td class="text-right fw-bold">72,000</td>
-            <td>국내산</td>
-          </tr>
-          <tr>
-            <td>채소류</td>
-            <td class="text-left fw-bold">대파</td>
-            <td>1kg / 단</td>
-            <td>단</td>
-            <td class="text-right fw-bold">15.0</td>
-            <td class="text-right">3,200</td>
-            <td class="text-right fw-bold">48,000</td>
-            <td>국내산</td>
-          </tr>
-          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
-            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 수산물</td>
-          </tr>
-          <tr>
-            <td>수산물</td>
-            <td class="text-left fw-bold">오징어(손질)</td>
-            <td>냉동 / 5kg</td>
-            <td>box</td>
-            <td class="text-right fw-bold">4.0</td>
-            <td class="text-right">45,000</td>
-            <td class="text-right fw-bold">180,000</td>
-            <td>원양산</td>
-          </tr>
-          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
-            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 양념류</td>
-          </tr>
-          <tr>
-            <td>양념류</td>
-            <td class="text-left fw-bold">고추장</td>
-            <td>14kg / 통</td>
-            <td>통</td>
-            <td class="text-right fw-bold">2.0</td>
-            <td class="text-right">38,000</td>
-            <td class="text-right fw-bold">76,000</td>
-            <td>HACCP</td>
-          </tr>
-          <tr style="background-color: #f1f3f5; border-top: 2px solid #ced4da;">
-            <td colspan="8" class="text-left fw-bold" style="font-size: 11px; color: #343a40;">■ [품목 대분류] 곡류</td>
-          </tr>
-          <tr>
-            <td>곡류</td>
-            <td class="text-left fw-bold">쌀(백미)</td>
-            <td>20kg / 포</td>
-            <td>포</td>
-            <td class="text-right fw-bold">10.0</td>
-            <td class="text-right">55,000</td>
-            <td class="text-right fw-bold">550,000</td>
-            <td>2025년 신곡</td>
-          </tr>
-
-          <!-- Empty filler rows for clean printable form layout -->
-          {% for _ in "123"|make_list %}
-          <tr>
-            <td>&nbsp;</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          {% endfor %}
         {% endif %}
 
         <!-- 합계 행 -->
         <tr class="total-row">
           <td colspan="4" class="text-center">합 계 ( Total Amount )</td>
-          <td class="text-right">{{ total_qty|default:"109.5" }}</td>
+          <td class="text-right">{{ total_qty|default:"0" }}</td>
           <td>-</td>
-          <td class="text-right fw-bold" style="color: #0b7285;">{{ total_amount|default:"2,286,000" }}</td>
+          <td class="text-right fw-bold" style="color: #0b7285;">{{ total_amount|default:"0" }}</td>
           <td>원</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- JS Pagination Controls -->
-    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
-
-    <div style="margin-top: 25px; display: flex; justify-content: space-between; font-size: 11px; color: #495057;">
-      <div>* 특기사항: 당일 품질 검수 기준 미달 시 즉시 교환 및 반품 조치함.</div>
-      <div>작성자: S&P 영양사 (인)</div>
-    </div>
   </div>
 </div>
-
-{% block extra_js %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const table = document.querySelector('.doc-table');
-    if (!table) return;
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-
-    // Filter out total-row and empty placeholder td rows
-    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => {
-      if (r.classList.contains('total-row')) return false;
-      const firstTd = r.querySelector('td');
-      if (firstTd && firstTd.innerHTML === '&nbsp;') return false;
-      return true;
-    });
-
-    if (rows.length === 0) return;
-
-    const pageSize = 15;
-    const totalPages = Math.ceil(rows.length / pageSize);
-    if (totalPages <= 1) return;
-
-    let currentPage = 1;
-    const container = document.getElementById('docPagination');
-
-    function renderPage(page) {
-      currentPage = page;
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      rows.forEach((r, idx) => {
-        r.style.display = (idx >= start && idx < end) ? '' : 'none';
-      });
-
-      renderControls();
-    }
-
-    function renderControls() {
-      if (!container) return;
-      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
-
-      const maxButtons = 5;
-      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-      let endPage = startPage + maxButtons - 1;
-
-      if (endPage > totalPages) {
-        endPage = totalPages;
-        startPage = Math.max(1, endPage - maxButtons + 1);
-      }
-
-      if (startPage > 1) {
-        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
-      }
-
-      if (endPage < totalPages) {
-        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
-      }
-
-      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
-      container.innerHTML = html;
-    }
-
-    window.changeDocPage = function(page) {
-      if (page < 1 || page > totalPages) return;
-      renderPage(page);
-    };
-
-    renderPage(1);
-  });
-</script>
-{% endblock %}
 {% endblock %}

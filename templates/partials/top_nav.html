@@ -42,8 +42,10 @@
       <a href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
       <a href="{% url 'procurement:order_create' %}">간편 발주</a>
       <a href="{% url 'procurement:order_list' %}">발주 목록</a>
+      <a href="{% url 'procurement:supplier_list' %}">거래처 관리</a>
     </div>
   </li>
+
 
   <li>
     <a href="{% url 'docs_index' %}">문서화</a>
@@ -52,6 +54,7 @@
       <a href="{% url 'docs_index' %}#meal-docs">식단 문서화</a>
       <a href="{% url 'docs_index' %}#stock-docs">수불 현황</a>
       <a href="{% url 'docs_index' %}#order-docs">발주 내역</a>
+      <a href="{% url 'procurement:doc_cooking_instruction' %}" style="color:#e67700; font-weight:600;">★ 조리지시서</a>
     </div>
   </li>
 

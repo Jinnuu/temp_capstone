@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}주간 식단조견표 | S&P{% endblock %}
+{% block title %}발주예정서 | S&P{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -133,7 +133,16 @@
 
   .text-left { text-align: left !important; padding-left: 6px !important; }
   .text-right { text-align: right !important; padding-right: 6px !important; }
-  .allergy-tag { display: inline-block; background: #fff3bf; color: #d9480f; padding: 1px 4px; border-radius: 3px; font-size: 10px; margin: 1px; }
+
+  .doc-input {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 11px;
+    box-sizing: border-box;
+    background: #fff;
+  }
 
   @media print {
     header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
@@ -141,6 +150,13 @@
     }
     body {
       background: white !important;
+    }
+    .doc-input {
+      border: none !important;
+      background: transparent !important;
+      outline: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
     }
     .a4-container {
       padding: 0 !important;
@@ -186,18 +202,10 @@
 {% block content %}
 <div class="document-toolbar no-print">
   <div class="d-flex align-items-center gap-3">
-    <h5 class="m-0 fw-bold">[실무 양식] 주간 식단조견표</h5>
+    <h5 class="m-0 fw-bold">[실무 양식] 발주예정서</h5>
     <span class="badge bg-secondary">A4 세로 (Portrait)</span>
   </div>
   <div class="d-flex gap-2 align-items-center">
-    {% if total_pages > 1 %}
-    <div class="btn-group btn-group-sm no-print align-items-center me-2" id="pageNav">
-      <button type="button" class="btn btn-primary active" onclick="showPage('all')">전체 보기</button>
-      {% for page in pages %}
-        <button type="button" class="btn btn-outline-secondary" onclick="showPage('{{ page.page_num }}')">{{ page.page_num }}페이지</button>
-      {% endfor %}
-    </div>
-    {% endif %}
     <form method="get" class="d-flex gap-2 m-0 align-items-center">
       <label class="form-label m-0 small fw-bold text-nowrap">기간:</label>
       <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="form-control form-control-sm" style="width: 140px;">
@@ -214,31 +222,11 @@
 <div class="a4-container page-block" id="page-block-{{ page.page_num }}" data-page="{{ page.page_num }}">
   <div class="a4-page page-break">
     
-    <!-- 헤더 & 결재란 -->
-    <div class="doc-header-wrap">
-      <div style="width: 220px;"></div>
-      
+    <!-- 헤더 -->
+    <div class="doc-header-wrap" style="justify-content: center; text-align: center;">
       <div class="doc-title-box">
-        <h1>주 간 식 단 조 견 표</h1>
-        <div class="doc-subtitle">( 1인량 / 총수량 / 알레르기 정보 명세 )</div>
-      </div>
-
-      <div>
-        <table class="approval-table">
-          <tr>
-            <th style="width: 20px;" rowspan="2">결<br>재</th>
-            <th>담당</th>
-            <th>팀장</th>
-            <th>점장</th>
-            <th>영양사</th>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </table>
+        <h1>발 주 예 정 서</h1>
+        <div class="doc-subtitle">( 식단 기반 발주 사전 검토 및 예상 수량 명세서 )</div>
       </div>
     </div>
 
@@ -246,21 +234,20 @@
     <div class="doc-info-bar">
       <div>운영사업장 : S&P 중앙 급식소</div>
       <div>적용기간 : {{ monday|default:"2026-08-24" }} ~ {{ sunday|default:"2026-08-30" }}</div>
-      <div>기준 식수 : {{ headcount|default:500 }} 명 {% if total_pages > 1 %}({{ page.page_num }}/{{ total_pages }} Page){% endif %}</div>
+      <div>기준 식수 : 직접 입력 {% if total_pages > 1 %}({{ page.page_num }}/{{ total_pages }} Page){% endif %}</div>
     </div>
 
-    <!-- 식단 조견표 8개 컬럼 -->
+    <!-- 발주예정서 개편 테이블 7개 컬럼: [날짜 | 예상식수 | 메뉴 | 재료 | 1인분 | 총량 | 비고] -->
     <table class="doc-table">
       <thead>
         <tr>
-          <th style="width: 11%;">날짜/요일</th>
-          <th style="width: 8%;">구분</th>
-          <th style="width: 17%;">메뉴명</th>
-          <th style="width: 22%;">식재료명</th>
-          <th style="width: 9%;">1인량(g)</th>
-          <th style="width: 10%;">총수량(kg/L)</th>
-          <th style="width: 13%;">알레르기 정보</th>
-          <th style="width: 10%;">비고</th>
+          <th style="width: 12%;">날짜</th>
+          <th style="width: 10%;">예상식수</th>
+          <th style="width: 18%;">메뉴</th>
+          <th style="width: 20%;">재료</th>
+          <th style="width: 10%;">1인분</th>
+          <th style="width: 12%;">총량</th>
+          <th style="width: 18%;">비고</th>
         </tr>
       </thead>
       <tbody>
@@ -270,37 +257,27 @@
               {% for ing in menu_item.ingredients %}
               <tr>
                 {% if forloop.parentloop.first and forloop.first %}
-                  <td rowspan="{{ plan.rowspan }}">{{ plan.date_str }}</td>
-                  <td rowspan="{{ plan.rowspan }}">{{ plan.meal_type }}</td>
+                  <td rowspan="{{ plan.rowspan }}">{{ plan.date_str }}<br><small>({{ plan.meal_type }})</small></td>
+                  <td rowspan="{{ plan.rowspan }}"><input type="number" class="doc-input text-center" min="0" placeholder="식수"></td>
                 {% endif %}
                 {% if forloop.first %}
                   <td class="text-left fw-bold" rowspan="{{ menu_item.rowspan }}">{{ menu_item.name }}</td>
                 {% endif %}
                 <td class="text-left">{{ ing.name }}</td>
-                <td class="text-right">{{ ing.portion_g }}</td>
+                <td class="text-right">{{ ing.portion_g }}g</td>
                 <td class="text-right fw-bold">{{ ing.total_qty }}</td>
-                <td>
-                  {% if ing.allergy != "-" %}
-                    <span class="allergy-tag">{{ ing.allergy }}</span>
-                  {% else %}
-                    -
-                  {% endif %}
-                </td>
-                <td>{{ ing.remark }}</td>
+                <td><input type="text" class="doc-input" placeholder="비고"></td>
               </tr>
               {% endfor %}
             {% endfor %}
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="8" class="text-center py-4 text-muted">선택한 기간에 등록된 식단 데이터가 없습니다.</td>
+            <td colspan="7" class="text-center py-4 text-muted">선택한 기간에 등록된 식단 데이터가 없습니다.</td>
           </tr>
         {% endif %}
       </tbody>
     </table>
-
-    <!-- JS Pagination Controls -->
-    <div id="docPagination" class="d-flex justify-content-center align-items-center gap-1 mt-3 no-print"></div>
 
     <div style="margin-top: 15px; font-size: 11px; color: #495057;">
       * 알레르기 유발물질 표시: 1.난류 2.우유 3.메밀 4.땅콩 5.대두 6.밀 7.고등어 8.게 9.새우 10.돼지고기 11.복숭아 12.토마토 13.아황산류 14.호두 15.닭고기 16.쇠고기 17.오징어 18.조개류
@@ -308,108 +285,5 @@
   </div>
 </div>
 {% endfor %}
-
-{% block extra_js %}
-<script>
-  function showPage(pageNum) {
-    const blocks = document.querySelectorAll('.page-block');
-    const nav = document.getElementById('pageNav');
-    if (!nav) return;
-    const buttons = nav.querySelectorAll('.btn');
-
-    buttons.forEach(btn => {
-      btn.classList.remove('active', 'btn-primary');
-      btn.classList.add('btn-outline-secondary');
-    });
-
-    if (pageNum === 'all') {
-      blocks.forEach(b => b.style.display = 'flex');
-      if (buttons[0]) {
-        buttons[0].classList.add('active', 'btn-primary');
-        buttons[0].classList.remove('btn-outline-secondary');
-      }
-    } else {
-      blocks.forEach(b => {
-        if (b.getAttribute('data-page') == pageNum) {
-          b.style.display = 'flex';
-        } else {
-          b.style.display = 'none';
-        }
-      });
-      buttons.forEach(btn => {
-        if (btn.textContent.includes(pageNum + '페이지')) {
-          btn.classList.add('active', 'btn-primary');
-          btn.classList.remove('btn-outline-secondary');
-        }
-      });
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const table = document.querySelector('.doc-table');
-    if (!table) return;
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-
-    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.querySelector('td[colspan="8"]'));
-    if (rows.length === 0) return;
-
-    const pageSize = 15;
-    const totalPages = Math.ceil(rows.length / pageSize);
-    if (totalPages <= 1) return;
-
-    let currentPage = 1;
-    const container = document.getElementById('docPagination');
-
-    function renderPage(page) {
-      currentPage = page;
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      rows.forEach((r, idx) => {
-        r.style.display = (idx >= start && idx < end) ? '' : 'none';
-      });
-
-      renderControls();
-    }
-
-    function renderControls() {
-      if (!container) return;
-      let html = `<button type="button" class="btn btn-sm btn-outline-secondary me-1 ${currentPage === 1 ? 'disabled' : ''}" onclick="changeDocPage(${currentPage - 1})">&lt; 이전</button>`;
-
-      const maxButtons = 5;
-      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-      let endPage = startPage + maxButtons - 1;
-
-      if (endPage > totalPages) {
-        endPage = totalPages;
-        startPage = Math.max(1, endPage - maxButtons + 1);
-      }
-
-      if (startPage > 1) {
-        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        html += `<button type="button" class="btn btn-sm me-1 ${i === currentPage ? 'btn-primary active' : 'btn-outline-secondary'}" onclick="changeDocPage(${i})">${i}</button>`;
-      }
-
-      if (endPage < totalPages) {
-        html += `<span class="align-self-center px-1 text-muted me-1">...</span>`;
-      }
-
-      html += `<button type="button" class="btn btn-sm btn-outline-secondary ${currentPage === totalPages ? 'disabled' : ''}" onclick="changeDocPage(${currentPage + 1})">다음 &gt;</button>`;
-      container.innerHTML = html;
-    }
-
-    window.changeDocPage = function(page) {
-      if (page < 1 || page > totalPages) return;
-      renderPage(page);
-    };
-
-    renderPage(1);
-  });
-</script>
-{% endblock %}
 {% endblock %}
 

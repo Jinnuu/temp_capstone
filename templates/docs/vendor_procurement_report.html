@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}기간별/업체별 발주 명세서 | S&P{% endblock %}
+{% block title %}업체별 구매발주서 | S&P{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sp_final.css' %}">
@@ -64,9 +64,9 @@
 <div class="sp-page">
   <section class="sp-hero">
     <div>
-      <p class="sp-kicker">Vendor Procurement Report</p>
-      <h1>기간별 / 업체별 발주 명세서</h1>
-      <p>조회 기간과 납품업체를 지정하여 출력 가능한 발주서 문서를 생성합니다.</p>
+      <p class="sp-kicker">Vendor Purchase Order</p>
+      <h1>업체별 구매발주서</h1>
+      <p>조회 기간과 납품업체를 지정하여 출력 가능한 구매발주서 문서를 생성합니다.</p>
     </div>
     <div class="sp-actions">
       <a href="{% url 'docs_index' %}" class="sp-btn">돌아가기</a>
@@ -118,8 +118,9 @@
   <div class="a4-preview-container">
     <div class="a4-page">
       <div class="report-header">
-        <h1>식 자 재 발 주 명 세 서</h1>
+        <h1>업 체 별 구 매 발 주 서</h1>
       </div>
+
       
       <!-- 상단 공급자 및 발주 정보 영역 -->
       <div class="supplier-info-box">

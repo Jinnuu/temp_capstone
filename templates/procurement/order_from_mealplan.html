@@ -108,8 +108,6 @@
                     <th style="width:40px; text-align:center;">
                       <input type="checkbox" class="js-check-all" checked title="전체 선택/해제">
                     </th>
-                    <th>끼니</th>
-                    <th>예측/기준 식수</th>
                     <th>메뉴</th>
                     <th class="left">식재료명</th>
                     <th>규격</th>
@@ -125,6 +123,32 @@
                 </thead>
                 <tbody>
                   {% for plan in group.plans %}
+                    <!-- 날짜/끼니별 식수 그룹 헤더 행 -->
+                    <tr class="sp-meal-header-row" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1;">
+                      <td colspan="12" style="padding:10px 16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                          <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:15px; font-weight:700; color:#1e293b;">🍱 {{ plan.meal_type_display }}</span>
+                            <div style="display:flex; align-items:center; gap:6px; background:#fff; padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px;">
+                              <label style="font-size:13px; font-weight:600; color:#334155; margin:0;">예측/기준 식수:</label>
+                              <input
+                                type="number"
+                                name="headcount_{{ plan.target_date_str }}_{{ plan.meal_type }}"
+                                value="{{ plan.serving_count }}"
+                                min="1"
+                                class="form-control form-control-sm js-plan-headcount-input"
+                                style="width:90px; font-weight:700; text-align:center; padding:2px 6px; font-size:14px; border:1px solid #94a3b8;"
+                                data-plan-date="{{ plan.target_date_str }}"
+                                data-plan-meal="{{ plan.meal_type }}"
+                              >
+                              <span style="font-size:13px; font-weight:700; color:#1e293b;">명</span>
+                            </div>
+                            <span class="sp-note js-serving-source" style="font-size:12px; color:#64748b;">(출처: {{ plan.serving_source }})</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+
                     {% for menu in plan.menus %}
                       {% for ing in menu.ingredients %}
                         <tr
@@ -133,14 +157,10 @@
                           data-current-stock="{{ ing.current_stock }}"
                           data-safe-stock="{{ ing.safe_stock }}"
                           data-unit="{{ ing.unit }}"
+                          data-raw-unit="{{ ing.raw_unit }}"
                         >
                           <td style="text-align:center;">
                             <input type="checkbox" class="js-item-check" checked>
-                          </td>
-                          <td>{{ plan.meal_type_display }}</td>
-                          <td>
-                            <span class="sp-forecast-count js-serving-count">{{ plan.serving_count }}명</span>
-                            <div class="sp-note js-serving-source">{{ plan.serving_source }}</div>
                           </td>
                           <td>{{ menu.name }}</td>
                           <td class="left">
@@ -190,8 +210,6 @@
                       {% empty %}
                         <tr>
                           <td></td>
-                          <td>{{ plan.meal_type_display }}</td>
-                          <td>{{ plan.serving_count }}명</td>
                           <td>{{ menu.name }}</td>
                           <td colspan="10">연결된 레시피 식재료가 없습니다.</td>
                         </tr>
@@ -199,8 +217,6 @@
                     {% empty %}
                       <tr>
                         <td></td>
-                        <td>{{ plan.meal_type_display }}</td>
-                        <td>{{ plan.serving_count }}명</td>
                         <td colspan="11">등록된 메뉴가 없습니다.</td>
                       </tr>
                     {% endfor %}
@@ -295,12 +311,12 @@ function applyBatchServing(count) {
   const newCount = parseFloat(count);
   if (isNaN(newCount) || newCount < 0) return;
 
-  // 모든 식수 표시 업데이트
-  document.querySelectorAll(".js-serving-count").forEach((el) => {
-    el.textContent = newCount + "명";
+  // 모든 끼니별 식수 input 값 업데이트
+  document.querySelectorAll(".js-plan-headcount-input").forEach((input) => {
+    input.value = newCount;
   });
   document.querySelectorAll(".js-serving-source").forEach((el) => {
-    el.textContent = "수동 입력";
+    el.textContent = "(출처: 수동 입력)";
   });
 
   // 행별 필요량 & 발주수량 실시간 재계산
@@ -309,15 +325,19 @@ function applyBatchServing(count) {
     const currentStock = parseFloat(row.dataset.currentStock || 0);
     const safeStock = parseFloat(row.dataset.safeStock || 0);
     const unit = row.dataset.unit || "";
+    const isKgConv = (row.dataset.unit || "").toLowerCase() === "kg" && (row.dataset.rawUnit || "").toLowerCase() === "g";
 
-    // 필요량 = 식수 * 1인분 제공량
-    const neededQty = Math.round(newCount * perPerson * 100) / 100;
+    let neededQty = newCount * perPerson;
+    if (isKgConv) {
+      neededQty = neededQty / 1000;
+    }
+    neededQty = Math.round(neededQty * 100) / 100;
+
     const neededCell = row.querySelector(".js-needed-qty");
     if (neededCell) {
       neededCell.textContent = neededQty + " " + unit;
     }
 
-    // 최종 발주수량 = 필요량 + 안전재고 - 현재고
     const shortage = neededQty + safeStock - currentStock;
     const orderQty = shortage > 0 ? Math.round(shortage * 100) / 100 : 0;
 
@@ -331,7 +351,6 @@ function applyBatchServing(count) {
       }
     }
 
-    // 상태 안내문구 및 태그 업데이트
     const qtyWrap = row.querySelector(".sp-order-qty");
     if (qtyWrap) {
       const noteEl = qtyWrap.querySelector("small");
@@ -360,9 +379,85 @@ function applyBatchServing(count) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  // 개별 끼니별 식수 입력 변경 이벤트
+  document.querySelectorAll(".js-plan-headcount-input").forEach((input) => {
+    input.addEventListener("input", function () {
+      const pDate = this.dataset.planDate;
+      const pMeal = this.dataset.planMeal;
+      const newCount = parseFloat(this.value);
+
+      if (isNaN(newCount) || newCount < 0) return;
+
+      const sourceSpan = this.closest("div").parentElement.querySelector(".js-serving-source");
+      if (sourceSpan) sourceSpan.textContent = "(출처: 직접 입력)";
+
+      document.querySelectorAll(".smart-order-table tbody tr[data-price]").forEach((row) => {
+        const dateInput = row.querySelector('input[name="target_date[]"]');
+        const mealInput = row.querySelector('input[name="meal_type[]"]');
+        if (!dateInput || !mealInput) return;
+
+        if (dateInput.value === pDate && mealInput.value === pMeal) {
+          const perPerson = parseFloat(row.dataset.perPerson || 0);
+          const currentStock = parseFloat(row.dataset.currentStock || 0);
+          const safeStock = parseFloat(row.dataset.safeStock || 0);
+          const unit = row.dataset.unit || "";
+          const isKgConv = (row.dataset.unit || "").toLowerCase() === "kg" && (row.dataset.rawUnit || "").toLowerCase() === "g";
+
+          let neededQty = newCount * perPerson;
+          if (isKgConv) {
+            neededQty = neededQty / 1000;
+          }
+          neededQty = Math.round(neededQty * 100) / 100;
+
+          const neededCell = row.querySelector(".js-needed-qty");
+          if (neededCell) neededCell.textContent = neededQty + " " + unit;
+
+          const shortage = neededQty + safeStock - currentStock;
+          const orderQty = shortage > 0 ? Math.round(shortage * 100) / 100 : 0;
+
+          const qtyInput = row.querySelector('input[name="quantity[]"]');
+          if (qtyInput) {
+            qtyInput.value = orderQty;
+            if (orderQty > 0) {
+              qtyInput.classList.add("needs-order");
+            } else {
+              qtyInput.classList.remove("needs-order");
+            }
+          }
+
+          const qtyWrap = row.querySelector(".sp-order-qty");
+          if (qtyWrap) {
+            const noteEl = qtyWrap.querySelector("small");
+            if (noteEl) {
+              if (orderQty > 0) {
+                noteEl.textContent = "부족분 자동 입력";
+                noteEl.style.color = "";
+              } else {
+                noteEl.textContent = "재고 충분";
+                noteEl.style.color = "#2f9e44";
+              }
+            }
+          }
+
+          const statusTd = row.children[row.children.length - 1];
+          if (statusTd) {
+            if (orderQty > 0) {
+              statusTd.innerHTML = '<span class="sp-status danger">발주필요</span>';
+            } else {
+              statusTd.innerHTML = '<span class="sp-status ok">재고충분</span>';
+            }
+          }
+        }
+      });
+
+      updateSmartOrderTotals();
+    });
+  });
+
   // 일괄 기준 식수 입력 이벤트 리스너
   const batchInput = document.getElementById("batchServingInput");
   const applyBtn = document.getElementById("applyBatchServingBtn");
+
 
   if (applyBtn && batchInput) {
     applyBtn.addEventListener("click", function () {

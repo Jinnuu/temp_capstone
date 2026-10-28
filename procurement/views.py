@@ -18,7 +18,8 @@ from forecasting.models import AttendancePrediction
 from forecasting.services.ingredient_calc import get_all_day_requirements
 from inventory.models import Ingredient, InventoryLog
 from meals.models import DietPlan
-from .models import OrderItem, PurchaseOrder
+from .models import OrderItem, PurchaseOrder, Supplier
+
 
 
 CATEGORY_ORDER = ["밥", "국", "주반찬", "부반찬", "김치", "간식"]
@@ -486,14 +487,28 @@ def order_from_mealplan(request):
 
         date_plans = []
         for plan in plans:
-            serving_count, serving_source = get_serving_count(plan)
-
+            default_serving_count, serving_source = get_serving_count(plan)
             dt = plan.target_date
+            dt_key = dt.strftime('%Y-%m-%d')
+            custom_hc_param = f"headcount_{dt_key}_{plan.meal_type}"
+            custom_hc = request.GET.get(custom_hc_param) or request.POST.get(custom_hc_param)
+
+            if custom_hc:
+                try:
+                    serving_count = int(custom_hc)
+                    serving_source = "직접 입력"
+                except ValueError:
+                    serving_count = default_serving_count
+            else:
+                serving_count = default_serving_count
+
             dt_str = f"{dt.strftime('%d일')}({WEEKDAYS_KO[dt.weekday()]})"
             meal_type_display = f"{dt_str} {plan.meal_type}"
 
             plan_item = {
+                "plan_id": plan.id,
                 "target_date": plan.target_date,
+                "target_date_str": dt_key,
                 "meal_type": plan.meal_type,
                 "meal_type_display": meal_type_display,
                 "headcount": plan.headcount,
@@ -524,23 +539,44 @@ def order_from_mealplan(request):
                     # 현재 끼니 소비량만큼 재고를 차감한다. 음수는 0으로 고정한다.
                     stock_balance[ing.id] = max(Decimal("0"), current_before - needed_qty)
 
+                    # 쌀/김치류 g -> kg 단위 변환 처리
+                    ing_cat = ing.category or ""
+                    ing_name = ing.name or ""
+                    unit_str = ing.unit or "kg"
+                    display_unit = unit_str
+                    disp_needed = needed_qty
+                    disp_order = order_qty
+                    disp_current = current_before
+                    disp_safe = safe_stock
+                    disp_req_pp = required_per_person
+
+                    if ("쌀" in ing_cat or "김치" in ing_cat or "쌀" in ing_name or "김치" in ing_name) and unit_str.lower() in ["g", "그램"]:
+                        display_unit = "kg"
+                        disp_needed = needed_qty / Decimal("1000")
+                        disp_order = order_qty / Decimal("1000")
+                        disp_current = current_before / Decimal("1000")
+                        disp_safe = safe_stock / Decimal("1000")
+                        disp_req_pp = required_per_person / Decimal("1000")
+
                     menu_item["ingredients"].append(
                         {
                             "id": ing.id,
                             "name": ing.name,
-                            "unit": ing.unit,
+                            "unit": display_unit,
+                            "raw_unit": unit_str,
                             "price": ing.unit_price,
                             "category": ing.category,
                             "spec": ing.spec,
                             "description": ing.description,
                             "supplier_name": ing.supplier.name if ing.supplier else "미정",
-                            "current_stock": round(current_before, 2),
-                            "safe_stock": round(safe_stock, 2),
-                            "needed_qty": round(needed_qty, 2),
-                            "order_qty": round(order_qty, 2),
-                            "required_per_person": float(required_per_person),
+                            "current_stock": round(disp_current, 2),
+                            "safe_stock": round(disp_safe, 2),
+                            "needed_qty": round(disp_needed, 2),
+                            "order_qty": round(disp_order, 2),
+                            "required_per_person": round(disp_req_pp, 4),
                         }
                     )
+
 
                 plan_item["menus"].append(menu_item)
 
@@ -1047,3 +1083,235 @@ def export_daily_inspection_excel(request):
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+
+def monthly_settlement_view(request):
+    """
+    [9단계] 월말 정산 (총 식자재 소요량 및 금액 정산)
+    - 특정 월(Month: YYYY-MM) 기준 한 달간의 총 식자재 발주 소요량과 총 청구 금액을 발주처별/대분류별로 합산(Aggregation)
+    """
+    import calendar
+    today = date.today()
+    month_str = request.GET.get("month", "").strip()
+
+    if month_str:
+        try:
+            parsed = datetime.strptime(month_str, "%Y-%m").date()
+            year = parsed.year
+            month = parsed.month
+        except ValueError:
+            year = today.year
+            month = today.month
+    else:
+        year = today.year
+        month = today.month
+
+    start_date = date(year, month, 1)
+    _, last_day = calendar.monthrange(year, month)
+    end_date = date(year, month, last_day)
+
+    target_month_display = f"{year}년 {month:02d}월"
+    target_month_str = f"{year}-{month:02d}"
+
+    # Filter OrderItems for the target month
+    order_items_qs = OrderItem.objects.filter(
+        Q(target_date__range=[start_date, end_date]) | Q(purchase_order__created_at__date__range=[start_date, end_date])
+    ).select_related("ingredient", "purchase_order__supplier")
+
+    # Aggregation 1: By Supplier (발주처별)
+    supplier_agg = defaultdict(lambda: {
+        "supplier_name": "",
+        "item_count": 0,
+        "total_qty": 0.0,
+        "total_amount": 0,
+    })
+
+    # Aggregation 2: By Category (대분류별)
+    category_agg = defaultdict(lambda: {
+        "category_name": "",
+        "item_count": 0,
+        "total_qty": 0.0,
+        "total_amount": 0,
+    })
+
+    # Detailed item breakdown list
+    item_details = []
+    grand_total_qty = 0.0
+    grand_total_amount = 0
+
+    for item in order_items_qs:
+        supplier_user = item.purchase_order.supplier
+        sup_name = getattr(supplier_user, "name", "") or supplier_user.username
+        category = item.ingredient.category or "기타"
+        qty = float(item.required_qty or item.missing_qty or 0)
+        unit_price = item.order_unit_price or item.ingredient.unit_price or 0
+        amount = item.estimated_price if item.estimated_price else int(qty * unit_price)
+
+        # Supplier agg
+        supplier_agg[sup_name]["supplier_name"] = sup_name
+        supplier_agg[sup_name]["item_count"] += 1
+        supplier_agg[sup_name]["total_qty"] += qty
+        supplier_agg[sup_name]["total_amount"] += amount
+
+        # Category agg
+        category_agg[category]["category_name"] = category
+        category_agg[category]["item_count"] += 1
+        category_agg[category]["total_qty"] += qty
+        category_agg[category]["total_amount"] += amount
+
+        grand_total_qty += qty
+        grand_total_amount += amount
+
+        item_details.append({
+            "supplier_name": sup_name,
+            "category": category,
+            "ingredient_name": item.ingredient.name,
+            "spec": item.ingredient.spec or "-",
+            "unit": item.ingredient.unit or "kg",
+            "unit_price": unit_price,
+            "quantity": round(qty, 2),
+            "amount": amount,
+            "target_date": item.target_date.strftime("%Y-%m-%d") if item.target_date else item.purchase_order.created_at.strftime("%Y-%m-%d"),
+        })
+
+    supplier_summary = sorted(supplier_agg.values(), key=lambda x: x["total_amount"], reverse=True)
+    category_summary = sorted(category_agg.values(), key=lambda x: x["total_amount"], reverse=True)
+    item_details.sort(key=lambda x: (x["supplier_name"], x["category"], x["ingredient_name"]))
+
+    subtotal = int(grand_total_amount / 1.1) if grand_total_amount > 0 else 0
+    vat = grand_total_amount - subtotal
+
+    context = {
+        "year": year,
+        "month": f"{month:02d}",
+        "target_month": target_month_str,
+        "target_month_display": target_month_display,
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
+        "supplier_summary": supplier_summary,
+        "category_summary": category_summary,
+        "item_details": item_details,
+        "grand_total_qty": round(grand_total_qty, 2),
+        "grand_total_amount": grand_total_amount,
+        "subtotal": subtotal,
+        "vat": vat,
+    }
+    return render(request, "docs/doc_monthly_settlement.html", context)
+
+
+def supplier_list(request):
+    """소비조합 거래처(발주 업체) 현황 목록 뷰"""
+    if not Supplier.objects.exists():
+        default_suppliers = [
+            {"category": "유제품업체", "name": "행복한식자재", "business_items": "유제품, 우유", "phone_number": "02-123-4567", "fax": "02-123-4568", "mobile": "010-1111-2222", "remarks": "happy@supplier.com"},
+            {"category": "농산물업체", "name": "해동", "business_items": "농산물, 채소류", "phone_number": "02-234-5678", "fax": "02-234-5679", "mobile": "010-2222-3333", "remarks": "haedong@supplier.com"},
+            {"category": "공산품업체", "name": "신선유통", "business_items": "공산품, 조미료", "phone_number": "02-345-6789", "fax": "02-345-6790", "mobile": "010-3333-4444", "remarks": "sinsun@supplier.com"},
+            {"category": "육계업체", "name": "다나푸드", "business_items": "계육 및 계란", "phone_number": "02-456-7890", "fax": "02-456-7891", "mobile": "010-4444-5555", "remarks": "dana@supplier.com"},
+            {"category": "곡류업체", "name": "하나유통", "business_items": "곡류, 쌀, 잡곡", "phone_number": "02-567-8901", "fax": "02-567-8902", "mobile": "010-5555-6666", "remarks": "hana@supplier.com"},
+            {"category": "김치업체", "name": "구전식품", "business_items": "김치류, 절임류", "phone_number": "02-678-9012", "fax": "02-678-9013", "mobile": "010-6666-7777", "remarks": "gujun@supplier.com"},
+            {"category": "육류업체", "name": "일오삼", "business_items": "육류, 돼지고기, 소고기", "phone_number": "02-789-0123", "fax": "02-789-0124", "mobile": "010-7777-8888", "remarks": "153@supplier.com"},
+        ]
+        User = get_user_model()
+        for item in default_suppliers:
+            user_obj = User.objects.filter(Q(name=item["name"]) | Q(username=item["name"])).first()
+            Supplier.objects.create(
+                category=item["category"],
+                name=item["name"],
+                business_items=item["business_items"],
+                phone_number=item["phone_number"],
+                fax=item["fax"],
+                mobile=item["mobile"],
+                remarks=item["remarks"],
+                user=user_obj,
+            )
+
+    query = request.GET.get("q", "").strip()
+    suppliers = Supplier.objects.all()
+
+    if query:
+        suppliers = suppliers.filter(
+            Q(name__icontains=query) |
+            Q(category__icontains=query) |
+            Q(business_items__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(mobile__icontains=query) |
+            Q(remarks__icontains=query)
+        )
+
+    context = {
+        "suppliers": suppliers,
+        "query": query,
+    }
+    return render(request, "procurement/supplier_list.html", context)
+
+
+def supplier_create(request):
+    if request.method == "POST":
+        category = request.POST.get("category", "").strip()
+        name = request.POST.get("name", "").strip()
+        business_items = request.POST.get("business_items", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+        fax = request.POST.get("fax", "").strip()
+        mobile = request.POST.get("mobile", "").strip()
+        remarks = request.POST.get("remarks", "").strip()
+
+        if name:
+            User = get_user_model()
+            user_obj, _ = User.objects.get_or_create(
+                username=name,
+                defaults={
+                    "name": name,
+                    "phone_number": mobile or phone_number,
+                }
+            )
+
+            Supplier.objects.create(
+                category=category or "부식업체",
+                name=name,
+                business_items=business_items,
+                phone_number=phone_number,
+                fax=fax,
+                mobile=mobile,
+                remarks=remarks,
+                user=user_obj,
+            )
+            messages.success(request, f"거래처 [{name}] 추가 등록이 완료되었습니다.")
+        else:
+            messages.error(request, "상호명을 입력해 주세요.")
+
+    return redirect("procurement:supplier_list")
+
+
+def supplier_update(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+    if request.method == "POST":
+        supplier.category = request.POST.get("category", "").strip()
+        supplier.name = request.POST.get("name", "").strip()
+        supplier.business_items = request.POST.get("business_items", "").strip()
+        supplier.phone_number = request.POST.get("phone_number", "").strip()
+        supplier.fax = request.POST.get("fax", "").strip()
+        supplier.mobile = request.POST.get("mobile", "").strip()
+        supplier.remarks = request.POST.get("remarks", "").strip()
+        supplier.save()
+
+        if supplier.user:
+            supplier.user.name = supplier.name
+            if supplier.mobile:
+                supplier.user.phone_number = supplier.mobile
+            supplier.user.save()
+
+        messages.success(request, f"거래처 [{supplier.name}] 정보가 수정되었습니다.")
+
+    return redirect("procurement:supplier_list")
+
+
+def supplier_delete(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+    if request.method == "POST":
+        name = supplier.name
+        supplier.delete()
+        messages.success(request, f"거래처 [{name}] 삭제되었습니다.")
+
+    return redirect("procurement:supplier_list")
+
+

@@ -131,7 +131,7 @@
         <a href="{% url 'meals:weekly_recipe_report' %}" class="doc-link">주간 레시피 명세서</a>
       </li>
       <li class="doc-item">
-        <a href="{% url 'meals:doc_menu_overview' %}" class="doc-link" style="color:#2b8a3e; font-weight:600;">★ 주간 식단조견표 (실무)</a>
+        <a href="{% url 'meals:doc_menu_overview' %}" class="doc-link" style="color:#2b8a3e; font-weight:600;">★ 발주예정서 (실무)</a>
       </li>
     </ul>
     <div class="doc-card-footer">
@@ -172,8 +172,9 @@
         <a href="{% url 'procurement:weekly_procurement_report' %}" class="doc-link">주간 통합 발주서</a>
       </li>
       <li class="doc-item">
-        <a href="{% url 'procurement:vendor_procurement_report' %}" class="doc-link">업체별 발주 명세서</a>
+        <a href="{% url 'procurement:vendor_procurement_report' %}" class="doc-link">업체별 구매발주서</a>
       </li>
+
       <li class="doc-item">
         <a href="{% url 'procurement:daily_inspection_report' %}" class="doc-link">일자별 검수서(주문)</a>
       </li>
@@ -182,6 +183,9 @@
       </li>
       <li class="doc-item">
         <a href="{% url 'procurement:doc_inspection_log' %}" class="doc-link" style="color:#2b8a3e; font-weight:600;">★ 급식물품 검수일지 (실무)</a>
+      </li>
+      <li class="doc-item">
+        <a href="{% url 'procurement:doc_cooking_instruction' %}" class="doc-link" style="color:#e67700; font-weight:600;">★ 조리지시서 (실무)</a>
       </li>
     </ul>
     <div class="doc-card-footer">

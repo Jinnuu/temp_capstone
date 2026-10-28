@@ -11,7 +11,7 @@ WEEKDAYS_KO = ["월", "화", "수", "목", "금", "토", "일"]
 
 
 def doc_menu_overview(request):
-    """[신규] 주간 식단조견표 (실무 양식) - doc_menu_overview.html"""
+    """[신규] 발주예정서 (실무 양식) - doc_menu_overview.html"""
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
     target_date_str = request.GET.get("date")
@@ -77,7 +77,15 @@ def doc_menu_overview(request):
                         total_qty_val = float(req_amt * headcount / 1000)
 
                     unit = ing.unit if ing.unit else "kg"
-                    total_qty_str = f"{round(total_qty_val, 1)} {unit}"
+                    ing_cat = ing.category or ""
+                    ing_name = ing.name or ""
+
+                    # 쌀/김치류 g -> kg 단위 변환
+                    if ("쌀" in ing_cat or "김치" in ing_cat or "쌀" in ing_name or "김치" in ing_name) and unit.lower() in ["g", "그램"]:
+                        unit = "kg"
+                        total_qty_val = total_qty_val / 1000.0
+
+                    total_qty_str = f"{round(total_qty_val, 2)} {unit}"
 
                     ing_list.append({
                         "name": ing.name,
@@ -86,6 +94,7 @@ def doc_menu_overview(request):
                         "allergy": ing.description if (ing.description and "알레르기" in ing.description) else "-",
                         "remark": ing.spec or "-",
                     })
+
             else:
                 ing_list.append({
                     "name": "-",

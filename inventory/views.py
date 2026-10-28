@@ -133,6 +133,22 @@ def ingredient_create(request):
         form = IngredientForm()
     return render(request, "inventory/ingredient_form.html", {"form": form})
 
+def ingredient_update(request, pk):
+    ingredient = get_object_or_404(Ingredient, pk=pk)
+    if request.method == "POST":
+        form = IngredientForm(request.POST, instance=ingredient)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"[{ingredient.name}] 식재료 정보가 성공적으로 수정되었습니다.")
+            return redirect("inventory:ingredient_list")
+    else:
+        form = IngredientForm(instance=ingredient)
+    return render(request, "inventory/ingredient_form.html", {
+        "form": form,
+        "ingredient": ingredient,
+        "is_update": True,
+    })
+
 def ingredient_upload(request):
     if request.method == "POST":
         file_obj = request.FILES.get("file") or (list(request.FILES.values())[0] if request.FILES else None)
