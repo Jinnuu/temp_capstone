@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, Side, PatternFill
+from collections import defaultdict
 
 from .forms import AttendancePredictionForm, PredictionFilterForm
 from .models import AttendancePrediction
@@ -28,6 +29,19 @@ def prediction_create_view(request):
         form = AttendancePredictionForm(request.POST)
         if form.is_valid():
             prediction_date = form.cleaned_data["prediction_date"]
+
+            # [핵심 추가] 해당 날짜에 이미 생성된 예측 결과가 하나라도 존재하는지 검사
+            existing_count = AttendancePrediction.objects.filter(
+                prediction_date=prediction_date
+            ).count()
+
+            if existing_count > 0:
+                messages.error(
+                    request,
+                    f"[{prediction_date}] 해당 날짜의 예측 결과가 이미 존재합니다."
+                )
+                # 폼을 유지한 채 다시 폼 페이지로 리다이렉트 또는 렌더링
+                return render(request, "forecasting/predict_form.html", {"form": form})
 
             meal_types = [
                 AttendancePrediction.MealType.BREAKFAST,
@@ -93,11 +107,16 @@ def prediction_calendar_view(request):
     cal = calendar.Calendar(firstweekday=6)
     month_days = cal.monthdatescalendar(selected_year, selected_month)
 
+    # 해당 월의 모든 예측 데이터 조회
     predictions = AttendancePrediction.objects.filter(
         prediction_date__year=selected_year,
         prediction_date__month=selected_month,
     )
-    predicted_dates = {p.prediction_date for p in predictions}
+
+    # 날짜별로 예측 데이터 그룹화 (Key: date 객체, Value: [AttendancePrediction 객체들])
+    predictions_by_date = defaultdict(list)
+    for p in predictions:
+        predictions_by_date[p.prediction_date].append(p)
 
     calendar_weeks = []
     for week in month_days:
@@ -107,13 +126,17 @@ def prediction_calendar_view(request):
                 row.append(None)
                 continue
 
-            has_prediction = day in predicted_dates
+            day_preds = predictions_by_date.get(day, [])
+            has_prediction = len(day_preds) > 0
+            total_count = sum(p.predicted_count for p in day_preds)
+
             row.append({
                 "date": day,
                 "day": day.day,
                 "is_today": day == today,
                 "has_prediction": has_prediction,
-                "status_label": "결과 있음" if has_prediction else "미생성",
+                "predictions": day_preds,  # 해당 날짜의 조식/중식/석식 예측 객체 목록
+                "total_count": total_count,
             })
         calendar_weeks.append(row)
 

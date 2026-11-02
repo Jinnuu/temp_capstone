@@ -5,183 +5,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sp_final.css' %}?v=sprint7-final">
-{% endblock %}
-
-{% block content %}
-<div class="sp-page">
-  <section class="sp-hero">
-    <div>
-      <p class="sp-kicker">Weekly Meal Planning</p>
-      <h1>주간 식단 등록</h1>
-      <p>월요일부터 일요일까지 일주일 단위로 조식·중식·석식을 입력합니다. 각 칸에서 메뉴를 입력하고 Enter를 누르면 저장됩니다.</p>
-    </div>
-    <div class="sp-actions">
-      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">월간 달력 보기</a>
-      <a class="sp-btn primary" href="{% url 'meals:menu_create' %}">메뉴 추가 등록</a>
-    </div>
-  </section>
-
-  <section class="sp-card">
-    <div class="sp-card-head">
-      <div>
-        <p class="sp-kicker">Week Range</p>
-        <h2 style="white-space: nowrap; font-size: 1.35rem;">{{ start_date_str }} ~ {{ end_date_str }} 주간 식단</h2>
-      </div>
-      <div class="sp-actions">
-        <form method="get" style="display:flex; gap:8px; align-items:center;">
-          <input type="date" name="date" value="{{ start_date_str }}" class="sp-input" style="width:150px;">
-          <button type="submit" class="sp-btn primary">조회</button>
-          <a href="{% url 'meals:export_weekly_mealplan_excel' %}?date={{ start_date_str }}" class="sp-btn ok">엑셀 다운로드</a>
-        </form>
-        <div style="margin-left:16px;">
-          <a class="sp-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
-          <a class="sp-btn" href="?start_date={{ next_week }}">다음 주 »</a>
-        </div>
-        <form method="post" action="{% url 'meals:bulk_delete_mealplans' %}" style="margin-left:16px;"
-              onsubmit="return confirm('{{ start_date_str }} ~ {{ end_date_str }}\ 기간의 주간 식단을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');">
-          {% csrf_token %}
-          <input type="hidden" name="start_date" value="{{ start_date_str }}">
-          <input type="hidden" name="end_date" value="{{ end_date_str }}">
-          <input type="hidden" name="redirect_url" value="{% url 'meals:weekly_mealplan_create' %}?start_date={{ start_date_str }}">
-          <button type="submit" class="sp-btn" style="background:#fa5252;color:#fff;border-color:#fa5252;">🗑 주간 식단 일괄 삭제</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="sp-table-wrap">
-      <div class="sp-week-editor">
-        <div class="sp-week-cell head">구분</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell head">
-            {{ day.date|date:"m/d" }}<br>({{ day.weekday }})
-          </div>
-        {% endfor %}
-
-        <div class="sp-week-cell meal-head">조식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-조식">
-              {% for menu in day.breakfast %}
-                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
-                  {{ menu.name }}
-                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
-                    data-diet-menu-id="{{ menu.diet_menu_id }}"
-                    data-date="{{ day.date_str }}"
-                    data-meal="조식">&times;</button>
-                </span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="조식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
-
-        <div class="sp-week-cell meal-head">중식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-중식">
-              {% for menu in day.lunch %}
-                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
-                  {{ menu.name }}
-                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
-                    data-diet-menu-id="{{ menu.diet_menu_id }}"
-                    data-date="{{ day.date_str }}"
-                    data-meal="중식">&times;</button>
-                </span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="중식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
-
-        <div class="sp-week-cell meal-head">석식</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-석식">
-              {% for menu in day.dinner %}
-                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
-                  {{ menu.name }}
-                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
-                    data-diet-menu-id="{{ menu.diet_menu_id }}"
-                    data-date="{{ day.date_str }}"
-                    data-meal="석식">&times;</button>
-                </span>
-              {% empty %}
-                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-              {% endfor %}
-            </div>
-            <div class="sp-week-add">
-              <input type="text" placeholder="메뉴 입력" data-date="{{ day.date_str }}" data-meal="석식">
-              <button type="button" onclick="addWeeklyMenu(this)">+</button>
-            </div>
-          </div>
-        {% endfor %}
-
-        <div class="sp-week-cell meal-head">비고</div>
-        {% for day in days_context|slice:":7" %}
-          <div class="sp-week-cell">
-            {% if forloop.last %}
-              <div class="mb-3">
-                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7; font-weight:600;">[다음주 월요일 조식]</p>
-                <div class="sp-week-menu-list" id="week-{{ day.next_monday_str }}-조식">
-                  {% for menu in day.next_monday_breakfast %}
-                    <span data-diet-menu-id="{{ menu.diet_menu_id }}">
-                      {{ menu.name }}
-                      <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
-                        data-diet-menu-id="{{ menu.diet_menu_id }}"
-                        data-date="{{ day.next_monday_str }}"
-                        data-meal="조식">&times;</button>
-                    </span>
-                  {% empty %}
-                    <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-                  {% endfor %}
-                </div>
-                <div class="sp-week-add">
-                  <input type="text" placeholder="메뉴 입력" data-date="{{ day.next_monday_str }}" data-meal="조식">
-                  <button type="button" onclick="addWeeklyMenu(this)">+</button>
-                </div>
-              </div>
-              <div>
-                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7; font-weight:600;">[다음주 월요일 중식]</p>
-                <div class="sp-week-menu-list" id="week-{{ day.next_monday_str }}-중식">
-                  {% for menu in day.next_monday_lunch %}
-                    <span data-diet-menu-id="{{ menu.diet_menu_id }}">
-                      {{ menu.name }}
-                      <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
-                        data-diet-menu-id="{{ menu.diet_menu_id }}"
-                        data-date="{{ day.next_monday_str }}"
-                        data-meal="중식">&times;</button>
-                    </span>
-                  {% empty %}
-                    <span style="background:#f1f3f5;color:#868e96;">미등록</span>
-                  {% endfor %}
-                </div>
-                <div class="sp-week-add">
-                  <input type="text" placeholder="메뉴 입력" data-date="{{ day.next_monday_str }}" data-meal="중식">
-                  <button type="button" onclick="addWeeklyMenu(this)">+</button>
-                </div>
-              </div>
-            {% else %}
-              <p class="sp-note" style="color:#adb5bd;">-</p>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-</div>
-{% endblock %}
-
-{% block extra_js %}
 <style>
   .sp-card-head h2 {
     white-space: nowrap;
@@ -205,117 +28,320 @@
     opacity: 0.75;
     vertical-align: middle;
   }
-
   .sp-week-menu-del:hover { opacity: 1; }
 </style>
+{% endblock %}
+
+{% block content %}
+<!-- 공통 메뉴 선택용 datalist (메뉴에 등록된 목록 제공) -->
+<datalist id="menu-list-options">
+  {% for menu in menus %}
+    <option value="{{ menu.name }}">
+  {% endfor %}
+</datalist>
+
+<div class="sp-page">
+  <section class="sp-hero">
+    <div>
+      <p class="sp-kicker">Weekly Meal Planning</p>
+      <h1>주간 식단 등록</h1>
+      <p>월요일부터 일요일까지 일주일 단위로 조식·중식·석식을 입력합니다. 등록된 메뉴만 선택·입력할 수 있습니다.</p>
+    </div>
+    <div class="sp-actions">
+      <a class="sp-btn" href="{% url 'meals:mealplan_list' %}">월간 달력 보기</a>
+      <a class="sp-btn primary" href="{% url 'meals:menu_create' %}">메뉴 추가 등록</a>
+    </div>
+  </section>
+
+  <section class="sp-card">
+    <div class="sp-card-head">
+      <div>
+        <p class="sp-kicker">Week Range</p>
+        <h2 style="white-space: nowrap; font-size: 1.35rem;">{{ start_date_str }} ~ {{ end_date_str }} 주간 식단</h2>
+      </div>
+      <div class="sp-actions">
+        <form method="get" style="display:flex; gap:8px; align-items:center;">
+          <input type="date" name="start_date" value="{{ start_date_str }}" class="sp-input" style="width:150px;">
+          <button type="submit" class="sp-btn primary">조회</button>
+          <a href="{% url 'meals:export_weekly_mealplan_excel' %}?date={{ start_date_str }}" class="sp-btn ok">엑셀 다운로드</a>
+        </form>
+        <div style="margin-left:16px;">
+          <a class="sp-btn" href="?start_date={{ prev_week }}">« 이전 주</a>
+          <a class="sp-btn" href="?start_date={{ next_week }}">다음 주 »</a>
+        </div>
+        <form method="post" action="{% url 'meals:bulk_delete_mealplans' %}" style="margin-left:16px;"
+              onsubmit="return confirm('{{ start_date_str }} ~ {{ end_date_str }} 기간의 주간 식단을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');">
+          {% csrf_token %}
+          <input type="hidden" name="start_date" value="{{ start_date_str }}">
+          <input type="hidden" name="end_date" value="{{ end_date_str }}">
+          <input type="hidden" name="redirect_url" value="{% url 'meals:weekly_mealplan_create' %}?start_date={{ start_date_str }}">
+          <button type="submit" class="sp-btn" style="background:#fa5252;color:#fff;border-color:#fa5252;">🗑 주간 식단 일괄 삭제</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="sp-table-wrap">
+      <div class="sp-week-editor">
+        <div class="sp-week-cell head">구분</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell head">
+            {{ day.date|date:"m/d" }}<br>({{ day.weekday }})
+          </div>
+        {% endfor %}
+
+        <!-- 조식 -->
+        <div class="sp-week-cell meal-head">조식</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell">
+            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-조식">
+              {% for menu in day.breakfast %}
+                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
+                  {{ menu.name }}
+                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
+                    data-diet-menu-id="{{ menu.diet_menu_id }}"
+                    data-date="{{ day.date_str }}"
+                    data-meal="조식">&times;</button>
+                </span>
+              {% empty %}
+                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+              {% endfor %}
+            </div>
+            <div class="sp-week-add">
+              <input type="text" list="menu-list-options" placeholder="메뉴 선택/검색" data-date="{{ day.date_str }}" data-meal="조식">
+              <button type="button" onclick="addWeeklyMenu(this)">+</button>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- 중식 -->
+        <div class="sp-week-cell meal-head">중식</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell">
+            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-중식">
+              {% for menu in day.lunch %}
+                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
+                  {{ menu.name }}
+                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
+                    data-diet-menu-id="{{ menu.diet_menu_id }}"
+                    data-date="{{ day.date_str }}"
+                    data-meal="중식">&times;</button>
+                </span>
+              {% empty %}
+                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+              {% endfor %}
+            </div>
+            <div class="sp-week-add">
+              <input type="text" list="menu-list-options" placeholder="메뉴 선택/검색" data-date="{{ day.date_str }}" data-meal="중식">
+              <button type="button" onclick="addWeeklyMenu(this)">+</button>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- 석식 -->
+        <div class="sp-week-cell meal-head">석식</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell">
+            <div class="sp-week-menu-list" id="week-{{ day.date_str }}-석식">
+              {% for menu in day.dinner %}
+                <span data-diet-menu-id="{{ menu.diet_menu_id }}">
+                  {{ menu.name }}
+                  <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
+                    data-diet-menu-id="{{ menu.diet_menu_id }}"
+                    data-date="{{ day.date_str }}"
+                    data-meal="석식">&times;</button>
+                </span>
+              {% empty %}
+                <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+              {% endfor %}
+            </div>
+            <div class="sp-week-add">
+              <input type="text" list="menu-list-options" placeholder="메뉴 선택/검색" data-date="{{ day.date_str }}" data-meal="석식">
+              <button type="button" onclick="addWeeklyMenu(this)">+</button>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- 비고 (다음주 월요일) -->
+        <div class="sp-week-cell meal-head">비고</div>
+        {% for day in days_context|slice:":7" %}
+          <div class="sp-week-cell">
+            {% if forloop.last %}
+              <div class="mb-3">
+                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7; font-weight:600;">[다음주 월요일 조식]</p>
+                <div class="sp-week-menu-list" id="week-{{ day.next_monday_str }}-조식">
+                  {% for menu in day.next_monday_breakfast %}
+                    <span data-diet-menu-id="{{ menu.diet_menu_id }}">
+                      {{ menu.name }}
+                      <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
+                        data-diet-menu-id="{{ menu.diet_menu_id }}"
+                        data-date="{{ day.next_monday_str }}"
+                        data-meal="조식">&times;</button>
+                    </span>
+                  {% empty %}
+                    <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+                  {% endfor %}
+                </div>
+                <div class="sp-week-add">
+                  <input type="text" list="menu-list-options" placeholder="메뉴 선택/검색" data-date="{{ day.next_monday_str }}" data-meal="조식">
+                  <button type="button" onclick="addWeeklyMenu(this)">+</button>
+                </div>
+              </div>
+              <div>
+                <p class="sp-note mb-1" style="font-size:0.75rem; color:#4dabf7; font-weight:600;">[다음주 월요일 중식]</p>
+                <div class="sp-week-menu-list" id="week-{{ day.next_monday_str }}-중식">
+                  {% for menu in day.next_monday_lunch %}
+                    <span data-diet-menu-id="{{ menu.diet_menu_id }}">
+                      {{ menu.name }}
+                      <button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제"
+                        data-diet-menu-id="{{ menu.diet_menu_id }}"
+                        data-date="{{ day.next_monday_str }}"
+                        data-meal="중식">&times;</button>
+                    </span>
+                  {% empty %}
+                    <span style="background:#f1f3f5;color:#868e96;">미등록</span>
+                  {% endfor %}
+                </div>
+                <div class="sp-week-add">
+                  <input type="text" list="menu-list-options" placeholder="메뉴 선택/검색" data-date="{{ day.next_monday_str }}" data-meal="중식">
+                  <button type="button" onclick="addWeeklyMenu(this)">+</button>
+                </div>
+              </div>
+            {% else %}
+              <p class="sp-note" style="color:#adb5bd;">-</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 등록된 유효 메뉴 목록을 자바스크립트 배열로 전달 -->
 <script>
-const DELETE_DIET_MENU_URL_TPL = "/meals/api/diet-menu/ID/delete/";
+  const validMenus = [
+    {% for menu in menus %}
+      "{{ menu.name|escapejs }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
 
-function getDeleteUrl(dietMenuId) {
-  return DELETE_DIET_MENU_URL_TPL.replace("ID", dietMenuId);
-}
+  const DELETE_DIET_MENU_URL_TPL = "/meals/api/diet-menu/ID/delete/";
 
-function getCsrfToken() {
-  const el = document.querySelector('[name=csrfmiddlewaretoken]');
-  return el ? el.value : '';
-}
-
-function renderWeeklyMenus(dateStr, mealType, menus) {
-  const box = document.getElementById(`week-${dateStr}-${mealType}`);
-  if (!box) return;
-
-  if (!menus || menus.length === 0) {
-    box.innerHTML = `<span style="background:#f1f3f5;color:#868e96;">미등록</span>`;
-    return;
+  function getDeleteUrl(dietMenuId) {
+    return DELETE_DIET_MENU_URL_TPL.replace("ID", dietMenuId);
   }
 
-  box.innerHTML = menus.map(menu => {
-    const dietMenuId = menu.diet_menu_id || menu.id || "";
-    return `<span data-diet-menu-id="${dietMenuId}">${menu.name}<button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제" data-diet-menu-id="${dietMenuId}" data-date="${dateStr}" data-meal="${mealType}">&times;</button></span>`;
-  }).join("");
-}
+  function getCsrfToken() {
+    const el = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (el) return el.value;
+    // 쿠키에서 CSRF 토큰 가져오기 (필요시)
+    const match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : '';
+  }
 
-async function deleteWeeklyMenu(dietMenuId, dateStr, mealType, chipEl) {
-  if (!dietMenuId) return;
+  function renderWeeklyMenus(dateStr, mealType, menus) {
+    const box = document.getElementById(`week-${dateStr}-${mealType}`);
+    if (!box) return;
 
-  try {
-    const resp = await fetch(getDeleteUrl(dietMenuId), {
-      method: "POST",
-      headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/json" },
-    });
-    const data = await resp.json();
-
-    if (data.status !== "success") {
-      alert(data.message || "삭제에 실패했습니다.");
+    if (!menus || menus.length === 0) {
+      box.innerHTML = `<span style="background:#f1f3f5;color:#868e96;">미등록</span>`;
       return;
     }
 
-    // Re-render the box with updated menu list
-    renderWeeklyMenus(dateStr, mealType, data.menus || []);
-  } catch (e) {
-    alert("네트워크 오류가 발생했습니다.");
+    box.innerHTML = menus.map(menu => {
+      const dietMenuId = menu.diet_menu_id || menu.id || "";
+      return `<span data-diet-menu-id="${dietMenuId}">${menu.name}<button type="button" class="sp-week-menu-del delete-btn delete-menu" title="삭제" data-diet-menu-id="${dietMenuId}" data-date="${dateStr}" data-meal="${mealType}">&times;</button></span>`;
+    }).join("");
   }
-}
 
-async function addWeeklyMenu(button) {
-  const row = button.closest(".sp-week-add");
-  const input = row.querySelector("input");
-  const menuName = input.value.trim();
-  const dateStr = input.dataset.date;
-  const mealType = input.dataset.meal;
+  async function deleteWeeklyMenu(dietMenuId, dateStr, mealType, chipEl) {
+    if (!dietMenuId) return;
 
-  if (!menuName) return;
+    try {
+      const resp = await fetch(getDeleteUrl(dietMenuId), {
+        method: "POST",
+        headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/json" },
+      });
+      const data = await resp.json();
 
-  try {
-    const response = await fetch("{% url 'meals:add_diet_menu_api' %}", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", "X-CSRFToken": getCsrfToken()},
-      body: JSON.stringify({
-        date: dateStr,
-        meal_type: mealType,
-        menu_name: menuName
-      })
-    });
+      if (data.status !== "success") {
+        alert(data.message || "삭제에 실패했습니다.");
+        return;
+      }
 
-    const data = await response.json();
+      renderWeeklyMenus(dateStr, mealType, data.menus || []);
+    } catch (e) {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  }
 
-    if (data.status !== "success") {
-      alert(data.message || "메뉴 저장에 실패했습니다.");
+  async function addWeeklyMenu(button) {
+    const row = button.closest(".sp-week-add");
+    const input = row.querySelector("input");
+    const menuName = input.value.trim();
+    const dateStr = input.dataset.date;
+    const mealType = input.dataset.meal;
+
+    if (!menuName) return;
+
+    // [핵심 검증] 등록된 메뉴 목록에 존재하는지 확인
+    if (!validMenus.includes(menuName)) {
+      alert(`"${menuName}"은(는) 등록되지 않은 메뉴입니다.\n상단의 '메뉴 추가 등록'을 통해 먼저 등록 후 사용해주세요.`);
+      input.focus();
       return;
     }
 
-    input.value = "";
-    renderWeeklyMenus(dateStr, mealType, data.menus || []);
-  } catch (e) {
-    alert("네트워크 오류가 발생했습니다.");
-  }
-}
+    try {
+      const response = await fetch("{% url 'meals:add_diet_menu_api' %}", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "X-CSRFToken": getCsrfToken()},
+        body: JSON.stringify({
+          date: dateStr,
+          meal_type: mealType,
+          menu_name: menuName
+        })
+      });
 
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".sp-week-add input").forEach((input) => {
-    input.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        addWeeklyMenu(input.closest(".sp-week-add").querySelector("button"));
+      const data = await response.json();
+
+      if (data.status !== "success") {
+        alert(data.message || "메뉴 저장에 실패했습니다.");
+        return;
+      }
+
+      input.value = "";
+      renderWeeklyMenus(dateStr, mealType, data.menus || []);
+    } catch (e) {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".sp-week-add input").forEach((input) => {
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          addWeeklyMenu(input.closest(".sp-week-add").querySelector("button"));
+        }
+      });
+    });
+
+    // Event Delegation for delete buttons
+    document.addEventListener("click", function (event) {
+      const delBtn = event.target.closest(".sp-week-menu-del, .delete-btn, .delete-menu");
+      if (!delBtn) return;
+
+      event.preventDefault();
+      const dietMenuId = delBtn.dataset.dietMenuId || delBtn.getAttribute("data-diet-menu-id");
+      const dateStr = delBtn.dataset.date || delBtn.getAttribute("data-date");
+      const mealType = delBtn.dataset.meal || delBtn.getAttribute("data-meal");
+      const chip = delBtn.closest("span");
+
+      if (dietMenuId) {
+        deleteWeeklyMenu(dietMenuId, dateStr, mealType, chip);
       }
     });
   });
-
-  // Event Delegation for delete buttons
-  document.addEventListener("click", function (event) {
-    const delBtn = event.target.closest(".sp-week-menu-del, .delete-btn, .delete-menu");
-    if (!delBtn) return;
-
-    event.preventDefault();
-    const dietMenuId = delBtn.dataset.dietMenuId || delBtn.getAttribute("data-diet-menu-id");
-    const dateStr = delBtn.dataset.date || delBtn.getAttribute("data-date");
-    const mealType = delBtn.dataset.meal || delBtn.getAttribute("data-meal");
-    const chip = delBtn.closest("span");
-
-    if (dietMenuId) {
-      deleteWeeklyMenu(dietMenuId, dateStr, mealType, chip);
-    }
-  });
-});
 </script>
 {% endblock %}

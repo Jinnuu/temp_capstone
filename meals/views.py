@@ -446,10 +446,14 @@ def add_diet_menu_api(request):
             if menu_id:
                 menu = Menu.objects.get(id=menu_id)
             elif menu_name:
-                menu, _ = Menu.objects.get_or_create(
-                    name=menu_name,
-                    defaults={"category": "기타"},
-                )
+                # [핵심 수정] get_or_create 대신 get을 사용하여 미등록 메뉴는 에러 처리
+                try:
+                    menu = Menu.objects.get(name=menu_name)
+                except Menu.DoesNotExist:
+                    return JsonResponse({
+                        "status": "error",
+                        "message": f"'{menu_name}'은(는) 등록되지 않은 메뉴입니다. 먼저 메뉴를 등록해주세요."
+                    }, status=400)
             else:
                 return JsonResponse({"status": "error", "message": "No menu info provided"}, status=400)
 
@@ -551,9 +555,7 @@ def weekly_mealplan_create(request):
 
     for plan_obj in all_plans:
         if plan_obj.target_date in weekly_data:
-            # Use model-level sorted method: 밥→국→주반찬→부반찬→과일/간식→음료→기타
             sorted_diet_menus = plan_obj.diet_menus.all().select_related("menu").order_by("id")
-            # Pass dict with id (menu_id), diet_menu_id, and name for template use
             weekly_data[plan_obj.target_date][plan_obj.meal_type] = [
                 {"id": dm.menu.id, "name": dm.menu.name, "diet_menu_id": dm.id}
                 for dm in sorted_diet_menus
@@ -583,6 +585,9 @@ def weekly_mealplan_create(request):
             }
         )
 
+    # [핵심 추가] 등록된 전체 메뉴 목록을 쿼리셋으로 조회하여 context에 포함
+    menus = Menu.objects.all().order_by("name")
+
     context = {
         "start_date": start_date,
         "start_date_str": start_date.strftime("%Y-%m-%d"),
@@ -590,6 +595,7 @@ def weekly_mealplan_create(request):
         "prev_week": (start_date - timedelta(days=7)).strftime("%Y-%m-%d"),
         "next_week": (start_date + timedelta(days=7)).strftime("%Y-%m-%d"),
         "days_context": days_context,
+        "menus": menus,  # 템플릿의 datalist와 자바스크립트 검증에서 사용될 메뉴 목록
     }
 
     return render(request, "meals/weekly_mealplan_create.html", context)
