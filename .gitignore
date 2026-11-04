@@ -16,3 +16,39 @@ db.sqlite3
 
 # Local reference documents are evidence, not application source.
 /docs/reference/
+
+# Local-only transient verification artifacts; keep final evidence versioned.
+/verification/comprehensive-20261104/attempt-1/browser-failure.json
+/verification/comprehensive-20261104/attempt-1/browser-failure.png
+/verification/comprehensive-20261104/attempt-1/browser-progress.json
+/verification/comprehensive-20261104/attempt-1/browser-service.log
+/verification/comprehensive-20261104/attempt-1/server.log
+/verification/comprehensive-20261104/attempt-2/browser-failure.json
+/verification/comprehensive-20261104/attempt-2/browser-failure.png
+/verification/comprehensive-20261104/attempt-2/browser-progress.json
+/verification/comprehensive-20261104/attempt-2/browser-service.log
+/verification/comprehensive-20261104/attempt-2/server.log
+/verification/comprehensive-20261104/browser-failure.json
+/verification/comprehensive-20261104/browser-failure.png
+/verification/comprehensive-20261104/browser-progress.json
+/verification/comprehensive-20261104/browser-server.log
+/verification/comprehensive-20261104/cooking-pdfinfo.txt
+/verification/comprehensive-20261104/cooking.txt
+/verification/comprehensive-20261104/defects-after-fix.log
+/verification/comprehensive-20261104/defects-before-fix.log
+/verification/comprehensive-20261104/git-before.txt
+/verification/comprehensive-20261104/mariadb-first.log
+/verification/comprehensive-20261104/mariadb-pre-print-fix.log
+/verification/comprehensive-20261104/services-before.json
+/verification/comprehensive-20261104/settlement-before-print-fix-page2.png
+/verification/comprehensive-20261104/settlement-before-print-fix.pdf
+/verification/comprehensive-20261104/settlement-pdfinfo.txt
+/verification/comprehensive-20261104/settlement.txt
+/verification/comprehensive-20261104/sqlite-first.log
+/verification/comprehensive-20261104/sqlite-pre-print-fix.log
+/verification/comprehensive-20261104/vendor-order-pdfinfo.txt
+/verification/comprehensive-20261104/vendor-order.txt
+/verification/kanghoon2-20261104/sqlite-first.log
+/verification/kanghoon2-20261104/sqlite-tests.log
+/verification/kanghoon2-20261104/mariadb-tests.log
+/verification/kanghoon2-20261104/browser-fixture-date.log

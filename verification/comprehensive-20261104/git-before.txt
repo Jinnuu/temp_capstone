@@ -1,3 +1,0 @@
-?? docs/analysis/OCTOBER_2026_COMMIT_AUDIT.md
-?? verification/comprehensive-20261104/
-42f1fe5639db230c129d151f392b439b7740226d Merge Kanghoon second improvements while preserving Sprint-final workflows
