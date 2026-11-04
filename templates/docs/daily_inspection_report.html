@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}검수서(주문) | S&P{% endblock %}
+{% block title %}검수서(주문) | 식수센스{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -208,7 +208,7 @@
     <!-- 정보행 구역 -->
     <div class="meta-info">
         <div>납품업체 : {% if selected_supplier %}{{ selected_supplier.name|default:selected_supplier.username }}{% else %}전체{% endif %}</div>
-        <div>사업장 : S&P 급식소</div>
+        <div>사업장 : 식수센스 급식소</div>
         <div>입고일자 : {{ target_date|date:"Y-m-d" }}</div>
     </div>
 

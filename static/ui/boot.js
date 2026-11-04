@@ -1,0 +1,2 @@
+/* Synchronous, pre-paint, allowlisted appearance only. Never stores business data. */
+(()=>{let mode='reference';const valid=['reference','green','civic'];try{const frame=window.frameElement;const preview=frame&&frame.getAttribute('data-snp-preview-mode');if(valid.includes(preview)){mode=preview;document.documentElement.dataset.snpPreview='true';}else{const saved=localStorage.getItem('snp.ui.mode.v1');if(valid.includes(saved))mode=saved;}}catch{}document.documentElement.dataset.snpMode=mode;})();

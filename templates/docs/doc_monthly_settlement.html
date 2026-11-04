@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}월말 정산 보고서 | S&P{% endblock %}
+{% block title %}월말 정산 보고서 | 식수센스{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -246,7 +246,7 @@
 
     <!-- 정보 바 -->
     <div class="doc-info-bar">
-      <div>사업장 : S&P 구내식당</div>
+      <div>사업장 : 식수센스 구내식당</div>
       <div>정산월 : {{ target_month_display|default:"2026년 09월" }}</div>
       <div>정산기간 : {{ start_date|default:"2026-09-01" }} ~ {{ end_date|default:"2026-09-30" }}</div>
       <div>보고일자 : {% now "Y-m-d" %}</div>
@@ -368,7 +368,7 @@
 
     <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px; color: #495057; border-top: 1px solid #dee2e6; padding-top: 10px;">
       <div>* 비고: 발주일 기준 참고 집계입니다. 단위별 수량을 구분하며 세금·청구 확정은 별도 확인이 필요합니다. 합격량 정산은 업무 흐름의 월말 정산에서 확인하세요.</div>
-      <div>작성자: S&P 영양사 (인)</div>
+      <div>작성자: 식수센스 영양사 (인)</div>
     </div>
   </div>
 </div>

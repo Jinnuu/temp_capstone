@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}업체별 구매발주서 | S&P{% endblock %}
+{% block title %}업체별 구매발주서 | 식수센스{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sp_final.css' %}">
@@ -138,7 +138,7 @@
           </tr>
           <tr>
             <th>사업장명</th>
-            <td>S&P 중앙급식소</td>
+            <td>식수센스 중앙급식소</td>
             <th>발주 출력일시</th>
             <td>{% now "Y-m-d H:i" %}</td>
           </tr>
@@ -200,7 +200,7 @@
 
       <!-- 하단 서명란 -->
       <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: space-between; font-size: 0.9rem; color: #495057;">
-        <div>비고: 본 명세서는 S&P 급식 운영 시스템에서 자동 생성되었습니다.</div>
+        <div>비고: 본 명세서는 식수센스 급식 운영 시스템에서 자동 생성되었습니다.</div>
         <div>
           공급처 확인: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           인수자 확인: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)

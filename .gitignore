@@ -52,3 +52,7 @@ db.sqlite3
 /verification/kanghoon2-20261104/sqlite-tests.log
 /verification/kanghoon2-20261104/mariadb-tests.log
 /verification/kanghoon2-20261104/browser-fixture-date.log
+
+# Experimental UI tooling and user-provided read-only reference archive
+/frontend/node_modules/
+/영양사 프로그램.zip

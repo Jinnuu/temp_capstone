@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}발주예정서 (기존 참고 양식) | S&P{% endblock %}
+{% block title %}발주예정서 (기존 참고 양식) | 식수센스{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -244,7 +244,7 @@
 
     <!-- 정보 바 -->
     <div class="doc-info-bar">
-      <div>운영사업장 : S&P 중앙 급식소</div>
+      <div>운영사업장 : 식수센스 중앙 급식소</div>
       <div>적용기간 : {{ monday|default:"2026-08-24" }} ~ {{ sunday|default:"2026-08-30" }}</div>
       <div>기준 식수 : {{ headcount|default:500 }} 명 {% if total_pages > 1 %}({{ page.page_num }}/{{ total_pages }} Page){% endif %}</div>
     </div>

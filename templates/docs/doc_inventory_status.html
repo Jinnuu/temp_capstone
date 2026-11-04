@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}급식재료 수불현황 | S&P{% endblock %}
+{% block title %}급식재료 수불현황 | 식수센스{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -215,7 +215,7 @@
 
     <!-- 정보 바 -->
     <div class="doc-info-bar">
-      <div>사업장명 : S&P 급식사업부</div>
+      <div>사업장명 : 식수센스 급식사업부</div>
       <div>조회기간 : {{ start_date|default:"-" }} ~ {{ end_date|default:"-" }}</div>
       <div>실사용 품목 : {{ item_count }}건 | 출력일시 : {% now "Y-m-d H:i" %}</div>
     </div>

@@ -1,0 +1,13 @@
+
+> snp-ui-three-modes@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 14 modules transformed.
+rendering chunks...
+computing gzip size...
+../static/ui/build/snp-ui.css  254.21 kB │ gzip: 35.64 kB
+../static/ui/build/snp-ui.js    22.32 kB │ gzip:  7.31 kB
+
+✓ built in 281ms

@@ -42,6 +42,7 @@ MIDDLEWARE = [
     "config.business_access.BusinessAccessMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.ui_preview.UIComparisonFrameMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

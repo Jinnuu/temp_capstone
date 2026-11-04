@@ -1,73 +1,19 @@
-<nav class="sp-nav" aria-label="주요 메뉴"><div class="sp-nav-item"><a class="sp-nav-link" href="{% url 'procurement:supplier_list' %}">공급업체 현황</a></div>
-  <div class="sp-nav-item"><a class="sp-nav-link" href="{% url 'procurement:workflow' %}">영양사 업무 흐름</a></div>
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'home' %}">홈</a>
-  </div>
-
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'inventory:ingredient_list' %}">식자재</a>
-    <div class="sp-dropdown">
-      <a href="{% url 'inventory:ingredient_list' %}">재고 현황</a>
-      <a href="{% url 'inventory:ingredient_create' %}">식자재 등록</a>
-      <a href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a>
-      <a href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a>
-      <a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a>
-      <a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
-    </div>
-  </div>
-
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'meals:mealplan_list' %}">식단</a>
-    <div class="sp-dropdown">
-      <a href="{% url 'meals:mealplan_list' %}">월간 식단표</a>
-      <a href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a>
-      <a href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a>
-      <a href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄 등록</a>
-      <a href="{% url 'meals:menu_list' %}">메뉴·레시피</a>
-    </div>
-  </div>
-
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'forecasting:forecasting_home' %}">식수 예측</a>
-    <div class="sp-dropdown">
-      <a href="{% url 'forecasting:prediction_calendar' %}">예측 캘린더</a>
-      <a href="{% url 'forecasting:prediction_create' %}">예측 실행</a>
-      <a href="{% url 'forecasting:prediction_list' %}">결과 목록</a>
-      <a href="{% url 'forecasting:ingredient_requirement' %}">식재료 산출</a>
-      <a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a>
-    </div>
-  </div>
-
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'procurement:order_list' %}">발주</a>
-    <div class="sp-dropdown">
-      <a href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a>
-      <a href="{% url 'procurement:order_create' %}">간편 발주</a>
-      <a href="{% url 'procurement:order_list' %}">발주 목록</a>
-      <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
-      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 구매발주서</a>
-      <a href="{% url 'procurement:daily_inspection_report' %}">급식물품 검수일지</a>
-    </div>
-  </div>
-
-  <div class="sp-nav-item">
-    <a class="sp-nav-link" href="{% url 'docs_index' %}">문서화</a>
-    <div class="sp-dropdown">
-      <a href="{% url 'docs_index' %}">문서화 홈</a>
-      <a href="{% url 'meals:weekly_meal_plan_document' %}">주간 식단 문서</a>
-      <a href="{% url 'meals:monthly_meal_plan_document' %}">월간 식단 문서</a>
-      <a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a>
-      <a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
-      <a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a>
-      <a href="{% url 'procurement:vendor_procurement_report' %}">업체별 구매발주서</a>
-      <a href="{% url 'procurement:daily_inspection_report' %}">급식물품 검수일지</a>
-      <a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a>
-    </div>
-  </div>
-
-  {% if user.is_staff %}
-    <div class="sp-nav-item">
-      <a class="sp-nav-link" href="/admin/">관리</a>
-    </div>
-  {% endif %}
+<nav class="snp-nav" aria-label="주요 메뉴">
+  <a class="snp-nav-home" href="{% url 'home' %}"><span aria-hidden="true">▦</span> 운영현황</a><a class="snp-nav-home" href="{% url 'procurement:workflow' %}">영양사 업무 흐름</a>
+  <details><summary><span aria-hidden="true">01</span> 식단·레시피</summary><div class="snp-nav-links">
+    <a href="{% url 'meals:mealplan_list' %}">월간 식단표</a><a href="{% url 'meals:mealplan_create' %}">일간 식단 등록</a><a href="{% url 'meals:weekly_mealplan_create' %}">주간 식단 등록</a><a href="{% url 'meals:mealplan_bulk_upload' %}">CSV/XLSX 일괄 등록</a><a href="{% url 'meals:menu_list' %}">메뉴·레시피</a><a href="{% url 'meals:menu_create' %}">메뉴 등록</a><a href="{% url 'meals:recipe_create' %}">레시피 수정</a><a href="{% url 'meals:recipe_upload_page' %}">레시피 엑셀 업로드</a>
+  </div></details>
+  <details><summary><span aria-hidden="true">02</span> 식수·소요량</summary><div class="snp-nav-links">
+    <a href="{% url 'forecasting:prediction_calendar' %}">예측 캘린더</a><a href="{% url 'forecasting:prediction_create' %}">예측 실행</a><a href="{% url 'forecasting:prediction_list' %}">결과 목록</a><a href="{% url 'forecasting:ingredient_requirement' %}">식재료 산출</a>
+  </div></details>
+  <details><summary><span aria-hidden="true">03</span> 발주·검수</summary><div class="snp-nav-links">
+    <a href="{% url 'procurement:workflow_preview' %}">발주예정서</a><a href="{% url 'procurement:order_from_mealplan' %}">식단기반 발주</a><a href="{% url 'procurement:order_create' %}">간편 발주</a><a href="{% url 'procurement:order_list' %}">발주 목록</a><a href="{% url 'procurement:workflow_inspections' %}">납품·검수</a><a href="{% url 'procurement:supplier_list' %}">공급업체 현황</a>
+  </div></details>
+  <details><summary><span aria-hidden="true">04</span> 재고·수불</summary><div class="snp-nav-links">
+    <a href="{% url 'inventory:ingredient_list' %}">재고 현황</a><a href="{% url 'inventory:ingredient_create' %}">식자재 등록</a><a href="{% url 'inventory:ingredient_upload' %}">엑셀 일괄 등록</a><a href="{% url 'inventory:inventory_log_create' %}">입출고 등록</a><a href="{% url 'procurement:workflow_transaction' %}">선입고·사용 기록</a><a href="{% url 'procurement:workflow_ledger' %}">급식재료 수불현황</a><a href="{% url 'inventory:weekly_inventory_report' %}">주간 수불 명세서</a><a href="{% url 'inventory:monthly_inventory_report' %}">월 수불 명세서</a>
+  </div></details>
+  <details><summary><span aria-hidden="true">05</span> 문서·정산</summary><div class="snp-nav-links">
+    <a href="{% url 'docs_index' %}">문서화 홈</a><a href="{% url 'meals:cooking_index' %}">조리지시서</a><a href="{% url 'procurement:doc_cooking_instruction' %}">기간별 조리지시서</a><a href="{% url 'procurement:vendor_procurement_report' %}">업체별 구매발주서</a><a href="{% url 'procurement:daily_inspection_report' %}">급식물품 검수일지</a><a href="{% url 'procurement:weekly_procurement_report' %}">주간 발주서</a><a href="{% url 'meals:weekly_meal_plan_document' %}">주간 식단 문서</a><a href="{% url 'meals:monthly_meal_plan_document' %}">월간 식단 문서</a><a href="{% url 'forecasting:weekly_forecast_report' %}">주간 예측 보고서</a><a href="{% url 'procurement:workflow_settlement' %}">월말 정산</a><a href="{% url 'procurement:doc_monthly_settlement' %}">월간 발주 정산서</a>
+  </div></details>
+  {% if user.is_staff or user.role == 'ADMIN' %}<details><summary><span aria-hidden="true">06</span> 기준정보</summary><div class="snp-nav-links"><a href="{% url 'procurement:workflow_specs' %}">납품규격 관리</a><a href="{% url 'procurement:workflow_categories' %}">카테고리 정정</a><a href="{% url 'procurement:workflow_suppliers' %}">업체 계정 관리</a>{% if user.is_staff %}<a href="/admin/">관리자</a>{% endif %}</div></details>{% endif %}
 </nav>

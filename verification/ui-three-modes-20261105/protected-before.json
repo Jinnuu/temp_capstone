@@ -1,0 +1,25 @@
+{
+  "sprint_final": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "origin_sprint_final": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "archive_sha256": "0dd717ab08e419cc3717bdf55d34fd333304f0dff17e1d627dffeb98430f6ddb",
+  "core_files": {
+    "forecasting/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "forecasting/services/data_loader.py": "bb3d103975c3b01c3041533723c9741f0a0f36c9fb2220367bf4a663831c9825",
+    "forecasting/services/ingredient_calc.py": "0ac3bf55153cbee16c5655c420a5dfb5a0d659097f8906c49ceaab90ce68cebd",
+    "forecasting/services/model_loader.py": "0f2f34072f3b029ae0521f7645eda69b798ddf585f7769b1d7af1861adbe20f5",
+    "forecasting/services/prediction_service.py": "46ddbf448775f7cae58c673aac00038250dec6cda88b2b43a774efe967e63c92",
+    "forecasting/services/processor.py": "9d04aa89dbb6870293384499f4d9d84daafd8f3cf8db9282ea6427bbcadae143",
+    "inventory/lot_services.py": "e034b499eed2e5d9a520227fd3df68b981fad0079622ee9f95e118bbc5695963",
+    "inventory/models.py": "130c64c3c21ae3aeb08d5fc9f2a05f0bdca70ee1e7857c146e8f602237b8908e",
+    "meals/cooking.py": "85a23b569e21a9cc6b55969f8fca919c49b71560d19f0587ef9bd72ea7199b3d",
+    "meals/cooking_export.py": "53030f76acf2a661912d0d1a79f988a30e9603768435e45c436a65b47a9eddc5",
+    "meals/cooking_views.py": "cdb629b66520f582fcb8d293697632a3ad68e87391837272fb404680aaf4c996",
+    "meals/models.py": "1769bf472c3bd628fd2f3b83705e28660ca0e764d40683d0a22695746c240355",
+    "ml_models/best_model_breakfast.pkl": "bf2fdfe01b19b25e50d8b2b302c9fa3e631c894a169b1aa22401d30742dc0a77",
+    "ml_models/best_model_dinner.pkl": "c7a6d0b97c9f3a0dddde98edc8b96d5f6e115bbd8a3dba4026c95448c22ae3bf",
+    "ml_models/best_model_lunch.pkl": "3cbd67a14b9629a7af4b987efad924ec1584b50d51fd8a05a36f71d1635a6055",
+    "procurement/models.py": "46840b18ceb4c6168d031eb6d886fb7f323f51d473c322204554ea57d099235e",
+    "procurement/workflow.py": "8b3384591afc125bb8cb97ec89bf100b27bdd15b6ea88a63a69e7c5984e5d5bd",
+    "requirements.txt": "7353f261e72510545004798cb4d0ef4ad7630d683dacec0a0cb75c8088929d28"
+  }
+}

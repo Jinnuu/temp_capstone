@@ -1,0 +1,20 @@
+{
+  "reference": {
+    "page_count": 1,
+    "text_sha256": "a6173074f5ff6e87b6067dc082e153eb540ba231f007c2b5595dea8f5d6dca33",
+    "quantities_preserved": true,
+    "application_chrome_excluded": true
+  },
+  "green": {
+    "page_count": 1,
+    "text_sha256": "a6173074f5ff6e87b6067dc082e153eb540ba231f007c2b5595dea8f5d6dca33",
+    "quantities_preserved": true,
+    "application_chrome_excluded": true
+  },
+  "civic": {
+    "page_count": 1,
+    "text_sha256": "a6173074f5ff6e87b6067dc082e153eb540ba231f007c2b5595dea8f5d6dca33",
+    "quantities_preserved": true,
+    "application_chrome_excluded": true
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "sprint_final_local": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "sprint_final_remote": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "core_files_verified_unchanged": 18,
+  "core_files_changed": [],
+  "original_reference_zip_unchanged": true,
+  "protected_services": {
+    "my-capstone": {
+      "same_start_time": true,
+      "same_running_state": true,
+      "same_pid": true
+    },
+    "my-capstone-sprint7": {
+      "same_start_time": true,
+      "same_running_state": true,
+      "same_pid": true
+    },
+    "snp-presentation": {
+      "same_start_time": true,
+      "same_running_state": true,
+      "same_pid": true
+    },
+    "snp-readiness-db-20261016": {
+      "same_start_time": true,
+      "same_running_state": true,
+      "same_pid": true
+    }
+  },
+  "task_resources_cleanup": "completed: task app, task DB, task network, socket directory and extracted reference only"
+}

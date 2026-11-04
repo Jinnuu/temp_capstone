@@ -1,0 +1,9 @@
+.git
+.env
+.venv
+venv
+**/__pycache__
+**/*.pyc
+frontend/node_modules
+영양사 프로그램.zip
+docs/reference

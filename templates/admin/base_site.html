@@ -1,0 +1,4 @@
+{% extends 'admin/base_site.html' %}{% load static %}
+{% block title %}{{ title }} | 식수센스 관리{% endblock %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'ui/boot.js' %}"></script><link rel="stylesheet" href="{% static 'ui/admin.css' %}"><script type="module" src="{% static 'ui/build/snp-ui.js' %}"></script>{% endblock %}
+{% block branding %}<div id="site-name"><a href="{% url 'admin:index' %}">식수센스 관리</a></div>{% include 'ui/mode_switcher.html' %}{% endblock %}

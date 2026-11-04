@@ -1,0 +1,1665 @@
+{
+  "archive_sha256": "0dd717ab08e419cc3717bdf55d34fd333304f0dff17e1d627dffeb98430f6ddb",
+  "images": [
+    {
+      "file": "주문목록.png",
+      "width": 2879,
+      "height": 1449,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3444757
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 218310
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 187617
+        },
+        {
+          "hex": "#272727",
+          "pixels": 76528
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 31204
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 16432
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 15825
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 13539
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 11846
+        },
+        {
+          "hex": "#000000",
+          "pixels": 10775
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 7755
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 6607
+        }
+      ]
+    },
+    {
+      "file": "즐겨찾기.png",
+      "width": 2875,
+      "height": 1458,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3504154
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 196266
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 157250
+        },
+        {
+          "hex": "#272727",
+          "pixels": 51585
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 42169
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 27404
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 26532
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 16117
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 11032
+        },
+        {
+          "hex": "#141c2f",
+          "pixels": 10240
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8432
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6982
+        }
+      ]
+    },
+    {
+      "file": "위생안전 Q&A.png",
+      "width": 2879,
+      "height": 1476,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 2928780
+        },
+        {
+          "hex": "#f2f1f0",
+          "pixels": 613359
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 203569
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 200472
+        },
+        {
+          "hex": "#272727",
+          "pixels": 64429
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 41378
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 17392
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 17141
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 11516
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 8923
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8176
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7102
+        }
+      ]
+    },
+    {
+      "file": "주문목록2.png",
+      "width": 2879,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3784501
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#272727",
+          "pixels": 36153
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 31208
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 18005
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 16143
+        },
+        {
+          "hex": "#bdbdbd",
+          "pixels": 13507
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 7612
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 6637
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6199
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 6121
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 3855
+        }
+      ]
+    },
+    {
+      "file": "장바구니.png",
+      "width": 2879,
+      "height": 1464,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3259692
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 196266
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 174538
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#272727",
+          "pixels": 59766
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 53811
+        },
+        {
+          "hex": "#292929",
+          "pixels": 37932
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 33920
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 25380
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 19895
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6857
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 6816
+        }
+      ]
+    },
+    {
+      "file": "공휴일 배송등록.png",
+      "width": 2879,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3280345
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 392503
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 258765
+        },
+        {
+          "hex": "#272727",
+          "pixels": 71229
+        },
+        {
+          "hex": "#bbbbbb",
+          "pixels": 30441
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 26010
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 15187
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 10853
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8172
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 8150
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7460
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5758
+        }
+      ]
+    },
+    {
+      "file": "축산이력조회.png",
+      "width": 2877,
+      "height": 1474,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3529348
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 229022
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 195008
+        },
+        {
+          "hex": "#272727",
+          "pixels": 59053
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 31138
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 17858
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 14502
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 8631
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8189
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7474
+        },
+        {
+          "hex": "#404040",
+          "pixels": 6102
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 5790
+        }
+      ]
+    },
+    {
+      "file": "스탑품목현황.png",
+      "width": 2879,
+      "height": 1463,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3409912
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 303513
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 199590
+        },
+        {
+          "hex": "#272727",
+          "pixels": 65512
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 46533
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 20324
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 12164
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 11258
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 11179
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8208
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7954
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 7468
+        }
+      ]
+    },
+    {
+      "file": "재고등록2.png",
+      "width": 2879,
+      "height": 1468,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 2719202
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 584130
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 482342
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 66869
+        },
+        {
+          "hex": "#272727",
+          "pixels": 49247
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 15638
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 13132
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 9615
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6196
+        },
+        {
+          "hex": "#404040",
+          "pixels": 5863
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5758
+        }
+      ]
+    },
+    {
+      "file": "간편주문.png",
+      "width": 2879,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#eaeaea",
+          "pixels": 1432662
+        },
+        {
+          "hex": "#ffffff",
+          "pixels": 1308607
+        },
+        {
+          "hex": "#b2b2b2",
+          "pixels": 947191
+        },
+        {
+          "hex": "#a9a7a5",
+          "pixels": 169401
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 58006
+        },
+        {
+          "hex": "#b1b1b1",
+          "pixels": 33802
+        },
+        {
+          "hex": "#727682",
+          "pixels": 14584
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 14502
+        },
+        {
+          "hex": "#272727",
+          "pixels": 12188
+        },
+        {
+          "hex": "#000000",
+          "pixels": 11616
+        },
+        {
+          "hex": "#afafaf",
+          "pixels": 11564
+        },
+        {
+          "hex": "#bdbdbd",
+          "pixels": 10545
+        }
+      ]
+    },
+    {
+      "file": "회사게시판.png",
+      "width": 2879,
+      "height": 1458,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3459893
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 204735
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 200907
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 156517
+        },
+        {
+          "hex": "#272727",
+          "pixels": 46570
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 18757
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 15753
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 8607
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8149
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6913
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 5288
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 4212
+        }
+      ]
+    },
+    {
+      "file": "재고동기화.png",
+      "width": 2879,
+      "height": 1482,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3084745
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 642315
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 227743
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 66829
+        },
+        {
+          "hex": "#272727",
+          "pixels": 35803
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 31293
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 20918
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 15756
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8217
+        },
+        {
+          "hex": "#d3d3d3",
+          "pixels": 7165
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7094
+        },
+        {
+          "hex": "#404040",
+          "pixels": 6017
+        }
+      ]
+    },
+    {
+      "file": "업무자료실.png",
+      "width": 2878,
+      "height": 1448,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 2460927
+        },
+        {
+          "hex": "#f2f1f0",
+          "pixels": 1023662
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 217285
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 200875
+        },
+        {
+          "hex": "#272727",
+          "pixels": 62455
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 46488
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 15962
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8179
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7788
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 6084
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 5917
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 4951
+        }
+      ]
+    },
+    {
+      "file": "공휴일 배송등록2.png",
+      "width": 2879,
+      "height": 1453,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3233662
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 392503
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 253037
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 67990
+        },
+        {
+          "hex": "#272727",
+          "pixels": 59434
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 26012
+        },
+        {
+          "hex": "#bbbbbb",
+          "pixels": 24906
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 15187
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 10649
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7460
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 7418
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 5203
+        }
+      ]
+    },
+    {
+      "file": "교환반품 처리.png",
+      "width": 2879,
+      "height": 1453,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3609648
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 194666
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 188110
+        },
+        {
+          "hex": "#272727",
+          "pixels": 58270
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 15777
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 12067
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 10338
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8185
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6949
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 5730
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 4185
+        },
+        {
+          "hex": "#929292",
+          "pixels": 2283
+        }
+      ]
+    },
+    {
+      "file": "주문리포트.png",
+      "width": 2879,
+      "height": 1459,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3194899
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 636577
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#272727",
+          "pixels": 21169
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 21022
+        },
+        {
+          "hex": "#d3d3d3",
+          "pixels": 18731
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 10682
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8191
+        },
+        {
+          "hex": "#141c2f",
+          "pixels": 7888
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6199
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5758
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 4314
+        }
+      ]
+    },
+    {
+      "file": "교환반품 내역서.png",
+      "width": 2879,
+      "height": 1459,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 2884133
+        },
+        {
+          "hex": "#ececec",
+          "pixels": 608281
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 226856
+        },
+        {
+          "hex": "#f5f6f9",
+          "pixels": 204276
+        },
+        {
+          "hex": "#c0c0c0",
+          "pixels": 40316
+        },
+        {
+          "hex": "#272727",
+          "pixels": 38646
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 15754
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 14832
+        },
+        {
+          "hex": "#9a9a9a",
+          "pixels": 13016
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 8303
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8174
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7642
+        }
+      ]
+    },
+    {
+      "file": "교환반품 요청.png",
+      "width": 2875,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3591826
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 223569
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 190469
+        },
+        {
+          "hex": "#272727",
+          "pixels": 55305
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 15755
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 12059
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 10446
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8190
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7267
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 5614
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 4271
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 4270
+        }
+      ]
+    },
+    {
+      "file": "일실적 주문.png",
+      "width": 2877,
+      "height": 1456,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3443354
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 228177
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 190219
+        },
+        {
+          "hex": "#272727",
+          "pixels": 61407
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 38993
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 16852
+        },
+        {
+          "hex": "#e9e9e9",
+          "pixels": 16090
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 14476
+        },
+        {
+          "hex": "#d01919",
+          "pixels": 13535
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8275
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7142
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 6455
+        }
+      ]
+    },
+    {
+      "file": "입고관리.png",
+      "width": 2879,
+      "height": 1483,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3103786
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 382250
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 261385
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 253939
+        },
+        {
+          "hex": "#272727",
+          "pixels": 69174
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 31293
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 17365
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 16793
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 10836
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8177
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 7641
+        },
+        {
+          "hex": "#000000",
+          "pixels": 7243
+        }
+      ]
+    },
+    {
+      "file": "시황현황.png",
+      "width": 2879,
+      "height": 1469,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3542229
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 199261
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 196789
+        },
+        {
+          "hex": "#272727",
+          "pixels": 64134
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 46550
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 17140
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 8804
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8258
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 7419
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6942
+        },
+        {
+          "hex": "#404040",
+          "pixels": 6246
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5758
+        }
+      ]
+    },
+    {
+      "file": "주문목록 (2).png",
+      "width": 2879,
+      "height": 1463,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3456577
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 229766
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 187617
+        },
+        {
+          "hex": "#272727",
+          "pixels": 76536
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 36308
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 16432
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 15917
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 13539
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 11846
+        },
+        {
+          "hex": "#000000",
+          "pixels": 10775
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 7755
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 6637
+        }
+      ]
+    },
+    {
+      "file": "일실적 주문2.png",
+      "width": 2877,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3662823
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 65845
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 42359
+        },
+        {
+          "hex": "#272727",
+          "pixels": 25977
+        },
+        {
+          "hex": "#d01919",
+          "pixels": 18780
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 18587
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 14566
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 8774
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6719
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 6413
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5754
+        }
+      ]
+    },
+    {
+      "file": "FAQ.png",
+      "width": 2879,
+      "height": 1471,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3762503
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#272727",
+          "pixels": 39526
+        },
+        {
+          "hex": "#fae0da",
+          "pixels": 38598
+        },
+        {
+          "hex": "#141c2f",
+          "pixels": 25600
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 24947
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 19692
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 14992
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 11656
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 10729
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8472
+        },
+        {
+          "hex": "#404040",
+          "pixels": 6248
+        }
+      ]
+    },
+    {
+      "file": "장바구니2.png",
+      "width": 2879,
+      "height": 1469,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3578565
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 178948
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#bdbdbd",
+          "pixels": 79270
+        },
+        {
+          "hex": "#292929",
+          "pixels": 37932
+        },
+        {
+          "hex": "#272727",
+          "pixels": 26545
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 11638
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 11196
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 10927
+        },
+        {
+          "hex": "#141c2f",
+          "pixels": 10240
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 6773
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6199
+        }
+      ]
+    },
+    {
+      "file": "카테고리 주문.png",
+      "width": 2879,
+      "height": 1473,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3416554
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 193306
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 191067
+        },
+        {
+          "hex": "#272727",
+          "pixels": 69732
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 42900
+        },
+        {
+          "hex": "#f2f1f0",
+          "pixels": 24142
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 21825
+        },
+        {
+          "hex": "#1c1c1c",
+          "pixels": 20088
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 19485
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 17108
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 12726
+        },
+        {
+          "hex": "#d01919",
+          "pixels": 12724
+        }
+      ]
+    },
+    {
+      "file": "재고등록.png",
+      "width": 2879,
+      "height": 1460,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3233886
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 292812
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 260075
+        },
+        {
+          "hex": "#f8f7f7",
+          "pixels": 187360
+        },
+        {
+          "hex": "#272727",
+          "pixels": 65010
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 13133
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 9751
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 9363
+        },
+        {
+          "hex": "#3c3c3c",
+          "pixels": 8738
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8248
+        },
+        {
+          "hex": "#000000",
+          "pixels": 8052
+        },
+        {
+          "hex": "#7d7d7d",
+          "pixels": 6006
+        }
+      ]
+    },
+    {
+      "file": "카테고리주문3.png",
+      "width": 2879,
+      "height": 1455,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3463118
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 234651
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 51790
+        },
+        {
+          "hex": "#272727",
+          "pixels": 27837
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 26331
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 16434
+        },
+        {
+          "hex": "#000000",
+          "pixels": 9084
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 6382
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 6336
+        },
+        {
+          "hex": "#e66344",
+          "pixels": 4329
+        },
+        {
+          "hex": "#929292",
+          "pixels": 4217
+        }
+      ]
+    },
+    {
+      "file": "수불리포트.png",
+      "width": 2879,
+      "height": 1455,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3810649
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 165842
+        },
+        {
+          "hex": "#272727",
+          "pixels": 24585
+        },
+        {
+          "hex": "#d3d3d3",
+          "pixels": 22697
+        },
+        {
+          "hex": "#141c2f",
+          "pixels": 19720
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 15802
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 10781
+        },
+        {
+          "hex": "#f4f4f4",
+          "pixels": 8297
+        },
+        {
+          "hex": "#525252",
+          "pixels": 7905
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 6867
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6196
+        },
+        {
+          "hex": "#444746",
+          "pixels": 5758
+        }
+      ]
+    },
+    {
+      "file": "카테고리주문2.png",
+      "width": 2879,
+      "height": 1455,
+      "top_colors": [
+        {
+          "hex": "#ffffff",
+          "pixels": 3665861
+        },
+        {
+          "hex": "#f2efec",
+          "pixels": 151522
+        },
+        {
+          "hex": "#dedede",
+          "pixels": 45190
+        },
+        {
+          "hex": "#272727",
+          "pixels": 31426
+        },
+        {
+          "hex": "#f9f9f9",
+          "pixels": 24991
+        },
+        {
+          "hex": "#d01919",
+          "pixels": 21924
+        },
+        {
+          "hex": "#a8a8a8",
+          "pixels": 21799
+        },
+        {
+          "hex": "#f2f1f0",
+          "pixels": 13016
+        },
+        {
+          "hex": "#cbcdd0",
+          "pixels": 12211
+        },
+        {
+          "hex": "#fefefe",
+          "pixels": 6685
+        },
+        {
+          "hex": "#000000",
+          "pixels": 6606
+        },
+        {
+          "hex": "#eaeaea",
+          "pixels": 4885
+        }
+      ]
+    }
+  ],
+  "inspected_representatives": [
+    "주문목록.png",
+    "재고등록.png",
+    "수불리포트.png",
+    "카테고리 주문.png",
+    "입고관리.png",
+    "주문리포트.png"
+  ],
+  "measured_primary": "#e66344",
+  "poster": "User clarified: no poster; apply green to ZIP reference. Green palette is an explicit UI candidate, not sampled poster color."
+}
