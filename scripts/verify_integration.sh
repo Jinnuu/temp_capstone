@@ -6,7 +6,7 @@ settings="${1:-config.test_settings}"
 image="${SPRINT7_TEST_IMAGE:-capstone-web:sprint7}"
 mounts=()
 if [[ "$settings" == "config.test_mysql_settings" ]]; then
-  mounts=(-v /tmp/sprint7-integration-db-socket:/integration-db:ro)
+  mounts=(-v "${SPRINT7_DB_SOCKET_DIR:-/tmp/sprint7-integration-db-socket}:/integration-db:ro")
 elif [[ "$settings" != "config.test_settings" ]]; then
   echo 'Only isolated integration settings are allowed.' >&2
   exit 2

@@ -1,0 +1,6 @@
+{% extends 'workflow/base.html' %}{% block content %}
+<h1>조리지시서</h1><form method="get"><label>날짜 <input type="date" name="date" value="{{ selected }}" required></label><button>조회</button></form>
+<p>각 식사의 최종 확정 식수로 계산하며, ‘입고분’ 발주 묶음과 구분됩니다.</p>
+{% if plans %}<p><a href="?date={{ selected }}&amp;format=xlsx">해당 날짜 조식·중식·석식 Excel 다운로드</a></p>{% endif %}
+<ul>{% for plan in plans %}<li><a href="{% url 'meals:cooking_detail' plan.pk %}">{{ plan }} 조리지시서</a> — 최종 확정 식수: {% if plan.is_confirmed %}{{ plan.final_headcount|default_if_none:'미확정' }}{% else %}미확정{% endif %}</li>{% empty %}<li>해당 날짜의 조식·중식·석식 식단이 없습니다.</li>{% endfor %}</ul>
+{% endblock %}

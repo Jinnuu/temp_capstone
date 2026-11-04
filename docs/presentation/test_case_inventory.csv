@@ -1,0 +1,1341 @@
+﻿test_id,representative_level,source_scope,file,class_name,function,source_line,purpose,input_conditions,expected_result,major_assertions,environment,latest_evidenced_result,sqlite_result,mariadb_result,execution_logs,classification_reason,limitations
+DJ-AI-01,Integration,repository,integration_tests/test_ai.py,PredictionCompatibilityTests,test_three_persisted_estimators_load_and_predict,13,저장된 조·중·석식 모델의 실제 로드·추론 호환성,"조·중·석식 실제pkl와 CSV 전처리; DB를 쓰는 예측 저장 메서드와 artifact만 읽는 메서드 구분.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for meal in ['breakfast', 'lunch', 'dinner']:
+            with self.subTest(meal=meal):
+                artifact, _ = load_prediction_artifact(meal)
+                columns = artifact.get('feature_columns') or list(getattr(artifact['model'], 'feature_names_in_', []))
+                if not columns:
+                    columns = [f'feature_{i}' for i in range(artifact['model'].n_features_in_)]
+                self.assertTrue(columns)
+                data = pd.DataFrame(np.zeros((1, len(columns))), columns=columns)
+                result = artifact['model'].predict(data)
+                self.assertTrue(math.isfinite(float(result[0])))
+                print(f'ARTIFACT_SMOKE {meal}: {type(artifact[""model""]).__name__}, {len(columns)} features, prediction={float(result[0])}')",True: columns; True: math.isfinite(float(result[0])),"self.assertTrue(columns)
+self.assertTrue(math.isfinite(float(result[0])))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:224 (ok:227); verification/cooking-format/mariadb.log:179 (ok:182),실제 파일시스템의 artifact를 loader/joblib/sklearn 모델과 DataFrame에 연결해 추론. DB 미사용이나 실제 산출물 호환 통합 검사.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. AI는 저장·호환/fallback 실행 검증이며 예측 정확도·OOF/Holdout·정상 SBERT 인수 시험이 아님.
+DJ-AI-02,Integration,repository,integration_tests/test_ai.py,PredictionCompatibilityTests,test_offline_prediction_pipeline_persists_three_meals,26,실제 전처리·모델 추론 후 조·중·석식 예측 DB 저장,"조·중·석식 실제pkl와 CSV 전처리; DB를 쓰는 예측 저장 메서드와 artifact만 읽는 메서드 구분.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for meal in ['breakfast', 'lunch', 'dinner']:
+            with self.subTest(meal=meal):
+                prediction = run_attendance_prediction(date(2026,10,15),meal,menu_text='쌀밥 미역국 제육볶음')
+                self.assertIsNotNone(prediction.pk)
+                self.assertGreaterEqual(prediction.predicted_count,0)
+                self.assertTrue(prediction.input_features['feature_columns'])
+                print(f'OFFLINE_PIPELINE {meal}: prediction={prediction.predicted_count}')","not None: prediction.pk; assertGreaterEqual(prediction.predicted_count, 0); True: prediction.input_features['feature_columns']","self.assertIsNotNone(prediction.pk)
+self.assertGreaterEqual(prediction.predicted_count,0)
+self.assertTrue(prediction.input_features['feature_columns'])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:169 (ok:222); verification/cooking-format/mariadb.log:124 (ok:178),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. AI는 저장·호환/fallback 실행 검증이며 예측 정확도·OOF/Holdout·정상 SBERT 인수 시험이 아님.
+DJ-COOK-01,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_confirmed_count_units_and_explicit_package,34,확정350명·100g/인·5kg/통의 조리지시서35kg·7통 계산,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        sheet = cooking_sheet(self.plan)
+        self.assertEqual(sheet['warnings'], [])
+        self.assertEqual(sheet['rows'][0]['total'], Decimal('35'))
+        self.assertEqual(sheet['rows'][0]['package'], Decimal('7'))",동일 기대값: []; 동일 기대값: Decimal('35'); 동일 기대값: Decimal('7'),"self.assertEqual(sheet['warnings'], [])
+self.assertEqual(sheet['rows'][0]['total'], Decimal('35'))
+self.assertEqual(sheet['rows'][0]['package'], Decimal('7'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:228 (ok:228); verification/cooking-format/mariadb.log:183 (ok:183),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-02,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_recalculates_after_headcount_change,40,최종 식수351명 변경에 따른35.1kg·7.02통 재계산,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan.final_headcount = 351
+        self.plan.save()
+        row = cooking_sheet(self.plan)['rows'][0]
+        self.assertEqual(row['total'], Decimal('35.1'))
+        self.assertEqual(row['package'], Decimal('7.02'))  # use amount, no order rounding",동일 기대값: Decimal('35.1'); 동일 기대값: Decimal('7.02'),"self.assertEqual(row['total'], Decimal('35.1'))
+self.assertEqual(row['package'], Decimal('7.02'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:238 (ok:238); verification/cooking-format/mariadb.log:193 (ok:193),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-03,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_zero_is_valid,47,0명 확정 시 총량0 처리,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan.final_headcount = 0
+        self.assertEqual(cooking_sheet(self.plan)['rows'][0]['total'], 0)",동일 기대값: 0,"self.assertEqual(cooking_sheet(self.plan)['rows'][0]['total'], 0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:243 (ok:243); verification/cooking-format/mariadb.log:198 (ok:198),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-04,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_unconfirmed_never_uses_manual_999,51,미확정이면 수동999명을 대신 사용하지 않고 계산 경고,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan.is_confirmed = False
+        sheet = cooking_sheet(self.plan)
+        self.assertIsNone(sheet['rows'][0]['total'])
+        self.assertTrue(sheet['warnings'])",None: sheet['rows'][0]['total']; True: sheet['warnings'],"self.assertIsNone(sheet['rows'][0]['total'])
+self.assertTrue(sheet['warnings'])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:242 (ok:242); verification/cooking-format/mariadb.log:197 (ok:197),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-05,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_no_recipe_warning,57,레시피 누락 경고,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.recipe.delete()
+        self.assertIn('레시피가 없습니다', ' '.join(cooking_sheet(self.plan)['warnings']))","assertIn('레시피가 없습니다', ' '.join(cooking_sheet(self.plan)['warnings']))","self.assertIn('레시피가 없습니다', ' '.join(cooking_sheet(self.plan)['warnings']))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:237 (ok:237); verification/cooking-format/mariadb.log:192 (ok:192),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-06,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_missing_spec_keeps_total_and_does_not_guess_label,61,명시 규격이 없어도 필요량 보존·문자 규격 추정 금지,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.spec.delete()
+        self.ingredient.spec = '5kg/통'
+        self.ingredient.save()
+        row = cooking_sheet(self.plan)['rows'][0]
+        self.assertEqual(row['total'], 35)
+        self.assertIsNone(row['package'])
+        self.assertTrue(cooking_sheet(self.plan)['warnings'])",동일 기대값: 35; None: row['package']; True: cooking_sheet(self.plan)['warnings'],"self.assertEqual(row['total'], 35)
+self.assertIsNone(row['package'])
+self.assertTrue(cooking_sheet(self.plan)['warnings'])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:236 (ok:236); verification/cooking-format/mariadb.log:191 (ok:191),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-07,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_incompatible_units_warn,70,개수와 질량 단위 불일치 경고,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.recipe.unit = '개'
+        self.recipe.save()
+        sheet = cooking_sheet(self.plan)
+        self.assertIsNone(sheet['rows'][0]['total'])
+        self.assertIn('단위 환산 불가', ' '.join(sheet['warnings']))","None: sheet['rows'][0]['total']; assertIn('단위 환산 불가', ' '.join(sheet['warnings']))","self.assertIsNone(sheet['rows'][0]['total'])
+self.assertIn('단위 환산 불가', ' '.join(sheet['warnings']))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:232 (ok:232); verification/cooking-format/mariadb.log:187 (ok:187),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-08,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_save_edit_conflict_and_no_stock_mutation,77,공통 지시 저장·revision 상충 거부·재고 비차감,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        data = {'instructions':'가열 후 배식', 'inventory_instructions':'선입고 재고 우선 사용', 'revision':0}
+        self.assertEqual(self.client.post(self.url, data).status_code, 302)
+        instruction = CookingInstruction.objects.get(diet_plan=self.plan)
+        self.assertEqual(instruction.revision, 1)
+        data['instructions'] = '다른 수정'
+        self.assertContains(self.client.post(self.url, data), '다른 사용자가 수정')
+        instruction.refresh_from_db()
+        self.assertEqual(instruction.instructions, '가열 후 배식')
+        data['revision'] = 1
+        self.assertEqual(self.client.post(self.url, data).status_code, 302)
+        self.assertEqual(InventoryLog.objects.count(), 0)","동일 기대값: 302; 동일 기대값: 1; assertContains(self.client.post(self.url, data), '다른 사용자가 수정'); 동일 기대값: '가열 후 배식'; 동일 기대값: 0","self.assertEqual(self.client.post(self.url, data).status_code, 302)
+self.assertEqual(instruction.revision, 1)
+self.assertContains(self.client.post(self.url, data), '다른 사용자가 수정')
+self.assertEqual(instruction.instructions, '가열 후 배식')
+self.assertEqual(InventoryLog.objects.count(), 0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:240 (ok:240); verification/cooking-format/mariadb.log:195 (ok:195),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-COOK-09,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_html_navigation_and_date_validation,90,조리지시서 URL·날짜 검증·허브 내비게이션,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.assertContains(self.client.get(self.url), '조리지시서')
+        self.assertContains(self.client.get(reverse('meals:cooking_index'), {'date':'2026-10-16'}), self.url)
+        self.assertEqual(self.client.get(reverse('meals:cooking_index'), {'date':'bad'}).status_code, 400)
+        self.assertContains(self.client.get(reverse('procurement:workflow')), '조리지시서 조회')","assertContains(self.client.get(self.url), '조리지시서'); assertContains(self.client.get(reverse('meals:cooking_index'), {'date': '2026-10-16'}), self.url); 동일 기대값: 400; assertContains(self.client.get(reverse('procurement:workflow')), '조리지시서 조회')","self.assertContains(self.client.get(self.url), '조리지시서')
+self.assertContains(self.client.get(reverse('meals:cooking_index'), {'date':'2026-10-16'}), self.url)
+self.assertEqual(self.client.get(reverse('meals:cooking_index'), {'date':'bad'}).status_code, 400)
+self.assertContains(self.client.get(reverse('procurement:workflow')), '조리지시서 조회')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:231 (ok:231); verification/cooking-format/mariadb.log:186 (ok:186),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-10,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_excel_numeric_total_and_literal_formula_text,96,실제 Excel의35kg·7통·수식 문자열·세로 인쇄 설정,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        CookingInstruction.objects.create(diet_plan=self.plan, instructions='=1+1')
+        response = self.client.get(self.url, {'format':'xlsx'})
+        self.assertEqual(response.status_code, 200)
+        ws = load_workbook(BytesIO(response.content)).active
+        self.assertEqual(ws['E3'].value, '35 kg')
+        calc = load_workbook(BytesIO(response.content))['계산근거']
+        self.assertEqual(calc['G2'].value, 35)
+        self.assertEqual(calc['I2'].value, 7)
+        self.assertTrue(any('=1+1' in str(c.value) for row in ws for c in row))
+        self.assertFalse(any(c.data_type == 'f' for row in ws for c in row))
+        self.assertEqual(ws.page_setup.orientation, 'portrait')",동일 기대값: 200; 동일 기대값: '35 kg'; 동일 기대값: 35; 동일 기대값: 7; True: any(('=1+1' in str(c.value) for row in ws for c in row)); False: any((c.data_type == 'f' for row in ws for c in row)); 동일 기대값: 'portrait',"self.assertEqual(response.status_code, 200)
+self.assertEqual(ws['E3'].value, '35 kg')
+self.assertEqual(calc['G2'].value, 35)
+self.assertEqual(calc['I2'].value, 7)
+self.assertTrue(any('=1+1' in str(c.value) for row in ws for c in row))
+self.assertFalse(any(c.data_type == 'f' for row in ws for c in row))
+self.assertEqual(ws.page_setup.orientation, 'portrait')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:230 (ok:230); verification/cooking-format/mariadb.log:185 (ok:185),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-11,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_invalid_revision_and_oversized_notes_rejected,109,음수 revision·과도한 비고 입력 저장 차단,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.client.post(self.url, {'revision':-1, 'instructions':'x'*10001})
+        self.assertFalse(CookingInstruction.objects.exists())",False: CookingInstruction.objects.exists(),self.assertFalse(CookingInstruction.objects.exists()),기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:233 (ok:233); verification/cooking-format/mariadb.log:188 (ok:188),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-12,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_supplier_and_anonymous_access_denied,113,익명·공급업체의 목록·다운로드·수정 접근 차단,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        index = reverse('meals:cooking_index')
+        for actor, status in [(self.vendor, 403), (None, 302)]:
+            if actor:
+                self.client.force_login(actor)
+            else:
+                self.client.logout()
+            for url, data in [(index, {}), (index, {'date':'2026-10-16','format':'xlsx'}), (self.url, {}), (self.url, {'format': 'xlsx'})]:
+                with self.subTest(actor=actor, url=url, data=data):
+                    self.assertEqual(self.client.get(url, data).status_code, status)
+            response = self.client.post(self.url, {
+                'revision': 0, 'instructions': '접근 불가', 'inventory_instructions': '출고 금지'})
+            self.assertEqual(response.status_code, status)
+        self.assertFalse(CookingInstruction.objects.exists())
+        self.assertFalse(InventoryLog.objects.exists())",False: CookingInstruction.objects.exists(); False: InventoryLog.objects.exists(); 동일 기대값: status,"self.assertEqual(self.client.get(url, data).status_code, status)
+self.assertEqual(response.status_code, status)
+self.assertFalse(CookingInstruction.objects.exists())
+self.assertFalse(InventoryLog.objects.exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:241 (ok:241); verification/cooking-format/mariadb.log:196 (ok:196),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-13,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_reference_all_sheets_and_export_structure,131,제공 Excel 전체 시트와 생성표의 머리글·병합·인쇄 구조 비교,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        source = load_workbook('docs/reference/(8.7~8.9)조리지시서.xlsx')
+        self.assertEqual(source.sheetnames, ['목','금','토','토 (1)','Sheet2','Sheet3'])
+        generated = load_workbook(BytesIO(self.client.get(self.url, {'format':'xlsx'}).content))
+        main = generated.worksheets[0]
+        for original in source.worksheets[:4]:
+            self.assertEqual([main.cell(2,c).value for c in range(1,7)], [original.cell(2,c).value for c in range(1,7)])
+            self.assertIn('A1:H1', [str(m) for m in original.merged_cells.ranges])
+            self.assertEqual(main.page_setup.orientation, original.page_setup.orientation)
+            self.assertEqual(main.page_setup.paperSize, original.page_setup.paperSize)
+            self.assertEqual(main.page_margins, original.page_margins)
+            for col in ['G','H']:
+                self.assertTrue(original.column_dimensions[col].hidden)
+                self.assertTrue(main.column_dimensions[col].hidden)
+            self.assertFalse(any(cell.data_type == 'f' for row in original for cell in row))
+        for original in source.worksheets[4:]:
+            self.assertFalse(any(c.value is not None for row in original for c in row))
+        # Friday is the declared layout reference; no copying example data.
+        for col in 'ABCDEFGH':
+            self.assertEqual(main.column_dimensions[col].width, source['금'].column_dimensions[col].width)
+        self.assertIn('A1:H1', [str(m) for m in main.merged_cells.ranges])
+        self.assertEqual(main.row_dimensions[1].height, source['금'].row_dimensions[1].height)
+        self.assertEqual(main['A2'].font.name, source['금']['A2'].font.name)
+        self.assertEqual(main['A2'].border.bottom.style, 'thin')
+        self.assertEqual(main.print_title_rows, '$1:$2')
+        self.assertIn('A$1:$F$', str(main.print_area))
+        self.assertEqual(main.page_setup.fitToWidth, 1)
+        self.assertEqual(main.page_setup.fitToHeight, 0)
+        self.assertIn('2026-10-16', main['A1'].value)
+        self.assertNotIn('입고분', main['A1'].value)","동일 기대값: ['목', '금', '토', '토 (1)', 'Sheet2', 'Sheet3']; assertIn('A1:H1', [str(m) for m in main.merged_cells.ranges]); 동일 기대값: source['금'].row_dimensions[1].height; 동일 기대값: source['금']['A2'].font.name; 동일 기대값: 'thin'; 동일 기대값: '$1:$2'; assertIn('A$1:$F$', str(main.print_area)); 동일 기대값: 1; 동일 기대값: 0; assertIn('2026-10-16', main['A1'].value); assertNotIn('입고분', main['A1'].value); 동일 기대값: [original.cell(2, c).value for c in range(1, 7)]; assertIn('A1:H1', [str(m) for m in original.merged_cells.ranges]); 동일 기대값: original.page_setup.orientation; 동일 기대값: original.page_setup.paperSize; 동일 기대값: original.page_margins; False: any((cell.data_type == 'f' for row in original for cell in row)); False: any((c.value is not None for row in original for c in row)); 동일 기대값: source['금'].column_dimensions[col].width; True: original.column_dimensions[col].hidden; True: main.column_dimensions[col].hidden","self.assertEqual(source.sheetnames, ['목','금','토','토 (1)','Sheet2','Sheet3'])
+self.assertEqual([main.cell(2,c).value for c in range(1,7)], [original.cell(2,c).value for c in range(1,7)])
+self.assertIn('A1:H1', [str(m) for m in original.merged_cells.ranges])
+self.assertEqual(main.page_setup.orientation, original.page_setup.orientation)
+self.assertEqual(main.page_setup.paperSize, original.page_setup.paperSize)
+self.assertEqual(main.page_margins, original.page_margins)
+self.assertTrue(original.column_dimensions[col].hidden)
+self.assertTrue(main.column_dimensions[col].hidden)
+self.assertFalse(any(cell.data_type == 'f' for row in original for cell in row))
+self.assertFalse(any(c.value is not None for row in original for c in row))
+self.assertEqual(main.column_dimensions[col].width, source['금'].column_dimensions[col].width)
+self.assertIn('A1:H1', [str(m) for m in main.merged_cells.ranges])
+self.assertEqual(main.row_dimensions[1].height, source['금'].row_dimensions[1].height)
+self.assertEqual(main['A2'].font.name, source['금']['A2'].font.name)
+self.assertEqual(main['A2'].border.bottom.style, 'thin')
+self.assertEqual(main.print_title_rows, '$1:$2')
+self.assertIn('A$1:$F$', str(main.print_area))
+self.assertEqual(main.page_setup.fitToWidth, 1)
+self.assertEqual(main.page_setup.fitToHeight, 0)
+self.assertIn('2026-10-16', main['A1'].value)
+self.assertNotIn('입고분', main['A1'].value)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:239 (ok:239); verification/cooking-format/mariadb.log:194 (ok:194),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,참고파일 없으면 skipUnless 적용. 선택 로그에서는 ok 확인. 셀 구조 비교이며 영양사 UAT/실제 프린터 일치 검증은 아님.
+DJ-COOK-14,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_line_notes_save_export_and_conflicting_revision,162,재료별 비고 저장·수식 문자·revision 충돌·비차감,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        key = f'line_{self.recipe.pk}'
+        self.assertEqual(self.client.post(self.url, {'revision':0, key:'=1+1'}).status_code,302)
+        saved=CookingInstruction.objects.get(diet_plan=self.plan)
+        self.assertEqual(saved.line_notes[str(self.recipe.pk)], '=1+1')
+        response=self.client.get(self.url)
+        self.assertContains(response,'=1+1')
+        wb=load_workbook(BytesIO(self.client.get(self.url, {'format':'xlsx'}).content))
+        self.assertEqual(wb['계산근거']['M2'].value, '=1+1')
+        self.assertEqual(wb['계산근거']['M2'].data_type, 's')
+        self.assertContains(self.client.post(self.url, {'revision':0,key:'덮어쓰기'}),'다른 사용자가 수정')
+        saved.refresh_from_db();self.assertEqual(saved.line_notes[str(self.recipe.pk)],'=1+1')
+        self.assertFalse(InventoryLog.objects.exists())","동일 기대값: 302; 동일 기대값: '=1+1'; assertContains(response, '=1+1'); 동일 기대값: 's'; assertContains(self.client.post(self.url, {'revision': 0, key: '덮어쓰기'}), '다른 사용자가 수정'); False: InventoryLog.objects.exists()","self.assertEqual(self.client.post(self.url, {'revision':0, key:'=1+1'}).status_code,302)
+self.assertEqual(saved.line_notes[str(self.recipe.pk)], '=1+1')
+self.assertContains(response,'=1+1')
+self.assertEqual(wb['계산근거']['M2'].value, '=1+1')
+self.assertEqual(wb['계산근거']['M2'].data_type, 's')
+self.assertContains(self.client.post(self.url, {'revision':0,key:'덮어쓰기'}),'다른 사용자가 수정')
+self.assertEqual(saved.line_notes[str(self.recipe.pk)],'=1+1')
+self.assertFalse(InventoryLog.objects.exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:234 (ok:234); verification/cooking-format/mariadb.log:189 (ok:189),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-COOK-15,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_daily_workbook_separate_meals_and_confirmed_counts,176,날짜별 식사0·350·7명과 별도 시트·총량 출력,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for meal,count in [('조식',0),('석식',7)]:
+            plan=DietPlan.objects.create(target_date=self.plan.target_date,meal_type=meal,
+                headcount=999,final_headcount=count,is_confirmed=True)
+            DietMenu.objects.create(diet_plan=plan,menu=self.menu)
+        response=self.client.get(reverse('meals:cooking_index'),{'date':'2026-10-16','format':'xlsx'})
+        wb=load_workbook(BytesIO(response.content))
+        self.assertEqual(wb.sheetnames,['1016-조식','1016-중식','1016-석식','계산근거'])
+        self.assertEqual([wb[name]['B3'].value for name in wb.sheetnames[:3]],[0,350,7])
+        self.assertEqual([wb['계산근거'].cell(i,7).value for i in [2,3,4]],[0,35,.7])
+        self.assertEqual(self.client.get(reverse('meals:cooking_index'),{'date':'2026-10-17','format':'xlsx'}).status_code,404)","동일 기대값: ['1016-조식', '1016-중식', '1016-석식', '계산근거']; 동일 기대값: [0, 350, 7]; 동일 기대값: [0, 35, 0.7]; 동일 기대값: 404","self.assertEqual(wb.sheetnames,['1016-조식','1016-중식','1016-석식','계산근거'])
+self.assertEqual([wb[name]['B3'].value for name in wb.sheetnames[:3]],[0,350,7])
+self.assertEqual([wb['계산근거'].cell(i,7).value for i in [2,3,4]],[0,35,.7])
+self.assertEqual(self.client.get(reverse('meals:cooking_index'),{'date':'2026-10-17','format':'xlsx'}).status_code,404)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:229 (ok:229); verification/cooking-format/mariadb.log:184 (ok:184),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-COOK-16,Integration,repository,integration_tests/test_cooking.py,CookingInstructionsTest,test_long_notes_continue_and_print_pages_repeat_headers,188,긴 지시사항 계속 행·페이지 구분·반복 머리글,"공통 fixture: kg재료·100g/인·5kg/통·최종350·수동999·확정식단; 인증된 staff와 별도 SUPPLIER.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        note='재고부터 사용하고 충분히 가열하세요. '*100
+        CookingInstruction.objects.create(diet_plan=self.plan,
+            line_notes={str(self.recipe.pk):note},instructions='현장 지시 '*500)
+        wb=load_workbook(BytesIO(self.client.get(self.url,{'format':'xlsx'}).content))
+        ws=wb.worksheets[0]
+        self.assertTrue(ws.row_breaks.brk)
+        self.assertEqual(ws.print_title_rows,'$1:$2')
+        self.assertTrue(any('(계속)' in str(c.value) for row in ws for c in row))
+        self.assertTrue(all(d.height <= 255 for d in ws.row_dimensions.values() if d.height))
+        self.assertEqual(wb['계산근거']['M2'].value,note)",True: ws.row_breaks.brk; 동일 기대값: '$1:$2'; True: any(('(계속)' in str(c.value) for row in ws for c in row)); True: all((d.height <= 255 for d in ws.row_dimensions.values() if d.height)); 동일 기대값: note,"self.assertTrue(ws.row_breaks.brk)
+self.assertEqual(ws.print_title_rows,'$1:$2')
+self.assertTrue(any('(계속)' in str(c.value) for row in ws for c in row))
+self.assertTrue(all(d.height <= 255 for d in ws.row_dimensions.values() if d.height))
+self.assertEqual(wb['계산근거']['M2'].value,note)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:235 (ok:235); verification/cooking-format/mariadb.log:190 (ok:190),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MIG-01,Integration,repository,integration_tests/test_migrations.py,ExistingDataMigrationTests,test_upgrade_preserves_inventory_logs_users_orders_and_items,10,과거 schema에서 최신 migration 적용 후 계정·재료·거래·발주 이력 보존,"과거 inventory0006/procurement0004 schema로 내린 테스트 DB에 보존할 사용자·재료·입고·주문·품목 생성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        old_targets=[('inventory','0006_ingredient_description'),('procurement','0004_remove_orderitem_unique_order_ingredient_date_and_more')]
+        latest=MigrationExecutor(connection).loader.graph.leaf_nodes()
+        executor=MigrationExecutor(connection)
+        executor.migrate(old_targets)
+        try:
+            apps=executor.loader.project_state(old_targets).apps
+            user=apps.get_model('accounts','User').objects.create(username='historical-supplier',name='기존업체',password='unused')
+            ingredient=apps.get_model('inventory','Ingredient').objects.create(name='기존재료',unit='kg',unit_price=100,safe_stock_level=2,supplier=user)
+            log=apps.get_model('inventory','InventoryLog').objects.create(ingredient=ingredient,log_type='입고',quantity=Decimal('7.25'),description='보존해야 할 이력')
+            order=apps.get_model('procurement','PurchaseOrder').objects.create(supplier=user,status='배송완료',total_amount=725)
+            item=apps.get_model('procurement','OrderItem').objects.create(purchase_order=order,ingredient=ingredient,required_qty=Decimal('7.25'),missing_qty=Decimal('7.25'),order_unit_price=100,estimated_price=725)
+            saved_time=log.transaction_date
+            MigrationExecutor(connection).migrate(latest)
+            from inventory.models import InventoryLog, Ingredient
+            from procurement.models import PurchaseOrder, OrderItem
+            from django.contrib.auth import get_user_model
+            self.assertEqual(InventoryLog.objects.get(pk=log.pk).transaction_date,saved_time)
+            self.assertEqual(InventoryLog.objects.get(pk=log.pk).quantity,Decimal('7.25'))
+            self.assertEqual(Ingredient.objects.get(pk=ingredient.pk).supplier_id,user.pk)
+            self.assertEqual(PurchaseOrder.objects.get(pk=order.pk).status,'배송완료')
+            self.assertEqual(OrderItem.objects.get(pk=item.pk).estimated_price,725)
+            self.assertTrue(get_user_model().objects.filter(pk=user.pk).exists())
+        finally:
+            MigrationExecutor(connection).migrate(latest)",동일 기대값: saved_time; 동일 기대값: Decimal('7.25'); 동일 기대값: user.pk; 동일 기대값: '배송완료'; 동일 기대값: 725; True: get_user_model().objects.filter(pk=user.pk).exists(),"self.assertEqual(InventoryLog.objects.get(pk=log.pk).transaction_date,saved_time)
+self.assertEqual(InventoryLog.objects.get(pk=log.pk).quantity,Decimal('7.25'))
+self.assertEqual(Ingredient.objects.get(pk=ingredient.pk).supplier_id,user.pk)
+self.assertEqual(PurchaseOrder.objects.get(pk=order.pk).status,'배송완료')
+self.assertEqual(OrderItem.objects.get(pk=item.pk).estimated_price,725)
+self.assertTrue(get_user_model().objects.filter(pk=user.pk).exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:446 (ok:446); verification/cooking-format/mariadb.log:401 (ok:401),실제 테스트 DB schema를 과거→현재 migration으로 전환하고 ORM 데이터 보존 검증.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-01,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_manual_and_final_headcounts_store_zero_and_timestamp,36,수동·최종0명과 확정시점 저장,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        save_headcount(self.plan.pk,0,0);self.plan.refresh_from_db()
+        self.assertEqual((self.plan.headcount,self.plan.final_headcount),(0,0))
+        self.assertIsNotNone(self.plan.headcount_confirmed_at)
+        self.assertEqual(build_preview(self.plan.target_date,self.plan.target_date)['lines'],[])","동일 기대값: (0, 0); not None: self.plan.headcount_confirmed_at; 동일 기대값: []","self.assertEqual((self.plan.headcount,self.plan.final_headcount),(0,0))
+self.assertIsNotNone(self.plan.headcount_confirmed_at)
+self.assertEqual(build_preview(self.plan.target_date,self.plan.target_date)['lines'],[])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:340 (ok:340); verification/cooking-format/mariadb.log:295 (ok:295),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-02,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_negative_nan_infinity_fractional_headcount_rejected,42,음수·NaN·무한·소수·문자 식수 거부,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for value in ['-1','NaN','Infinity','1.5','abc']:
+            with self.subTest(value=value),self.assertRaises(ValidationError):save_headcount(self.plan.pk,value,value)
+        self.plan.refresh_from_db();self.assertIsNone(self.plan.final_headcount)",None: self.plan.final_headcount; 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertIsNone(self.plan.final_headcount)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:343 (ok:343); verification/cooking-format/mariadb.log:298 (ok:298),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-03,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_manual_change_clears_confirmation,47,수동 식수 변경 시 최종 확정 해제,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        save_headcount(self.plan.pk,10,12);save_headcount(self.plan.pk,11)
+        self.plan.refresh_from_db();self.assertIsNone(self.plan.final_headcount)",None: self.plan.final_headcount,self.assertIsNone(self.plan.final_headcount),기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:341 (ok:341); verification/cooking-format/mariadb.log:296 (ok:296),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-04,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_ai_absent_manual_confirmation_and_ui,51,AI 없이 수동 확정 저장과 안내 표시,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.post(reverse('procurement:workflow'),{'plan':self.plan.pk,'manual':350,'final':350,'confirm':'on'})
+        self.assertEqual(response.status_code,302);self.plan.refresh_from_db();self.assertEqual(self.plan.final_headcount,350)
+        self.assertContains(self.client.get(reverse('procurement:workflow')),'미생성 / 수동 입력 가능')","동일 기대값: 302; 동일 기대값: 350; assertContains(self.client.get(reverse('procurement:workflow')), '미생성 / 수동 입력 가능')","self.assertEqual(response.status_code,302)
+self.assertEqual(self.plan.final_headcount,350)
+self.assertContains(self.client.get(reverse('procurement:workflow')),'미생성 / 수동 입력 가능')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:244 (ok:244); verification/cooking-format/mariadb.log:199 (ok:199),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-05,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_final_confirmation_overrides_ai,56,AI999와 구분하여 최종350명을 발주 기준으로 사용,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from forecasting.models import AttendancePrediction
+        from procurement.views import get_serving_count
+        AttendancePrediction.objects.create(prediction_date=self.plan.target_date,meal_type='dinner',predicted_count=999,model_name='test')
+        save_headcount(self.plan.pk,300,350);self.plan.refresh_from_db()
+        self.assertEqual(get_serving_count(self.plan)[0],350)",동일 기대값: 350,"self.assertEqual(get_serving_count(self.plan)[0],350)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:327 (ok:327); verification/cooking-format/mariadb.log:282 (ok:282),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-06,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_no_final_headcount_blocks_snapshot,63,미확정 식수의 발주계획 생성 차단,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        with self.assertRaises(ValidationError):create_plan(self.plan.target_date,self.plan.target_date,self.operator,uuid.uuid4())
+        self.assertEqual(ProcurementPlan.objects.count(),0)",동일 기대값: 0; 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertEqual(ProcurementPlan.objects.count(),0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:345 (ok:345); verification/cooking-format/mariadb.log:300 (ok:300),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-07,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_explicit_mass_conversion_and_seven_can_example,67,350명100g의35kg·7캔 및 명시 단위환산,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        plan=self.ready(350);line=plan.lines.get()
+        self.assertEqual((line.needed_qty,line.package_quantity),(Decimal('35'),7))
+        self.assertEqual(convert(700,'g','kg'),Decimal('.7'))
+        self.assertEqual(convert(1,'EA','개'),1)
+        self.assertEqual(line.unit_price,500)","동일 기대값: (Decimal('35'), 7); 동일 기대값: Decimal('.7'); 동일 기대값: 1; 동일 기대값: 500","self.assertEqual((line.needed_qty,line.package_quantity),(Decimal('35'),7))
+self.assertEqual(convert(700,'g','kg'),Decimal('.7'))
+self.assertEqual(convert(1,'EA','개'),1)
+self.assertEqual(line.unit_price,500)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:325 (ok:325); verification/cooking-format/mariadb.log:280 (ok:280),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-08,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_round_up_and_manual_adjustment_snapshot,74,351명100g의최소8캔·조정9캔45kg4500원 저장,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        plan=self.ready(351);line=plan.lines.get()
+        self.assertEqual(line.package_quantity,8)
+        order=confirm_orders(plan.pk,self.operator,{str(line.pk):'9'})[0];item=order.items.get()
+        self.assertEqual((item.package_quantity,item.required_qty,item.estimated_price),(9,45,4500))
+        self.assertEqual(item.spec_snapshot,'5kg / 캔')","동일 기대값: 8; 동일 기대값: (9, 45, 4500); 동일 기대값: '5kg / 캔'","self.assertEqual(line.package_quantity,8)
+self.assertEqual((item.package_quantity,item.required_qty,item.estimated_price),(9,45,4500))
+self.assertEqual(item.spec_snapshot,'5kg / 캔')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:372 (ok:372); verification/cooking-format/mariadb.log:327 (ok:327),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-09,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_zero_negative_noninteger_or_underorder_adjustment_rejected,81,발주 수량0·음수·비정수·최소 미달 거부,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        plan=self.ready();line=plan.lines.get()
+        for value in ['-1','0','7','8.5','NaN']:
+            with self.subTest(value=value),self.assertRaises(ValidationError):confirm_orders(plan.pk,self.operator,{str(line.pk):value})
+        self.assertFalse(PurchaseOrder.objects.exists())",False: PurchaseOrder.objects.exists(); 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertFalse(PurchaseOrder.objects.exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:379 (ok:379); verification/cooking-format/mariadb.log:334 (ok:334),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-10,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_duplicate_plan_and_confirm_requests_create_once,87,중복 계획·확정 요청이 주문을 한 번만 생성,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        save_headcount(self.plan.pk,350,350);key=uuid.uuid4()
+        first=create_plan(self.plan.target_date,self.plan.target_date,self.operator,key)
+        second=create_plan(self.plan.target_date,self.plan.target_date,self.operator,key)
+        self.assertEqual(first.pk,second.pk)
+        self.assertEqual(confirm_orders(first.pk,self.operator)[0].pk,confirm_orders(first.pk,self.operator)[0].pk)
+        self.assertEqual(PurchaseOrder.objects.count(),1)","동일 기대값: second.pk; 동일 기대값: confirm_orders(first.pk, self.operator)[0].pk; 동일 기대값: 1","self.assertEqual(first.pk,second.pk)
+self.assertEqual(confirm_orders(first.pk,self.operator)[0].pk,confirm_orders(first.pk,self.operator)[0].pk)
+self.assertEqual(PurchaseOrder.objects.count(),1)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:322 (ok:322); verification/cooking-format/mariadb.log:277 (ok:277),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-11,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_missing_spec_and_supplier_block_with_named_errors,95,규격·공급업체 누락 품목의 명시적 오류,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.spec.delete();save_headcount(self.plan.pk,350,350)
+        result=build_preview(self.plan.target_date,self.plan.target_date)
+        self.assertTrue(any('참치' in error and '납품' in error for error in result['errors']))
+        self.ing.supplier=None;self.ing.save()
+        self.assertTrue(any('공급업체' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))","True: any(('참치' in error and '납품' in error for error in result['errors'])); True: any(('공급업체' in error for error in build_preview(self.plan.target_date, self.plan.target_date)['errors']))","self.assertTrue(any('참치' in error and '납품' in error for error in result['errors']))
+self.assertTrue(any('공급업체' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:342 (ok:342); verification/cooking-format/mariadb.log:297 (ok:297),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-12,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_incompatible_units_and_recipe_missing_block,102,레시피 누락·비호환 단위의 발주 차단,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        save_headcount(self.plan.pk,350,350)
+        self.recipe.unit='EA';self.recipe.save()
+        self.assertTrue(any('단위 환산 불가' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))
+        self.recipe.delete()
+        self.assertTrue(any('레시피' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))","True: any(('단위 환산 불가' in error for error in build_preview(self.plan.target_date, self.plan.target_date)['errors'])); True: any(('레시피' in error for error in build_preview(self.plan.target_date, self.plan.target_date)['errors']))","self.assertTrue(any('단위 환산 불가' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))
+self.assertTrue(any('레시피' in error for error in build_preview(self.plan.target_date,self.plan.target_date)['errors']))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:329 (ok:329); verification/cooking-format/mariadb.log:284 (ok:284),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-13,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_pack_description_is_not_parsed_without_coefficient,109,700g 포장 계수 사용·규격 설명 문자열 추정 금지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.spec.base_quantity=Decimal('.7');self.spec.base_unit='kg';self.spec.label='700g(70g×10개)';self.spec.save()
+        line=self.ready(351).lines.get()
+        self.assertEqual(line.package_quantity,51)",동일 기대값: 51,"self.assertEqual(line.package_quantity,51)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:348 (ok:348); verification/cooking-format/mariadb.log:303 (ok:303),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-14,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_repeated_ingredient_aggregated_safety_applied_once,114,동일 재료 메뉴 합산·안전재고1회 적용,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.ing.safe_stock_level=5;self.ing.save()
+        extra=Menu.objects.create(name='추가참치');Recipe.objects.create(menu=extra,ingredient=self.ing,required_amount=100,unit='g');DietMenu.objects.create(diet_plan=self.plan,menu=extra)
+        InventoryLog.objects.create(ingredient=self.ing,log_type='입고',quantity=8)
+        line=self.ready(100).lines.get()
+        self.assertEqual((line.needed_qty,line.shortage_qty,line.package_quantity),(20,17,4))","동일 기대값: (20, 17, 4)","self.assertEqual((line.needed_qty,line.shortage_qty,line.package_quantity),(20,17,4))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:371 (ok:371); verification/cooking-format/mariadb.log:326 (ok:326),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-15,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_stock_surplus_yields_zero_order,121,재고 충분 시0포장·주문 없음,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        InventoryLog.objects.create(ingredient=self.ing,log_type='입고',quantity=100)
+        plan=self.ready(100);self.assertEqual(plan.lines.get().package_quantity,0)
+        self.assertEqual(confirm_orders(plan.pk,self.operator),[])",동일 기대값: 0; 동일 기대값: [],"self.assertEqual(plan.lines.get().package_quantity,0)
+self.assertEqual(confirm_orders(plan.pk,self.operator),[])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:375 (ok:375); verification/cooking-format/mariadb.log:330 (ok:330),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-16,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_friday_group_and_weekend_only,126,금요일9식 묶음·주말 단독 발주 제한,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for offset in range(1,4):
+            for meal in ['조식','중식','석식']:
+                p=DietPlan.objects.create(target_date=self.plan.target_date+timedelta(days=offset),meal_type=meal,headcount=1,final_headcount=1)
+                DietMenu.objects.create(diet_plan=p,menu=self.menu)
+        save_headcount(self.plan.pk,1,1)
+        result=build_preview(self.plan.target_date,self.plan.target_date)
+        self.assertEqual(len(result['meal_ids']),9)
+        self.assertEqual(result['lines'][0]['needed_qty'],Decimal('.9'))
+        self.assertTrue(build_preview(self.plan.target_date+timedelta(days=1),self.plan.target_date+timedelta(days=2))['errors'])","동일 기대값: 9; 동일 기대값: Decimal('.9'); True: build_preview(self.plan.target_date + timedelta(days=1), self.plan.target_date + timedelta(days=2))['errors']","self.assertEqual(len(result['meal_ids']),9)
+self.assertEqual(result['lines'][0]['needed_qty'],Decimal('.9'))
+self.assertTrue(build_preview(self.plan.target_date+timedelta(days=1),self.plan.target_date+timedelta(days=2))['errors'])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:328 (ok:328); verification/cooking-format/mariadb.log:283 (ok:283),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-17,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_changed_headcount_recipe_or_spec_marks_review,137,식수·레시피 변경 시 기존 계획 재검토 표시,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        plan=self.ready();save_headcount(self.plan.pk,100,100)
+        plan.refresh_from_db();self.assertTrue(plan.needs_review)
+        with self.assertRaises(ValidationError):confirm_orders(plan.pk,self.operator)
+        plan=self.ready();self.recipe.required_amount=101;self.recipe.save()
+        plan.refresh_from_db();self.assertTrue(plan.needs_review)",True: plan.needs_review; 예외: ValidationError,"self.assertTrue(plan.needs_review)
+self.assertRaises(ValidationError)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:316 (ok:316); verification/cooking-format/mariadb.log:271 (ok:271),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-18,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_stock_change_since_preview_requires_recalculation,144,미리보기 이후 재고 변경 시 확정 거부,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        plan=self.ready();InventoryLog.objects.create(ingredient=self.ing,log_type='입고',quantity=1)
+        with self.assertRaises(ValidationError):confirm_orders(plan.pk,self.operator)",예외: ValidationError,self.assertRaises(ValidationError),기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:374 (ok:374); verification/cooking-format/mariadb.log:329 (ok:329),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-19,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_no_receipt_before_inspection_and_legacy_cannot_bypass,148,검수 전 완료 버튼으로 자동입고 우회 금지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        order=self.order();self.assertEqual(current_stock(self.ing),0)
+        response=self.client.post(reverse('procurement:order_status_update',args=[order.pk]),{'status':'완료'})
+        self.assertRedirects(response,reverse('procurement:workflow_inspections'))
+        self.assertEqual(current_stock(self.ing),0)","동일 기대값: 0; assertRedirects(response, reverse('procurement:workflow_inspections'))","self.assertEqual(current_stock(self.ing),0)
+self.assertRedirects(response,reverse('procurement:workflow_inspections'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:346 (ok:346); verification/cooking-format/mariadb.log:301 (ok:301),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-20,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_inspection_partial_acceptance_and_duplicate_receipt,154,부분 합격량만 입고·같은 검수 재전송 중복 방지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        order=self.order();item=order.items.get()
+        first=inspect_item(item.pk,self.operator,40,35,'이상','5kg / 캔','5kg 품질 불량')
+        second=inspect_item(item.pk,self.operator,40,35,'이상','5kg / 캔','5kg 품질 불량')
+        self.assertEqual(first.pk,second.pk);self.assertEqual(current_stock(self.ing),35)
+        self.assertEqual(InventoryLog.objects.count(),1)
+        order.refresh_from_db();self.assertEqual(order.status,'완료')",동일 기대값: second.pk; 동일 기대값: 35; 동일 기대값: 1; 동일 기대값: '완료',"self.assertEqual(first.pk,second.pk)
+self.assertEqual(current_stock(self.ing),35)
+self.assertEqual(InventoryLog.objects.count(),1)
+self.assertEqual(order.status,'완료')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:331 (ok:331); verification/cooking-format/mariadb.log:286 (ok:286),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-21,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_conflicting_reinspection_does_not_overwrite,162,상충하는 확정 검수 수정 거부,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        item=self.order().items.get();inspect_item(item.pk,self.operator,40,40,'정상','5kg / 캔')
+        with self.assertRaises(ValidationError):inspect_item(item.pk,self.operator,40,39,'이상','5kg / 캔','수정')
+        self.assertEqual(current_stock(self.ing),40)",동일 기대값: 40; 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertEqual(current_stock(self.ing),40)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:318 (ok:318); verification/cooking-format/mariadb.log:273 (ok:273),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-22,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_invalid_inspections_never_receive_stock,167,잘못된 납품·합격량·규격·기한의 입고 차단,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        item=self.order().items.get()
+        cases=[(-1,0,'정상','spec',''),(40,41,'정상','spec',''),(40,40,'정상','',''),(39,39,'정상','spec',''),(40,1,'반품','spec','반품')]
+        for args in cases:
+            with self.subTest(args=args),self.assertRaises(ValidationError):inspect_item(item.pk,self.operator,*args)
+        with self.assertRaises(ValidationError):inspect_item(item.pk,self.operator,40,40,'정상','spec',expiration=timezone.localdate()-timedelta(days=1))
+        self.assertEqual(current_stock(self.ing),0);self.assertFalse(GoodsInspection.objects.exists())",동일 기대값: 0; False: GoodsInspection.objects.exists(); 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertEqual(current_stock(self.ing),0)
+self.assertFalse(GoodsInspection.objects.exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:333 (ok:333); verification/cooking-format/mariadb.log:288 (ok:288),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-23,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_inventory_request_idempotency_and_shortage,175,재고 요청 UUID 중복 방지·부족 출고 차단,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        now=timezone.now();key=uuid.uuid4()
+        a=record_inventory(self.ing.pk,'입고',10,self.operator,key,now,notes='쌀 선입고')
+        b=record_inventory(self.ing.pk,'입고',10,self.operator,key,now,notes='쌀 선입고')
+        self.assertEqual(a.pk,b.pk)
+        with self.assertRaises(ValidationError):record_inventory(self.ing.pk,'출고',11,self.operator,uuid.uuid4(),now)
+        self.assertEqual(current_stock(self.ing),10)",동일 기대값: b.pk; 동일 기대값: 10; 예외: ValidationError,"self.assertEqual(a.pk,b.pk)
+self.assertRaises(ValidationError)
+self.assertEqual(current_stock(self.ing),10)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:334 (ok:334); verification/cooking-format/mariadb.log:289 (ok:289),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-24,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_deduction_blocks_short_stock_and_negative_headcount,183,부족 재고·음수 식수 차감 차단·중복 차감 방지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        save_headcount(self.plan.pk,100,100)
+        data={'target_date':str(self.plan.target_date),'meal_type':'석식','confirm':'1'}
+        self.client.post(reverse('meals:deduct_inventory'),data)
+        self.assertFalse(InventoryLog.objects.filter(log_type='출고').exists())
+        InventoryLog.objects.create(ingredient=self.ing,log_type='입고',quantity=10)
+        self.client.post(reverse('meals:deduct_inventory'),dict(data,headcount='-1'))
+        self.assertFalse(InventoryLog.objects.filter(log_type='출고').exists())
+        self.client.post(reverse('meals:deduct_inventory'),data)
+        self.client.post(reverse('meals:deduct_inventory'),data)
+        self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(),1)
+        self.assertEqual(current_stock(self.ing),0)",False: InventoryLog.objects.filter(log_type='출고').exists(); 동일 기대값: 1; 동일 기대값: 0,"self.assertFalse(InventoryLog.objects.filter(log_type='출고').exists())
+self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(),1)
+self.assertEqual(current_stock(self.ing),0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:321 (ok:321); verification/cooking-format/mariadb.log:276 (ok:276),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-25,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_category_rename_reclassifies_and_duplicate_shows_error,196,카테고리 이름 변경·품목 정정·중복 분류 오류,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.client.post(reverse('procurement:workflow_categories'),{'name':'공산품','rename_from':'통조림','ingredients':[self.ing.pk]})
+        self.ing.refresh_from_db();self.assertEqual(self.ing.category,'공산품')
+        response=self.client.post(reverse('procurement:workflow_categories'),{'name':'공산품'})
+        self.assertContains(response,'이미 존재하는 분류')","동일 기대값: '공산품'; assertContains(response, '이미 존재하는 분류')","self.assertEqual(self.ing.category,'공산품')
+self.assertContains(response,'이미 존재하는 분류')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:315 (ok:315); verification/cooking-format/mariadb.log:270 (ok:270),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-26,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_supplier_and_spec_edit_from_ui,202,업체명·포장규격의 화면 POST 저장·재조회,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.post(reverse('procurement:workflow_supplier_edit',args=[self.vendor.pk]),{'username':self.vendor.username,'name':'새업체','phone_number':'010'})
+        self.assertEqual(response.status_code,302);self.vendor.refresh_from_db();self.assertEqual(self.vendor.name,'새업체')
+        response=self.client.post(reverse('procurement:workflow_spec_edit',args=[self.spec.pk]),{'ingredient':self.ing.pk,'supplier':self.vendor.pk,'label':'700g(70g×10개)','base_quantity':700,'base_unit':'g','order_unit':'봉','order_increment':1,'unit_price':70})
+        self.assertEqual(response.status_code,302);self.spec.refresh_from_db();self.assertEqual(self.spec.base_quantity,700)",동일 기대값: 302; 동일 기대값: '새업체'; 동일 기대값: 700,"self.assertEqual(response.status_code,302)
+self.assertEqual(self.vendor.name,'새업체')
+self.assertEqual(self.spec.base_quantity,700)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:376 (ok:376); verification/cooking-format/mariadb.log:331 (ok:331),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-27,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_inspection_ui_and_actual_monthly_settlement,208,검수 화면 입고와 실제 합격량 기준 월말 참고금액,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        order=self.order();item=order.items.get()
+        response=self.client.post(reverse('procurement:workflow_inspection',args=[item.pk]),{'delivered':40,'accepted':35,'condition':'이상','specification':'5kg','notes':'5kg 반품'})
+        self.assertEqual(response.status_code,302)
+        response=self.client.get(reverse('procurement:workflow_settlement'),{'month':timezone.localdate().strftime('%Y-%m')})
+        self.assertEqual(response.status_code,200)
+        row=response.context['rows'][0];self.assertEqual(row['inspected_amount'],3500)
+        self.assertEqual(row['uninspected'],0)",동일 기대값: 302; 동일 기대값: 200; 동일 기대값: 3500; 동일 기대값: 0,"self.assertEqual(response.status_code,302)
+self.assertEqual(response.status_code,200)
+self.assertEqual(row['inspected_amount'],3500)
+self.assertEqual(row['uninspected'],0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:332 (ok:332); verification/cooking-format/mariadb.log:287 (ok:287),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-28,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_weekly_ledger_opening_waste_adjustment_and_closing,217,서울·UTC 경계에서 기초10입고2폐기1기말11 계산,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        # UTC Oct 15 16:00 is Seoul Oct 16 01:00. Query business dates,
+        # not now.date() (UTC), so this test is independent of execution time.
+        now=datetime(2026,10,15,16,tzinfo=datetime_timezone.utc)
+        record_inventory(self.ing.pk,'입고',10,self.operator,uuid.uuid4(),now-timedelta(days=8))
+        record_inventory(self.ing.pk,'입고',2,self.operator,uuid.uuid4(),now)
+        record_inventory(self.ing.pk,'폐기',1,self.operator,uuid.uuid4(),now)
+        with timezone.override('Asia/Seoul'):
+            business_date=timezone.localdate(now)
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':str(business_date-timedelta(days=1)),'end_date':str(business_date)})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))
+            # The two new transactions are outside Oct 15 in business time.
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':'2026-10-15','end_date':'2026-10-15'})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,0,0,10))
+        with timezone.override('UTC'):
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':'2026-10-15','end_date':'2026-10-15'})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))","동일 기대값: (10, 2, 1, 11); 동일 기대값: (10, 0, 0, 10)","self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))
+self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,0,0,10))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:378 (ok:378); verification/cooking-format/mariadb.log:333 (ok:333),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-29,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_complete_ui_headcount_snapshot_order_inspection_usage_flow,235,Django client로 식수→계획→발주→검수→사용 전체 연동,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.client.post(reverse('procurement:workflow'),{'plan':self.plan.pk,'manual':350,'final':350,'confirm':'on'})
+        response=self.client.post(reverse('procurement:workflow_preview'),{'start_date':str(self.plan.target_date),'end_date':str(self.plan.target_date),'days':['4'],'request_key':str(uuid.uuid4()),'save':'1'})
+        self.assertEqual(response.status_code,302);snapshot=ProcurementPlan.objects.get()
+        response=self.client.post(reverse('procurement:workflow_plan',args=[snapshot.pk]));self.assertEqual(response.status_code,302)
+        order=PurchaseOrder.objects.get();item=order.items.get()
+        self.client.post(reverse('procurement:workflow_inspection',args=[item.pk]),{'delivered':35,'accepted':35,'condition':'정상','specification':'5kg / 캔'})
+        self.client.post(reverse('meals:deduct_inventory'),{'target_date':str(self.plan.target_date),'meal_type':'석식','confirm':'1'})
+        self.assertEqual(current_stock(self.ing),0)
+        self.assertContains(self.client.get(reverse('procurement:workflow_plan',args=[snapshot.pk])),'업체별 구매발주서')","동일 기대값: 302; 동일 기대값: 0; assertContains(self.client.get(reverse('procurement:workflow_plan', args=[snapshot.pk])), '업체별 구매발주서')","self.assertEqual(response.status_code,302)
+self.assertEqual(current_stock(self.ing),0)
+self.assertContains(self.client.get(reverse('procurement:workflow_plan',args=[snapshot.pk])),'업체별 구매발주서')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:317 (ok:317); verification/cooking-format/mariadb.log:272 (ok:272),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-30,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_business_authentication_and_admin_permissions,246,업무 로그인·공급업체·일반 영양사 관리권한 제한,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        anonymous=Client();self.assertEqual(anonymous.get(reverse('procurement:workflow')).status_code,302)
+        self.assertEqual(anonymous.get(reverse('procurement:order_list')).status_code,302)
+        self.client.force_login(self.vendor);self.assertEqual(self.client.get(reverse('procurement:workflow')).status_code,403)
+        user=get_user_model().objects.create_user(username='ordinary')
+        self.client.force_login(user);self.assertEqual(self.client.get(reverse('procurement:workflow_specs')).status_code,302)",동일 기대값: 302; 동일 기대값: 403,"self.assertEqual(anonymous.get(reverse('procurement:workflow')).status_code,302)
+self.assertEqual(anonymous.get(reverse('procurement:order_list')).status_code,302)
+self.assertEqual(self.client.get(reverse('procurement:workflow')).status_code,403)
+self.assertEqual(self.client.get(reverse('procurement:workflow_specs')).status_code,302)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:314 (ok:314); verification/cooking-format/mariadb.log:269 (ok:269),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-31,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_all_new_ui_routes_render,253,신규 업무화면10종 HTTP 렌더링,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for name in ['workflow','workflow_preview','workflow_inspections','workflow_transaction','workflow_ledger','workflow_settlement','workflow_specs','workflow_suppliers','workflow_categories','workflow_recipes']:
+            with self.subTest(name=name):self.assertEqual(self.client.get(reverse('procurement:'+name)).status_code,200)",동일 기대값: 200,"self.assertEqual(self.client.get(reverse('procurement:'+name)).status_code,200)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:312 (ok:312); verification/cooking-format/mariadb.log:267 (ok:267),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,주로 HTTP200·렌더링 smoke. 입력·DB변경·모든 화면 내용/브라우저 JS 동작까지 검증한 것은 아님.
+DJ-REQ-32,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_recipe_unit_and_cooking_notes_ui,257,레시피 단위·기준량·메뉴 조리정보 화면 저장,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.post(reverse('procurement:workflow_recipe_edit',args=[self.recipe.pk]),{'menu':self.menu.pk,'ingredient':self.ing.pk,'required_amount':70,'unit':'g','cooking_notes':'충분히 익혀 제공'})
+        self.assertEqual(response.status_code,302)
+        self.recipe.refresh_from_db();self.menu.refresh_from_db()
+        self.assertEqual((self.recipe.unit,self.recipe.required_amount),('g',70))
+        self.assertEqual(self.menu.cooking_notes,'충분히 익혀 제공')","동일 기대값: 302; 동일 기대값: ('g', 70); 동일 기대값: '충분히 익혀 제공'","self.assertEqual(response.status_code,302)
+self.assertEqual((self.recipe.unit,self.recipe.required_amount),('g',70))
+self.assertEqual(self.menu.cooking_notes,'충분히 익혀 제공')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:370 (ok:370); verification/cooking-format/mariadb.log:325 (ok:325),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-33,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_fifo_allocates_oldest_receipt_and_tracks_expiry,264,먼저 입고된3kg 다음4kg에서5kg FIFO 배정,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from inventory.models import StockLot,StockAllocation
+        now=timezone.now()
+        first=record_inventory(self.ing.pk,'입고',3,self.operator,uuid.uuid4(),now-timedelta(days=1),expiration=now.date()+timedelta(days=3))
+        second=record_inventory(self.ing.pk,'입고',4,self.operator,uuid.uuid4(),now,expiration=now.date()+timedelta(days=5))
+        out=record_inventory(self.ing.pk,'출고',5,self.operator,uuid.uuid4(),now)
+        self.assertEqual(list(out.lot_allocations.order_by('lot_id').values_list('quantity',flat=True)),[Decimal('3'),Decimal('2')])
+        self.assertEqual(StockLot.objects.get(incoming_log=first).remaining_quantity,0)
+        self.assertEqual(StockLot.objects.get(incoming_log=second).remaining_quantity,2)","동일 기대값: [Decimal('3'), Decimal('2')]; 동일 기대값: 0; 동일 기대값: 2","self.assertEqual(list(out.lot_allocations.order_by('lot_id').values_list('quantity',flat=True)),[Decimal('3'),Decimal('2')])
+self.assertEqual(StockLot.objects.get(incoming_log=first).remaining_quantity,0)
+self.assertEqual(StockLot.objects.get(incoming_log=second).remaining_quantity,2)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:326 (ok:326); verification/cooking-format/mariadb.log:281 (ok:281),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-34,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_expired_lot_cannot_be_consumed_but_can_be_disposed,274,만료 lot 사용 금지·폐기 허용,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        now=timezone.now()
+        record_inventory(self.ing.pk,'입고',3,self.operator,uuid.uuid4(),now-timedelta(days=3),expiration=now.date()-timedelta(days=1))
+        with self.assertRaises(ValidationError):record_inventory(self.ing.pk,'출고',1,self.operator,uuid.uuid4(),now)
+        self.assertEqual(current_stock(self.ing),3)
+        record_inventory(self.ing.pk,'폐기',3,self.operator,uuid.uuid4(),now)
+        self.assertEqual(current_stock(self.ing),0)",동일 기대값: 3; 동일 기대값: 0; 예외: ValidationError,"self.assertRaises(ValidationError)
+self.assertEqual(current_stock(self.ing),3)
+self.assertEqual(current_stock(self.ing),0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:323 (ok:323); verification/cooking-format/mariadb.log:278 (ok:278),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-35,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_ai_failure_does_not_block_manual_workflow,282,AI 예외 주입 시 수동 확정 경로 유지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from unittest.mock import patch
+        with patch('forecasting.views.run_attendance_prediction',side_effect=RuntimeError('모델 미가용')):
+            response=self.client.post(reverse('forecasting:prediction_create'),{'prediction_date':str(self.plan.target_date)})
+        self.assertEqual(response.status_code,200)
+        self.assertContains(response,'실패')
+        save_headcount(self.plan.pk,350,350)
+        self.assertEqual(self.ready(350).lines.get().package_quantity,7)","동일 기대값: 200; assertContains(response, '실패'); 동일 기대값: 7","self.assertEqual(response.status_code,200)
+self.assertContains(response,'실패')
+self.assertEqual(self.ready(350).lines.get().package_quantity,7)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:245 (ok:311); verification/cooking-format/mariadb.log:200 (ok:266),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-36,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_real_ai_then_final_confirmation_through_inspection_and_fifo_usage,291,실제 AI 예측→최종 확정→검수→FIFO 사용 연동,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from forecasting.services.prediction_service import run_attendance_prediction
+        prediction=run_attendance_prediction(self.plan.target_date,'dinner','참치볶음')
+        self.plan.refresh_from_db();self.assertIsNone(self.plan.final_headcount)
+        snapshot=self.ready(prediction.predicted_count)
+        order=confirm_orders(snapshot.pk,self.operator)[0];item=order.items.get()
+        inspect_item(item.pk,self.operator,item.required_qty,item.required_qty,'정상','5kg / 캔')
+        self.client.post(reverse('meals:deduct_inventory'),{'target_date':str(self.plan.target_date),'meal_type':'석식','confirm':'1'})
+        expected=item.required_qty-Decimal(prediction.predicted_count)/10
+        self.assertEqual(current_stock(self.ing),expected)
+        outgoing=InventoryLog.objects.get(log_type='출고')
+        self.assertEqual(outgoing.lot_allocations.get().quantity,Decimal(prediction.predicted_count)/10)",None: self.plan.final_headcount; 동일 기대값: expected; 동일 기대값: Decimal(prediction.predicted_count) / 10,"self.assertIsNone(self.plan.final_headcount)
+self.assertEqual(current_stock(self.ing),expected)
+self.assertEqual(outgoing.lot_allocations.get().quantity,Decimal(prediction.predicted_count)/10)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:350 (ok:367); verification/cooking-format/mariadb.log:305 (ok:322),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. AI는 저장·호환/fallback 실행 검증이며 예측 정확도·OOF/Holdout·정상 SBERT 인수 시험이 아님.
+DJ-REQ-37,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_same_legacy_stock_form_request_is_not_double_counted,304,기존 재고 폼의 같은 요청키 중복 출고 방지,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        now=timezone.now();record_inventory(self.ing.pk,'입고',10,self.operator,uuid.uuid4(),now)
+        data={'ingredient':self.ing.pk,'log_type':'출고','quantity':'2','request_key':str(uuid.uuid4())}
+        self.client.post(reverse('inventory:inventory_log_create'),data)
+        self.client.post(reverse('inventory:inventory_log_create'),data)
+        self.assertEqual(current_stock(self.ing),8)
+        self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(),1)",동일 기대값: 8; 동일 기대값: 1,"self.assertEqual(current_stock(self.ing),8)
+self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(),1)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:373 (ok:373); verification/cooking-format/mariadb.log:328 (ok:328),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-38,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_two_suppliers_split_orders_and_sort_by_real_name,312,업체별 주문2건 분리·실제 업체명 오름차순,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        other=get_user_model().objects.create_user(username='a-vendor',name='하업체',role='SUPPLIER')
+        ing=Ingredient.objects.create(name='쌀',unit='kg',unit_price=100,safe_stock_level=0,supplier=other)
+        SupplySpecification.objects.create(ingredient=ing,supplier=other,label='1kg',base_quantity=1,base_unit='kg',order_unit='kg',unit_price=100)
+        Recipe.objects.create(menu=self.menu,ingredient=ing,required_amount=100,unit='g')
+        orders=confirm_orders(self.ready(350).pk,self.operator)
+        self.assertEqual(len(orders),2)
+        response=self.client.get(reverse('procurement:workflow_inspections'))
+        text=response.content.decode();self.assertLess(text.index('가업체'),text.index('하업체'))","동일 기대값: 2; assertLess(text.index('가업체'), text.index('하업체'))","self.assertEqual(len(orders),2)
+self.assertLess(text.index('가업체'),text.index('하업체'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:377 (ok:377); verification/cooking-format/mariadb.log:332 (ok:332),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,주문2건은 명시 단언. 업체명 순서는 HTML전체의 문자열 위치 비교여서 표행별 순서를 별도로 추출한 시험은 아님.
+DJ-REQ-39,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_expired_receipt_blocks_planning_until_disposal,322,만료 재고가 남은 경우 발주 계산 차단,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        now=timezone.now()
+        record_inventory(self.ing.pk,'입고',3,self.operator,uuid.uuid4(),now-timedelta(days=3),expiration=now.date()-timedelta(days=1))
+        save_headcount(self.plan.pk,350,350)
+        with self.assertRaises(ValidationError):create_plan(self.plan.target_date,self.plan.target_date,self.operator,uuid.uuid4())",예외: ValidationError,self.assertRaises(ValidationError),기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:324 (ok:324); verification/cooking-format/mariadb.log:279 (ok:279),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-40,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_daily_edit_preserves_plan_identity_and_forecast,328,일간 편집 후 식단ID·예측 연결·메뉴 보존,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from forecasting.models import MealForecast
+        forecast=MealForecast.objects.create(diet_plan=self.plan,predicted_count=100)
+        response=self.client.post(reverse('meals:mealplan_create'),{'meal_date':str(self.plan.target_date),'dinner_menu':[str(self.menu.pk)]})
+        self.assertEqual(response.status_code,302)
+        self.assertTrue(DietPlan.objects.filter(pk=self.plan.pk).exists())
+        self.assertTrue(MealForecast.objects.filter(pk=forecast.pk,diet_plan_id=self.plan.pk).exists())","동일 기대값: 302; True: DietPlan.objects.filter(pk=self.plan.pk).exists(); True: MealForecast.objects.filter(pk=forecast.pk, diet_plan_id=self.plan.pk).exists()","self.assertEqual(response.status_code,302)
+self.assertTrue(DietPlan.objects.filter(pk=self.plan.pk).exists())
+self.assertTrue(MealForecast.objects.filter(pk=forecast.pk,diet_plan_id=self.plan.pk).exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:320 (ok:320); verification/cooking-format/mariadb.log:275 (ok:275),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-41,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_inspection_document_date_supplier_filter_and_empty_state,336,검수 문서 날짜·업체 필터와 빈 결과 표시,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        order=self.order()
+        response=self.client.get(reverse('procurement:workflow_inspections'),{'date':str(self.plan.target_date),'supplier':self.vendor.pk})
+        self.assertContains(response,'참치')
+        response=self.client.get(reverse('procurement:workflow_inspections'),{'date':'2026-01-01'})
+        self.assertContains(response,'검수 대상이 없습니다.')","assertContains(response, '참치'); assertContains(response, '검수 대상이 없습니다.')","self.assertContains(response,'참치')
+self.assertContains(response,'검수 대상이 없습니다.')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:330 (ok:330); verification/cooking-format/mariadb.log:285 (ok:285),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-42,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_legacy_requirement_screen_uses_final_and_all_stock_types,343,레거시 소요량도 최종 식수·모든 재고 유형 반영,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from forecasting.services.ingredient_calc import get_all_day_requirements
+        save_headcount(self.plan.pk,10,20)
+        InventoryLog.objects.create(ingredient=self.ing,log_type='입고',quantity=5)
+        InventoryLog.objects.create(ingredient=self.ing,log_type='폐기',quantity=1)
+        InventoryLog.objects.create(ingredient=self.ing,log_type='조정',quantity=-1)
+        result=get_all_day_requirements(self.plan.target_date)
+        self.assertEqual(result['items']['참치']['total_needed'],2)
+        self.assertEqual(result['items']['참치']['current_stock'],3)
+        self.assertEqual(result['items']['참치']['order_amount'],0)",동일 기대값: 2; 동일 기대값: 3; 동일 기대값: 0,"self.assertEqual(result['items']['참치']['total_needed'],2)
+self.assertEqual(result['items']['참치']['current_stock'],3)
+self.assertEqual(result['items']['참치']['order_amount'],0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:337 (ok:337); verification/cooking-format/mariadb.log:292 (ok:292),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-43,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_recipe_api_preserves_inventory_unit_and_rejects_nonpositive_amounts,354,레시피 API의 재고 단위 보존·음수 사용량 제외,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from .test_workflows import workbook_file
+        file=workbook_file([['메뉴명','식재료명','사용량','단위'],['참치볶음','참치',70,'g'],['오류메뉴','참치',-1,'g']])
+        response=self.client.post(reverse('meals:recipe_upload_api'),{'excel_file':file})
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json()['skipped_count'],1)
+        self.recipe.refresh_from_db();self.ing.refresh_from_db()
+        self.assertEqual((self.recipe.unit,self.recipe.required_amount,self.ing.unit),('g',70,'kg'))","동일 기대값: 200; 동일 기대값: 1; 동일 기대값: ('g', 70, 'kg')","self.assertEqual(response.status_code,200)
+self.assertEqual(response.json()['skipped_count'],1)
+self.assertEqual((self.recipe.unit,self.recipe.required_amount,self.ing.unit),('g',70,'kg'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:368 (ok:368); verification/cooking-format/mariadb.log:323 (ok:323),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-44,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_bulk_upload_clears_old_confirmation,363,식단 업로드 후 기존 최종 식수 해제,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        save_headcount(self.plan.pk,100,100)
+        file=SimpleUploadedFile('meal.csv','date,meal_type,menu_name,headcount\n2026-10-16,석식,참치볶음,20\n'.encode())
+        self.client.post(reverse('meals:mealplan_bulk_upload'),{'mealplan_file':file})
+        self.plan.refresh_from_db();self.assertIsNone(self.plan.final_headcount)",None: self.plan.final_headcount,self.assertIsNone(self.plan.final_headcount),기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:313 (ok:313); verification/cooking-format/mariadb.log:268 (ok:268),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-45,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_legacy_simple_order_uses_idempotent_validated_snapshot,370,간편 발주의 멱등 계획 생성·검토 후 확정,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        data={'ingredient_id[]':[str(self.ing.pk)],'quantity[]':['35.1'],'target_date':str(self.plan.target_date),'request_key':str(uuid.uuid4())}
+        self.client.post(reverse('procurement:order_create'),data)
+        self.client.post(reverse('procurement:order_create'),data)
+        self.assertEqual(ProcurementPlan.objects.count(),1)
+        self.assertFalse(PurchaseOrder.objects.exists())
+        plan=ProcurementPlan.objects.get()
+        self.assertEqual(plan.lines.get().package_quantity,8)
+        self.assertEqual(confirm_orders(plan.pk,self.operator)[0].supplier,self.vendor)",동일 기대값: 1; False: PurchaseOrder.objects.exists(); 동일 기대값: 8; 동일 기대값: self.vendor,"self.assertEqual(ProcurementPlan.objects.count(),1)
+self.assertFalse(PurchaseOrder.objects.exists())
+self.assertEqual(plan.lines.get().package_quantity,8)
+self.assertEqual(confirm_orders(plan.pk,self.operator)[0].supplier,self.vendor)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:338 (ok:338); verification/cooking-format/mariadb.log:293 (ok:293),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-REQ-46,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_legacy_smart_post_requires_final_and_creates_reviewable_snapshot,380,기존 식단 발주의 미확정 차단·검토 가능한 계획 저장,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        data={'order_start_date':str(self.plan.target_date),'order_end_date':str(self.plan.target_date),'request_key':str(uuid.uuid4())}
+        response=self.client.post(reverse('procurement:order_from_mealplan'),data)
+        self.assertEqual(response.status_code,302);self.assertFalse(ProcurementPlan.objects.exists())
+        save_headcount(self.plan.pk,350,350)
+        self.client.post(reverse('procurement:order_from_mealplan'),data)
+        self.assertEqual(ProcurementPlan.objects.count(),1)
+        self.assertFalse(PurchaseOrder.objects.exists())",동일 기대값: 302; False: ProcurementPlan.objects.exists(); 동일 기대값: 1; False: PurchaseOrder.objects.exists(),"self.assertEqual(response.status_code,302)
+self.assertFalse(ProcurementPlan.objects.exists())
+self.assertEqual(ProcurementPlan.objects.count(),1)
+self.assertFalse(PurchaseOrder.objects.exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:339 (ok:339); verification/cooking-format/mariadb.log:294 (ok:294),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-47,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_new_ingredient_form_accepts_managed_category,389,새 관리 카테고리의 식재료 등록 폼 수용,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        IngredientCategory.objects.create(name='새분류')
+        response=self.client.post(reverse('inventory:ingredient_create'),{'category':'새분류','name':'새재료','unit':'kg','unit_price':100,'safe_stock_level':1,'supplier':self.vendor.pk})
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(Ingredient.objects.get(name='새재료').category,'새분류')",동일 기대값: 302; 동일 기대값: '새분류',"self.assertEqual(response.status_code,302)
+self.assertEqual(Ingredient.objects.get(name='새재료').category,'새분류')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:344 (ok:344); verification/cooking-format/mariadb.log:299 (ok:299),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-48,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_kg_orders_follow_explicit_fractional_increment,395,명시0.01kg 발주 증분의 수량 조정·저장,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.spec.base_quantity=1;self.spec.order_unit='kg';self.spec.order_increment=Decimal('.01');self.spec.save()
+        snapshot=self.ready(351);line=snapshot.lines.get()
+        self.assertEqual(line.package_quantity,Decimal('35.10'))
+        order=confirm_orders(snapshot.pk,self.operator,{str(line.pk):'35.11'})[0]
+        self.assertEqual(order.items.get().required_qty,Decimal('35.11'))",동일 기대값: Decimal('35.10'); 동일 기대값: Decimal('35.11'),"self.assertEqual(line.package_quantity,Decimal('35.10'))
+self.assertEqual(order.items.get().required_qty,Decimal('35.11'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:336 (ok:336); verification/cooking-format/mariadb.log:291 (ok:291),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-49,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_daily_edit_empty_selection_removes_menus_without_deleting_plan,402,빈 일간 메뉴 선택 시 식단 삭제 없이 메뉴 해제,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.post(reverse('meals:mealplan_create'),{'meal_date':str(self.plan.target_date)})
+        self.assertEqual(response.status_code,302)
+        self.assertTrue(DietPlan.objects.filter(pk=self.plan.pk).exists())
+        self.assertFalse(DietMenu.objects.filter(diet_plan=self.plan).exists())
+        self.assertEqual(self.client.get(reverse('meals:mealplan_create'),{'date':'invalid'}).status_code,302)",동일 기대값: 302; True: DietPlan.objects.filter(pk=self.plan.pk).exists(); False: DietMenu.objects.filter(diet_plan=self.plan).exists(),"self.assertEqual(response.status_code,302)
+self.assertTrue(DietPlan.objects.filter(pk=self.plan.pk).exists())
+self.assertFalse(DietMenu.objects.filter(diet_plan=self.plan).exists())
+self.assertEqual(self.client.get(reverse('meals:mealplan_create'),{'date':'invalid'}).status_code,302)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:319 (ok:319); verification/cooking-format/mariadb.log:274 (ok:274),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-50,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_recipe_api_returns_recipe_unit_instead_of_inventory_unit,409,레시피 API가 재고 단위 대신 레시피 단위 반환,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.get(reverse('meals:get_menu_recipes_api',args=[self.menu.pk]))
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json()['recipes'][0]['unit'],'g')",동일 기대값: 200; 동일 기대값: 'g',"self.assertEqual(response.status_code,200)
+self.assertEqual(response.json()['recipes'][0]['unit'],'g')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:369 (ok:369); verification/cooking-format/mariadb.log:324 (ok:324),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-51,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_purchase_requisition_prints_category_once_per_group,414,구입요구서 분류명은 그룹당 한 번 표시,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.ing.category='분류중복검증';self.ing.save()
+        self.order()
+        response=self.client.get(reverse('procurement:doc_purchase_requisition'),{'start_date':str(self.plan.target_date),'end_date':str(self.plan.target_date)})
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.content.decode().count('분류중복검증'),1)",동일 기대값: 200; 동일 기대값: 1,"self.assertEqual(response.status_code,200)
+self.assertEqual(response.content.decode().count('분류중복검증'),1)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:349 (ok:349); verification/cooking-format/mariadb.log:304 (ok:304),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-52,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_order_preview_notes_persist_and_blank_print_does_not_change_final,421,발주 비고 저장·빈 출력 모드에서 최종 식수 보존,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        snapshot=self.ready(350)
+        response=self.client.post(reverse('procurement:workflow_plan',args=[snapshot.pk]),{'note_0':'선입고 확인'})
+        self.assertEqual(response.status_code,302);snapshot.refresh_from_db()
+        self.assertEqual(snapshot.details[0]['notes'],'선입고 확인')
+        response=self.client.get(reverse('procurement:workflow_plan',args=[snapshot.pk]),{'blank':'1'})
+        self.assertTrue(response.context['blank_inputs'])
+        self.plan.refresh_from_db();self.assertEqual(self.plan.final_headcount,350)",동일 기대값: 302; 동일 기대값: '선입고 확인'; True: response.context['blank_inputs']; 동일 기대값: 350,"self.assertEqual(response.status_code,302)
+self.assertEqual(snapshot.details[0]['notes'],'선입고 확인')
+self.assertTrue(response.context['blank_inputs'])
+self.assertEqual(self.plan.final_headcount,350)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:347 (ok:347); verification/cooking-format/mariadb.log:302 (ok:302),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-REQ-53,Integration,repository,integration_tests/test_requirements.py,RequirementWorkflows,test_issued_order_preview_shows_actual_adjusted_quantity,430,발행 후 화면에 최소량이 아닌 조정 포장수 표시,"공통 fixture: 참치kg,100g/인,2026-10-16석식,수동100·최종미확정,5kg/캔500원·간격1,staff영양사·가업체.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        snapshot=self.ready(351);line=snapshot.lines.get()
+        confirm_orders(snapshot.pk,self.operator,{str(line.pk):'9'})
+        response=self.client.get(reverse('procurement:workflow_plan',args=[snapshot.pk]))
+        self.assertEqual(response.context['lines'][0].confirmed_quantity,9)
+        self.assertContains(response,'구매발주서 발행 완료')","동일 기대값: 9; assertContains(response, '구매발주서 발행 완료')","self.assertEqual(response.context['lines'][0].confirmed_quantity,9)
+self.assertContains(response,'구매발주서 발행 완료')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:335 (ok:335); verification/cooking-format/mariadb.log:290 (ok:290),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-01,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_single_ingredient_id_uses_annotated_stock,65,단일 품목ID 부족분의 annotated stock 사용,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.stock(3)
+        response = self.client.get(reverse('procurement:order_create'), {'items': str(self.ing.pk)})
+        self.assertEqual(response.context['shortage_map'], {'쌀': '2.00'})",동일 기대값: {'쌀': '2.00'},"self.assertEqual(response.context['shortage_map'], {'쌀': '2.00'})",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:418 (ok:418); verification/cooking-format/mariadb.log:373 (ok:373),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-02,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_comma_ids_use_all_inventory_log_types,70,쉼표ID와 입고·출고·폐기·음수 조정의 재고 합산,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.stock(10); self.stock(2, '출고'); self.stock(4, '폐기'); self.stock(-1, '조정')
+        second = Ingredient.objects.create(name='소금', unit='kg', safe_stock_level=2)
+        response = self.client.get(reverse('procurement:order_create'), {'items': f'{self.ing.pk},{second.pk}'})
+        self.assertEqual(response.context['shortage_map'], {'쌀': '2.00', '소금': '2.00'})","동일 기대값: {'쌀': '2.00', '소금': '2.00'}","self.assertEqual(response.context['shortage_map'], {'쌀': '2.00', '소금': '2.00'})",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:382 (ok:382); verification/cooking-format/mariadb.log:337 (ok:337),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-03,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_repeated_ids_and_nonshortage_do_not_force_minimum,76,중복ID·재고 충분 품목의 강제 최소발주 방지,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.stock(5)
+        response = self.client.get(reverse('procurement:order_create'), {'items': [str(self.ing.pk), str(self.ing.pk), 'bad']})
+        self.assertEqual(response.context['shortage_map'], {})",동일 기대값: {},"self.assertEqual(response.context['shortage_map'], {})",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:414 (ok:414); verification/cooking-format/mariadb.log:369 (ok:369),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-04,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_named_amounts_take_priority_over_date,81,명시 품목별 수량이 날짜 소요량보다 우선,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        with patch('procurement.views.get_all_day_requirements') as calc:
+            response = self.client.get(reverse('procurement:order_create'), {'items': '쌀', 'amounts': '7.25', 'target_date': '2026-10-12'})
+        calc.assert_not_called()
+        self.assertEqual(response.context['shortage_map'], {'쌀': '7.25'})",assert_not_called(); 동일 기대값: {'쌀': '7.25'},"calc.assert_not_called()
+self.assertEqual(response.context['shortage_map'], {'쌀': '7.25'})",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:391 (ok:391); verification/cooking-format/mariadb.log:346 (ok:346),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-05,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_date_requirement_fallback,87,명시 수량 없을 때 날짜 소요량 fallback,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        with patch('procurement.views.get_all_day_requirements', return_value={'items': {'쌀': {'order_amount': 4}}}):
+            response = self.client.get(reverse('procurement:order_create'), {'target_date': '2026-10-12'})
+        self.assertEqual(response.context['shortage_map'], {'쌀': '4'})",동일 기대값: {'쌀': '4'},"self.assertEqual(response.context['shortage_map'], {'쌀': '4'})",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:385 (ok:385); verification/cooking-format/mariadb.log:340 (ok:340),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-06,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_dashboard_total_is_not_capped_at_eight,92,부족재고 전체 수와 상위8개 목록의 분리,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for i in range(10):
+            Ingredient.objects.create(name=f'부족재료{i}', unit='kg', safe_stock_level=1)
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_low_stock_count'], 11)
+        self.assertEqual(len(response.context['low_stock_items']), 8)",동일 기대값: 200; 동일 기대값: 11; 동일 기대값: 8,"self.assertEqual(response.status_code, 200)
+self.assertEqual(response.context['total_low_stock_count'], 11)
+self.assertEqual(len(response.context['low_stock_items']), 8)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:384 (ok:384); verification/cooking-format/mariadb.log:339 (ok:339),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-07,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_preserved_release_patch_routes,100,기존 release_patch 업로드·차감 URL 연결 보존,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from inventory.release_patch_views import ingredient_upload_flexible
+        from meals.release_patch_views import deduct_inventory_view, recipe_upload_page
+        for name, function in [('inventory:ingredient_upload', ingredient_upload_flexible), ('inventory:ingredient_upload_legacy', ingredient_upload_flexible), ('meals:deduct_inventory', deduct_inventory_view), ('meals:recipe_upload_page', recipe_upload_page)]:
+            self.assertIs(resolve(reverse(name)).func, function)",동일 기대값: function,"self.assertIs(resolve(reverse(name)).func, function)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:394 (ok:394); verification/cooking-format/mariadb.log:349 (ok:349),reverse→프로젝트 URL registry→resolve된 View 함수 연결의 구성요소 통합 계약. DB fixture는 쓰지 않아도 독립 계산 단위가 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-08,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_titled_multisheet_ingredient_upload_matches_supplier_name,106,제목 있는 다중시트 식재료 업로드·업체명 일치,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        upload = workbook_file([['2026 식재료 기준정보'], ['품목명', '발주처', '식품 설명', '단가 (원)'], ['쌀', '공급회사', '수정 설명', '1,200']], extra=[['재료명', '안전재고'], ['당근', 3]])
+        response = self.client.post(reverse('inventory:ingredient_upload'), {'file': upload})
+        self.assertEqual(response.status_code, 302)
+        self.ing.refresh_from_db()
+        self.assertEqual(self.ing.supplier, self.supplier)
+        self.assertEqual(self.ing.description, '수정 설명')
+        self.assertEqual(self.ing.unit_price, 1200)
+        self.assertEqual(self.ing.safe_stock_level, 5)
+        self.assertEqual(Ingredient.objects.get(name='당근').category, '채소류')",동일 기대값: 302; 동일 기대값: self.supplier; 동일 기대값: '수정 설명'; 동일 기대값: 1200; 동일 기대값: 5; 동일 기대값: '채소류',"self.assertEqual(response.status_code, 302)
+self.assertEqual(self.ing.supplier, self.supplier)
+self.assertEqual(self.ing.description, '수정 설명')
+self.assertEqual(self.ing.unit_price, 1200)
+self.assertEqual(self.ing.safe_stock_level, 5)
+self.assertEqual(Ingredient.objects.get(name='당근').category, '채소류')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:420 (ok:420); verification/cooking-format/mariadb.log:375 (ok:375),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-09,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_csv_ingredient_upload_preserves_missing_columns,117,CP949 CSV 수정 시 누락 열의 기존값 보존,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        upload = SimpleUploadedFile('ingredients.csv', '식재료명,단가\n쌀,800\n'.encode('cp949'))
+        response = self.client.post(reverse('inventory:ingredient_upload_legacy'), {'file': upload})
+        self.assertEqual(response.status_code, 302)
+        self.ing.refresh_from_db()
+        self.assertEqual((self.ing.unit_price, self.ing.safe_stock_level, self.ing.description, self.ing.supplier_id), (800, 5, '기존 설명', self.supplier.pk))","동일 기대값: 302; 동일 기대값: (800, 5, '기존 설명', self.supplier.pk)","self.assertEqual(response.status_code, 302)
+self.assertEqual((self.ing.unit_price, self.ing.safe_stock_level, self.ing.description, self.ing.supplier_id), (800, 5, '기존 설명', self.supplier.pk))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:383 (ok:383); verification/cooking-format/mariadb.log:338 (ok:338),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-10,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_ingredient_upload_rolls_back_on_bad_number,124,잘못된 숫자 업로드 전체 rollback,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        upload = workbook_file([['식재료명', '단가'], ['쌀', 800], ['새재료', 'invalid']])
+        with self.assertRaises(ValueError):
+            process_ingredient_file_upload(upload)
+        self.ing.refresh_from_db()
+        self.assertEqual(self.ing.unit_price, 1000)
+        self.assertFalse(Ingredient.objects.filter(name='새재료').exists())",동일 기대값: 1000; False: Ingredient.objects.filter(name='새재료').exists(); 예외: ValueError,"self.assertRaises(ValueError)
+self.assertEqual(self.ing.unit_price, 1000)
+self.assertFalse(Ingredient.objects.filter(name='새재료').exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:388 (ok:388); verification/cooking-format/mariadb.log:343 (ok:343),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-11,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_unknown_supplier_does_not_erase_existing_mapping,132,미등록 업체명으로 기존 업체 연결을 지우지 않음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        with self.assertRaises(ValueError):
+            process_ingredient_file_upload(workbook_file([['식재료명','발주처'], ['쌀','미등록회사']]))
+        self.ing.refresh_from_db(); self.assertEqual(self.ing.supplier, self.supplier)",동일 기대값: self.supplier; 예외: ValueError,"self.assertRaises(ValueError)
+self.assertEqual(self.ing.supplier, self.supplier)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:422 (ok:422); verification/cooking-format/mariadb.log:377 (ok:377),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-12,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_recipe_release_upload_to_deduction_flow_is_idempotent,137,레시피 업로드→차감 미리보기→중복 차감 방지,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        upload = workbook_file([['레시피 자료'], ['메뉴명', '식재료명', '사용량', '단위'], ['쌀밥', '쌀', '0.2', 'kg']])
+        response = self.client.post(reverse('meals:recipe_upload_page'), {'file': upload})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Recipe.objects.get(menu=self.menu, ingredient=self.ing).required_amount, Decimal('0.2'))
+        plan = self.plan(self.monday, headcount=10); self.stock(20)
+        preview = self.client.get(reverse('meals:deduct_inventory'), {'date': str(self.monday)})
+        self.assertEqual(preview.context['rows'][0]['deduct_qty'], Decimal('2'))
+        payload = {'target_date': str(self.monday), 'confirm': '1'}
+        self.client.post(reverse('meals:deduct_inventory'), payload)
+        self.client.post(reverse('meals:deduct_inventory'), payload)
+        self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(), 1)
+        plan.refresh_from_db(); self.assertTrue(plan.is_served)
+        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock, 18)",동일 기대값: 200; 동일 기대값: Decimal('0.2'); 동일 기대값: Decimal('2'); 동일 기대값: 1; True: plan.is_served; 동일 기대값: 18,"self.assertEqual(response.status_code, 200)
+self.assertEqual(Recipe.objects.get(menu=self.menu, ingredient=self.ing).required_amount, Decimal('0.2'))
+self.assertEqual(preview.context['rows'][0]['deduct_qty'], Decimal('2'))
+self.assertEqual(InventoryLog.objects.filter(log_type='출고').count(), 1)
+self.assertTrue(plan.is_served)
+self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock, 18)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:413 (ok:413); verification/cooking-format/mariadb.log:368 (ok:368),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-WF-13,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_weekday_order_group_uses_dinner_then_next_breakfast_lunch,152,평일 석식과 다음날 조·중식 발주 묶음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan(self.monday, '중식'); self.plan(self.monday, '석식')
+        self.plan(self.monday + timedelta(days=1), '조식'); self.plan(self.monday + timedelta(days=1), '중식'); self.plan(self.monday + timedelta(days=1), '석식')
+        response = self.smart(self.monday)
+        plans = response.context['grouped_orders'][0]['plans']
+        self.assertEqual([(x['target_date'],x['meal_type']) for x in plans], [(self.monday,'석식'), (self.monday+timedelta(days=1),'조식'), (self.monday+timedelta(days=1),'중식')])
+        self.assertEqual(self.ordered_total(response), 35) # 3 * 10kg + 5kg reserve","동일 기대값: [(self.monday, '석식'), (self.monday + timedelta(days=1), '조식'), (self.monday + timedelta(days=1), '중식')]; 동일 기대값: 35","self.assertEqual([(x['target_date'],x['meal_type']) for x in plans], [(self.monday,'석식'), (self.monday+timedelta(days=1),'조식'), (self.monday+timedelta(days=1),'중식')])
+self.assertEqual(self.ordered_total(response), 35)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:423 (ok:423); verification/cooking-format/mariadb.log:378 (ok:378),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-14,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_friday_group_covers_weekend_and_next_monday,160,금요일과 주말·월요일9식 묶음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        friday=self.monday+timedelta(days=4)
+        for i in range(4):
+            for meal in ['조식','중식','석식']:
+                self.plan(friday+timedelta(days=i),meal)
+        response=self.smart(friday,friday+timedelta(days=2))
+        groups=response.context['grouped_orders']
+        self.assertEqual(len(groups),1)
+        self.assertEqual(len(groups[0]['plans']),9)
+        self.assertEqual(self.ordered_total(response),95)",동일 기대값: 1; 동일 기대값: 9; 동일 기대값: 95,"self.assertEqual(len(groups),1)
+self.assertEqual(len(groups[0]['plans']),9)
+self.assertEqual(self.ordered_total(response),95)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:387 (ok:387); verification/cooking-format/mariadb.log:342 (ok:342),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-15,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_weekend_only_has_no_order_day_group,171,주말 단독의 발주일 그룹 없음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        saturday=self.monday+timedelta(days=5);self.plan(saturday)
+        self.assertEqual(self.smart(saturday).context['grouped_orders'], [])",동일 기대값: [],"self.assertEqual(self.smart(saturday).context['grouped_orders'], [])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:424 (ok:424); verification/cooking-format/mariadb.log:379 (ok:379),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-16,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_selected_weekday_and_no_duplicate_meals,175,선택 요일과 식사 중복 집계 방지,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        for i in range(3):
+            for meal in ['조식','중식','석식']:
+                self.plan(self.monday+timedelta(days=i),meal)
+        response=self.smart(self.monday,self.monday+timedelta(days=1))
+        plans=[(p['target_date'],p['meal_type']) for g in response.context['grouped_orders'] for p in g['plans']]
+        self.assertEqual(len(plans),len(set(plans)))
+        response=self.smart(self.monday,self.monday+timedelta(days=1),['1'])
+        self.assertEqual([g['order_date'] for g in response.context['grouped_orders']], [self.monday+timedelta(days=1)])",동일 기대값: len(set(plans)); 동일 기대값: [self.monday + timedelta(days=1)],"self.assertEqual(len(plans),len(set(plans)))
+self.assertEqual([g['order_date'] for g in response.context['grouped_orders']], [self.monday+timedelta(days=1)])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:416 (ok:416); verification/cooking-format/mariadb.log:371 (ok:371),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-WF-17,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_safety_reserve_not_duplicated_across_menus_or_days,185,여러 메뉴·날짜 동일 재료의 안전재고 중복 방지,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        extra=Menu.objects.create(name='추가쌀밥');Recipe.objects.create(menu=extra,ingredient=self.ing,required_amount=Decimal('0.10'))
+        first=self.plan(self.monday,'석식',100);DietMenu.objects.create(diet_plan=first,menu=extra)
+        self.plan(self.monday+timedelta(days=1),'석식',100)
+        self.stock(8)
+        self.assertEqual(self.ordered_total(self.smart(self.monday,self.monday+timedelta(days=1))),Decimal('27')) # 30+5-8",동일 기대값: Decimal('27'),"self.assertEqual(self.ordered_total(self.smart(self.monday,self.monday+timedelta(days=1))),Decimal('27'))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:415 (ok:415); verification/cooking-format/mariadb.log:370 (ok:370),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-WF-18,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_sufficient_stock_yields_no_order,192,현재고 충분 시 발주0,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.stock(50);self.plan(self.monday,'석식')
+        self.assertEqual(self.ordered_total(self.smart(self.monday)),0)",동일 기대값: 0,"self.assertEqual(self.ordered_total(self.smart(self.monday)),0)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:419 (ok:419); verification/cooking-format/mariadb.log:374 (ok:374),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-19,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_unconfirmed_ai_is_not_used_as_final_smart_order,196,미확정 AI를 최종 발주 식수로 직접 채택하지 않음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan(self.monday,'석식',5)
+        DietPlan.objects.filter(target_date=self.monday).update(final_headcount=None)
+        AttendancePrediction.objects.create(prediction_date=self.monday, meal_type='dinner', predicted_count=30, model_name='fixture')
+        response=self.smart(self.monday)
+        self.assertEqual(response.context['grouped_orders'][0]['plans'][0]['serving_count'],5)
+        self.assertEqual(self.ordered_total(response),Decimal(""5.5""))",동일 기대값: 5; 동일 기대값: Decimal('5.5'),"self.assertEqual(response.context['grouped_orders'][0]['plans'][0]['serving_count'],5)
+self.assertEqual(self.ordered_total(response),Decimal(""5.5""))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:421 (ok:421); verification/cooking-format/mariadb.log:376 (ok:376),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-20,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_order_creation_receipt_and_repeated_confirmation,204,간편 계획→검수 입고→완료 재요청 중복 방지,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from procurement.workflow import create_manual_plan, confirm_orders, inspect_item
+        import uuid
+        snapshot=create_manual_plan([(self.ing.pk,""2.5"")],self.monday,self.operator,uuid.uuid4())
+        order=confirm_orders(snapshot.pk,self.operator)[0];item=order.items.get()
+        self.assertEqual((order.supplier_id,order.total_amount,item.required_qty),(self.supplier.pk,3000,Decimal(""3"")))
+        inspect_item(item.pk,self.operator,""3"",""3"",""정상"",""1kg"")
+        for _ in range(2):self.client.post(reverse(""procurement:order_status_update"",args=[order.pk]),{""status"":""완료""})
+        self.assertEqual(InventoryLog.objects.filter(log_type=""입고"").count(),1)
+        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,Decimal(""3""))","동일 기대값: (self.supplier.pk, 3000, Decimal('3')); 동일 기대값: 1; 동일 기대값: Decimal('3')","self.assertEqual((order.supplier_id,order.total_amount,item.required_qty),(self.supplier.pk,3000,Decimal(""3"")))
+self.assertEqual(InventoryLog.objects.filter(log_type=""입고"").count(),1)
+self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,Decimal(""3""))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:393 (ok:393); verification/cooking-format/mariadb.log:348 (ok:348),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-WF-21,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_simple_order_preserves_post_date,215,간편 발주 POST 대상 날짜 보존,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        import uuid
+        from procurement.models import ProcurementPlan
+        from procurement.workflow import confirm_orders
+        response=self.client.post(reverse(""procurement:order_create""),{""ingredient_id[]"":[str(self.ing.pk)],""quantity[]"":[""2""],""target_date"":str(self.monday),""request_key"":str(uuid.uuid4())})
+        self.assertEqual(response.status_code,302)
+        confirm_orders(ProcurementPlan.objects.get().pk,self.operator)
+        self.assertEqual(OrderItem.objects.get().target_date,self.monday)",동일 기대값: 302; 동일 기대값: self.monday,"self.assertEqual(response.status_code,302)
+self.assertEqual(OrderItem.objects.get().target_date,self.monday)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:417 (ok:417); verification/cooking-format/mariadb.log:372 (ok:372),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-22,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_wide_upload_keeps_headcount_and_row_upload_overwrites,224,가로형 업로드 식수 보존·행형 덮어쓰기,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        upload=SimpleUploadedFile('wide.csv', '날짜,조식,기준식수_조식,중식,기준식수_중식\n2026-10-12,쌀밥,50,쌀밥,80\n'.encode())
+        self.client.post(reverse('meals:mealplan_bulk_upload'),{'mealplan_file':upload})
+        self.assertEqual(DietPlan.objects.get(meal_type='조식').headcount,50)
+        self.assertEqual(DietPlan.objects.get(meal_type='중식').headcount,80)
+        upload=SimpleUploadedFile('row.csv','date,meal_type,menu_name,headcount\n2026-10-12,중식,새메뉴,90\n'.encode())
+        self.client.post(reverse('meals:mealplan_bulk_upload'),{'mealplan_file':upload})
+        self.assertEqual(list(DietPlan.objects.get(meal_type='중식').diet_menus.values_list('menu__name',flat=True)),['새메뉴'])",동일 기대값: 50; 동일 기대값: 80; 동일 기대값: ['새메뉴'],"self.assertEqual(DietPlan.objects.get(meal_type='조식').headcount,50)
+self.assertEqual(DietPlan.objects.get(meal_type='중식').headcount,80)
+self.assertEqual(list(DietPlan.objects.get(meal_type='중식').diet_menus.values_list('menu__name',flat=True)),['새메뉴'])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:427 (ok:427); verification/cooking-format/mariadb.log:382 (ok:382),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-23,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_new_menu_name_api_and_delete_endpoint,233,새 메뉴명 API 생성·식단상세 삭제,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        response=self.client.post(reverse('meals:add_diet_menu_api'),data=json.dumps({'date':str(self.monday),'meal_type':'중식','menu_name':'새메뉴'}),content_type='application/json')
+        self.assertEqual(response.status_code,200)
+        identifier=response.json()['menus'][0]['diet_menu_id']
+        response=self.client.post(reverse('meals:delete_diet_menu_api',args=[identifier]))
+        self.assertEqual(response.status_code,200)
+        self.assertFalse(DietMenu.objects.filter(pk=identifier).exists())",동일 기대값: 200; False: DietMenu.objects.filter(pk=identifier).exists(),"self.assertEqual(response.status_code,200)
+self.assertFalse(DietMenu.objects.filter(pk=identifier).exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:392 (ok:392); verification/cooking-format/mariadb.log:347 (ok:347),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-24,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_weekly_recipe_document_links_menu_recipe_and_explicit_headcount,241,주간 레시피 문서의 지정 인원별 총량,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan(self.monday)
+        response=self.client.get(reverse('meals:weekly_recipe_report'),{'start_date':str(self.monday),'end_date':str(self.monday),'headcount':'40'})
+        self.assertEqual(response.status_code,200)
+        entry=response.context['report_data'][0]['menus'][0]['ingredients'][0]
+        self.assertEqual((entry['name'],entry['needed_qty']),('쌀',4))","동일 기대값: 200; 동일 기대값: ('쌀', 4)","self.assertEqual(response.status_code,200)
+self.assertEqual((entry['name'],entry['needed_qty']),('쌀',4))",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:426 (ok:426); verification/cooking-format/mariadb.log:381 (ok:381),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-25,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_all_documents_and_main_screens_render,249,기존 문서·주요 화면의 HTTP 렌더링,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan(self.monday)
+        order=PurchaseOrder.objects.create(supplier=self.supplier,total_amount=1000)
+        OrderItem.objects.create(purchase_order=order,ingredient=self.ing,target_date=self.monday,meal_type='중식',required_qty=1,missing_qty=1,order_unit_price=1000,estimated_price=1000)
+        names=['docs_index','inventory:ingredient_list','inventory:ingredient_upload','inventory:weekly_inventory_report','inventory:monthly_inventory_report','inventory:doc_inventory_status','meals:mealplan_create','meals:mealplan_list','meals:weekly_mealplan_create','meals:monthly_mealplan_create','meals:mealplan_bulk_upload','meals:recipe_upload_page','meals:weekly_meal_plan_document','meals:monthly_meal_plan_document','meals:weekly_recipe_report','meals:doc_menu_overview','procurement:order_create','procurement:order_list','procurement:weekly_procurement_report','procurement:vendor_procurement_report','procurement:daily_inspection_report','procurement:doc_purchase_requisition','procurement:doc_inspection_log','login','forecasting:prediction_list']
+        for name in names:
+            with self.subTest(route=name):
+                response=self.client.get(reverse(name),{'date':str(self.monday),'start_date':str(self.monday),'end_date':str(self.monday)})
+                self.assertEqual(response.status_code,200)",동일 기대값: 200,"self.assertEqual(response.status_code,200)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:380 (ok:380); verification/cooking-format/mariadb.log:335 (ok:335),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,주로 HTTP200·렌더링 smoke. 입력·DB변경·모든 화면 내용/브라우저 JS 동작까지 검증한 것은 아님.
+DJ-WF-26,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_excel_exports_open_as_real_workbooks,259,기존 Excel 다운로드를 실제 workbook으로 재열기,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        self.plan(self.monday)
+        for name in ['meals:export_weekly_mealplan_excel','inventory:export_inventory_excel','procurement:export_weekly_procurement_excel','procurement:export_vendor_procurement_excel','procurement:export_daily_inspection_excel']:
+            with self.subTest(route=name):
+                response=self.client.get(reverse(name),{'date':str(self.monday),'start_date':str(self.monday),'end_date':str(self.monday)})
+                self.assertEqual(response.status_code,200)
+                wb=load_workbook(io.BytesIO(response.content));self.assertTrue(wb.sheetnames)",동일 기대값: 200; True: wb.sheetnames,"self.assertEqual(response.status_code,200)
+self.assertTrue(wb.sheetnames)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:386 (ok:386); verification/cooking-format/mariadb.log:341 (ok:341),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,파일이Workbook으로 열리고 시트가 있는지만 확인. 모든 셀 수치의 정확성 검사는 아님.
+DJ-WF-27,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_migration_graph_has_no_conflicts,267,migration graph 충돌·미적용 계획 없음,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        executor=MigrationExecutor(connection)
+        self.assertEqual(executor.loader.detect_conflicts(),{})
+        self.assertEqual(executor.migration_plan(executor.loader.graph.leaf_nodes()),[])",동일 기대값: {}; 동일 기대값: [],"self.assertEqual(executor.loader.detect_conflicts(),{})
+self.assertEqual(executor.migration_plan(executor.loader.graph.leaf_nodes()),[])",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:390 (ok:390); verification/cooking-format/mariadb.log:345 (ok:345),MigrationExecutor가 실제 DB 연결·migration loader/graph 및 적용 계획을 연계 검증.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. 순차 재요청/상충 수정 시험이며 실제 동시 부하 시험이 아님.
+DJ-WF-28,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_legacy_xls_ingredient_upload,272,기존 XLS 식재료 업로드 호환,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        import xlwt
+        wb=xlwt.Workbook();ws=wb.add_sheet('곡류')
+        for row_index,row in enumerate([['식재료명','발주처','단가'],['쌀','공급회사',1500]]):
+            for col_index,value in enumerate(row):ws.write(row_index,col_index,value)
+        stream=io.BytesIO();wb.save(stream)
+        self.client.post(reverse('inventory:ingredient_upload'),{'file':SimpleUploadedFile('legacy.xls',stream.getvalue())})
+        self.ing.refresh_from_db();self.assertEqual(self.ing.unit_price,1500)
+        self.assertEqual(self.ing.supplier,self.supplier)",동일 기대값: 1500; 동일 기대값: self.supplier,"self.assertEqual(self.ing.unit_price,1500)
+self.assertEqual(self.ing.supplier,self.supplier)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:389 (ok:389); verification/cooking-format/mariadb.log:344 (ok:344),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-29,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_weekly_page_keeps_search_and_next_monday_editing,282,주간 검색·차주 월요일 편집영역 템플릿 보존,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        next_monday=self.monday+timedelta(days=7);self.plan(next_monday,'조식')
+        response=self.client.get(reverse('meals:weekly_mealplan_create'),{'start_date':str(self.monday)})
+        self.assertContains(response,'다음 월요일 조식·중식')
+        self.assertContains(response,f'data-date=""{next_monday}"" data-meal-type=""조식""')
+        self.assertContains(response,'메뉴 검색')","assertContains(response, '다음 월요일 조식·중식'); assertContains(response, f'data-date=""{next_monday}"" data-meal-type=""조식""'); assertContains(response, '메뉴 검색')","self.assertContains(response,'다음 월요일 조식·중식')
+self.assertContains(response,f'data-date=""{next_monday}"" data-meal-type=""조식""')
+self.assertContains(response,'메뉴 검색')",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:425 (ok:425); verification/cooking-format/mariadb.log:380 (ok:380),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-WF-30,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_real_prediction_through_order_receipt_deduction_and_report,289,실제 예측→발주→검수→차감→레시피 문서 연동,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        from forecasting.services.prediction_service import run_attendance_prediction
+        prediction=run_attendance_prediction(self.monday,'dinner',menu_text='쌀밥 미역국')
+        plan=self.plan(self.monday,'석식',headcount=prediction.predicted_count)
+        response=self.smart(self.monday)
+        quantity=response.context['grouped_orders'][0]['plans'][0]['menus'][0]['ingredients'][0]['order_qty']
+        required=Decimal(prediction.predicted_count)*Decimal('0.10')
+        self.assertEqual(quantity,required+Decimal('5'))
+        import uuid
+        from procurement.workflow import create_manual_plan,confirm_orders,inspect_item
+        snapshot=create_manual_plan([(self.ing.pk,str(quantity))],self.monday,self.operator,uuid.uuid4())
+        order=confirm_orders(snapshot.pk,self.operator)[0]
+        received=order.items.get().required_qty
+        inspect_item(order.items.get().pk,self.operator,received,received,'정상','1kg')
+        self.client.post(reverse('meals:deduct_inventory'),{'target_date':str(self.monday),'meal_type':'석식','confirm':'1'})
+        self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,received-required)
+        response=self.client.get(reverse('meals:weekly_recipe_report'),{'start_date':str(self.monday),'end_date':str(self.monday),'headcount':prediction.predicted_count})
+        self.assertEqual(Decimal(str(response.context['report_data'][0]['menus'][0]['ingredients'][0]['needed_qty'])),required)",동일 기대값: required + Decimal('5'); 동일 기대값: received - required; 동일 기대값: required,"self.assertEqual(quantity,required+Decimal('5'))
+self.assertEqual(get_ingredient_stock_queryset().get(pk=self.ing.pk).calc_stock,received-required)
+self.assertEqual(Decimal(str(response.context['report_data'][0]['menus'][0]['ingredients'][0]['needed_qty'])),required)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:395 (ok:412); verification/cooking-format/mariadb.log:350 (ok:367),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음. AI는 저장·호환/fallback 실행 검증이며 예측 정확도·OOF/Holdout·정상 SBERT 인수 시험이 아님.
+DJ-WF-31,Integration,repository,integration_tests/test_workflows.py,WorkflowCase,test_bulk_delete_requires_post_and_preserves_other_dates,308,기간 일괄 삭제는 POST만·다른 날짜 보존,"공통 fixture: 쌀kg,안전재고5·0.1kg/인·1kg규격,2026-10-12월요일,인증staff. plan/stock/smart helper는 ORM와 View 사용.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        first=self.plan(self.monday);second=self.plan(self.monday+timedelta(days=7))
+        data={'start_date':str(self.monday),'end_date':str(self.monday)}
+        self.assertEqual(self.client.get(reverse('meals:bulk_delete_mealplans'),data).status_code,405)
+        self.assertTrue(DietPlan.objects.filter(pk=first.pk).exists())
+        self.assertEqual(self.client.post(reverse('meals:bulk_delete_mealplans'),data).status_code,302)
+        self.assertFalse(DietPlan.objects.filter(pk=first.pk).exists())
+        self.assertTrue(DietPlan.objects.filter(pk=second.pk).exists())",동일 기대값: 405; True: DietPlan.objects.filter(pk=first.pk).exists(); 동일 기대값: 302; False: DietPlan.objects.filter(pk=first.pk).exists(); True: DietPlan.objects.filter(pk=second.pk).exists(),"self.assertEqual(self.client.get(reverse('meals:bulk_delete_mealplans'),data).status_code,405)
+self.assertTrue(DietPlan.objects.filter(pk=first.pk).exists())
+self.assertEqual(self.client.post(reverse('meals:bulk_delete_mealplans'),data).status_code,302)
+self.assertFalse(DietPlan.objects.filter(pk=first.pk).exists())
+self.assertTrue(DietPlan.objects.filter(pk=second.pk).exists())",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:381 (ok:381); verification/cooking-format/mariadb.log:336 (ok:336),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-01,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_csv_bulk_upload_success,18,행형 CSV 식단 업로드·메뉴 DB 연결,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        csv_content = (
+            ""date,meal_type,menu_name,category\n""
+            ""2026-05-20,중식,제육볶음,주반찬\n""
+            ""2026-05-20,중식,미역국,국\n""
+            ""2026-05-20,석식,카레라이스,일품\n""
+        ).encode(""utf-8-sig"")
+
+        file_obj = SimpleUploadedFile(""test_meal.csv"", csv_content, content_type=""text/csv"")
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+
+        self.assertRedirects(response, self.list_url)
+
+        # Check DietPlans created
+        lunch_plan = DietPlan.objects.get(target_date=date(2026, 5, 20), meal_type=""중식"")
+        dinner_plan = DietPlan.objects.get(target_date=date(2026, 5, 20), meal_type=""석식"")
+
+        lunch_menus = list(lunch_plan.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""제육볶음"", lunch_menus)
+        self.assertIn(""미역국"", lunch_menus)
+
+        dinner_menus = list(dinner_plan.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""카레라이스"", dinner_menus)","assertRedirects(response, self.list_url); assertIn('제육볶음', lunch_menus); assertIn('미역국', lunch_menus); assertIn('카레라이스', dinner_menus)","self.assertRedirects(response, self.list_url)
+self.assertIn(""제육볶음"", lunch_menus)
+self.assertIn(""미역국"", lunch_menus)
+self.assertIn(""카레라이스"", dinner_menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:429 (ok:429); verification/cooking-format/mariadb.log:384 (ok:384),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-02,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_xlsx_bulk_upload_success,42,행형 XLSX 식단 업로드·메뉴 DB 연결,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        wb = Workbook()
+        ws = wb.active
+        ws.append([""date"", ""meal_type"", ""menu_name"", ""category""])
+        ws.append([""2026-05-21"", ""조식"", ""전복죽"", ""죽""])
+        ws.append([""2026-05-21"", ""조식"", ""계란말이"", ""부반찬""])
+
+        file_stream = io.BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        file_obj = SimpleUploadedFile(
+            ""test_meal.xlsx"",
+            file_stream.read(),
+            content_type=""application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"",
+        )
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.list_url)
+
+        breakfast_plan = DietPlan.objects.get(target_date=date(2026, 5, 21), meal_type=""조식"")
+        breakfast_menus = list(breakfast_plan.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""전복죽"", breakfast_menus)
+        self.assertIn(""계란말이"", breakfast_menus)","assertRedirects(response, self.list_url); assertIn('전복죽', breakfast_menus); assertIn('계란말이', breakfast_menus)","self.assertRedirects(response, self.list_url)
+self.assertIn(""전복죽"", breakfast_menus)
+self.assertIn(""계란말이"", breakfast_menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:436 (ok:436); verification/cooking-format/mariadb.log:391 (ok:391),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-03,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_xltx_bulk_upload_success,67,XLTX 식단 업로드 호환,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        wb = Workbook()
+        ws = wb.active
+        ws.append([""date"", ""meal_type"", ""menu_name"", ""category""])
+        ws.append([""2026-05-22"", ""석식"", ""돈까스"", ""주반찬""])
+
+        file_stream = io.BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        file_obj = SimpleUploadedFile(
+            ""template_meal.xltx"",
+            file_stream.read(),
+            content_type=""application/vnd.openxmlformats-officedocument.spreadsheetml.template"",
+        )
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.list_url)
+
+        dinner_plan = DietPlan.objects.get(target_date=date(2026, 5, 22), meal_type=""석식"")
+        dinner_menus = list(dinner_plan.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""돈까스"", dinner_menus)","assertRedirects(response, self.list_url); assertIn('돈까스', dinner_menus)","self.assertRedirects(response, self.list_url)
+self.assertIn(""돈까스"", dinner_menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:437 (ok:437); verification/cooking-format/mariadb.log:392 (ok:392),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-04,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_grid_calendar_excel_upload_success,90,달력형 Excel 날짜·끼니·복수메뉴 저장,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        wb = Workbook()
+        ws = wb.active
+        ws.append([""구분"", ""08-10(월)"", ""08-11(화)""])
+        ws.append([""조식"", ""쌀밥"", ""쌀밥""])
+        ws.append(["""", ""계란국"", ""콩나물국""])
+        ws.append([""중식"", ""제육볶음"", ""돈까스""])
+        ws.append(["""", ""미역국"", ""스프""])
+
+        file_stream = io.BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        file_obj = SimpleUploadedFile(
+            ""weekly_grid_meal.xlsx"",
+            file_stream.read(),
+            content_type=""application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"",
+        )
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.list_url)
+
+        current_year = date.today().year
+
+        # Check August 10 Breakfast & Lunch
+        aug10_bf = DietPlan.objects.get(target_date=date(current_year, 8, 10), meal_type=""조식"")
+        bf_menus = list(aug10_bf.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""쌀밥"", bf_menus)
+        self.assertIn(""계란국"", bf_menus)
+
+        aug10_lunch = DietPlan.objects.get(target_date=date(current_year, 8, 10), meal_type=""중식"")
+        lunch_menus = list(aug10_lunch.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertIn(""제육볶음"", lunch_menus)
+        self.assertIn(""미역국"", lunch_menus)","assertRedirects(response, self.list_url); assertIn('쌀밥', bf_menus); assertIn('계란국', bf_menus); assertIn('제육볶음', lunch_menus); assertIn('미역국', lunch_menus)","self.assertRedirects(response, self.list_url)
+self.assertIn(""쌀밥"", bf_menus)
+self.assertIn(""계란국"", bf_menus)
+self.assertIn(""제육볶음"", lunch_menus)
+self.assertIn(""미역국"", lunch_menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:430 (ok:430); verification/cooking-format/mariadb.log:385 (ok:385),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-05,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_grid_calendar_with_title_and_disclaimer_noise,125,달력 제목·안내·원산지 행을 메뉴로 저장하지 않음,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        wb = Workbook()
+        ws = wb.active
+        ws.append([""2026년 8월 주간 식단표"", None, None, None, None])
+        ws.append([""구분"", ""08-10(월)"", ""08-11(화)"", ""08-12(수)"", ""08-13(목)""])
+        ws.append([""조식"", ""쌀밥"", ""쌀밥"", ""잡곡밥"", ""쌀밥""])
+        ws.append([""중식"", ""제육볶음"", ""돈까스"", ""카레라이스"", ""불고기""])
+        ws.append([""석식"", ""볶음밥"", ""짜장면"", ""우동"", ""떡볶이""])
+        ws.append([""※ 위 식단은 물품수급 사정에 따라 변경될 수 있습니다."", None, None, None, None])
+        ws.append([""원산지 표시: 쌀(국산), 돼지고기(국산)"", None, None, None, None])
+
+        file_stream = io.BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        file_obj = SimpleUploadedFile(
+            ""complex_grid_meal.xlsx"",
+            file_stream.read(),
+            content_type=""application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"",
+        )
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.list_url)
+
+        current_year = date.today().year
+
+        # 1. Check all 4 date columns (10th, 11th, 12th, 13th) were extracted
+        for day in (10, 11, 12, 13):
+            plan = DietPlan.objects.get(target_date=date(current_year, 8, day), meal_type=""중식"")
+            self.assertTrue(plan.diet_menus.exists())
+
+        # 2. Check disclaimer text was NOT saved as menu
+        all_menus = set(Menu.objects.values_list(""name"", flat=True))
+        self.assertNotIn(""※ 위 식단은 물품수급 사정에 따라 변경될 수 있습니다."", all_menus)
+        self.assertNotIn(""원산지 표시: 쌀(국산), 돼지고기(국산)"", all_menus)","assertRedirects(response, self.list_url); assertNotIn('※ 위 식단은 물품수급 사정에 따라 변경될 수 있습니다.', all_menus); assertNotIn('원산지 표시: 쌀(국산), 돼지고기(국산)', all_menus); True: plan.diet_menus.exists()","self.assertRedirects(response, self.list_url)
+self.assertTrue(plan.diet_menus.exists())
+self.assertNotIn(""※ 위 식단은 물품수급 사정에 따라 변경될 수 있습니다."", all_menus)
+self.assertNotIn(""원산지 표시: 쌀(국산), 돼지고기(국산)"", all_menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:431 (ok:431); verification/cooking-format/mariadb.log:386 (ok:386),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-06,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_menu_sorting_by_category_priority,161,업로드 메뉴를 밥·국·주반찬 등 우선순위로 저장,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        wb = Workbook()
+        ws = wb.active
+        ws.append([""date"", ""meal_type"", ""menu_name"", ""category""])
+        # Add menus in unsorted order: Fruit -> Kimchi -> Soup -> Main dish -> Rice -> Milk
+        ws.append([""2026-05-25"", ""중식"", ""사과"", ""기타""])
+        ws.append([""2026-05-25"", ""중식"", ""배추김치"", ""기타""])
+        ws.append([""2026-05-25"", ""중식"", ""미역국"", ""기타""])
+        ws.append([""2026-05-25"", ""중식"", ""제육볶음"", ""기타""])
+        ws.append([""2026-05-25"", ""중식"", ""쌀밥"", ""기타""])
+        ws.append([""2026-05-25"", ""중식"", ""우유"", ""기타""])
+
+        file_stream = io.BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        file_obj = SimpleUploadedFile(
+            ""unsorted_menu.xlsx"",
+            file_stream.read(),
+            content_type=""application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"",
+        )
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.list_url)
+
+        plan = DietPlan.objects.get(target_date=date(2026, 5, 25), meal_type=""중식"")
+        saved_menus = list(
+            DietMenu.objects.filter(diet_plan=plan)
+            .order_by(""id"")
+            .values_list(""menu__name"", flat=True)
+        )
+
+        # Expected priority order: 밥(1) -> 미역국(2) -> 제육볶음(3) -> 배추김치(4) -> 사과(5) -> 우유(6)
+        expected_order = [""쌀밥"", ""미역국"", ""제육볶음"", ""배추김치"", ""사과"", ""우유""]
+        self.assertEqual(saved_menus, expected_order)","assertRedirects(response, self.list_url); 동일 기대값: expected_order","self.assertRedirects(response, self.list_url)
+self.assertEqual(saved_menus, expected_order)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:434 (ok:434); verification/cooking-format/mariadb.log:389 (ok:389),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-07,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_bulk_upload_update_or_create_overwrite,197,기존 날짜 식단을 새 메뉴로 덮어쓰기,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        # Create existing diet plan with menu
+        plan = DietPlan.objects.create(target_date=date(2026, 5, 20), meal_type=""중식"")
+        old_menu = Menu.objects.create(name=""구식메뉴"", category=""주반찬"")
+        DietMenu.objects.create(diet_plan=plan, menu=old_menu)
+
+        csv_content = (
+            ""date,meal_type,menu_name,category\n""
+            ""2026-05-20,중식,신식메뉴,주반찬\n""
+        ).encode(""utf-8-sig"")
+
+        file_obj = SimpleUploadedFile(""update_meal.csv"", csv_content, content_type=""text/csv"")
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+
+        self.assertRedirects(response, self.list_url)
+
+        plan.refresh_from_db()
+        menus = list(plan.diet_menus.values_list(""menu__name"", flat=True))
+        self.assertEqual(menus, [""신식메뉴""])
+        self.assertNotIn(""구식메뉴"", menus)","assertRedirects(response, self.list_url); 동일 기대값: ['신식메뉴']; assertNotIn('구식메뉴', menus)","self.assertRedirects(response, self.list_url)
+self.assertEqual(menus, [""신식메뉴""])
+self.assertNotIn(""구식메뉴"", menus)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:428 (ok:428); verification/cooking-format/mariadb.log:383 (ok:383),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-MEAL-08,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_missing_required_headers,218,필수 헤더 누락 업로드의 재안내,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        csv_content = ""wrong_header,meal_type,menu_name\n2026-05-20,중식,제육볶음\n"".encode(""utf-8-sig"")
+        file_obj = SimpleUploadedFile(""bad_header.csv"", csv_content, content_type=""text/csv"")
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.upload_url)","assertRedirects(response, self.upload_url)","self.assertRedirects(response, self.upload_url)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:435 (ok:435); verification/cooking-format/mariadb.log:390 (ok:390),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,오류 시 redirect 경로 단언. 이 메서드 자체에는 저장0건의 DB 단언이 없음.
+DJ-MEAL-09,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_invalid_date_format,225,잘못된 날짜 업로드의 재안내,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        csv_content = (
+            ""date,meal_type,menu_name,category\n""
+            ""invalid-date,중식,제육볶음,주반찬\n""
+        ).encode(""utf-8-sig"")
+        file_obj = SimpleUploadedFile(""bad_date.csv"", csv_content, content_type=""text/csv"")
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.upload_url)","assertRedirects(response, self.upload_url)","self.assertRedirects(response, self.upload_url)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:432 (ok:432); verification/cooking-format/mariadb.log:387 (ok:387),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,오류 시 redirect 경로 단언. 이 메서드 자체에는 저장0건의 DB 단언이 없음.
+DJ-MEAL-10,Integration,repository,meals/tests.py,MealPlanBulkUploadTestCase,test_invalid_meal_type,235,잘못된 끼니 업로드의 재안내,"공통 fixture: 로그인 세션·업로드URL. 각 함수에서 CSV/XLSX/XLTX 파일 내용을 직접 구성.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        csv_content = (
+            ""date,meal_type,menu_name,category\n""
+            ""2026-05-20,야식,제육볶음,주반찬\n""
+        ).encode(""utf-8-sig"")
+        file_obj = SimpleUploadedFile(""bad_mealtype.csv"", csv_content, content_type=""text/csv"")
+
+        response = self.client.post(self.upload_url, {""mealplan_file"": file_obj})
+        self.assertRedirects(response, self.upload_url)","assertRedirects(response, self.upload_url)","self.assertRedirects(response, self.upload_url)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:433 (ok:433); verification/cooking-format/mariadb.log:388 (ok:388),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,오류 시 redirect 경로 단언. 이 메서드 자체에는 저장0건의 DB 단언이 없음.
+DJ-PO-01,Integration,repository,procurement/tests.py,PurchaseOrderStatusUpdateTest,test_order_status_update_success,16,발주 대기→승인 상태 저장·상세 이동,"공통 fixture: 로그인 계정과 대기 주문. username이test_supplier여도 role을SUPPLIER로 명시하지 않아 기본NUTRITIONIST임.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        """"""정상적으로 발주 상태가 업데이트 되는지 확인하는 테스트""""""
+        url = reverse('procurement:order_status_update', kwargs={'pk': self.order.pk})
+        
+        # '대기'에서 '승인'으로 변경 요청
+        response = self.client.post(url, data={'status': PurchaseOrder.Status.APPROVED})
+        
+        # 리다이렉트 응답 확인 (302)
+        self.assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk}))
+        
+        # 새로운 상태가 DB에 잘 반영되었는지 확인
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, PurchaseOrder.Status.APPROVED)","assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk})); 동일 기대값: PurchaseOrder.Status.APPROVED","self.assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk}))
+self.assertEqual(self.order.status, PurchaseOrder.Status.APPROVED)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:444 (ok:445); verification/cooking-format/mariadb.log:399 (ok:400),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-PO-02,Integration,repository,procurement/tests.py,PurchaseOrderStatusUpdateTest,test_order_status_update_invalid,30,잘못된 발주 상태를 무시하고 대기 유지,"공통 fixture: 로그인 계정과 대기 주문. username이test_supplier여도 role을SUPPLIER로 명시하지 않아 기본NUTRITIONIST임.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        """"""존재하지 않는 상태값으로의 변경은 무시되는지 테스트""""""
+        url = reverse('procurement:order_status_update', kwargs={'pk': self.order.pk})
+        
+        # 비정상적인 상태 문자열 전달
+        response = self.client.post(url, data={'status': '잘못된상태'})
+        
+        self.assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk}))
+        
+        # 모델의 상태가 기존(대기) 그대로인지 확인
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, PurchaseOrder.Status.PENDING)","assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk})); 동일 기대값: PurchaseOrder.Status.PENDING","self.assertRedirects(response, reverse('procurement:order_detail', kwargs={'pk': self.order.pk}))
+self.assertEqual(self.order.status, PurchaseOrder.Status.PENDING)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:442 (ok:443); verification/cooking-format/mariadb.log:397 (ok:398),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,관련 경로·입력에서의 회귀이며 전체 업무·현업 인수/모든 경계값을 뜻하지 않음.
+DJ-PO-03,Integration,repository,procurement/tests.py,DailyInspectionReportTest,test_daily_inspection_report_status_code,50,검수서 기본 화면 HTTP200,"공통 fixture: 로그인 계정과 대기 주문. 기본 role 계정의 화면 렌더링만 검사.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        """"""검수일지 페이지가 정상적으로 로드되는지 확인""""""
+        url = reverse('procurement:daily_inspection_report')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)",동일 기대값: 200,"self.assertEqual(response.status_code, 200)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:438 (ok:439); verification/cooking-format/mariadb.log:393 (ok:394),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,주로 HTTP200·렌더링 smoke. 입력·DB변경·모든 화면 내용/브라우저 JS 동작까지 검증한 것은 아님.
+DJ-PO-04,Integration,repository,procurement/tests.py,DailyInspectionReportTest,test_daily_inspection_report_with_date,56,지정 날짜 검수서 화면 HTTP200,"공통 fixture: 로그인 계정과 대기 주문. 기본 role 계정의 화면 렌더링만 검사.
+메서드 입력·조작 코드(정적 발췌, 실행 안 함):
+        """"""특정 날짜 파라미터와 함께 검수일지 페이지 접근""""""
+        url = reverse('procurement:daily_inspection_report')
+        response = self.client.get(url, {'date': '2026-05-28'})
+        self.assertEqual(response.status_code, 200)",동일 기대값: 200,"self.assertEqual(response.status_code, 200)",기존 capstone-web:sprint7 Python3.12/Django6.0.3; test_settings SQLite 및 test_mysql_settings MariaDB10.6; 소스ro/네트워크none/임시DB,PASS,PASS,PASS,verification/cooking-format/sqlite.log:440 (ok:441); verification/cooking-format/mariadb.log:395 (ok:396),View/서비스/폼·문서 생성과 ORM/DB의 실제 연결을 함께 검증. Django TestCase 상속이 분류 이유는 아님.,주로 HTTP200·렌더링 smoke. 입력·DB변경·모든 화면 내용/브라우저 JS 동작까지 검증한 것은 아님.
+JS-U-01,Unit,repository,integration_tests/smart_order.test.cjs,,node:test: batch serving reserves safety stock once across repeated ingredients,5,반복 재료의 안전재고1회 예약,"필요10kg3회,현재8,안전5","주문[7,10,10],합27","assert.deepEqual(orderQty,[7,10,10]); assert.equal(sum,27)","Node.js, node integration_tests/smart_order.test.cjs; DOM/브라우저/DB 미사용",PASS,N/A,N/A,verification/feedback/javascript-direct.log; verification/requirements/javascript.log,입력 배열→calculateSmartOrderQuantities의 독립 반환값 검증. UI·ORM 연동 없음.,정해진 예제의 계산 회귀. 모든 정밀도·UI 입력·동시 처리 검증 아님. Django117에 포함되지 않음.
+JS-U-02,Unit,repository,integration_tests/smart_order.test.cjs,,node:test: each ingredient starts from its own real stock,10,재료별 독립 재고 잔액,"재료1현재20/안전5/필요10,재료2현재0/안전3/필요2,재료1다시10","주문[0,5,5]","assert.deepEqual(orderQty,[0,5,5])","Node.js, node integration_tests/smart_order.test.cjs; DOM/브라우저/DB 미사용",PASS,N/A,N/A,verification/feedback/javascript-direct.log; verification/requirements/javascript.log,입력 배열→calculateSmartOrderQuantities의 독립 반환값 검증. UI·ORM 연동 없음.,정해진 예제의 계산 회귀. 모든 정밀도·UI 입력·동시 처리 검증 아님. Django117에 포함되지 않음.
+JS-U-03,Unit,repository,integration_tests/smart_order.test.cjs,,node:test: reapplying a different headcount starts from real stock,18,식수 재적용 시 실제 초기 재고로 재계산,"같은 재료3행 현재8/안전5,필요2→필요10 재적용",주문합3→27,"assert.equal(sum(initial),3); assert.equal(sum(reapplied),27)","Node.js, node integration_tests/smart_order.test.cjs; DOM/브라우저/DB 미사용",PASS,N/A,N/A,verification/feedback/javascript-direct.log; verification/requirements/javascript.log,입력 배열→calculateSmartOrderQuantities의 독립 반환값 검증. UI·ORM 연동 없음.,정해진 예제의 계산 회귀. 모든 정밀도·UI 입력·동시 처리 검증 아님. Django117에 포함되지 않음.
+JS-U-04,Unit,repository,integration_tests/smart_order.test.cjs,,node:test: fractional quantities remain stable to two decimal places,23,소수 수량의2자리 계산 안정성,"현재0/안전0.1,필요0.1·0.2","주문[0.2,0.2]","assert.deepEqual(orderQty,[0.2,0.2])","Node.js, node integration_tests/smart_order.test.cjs; DOM/브라우저/DB 미사용",PASS,N/A,N/A,verification/feedback/javascript-direct.log; verification/requirements/javascript.log,입력 배열→calculateSmartOrderQuantities의 독립 반환값 검증. UI·ORM 연동 없음.,정해진 예제의 계산 회귀. 모든 정밀도·UI 입력·동시 처리 검증 아님. Django117에 포함되지 않음.
+SYS-01,System,repository,integration_tests/browser_workflow.cjs,,async IIFE (main),1,단일 재료 전체 업무 흐름,"351명100g,5kg/캔,최소8→9캔,45납품/40합격","발주4500원,수불잔량4.9kg,페이지오류0·PDF","assert.equal(packs,8/9); body.includes(4500/40/4.9); assert.deepEqual(errors,[])","Chromium1440×1000,Playwright,기존 격리SQLite 앱",PASS,N/A (browser app uses SQLite),N/A,verification/requirements/browser.json; verification/requirements/browser.log,실제 Chromium HTML/JS·CSRF 폼/저장·서버/DB·화면 전환을 사용자 관점에서 연결. 자동화된 개발자 System 시험이며 영양사 인수가 아님.,JSON11개 단계는1시나리오. FIFO lot는 결과 목록에 적혔으나 script는4.9텍스트를 단언하므로 FIFO순서 보장은 별도 Integration 결과로만 설명.
+SYS-02,System,repository,integration_tests/browser_cooking.cjs,,async IIFE (main),1,조리지시서 편집·출력·식수 변경,"최종351→352,100g/인,재료/공통 비고 입력",35.1→35.2kg 재계산·비고보존·다운로드·PDF·오류0,"assert.match(table,/35.1/); inputValue==비고; printCalled; print영역visible; assert.match(table,/35.2/); errors==[]","Chromium1280×1100,Playwright,새 tmpfsSQLite 앱",PASS,N/A (browser app uses SQLite),N/A,verification/cooking-format/browser.json; verification/cooking-format/browser.log,실제 Chromium HTML/JS·CSRF 폼/저장·서버/DB·화면 전환을 사용자 관점에서 연결. 자동화된 개발자 System 시험이며 영양사 인수가 아님.,JSON8단계는1시나리오. 브라우저PDF이며 실제 Excel 인쇄엔진/프린터·모든 입력조합 시험 아님.
+SYS-03,System,temporary_source,/tmp/snp-finalprep-wisanw0k/demo/capture.cjs,,async IIFE (main),1,발표용 다품목·업체분리·AI 포함 전체 시연,"메뉴2·재료3·선입고쌀50kg,AI실제133/수동360/최종351","업체2건,합격참치40·두부36,각35.1사용,잔량4.9/14.9/0.9kg·출력비차감",assert counts360/351 and AI!=351; packs8/12 then9; orders==2; beforeStock0; ledger40/36; repeat40; closings4.9/14.9/.9; afterCookingLedger==before; errors==[],"Chromium1920×1080,Playwright,새 내부네트워크·읽기전용소스·tmpfsSQLite",PASS,N/A (browser app uses SQLite),N/A,docs/presentation/demo_artifacts/browser_result.json; docs/presentation/demo_artifacts/browser.log,실제 Chromium HTML/JS·CSRF 폼/저장·서버/DB·화면 전환을 사용자 관점에서 연결. 자동화된 개발자 System 시험이며 영양사 인수가 아님.,13체크포인트/12스크린샷은1시나리오. 임시 코드이며 Git에 없음. AI는SBERT fallback. 최초 헤더 이름 기대 실패 후 실제 계정ID에 맞춘 스크립트 재시도 성공.
+SYS-04,System,temporary_source,/tmp/snp-finalprep-wisanw0k/demo/supplement.cjs,,async IIFE (main),1,시연 보충 화면과 정확한1주 수불,"주기간10/19~25,기초쌀50,입고0,사용35.1",쌀기말14.9·대시보드선택날짜메뉴·인쇄CSS화면,"assert.match(body,/참치비빔밥/); assert.equal(rice[2],50); assert.equal(rice[3],0); assert.equal(rice[7],14.9)","Chromium1920×1080,동일폐기용앱·기존시나리오가 남긴 가상데이터",PASS,N/A (browser app uses SQLite),N/A,docs/presentation/demo_artifacts/supplement.json; docs/presentation/demo_artifacts/supplement.log,실제 Chromium HTML/JS·CSRF 폼/저장·서버/DB·화면 전환을 사용자 관점에서 연결. 자동화된 개발자 System 시험이며 영양사 인수가 아님.,독립 초기화 안 하는 후속 시나리오.3PNG를3케이스로 세지 않음. 인쇄화면은 캡처이며 실프린터 단언 없음.

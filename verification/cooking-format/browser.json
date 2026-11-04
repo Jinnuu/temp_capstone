@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "pageErrors": [],
+  "steps": [
+    "login",
+    "confirm 351",
+    "view 35.1kg",
+    "save line/document notes",
+    "download xlsx",
+    "print button and print CSS",
+    "PDF",
+    "confirm 352 and recalculate 35.2kg; preserve note"
+  ]
+}

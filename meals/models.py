@@ -64,3 +64,11 @@ class DietMenu(models.Model):
 
     def __str__(self):
         return f"{self.diet_plan} -> {self.menu.name}"
+
+class CookingInstruction(models.Model):
+    diet_plan = models.OneToOneField(DietPlan, on_delete=models.CASCADE, related_name='cooking_instruction')
+    instructions = models.TextField(blank=True, default='', verbose_name='현장 조리 지시·비고')
+    inventory_instructions = models.TextField(blank=True, default='', verbose_name='재고 사용 지시')
+    line_notes = models.JSONField(default=dict, blank=True, verbose_name='재료별 비고')
+    revision = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)

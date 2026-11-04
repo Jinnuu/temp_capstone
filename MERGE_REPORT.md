@@ -1,6 +1,8 @@
 # Sprint 7 · 강훈 브랜치 통합 보고서
 
-> 최신 결과: 문서 기반 보완 후 SQLite/MariaDB 각각 101개 테스트 통과. 현재 기능 상태는 docs/analysis/FUNCTIONAL_TEST_REPORT.md와 본 문서 하단 추가 작업 절을 따른다. 아래 기존 통합 기록은 변경 이력으로 보존했다.
+> 기존 검증 결과 (a8d9fae): 문서 기반 보완 후 SQLite/MariaDB 각각 101개 테스트 통과. 현재 기능 상태는 docs/analysis/FUNCTIONAL_TEST_REPORT.md와 본 문서 하단 추가 작업 절을 따른다. 아래 기존 통합 기록은 변경 이력으로 보존했다.
+
+> 2026-10-16 후속: 조리지시서 신규 코드 및 테스트 작성. 새 변경본 Django 실행은 Docker 권한 오류로 미검증. 자세한 상태는 문서 마지막 절 참조.
 
 작성일: 2026-10-15 (Asia/Seoul)
 
@@ -222,3 +224,22 @@ docker rm -f sprint7-integration-db-audit
 새 MariaDB 재현 시 전용 컨테이너 이름은 임의로 정하되 `/tmp/sprint7-integration-db-socket`에만 연결한다. 브라우저 검증은 `snp-requirements-test`처럼 새 내부 네트워크와 폐기용 `config.test_settings` 서버를 사용한다. 기존 서비스나 운영 DB를 테스트 대상으로 지정하지 않는다.
 
 검증 종료 후 `snp-requirements-browser-app`, `snp-requirements-db`, `snp-requirements-test`를 정리했다. 기존 서비스에는 정리 명령을 실행하지 않았다.
+
+
+## 2026-10-16 영양사 피드백·조리지시서 후속
+
+기존 통합 및 사용자 AGENTS.md를 보존했다. 새 조리지시서는 주간 레시피 명세서/발주예정서와 독립된 문서이며 최종 확정 식수와 명시적 납품규격만 사용한다. 지시사항 저장은 재고를 차감하지 않는다. meals/0005_cookinginstruction은 신규 테이블 생성이며 기존 DB에는 적용하지 않았다.
+
+15개 피드백의 코드 확인과 미완료 항목은 docs/analysis/DIETITIAN_FEEDBACK_VERIFICATION.md에 기록했다. 업체현황 전용 문서와 개별 중량에 의한 개수→질량 변환 등은 미완료로 남겼다. 요청 Excel이 실제 디렉터리에 없어 양식 구조 분석은 수행할 수 없었다.
+
+이번 실행: JavaScript 4개 통과, Python AST 6개 통과, diff 공백 검사 통과. Django 검증 스크립트는 Docker socket 권한 오류로 실패했다. 신규 12개 테스트·migration·렌더링·Excel·브라우저는 미검증이며 이전 101개 통과와 혼동하지 않는다. 조리지시서는 UNVERIFIED로 기록한다.
+
+기존 원본·기존 컨테이너/DB/볼륨·참고 문서·AI 모델·requirements는 변경하지 않았고 push/PR/배포는 수행하지 않았다. 변경본은 검토 및 후속 검증을 위해 작업 트리에 남겼다.
+
+## 최신 실제 실패 수정 및 재검증
+
+조리지시서 픽스처 safe_stock_level 필수값과 주간 수불 테스트 UTC/서울 날짜 불일치를 수정했다. 업무 집계/모델 제약은 변경하지 않았다. 익명·공급업체 조회/수정/Excel 차단 테스트를 보강했다. 기존 스크립트에 전용 DB 소켓 환경변수만 추가했다. 승인된 격리 Docker에서 check/migration 및 전체 SQLite113/MariaDB113 모두 통과(신규 조리지시서12 포함), 종료코드0. 증거는 verification/feedback/*-recheck.log. 새 MariaDB 컨테이너를 정리했고 기존 서비스는 변경하지 않았다. 조리지시서는 예시 양식/현장 검증이 남아 PARTIAL. 세부 원인과 재현 명령은 FUNCTIONAL_TEST_REPORT.md 최신 절을 따른다.
+
+## 실제 Excel 양식 후속 결과
+
+참고 Excel 전체6시트 조사,6열 조리지시서/계산근거 분리, 재료별 비고 저장과 날짜별 식사 Excel 생성, 긴 한글 비고/페이지 구분을 보완했다. 신규 migration meals/0006_cookinginstruction_line_notes. SQLite/MariaDB117/117 및 실제 Chromium 조회·저장·다운로드·인쇄PDF·식수변경 흐름 통과. 원본 SHA-256 보존, 기존 서비스 변경 없음, 이번 임시 앱/DB/네트워크 정리 완료. 입고일묶음·대상집단별 식수·실제 프린터 인수는 미완료로 남겼다. 상세는 DIETITIAN_FEEDBACK_VERIFICATION.md 최종 절과 verification/cooking-format/.

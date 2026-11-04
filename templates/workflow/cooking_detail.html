@@ -1,0 +1,15 @@
+{% extends 'workflow/base.html' %}{% block content %}
+<style>
+.cooking-table{width:100%;border-collapse:collapse;font-size:16px}.cooking-table th,.cooking-table td{border:1px solid #333;padding:8px;vertical-align:top}.cooking-table textarea{width:100%;min-height:72px}.cooking-print-note{display:none}.cooking-table .basis{display:block;font-size:.9em;margin-top:6px}.cooking-table .date-cell{white-space:nowrap}
+@media print{@page{size:A4 portrait;margin:15mm}.cooking-controls,nav,header,footer,.cooking-edit-note,.alert-success,.alert-info{display:none!important}.cooking-print-note{display:block;white-space:pre-wrap} .cooking-table{font-size:11px}.cooking-table td,.cooking-table th{padding:5px}.cooking-table thead{display:table-header-group}.cooking-table tr{break-inside:avoid}.cooking-doc-note{white-space:pre-wrap}.cooking-notices{font-size:10px}}
+</style>
+<h1>조리지시서 — {{ plan }}</h1>
+<div class="cooking-controls"><a href="{% url 'meals:cooking_index' %}?date={{ plan.target_date|date:'Y-m-d' }}">날짜별 조회</a> · <a href="?format=xlsx">저장한 지시사항 Excel 출력</a> · <button type="button" onclick="window.print()">인쇄</button><p>수정한 지시사항을 저장한 뒤 출력하세요. 이 화면은 식사별 최종 확정 식수를 사용합니다.</p></div>
+<div class="cooking-notices"><p>현재 식단·레시피·최종 확정 식수로 재계산합니다. 포장 환산량은 사용량이며 발주 올림량과 다릅니다.</p>
+{% for warning in warnings %}<p role="alert" class="alert alert-warning">{{ warning }}</p>{% endfor %}</div>
+<form method="post">{% csrf_token %}{{ form.revision }}{{ form.non_field_errors }}{{ form.revision.errors }}
+<table class="cooking-table"><thead><tr><th>날짜</th><th>예상식수<br>(최종 확정)</th><th>메뉴</th><th>재료</th><th>총량</th><th>비고</th></tr></thead><tbody>
+{% for row in rows %}<tr><td class="date-cell">{{ plan.target_date|date:'m/d' }}<br>{{ plan.meal_type }}</td><td>{{ headcount|default_if_none:'미확정' }}</td><td>{{ row.menu }}</td><td>{{ row.ingredient }}{% if row.per_person != None %}<span class="basis">1인량 {{ row.per_person_display }} {{ row.recipe_unit }}</span>{% endif %}</td><td>{{ row.total_display|default:'계산 불가' }} {{ row.unit }}{% if row.package != None %}<span class="basis">{{ row.package_display }} {{ row.package_unit }} 사용분</span>{% endif %}</td><td>{{ row.notes|linebreaksbr }}<div class="cooking-edit-note">{{ row.note_field.label_tag }}{{ row.note_field }}{{ row.note_field.errors }}</div><div class="cooking-print-note">{{ row.remark }}</div>{% if row.specification %}<span class="basis">{{ row.supplier }} {{ row.specification }}</span>{% endif %}</td></tr>{% endfor %}</tbody></table>
+<div class="cooking-controls"><p>{{ form.inventory_instructions.label_tag }}{{ form.inventory_instructions }}{{ form.inventory_instructions.errors }}</p><p>{{ form.instructions.label_tag }}{{ form.instructions }}{{ form.instructions.errors }}</p><p>재고 사용 지시는 현장 전달용이며 저장만으로 재고를 차감하지 않습니다.</p><button>지시사항 저장</button></div>
+<section class="cooking-print-note"><h2>재고 사용 지시</h2><p class="cooking-doc-note">{{ instruction.inventory_instructions }}</p><h2>현장 조리 지시·비고</h2><p class="cooking-doc-note">{{ instruction.instructions }}</p></section>
+</form>{% endblock %}

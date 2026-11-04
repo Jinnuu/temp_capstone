@@ -1,0 +1,32 @@
+{
+  "python": "/home/woohyeak/miniconda3/envs/meal_pycaret/bin/python",
+  "python_version": "3.11.15",
+  "branch": "integration/sprint7-kanghoon",
+  "installed_packages": [],
+  "freeze_identical": true,
+  "writable_roots": [
+    "/home/woohyeak/sprint7-integration",
+    "/tmp"
+  ],
+  "conda_environment_write_permitted": false,
+  "docker_access": "denied in Codex sandbox; host account access not evaluated",
+  "example_xlsx_present": false,
+  "model_hashes": {
+    "ml_models/best_model_dinner.pkl": "c7a6d0b97c9f3a0dddde98edc8b96d5f6e115bbd8a3dba4026c95448c22ae3bf",
+    "ml_models/best_model_breakfast.pkl": "bf2fdfe01b19b25e50d8b2b302c9fa3e631c894a169b1aa22401d30742dc0a77",
+    "ml_models/best_model_lunch.pkl": "3cbd67a14b9629a7af4b987efad924ec1584b50d51fd8a05a36f71d1635a6055"
+  },
+  "results": {
+    "pip_check_before": "PASS",
+    "pip_check_after": "PASS",
+    "dependency_download": "FAILED",
+    "cooking_tests": "STARTUP_FAILED_NO_DJANGO",
+    "django_check": "STARTUP_FAILED_NO_DJANGO",
+    "docker_sqlite": "STARTUP_FAILED_ACCESS_DENIED",
+    "docker_mariadb": "STARTUP_FAILED_ACCESS_DENIED",
+    "migration": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "xlsx_output": "NOT_RUN",
+    "models_load_and_zero_feature_inference": "3 PASS with sklearn version warnings; not production compatibility certification"
+  }
+}

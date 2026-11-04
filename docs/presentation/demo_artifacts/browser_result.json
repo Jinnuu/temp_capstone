@@ -1,0 +1,131 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "base": "http://192.168.80.2:8000",
+  "steps": [
+    {
+      "step": "01 로그인·대시보드",
+      "url": "http://192.168.80.2:8000/",
+      "at": "2026-10-18T20:16:39.720Z"
+    },
+    {
+      "step": "02 일간 생성·수정 저장, 주간 재조회",
+      "url": "http://192.168.80.2:8000/meals/mealplan/weekly/?start_date=2026-10-12",
+      "at": "2026-10-18T20:16:40.765Z"
+    },
+    {
+      "step": "03 레시피 편집110g→100g 저장·재조회",
+      "url": "http://192.168.80.2:8000/procurement/workflow/recipes/",
+      "at": "2026-10-18T20:16:41.691Z"
+    },
+    {
+      "step": "04a 기존 저장 모델 실제 예측 생성",
+      "url": "http://192.168.80.2:8000/forecasting/results/?target_date=2026-10-16",
+      "at": "2026-10-18T20:16:42.957Z"
+    },
+    {
+      "step": "미확정 발주 계산 경고 확인",
+      "url": "http://192.168.80.2:8000/procurement/workflow/preview/",
+      "at": "2026-10-18T20:16:43.206Z"
+    },
+    {
+      "step": "04 AI·수동·최종 구분 저장",
+      "details": "2026-10-16 석식 | 360 | 133명 | 351 | 2026년 10월 19일 5:16 오전",
+      "url": "http://192.168.80.2:8000/procurement/workflow/",
+      "at": "2026-10-18T20:16:43.839Z"
+    },
+    {
+      "step": "05 최종351명×100g=35.1kg; 참치8캔/두부12판; 쌀50kg 반영",
+      "url": "http://192.168.80.2:8000/procurement/workflow/preview/",
+      "at": "2026-10-18T20:16:44.375Z"
+    },
+    {
+      "step": "06~07 계획저장·수동9캔 조정·업체별2건 발행",
+      "url": "http://192.168.80.2:8000/procurement/workflow/plans/1/",
+      "at": "2026-10-18T20:16:45.425Z"
+    },
+    {
+      "step": "검수 전 재고 증가 없음",
+      "details": "{\"시연 참치\":{\"opening\":0,\"incoming\":0,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":0},\"시연 쌀\":{\"opening\":0,\"incoming\":50,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":50},\"시연 두부\":{\"opening\":0,\"incoming\":0,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":0}}",
+      "url": "http://192.168.80.2:8000/procurement/workflow/ledger/?start_date=2026-10-12&end_date=2026-10-25",
+      "at": "2026-10-18T20:16:45.559Z"
+    },
+    {
+      "step": "08 검수 합격량40kg/36kg 입고",
+      "details": "{\"시연 참치\":{\"opening\":0,\"incoming\":40,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":40},\"시연 쌀\":{\"opening\":0,\"incoming\":50,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":50},\"시연 두부\":{\"opening\":0,\"incoming\":36,\"outgoing\":0,\"waste\":0,\"adjustment\":0,\"closing\":36}}",
+      "url": "http://192.168.80.2:8000/procurement/workflow/ledger/?start_date=2026-10-12&end_date=2026-10-25",
+      "at": "2026-10-18T20:16:46.833Z"
+    },
+    {
+      "step": "검수 재전송 중복 입고 없음",
+      "url": "http://192.168.80.2:8000/procurement/workflow/ledger/?start_date=2026-10-12&end_date=2026-10-25",
+      "at": "2026-10-18T20:16:47.320Z"
+    },
+    {
+      "step": "09 사용35.1kg씩, 잔량4.9/14.9/0.9kg",
+      "details": "{\"시연 참치\":{\"opening\":0,\"incoming\":40,\"outgoing\":35.1,\"waste\":0,\"adjustment\":0,\"closing\":4.9},\"시연 쌀\":{\"opening\":0,\"incoming\":50,\"outgoing\":35.1,\"waste\":0,\"adjustment\":0,\"closing\":14.9},\"시연 두부\":{\"opening\":0,\"incoming\":36,\"outgoing\":35.1,\"waste\":0,\"adjustment\":0,\"closing\":0.9}}",
+      "url": "http://192.168.80.2:8000/procurement/workflow/ledger/?start_date=2026-10-12&end_date=2026-10-25",
+      "at": "2026-10-18T20:16:48.115Z"
+    },
+    {
+      "step": "10 조리지시서 저장·Excel·인쇄PDF; 재고 비차감",
+      "url": "http://192.168.80.2:8000/procurement/workflow/ledger/?start_date=2026-10-12&end_date=2026-10-25",
+      "at": "2026-10-18T20:16:49.279Z"
+    }
+  ],
+  "screenshots": [
+    "01_dashboard.png",
+    "02_mealplan.png",
+    "03_recipe.png",
+    "04a_ai_predictions.png",
+    "04_headcount.png",
+    "05_ingredient_requirements.png",
+    "06_procurement_plan.png",
+    "07_purchase_order.png",
+    "08_inspection.png",
+    "09_inventory_ledger.png",
+    "10_cooking_instruction.png",
+    "01_dashboard_after.png"
+  ],
+  "errors": [],
+  "started": "2026-10-18T20:16:38.604Z",
+  "data": {
+    "date": "2026-10-16",
+    "meal": "석식",
+    "manual": 360,
+    "final": 351,
+    "ai": 133
+  },
+  "planUrl": "http://192.168.80.2:8000/procurement/workflow/plans/1/",
+  "ledger": {
+    "시연 참치": {
+      "opening": 0,
+      "incoming": 40,
+      "outgoing": 35.1,
+      "waste": 0,
+      "adjustment": 0,
+      "closing": 4.9
+    },
+    "시연 쌀": {
+      "opening": 0,
+      "incoming": 50,
+      "outgoing": 35.1,
+      "waste": 0,
+      "adjustment": 0,
+      "closing": 14.9
+    },
+    "시연 두부": {
+      "opening": 0,
+      "incoming": 36,
+      "outgoing": 35.1,
+      "waste": 0,
+      "adjustment": 0,
+      "closing": 0.9
+    }
+  },
+  "cookingUrl": "http://192.168.80.2:8000/meals/cooking/1/",
+  "passed": true,
+  "finished": "2026-10-18T20:16:49.693Z"
+}

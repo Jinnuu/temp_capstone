@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "weeklyRange": [
+    "2026-10-19",
+    "2026-10-25"
+  ],
+  "rice": {
+    "opening": 50,
+    "incoming": 0,
+    "outgoing": 35.1,
+    "closing": 14.9
+  },
+  "screenshots": [
+    "01_dashboard_selected.png",
+    "09_weekly_ledger.png",
+    "10_cooking_print.png"
+  ]
+}

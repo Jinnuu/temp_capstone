@@ -1,0 +1,13 @@
+PASS 01 로그인·대시보드 
+PASS 02 일간 생성·수정 저장, 주간 재조회 
+PASS 03 레시피 편집110g→100g 저장·재조회 
+PASS 04a 기존 저장 모델 실제 예측 생성 
+PASS 미확정 발주 계산 경고 확인 
+PASS 04 AI·수동·최종 구분 저장 2026-10-16 석식 | 360 | 133명 | 351 | 2026년 10월 19일 5:16 오전
+PASS 05 최종351명×100g=35.1kg; 참치8캔/두부12판; 쌀50kg 반영 
+PASS 06~07 계획저장·수동9캔 조정·업체별2건 발행 
+PASS 검수 전 재고 증가 없음 {"시연 참치":{"opening":0,"incoming":0,"outgoing":0,"waste":0,"adjustment":0,"closing":0},"시연 쌀":{"opening":0,"incoming":50,"outgoing":0,"waste":0,"adjustment":0,"closing":50},"시연 두부":{"opening":0,"incoming":0,"outgoing":0,"waste":0,"adjustment":0,"closing":0}}
+PASS 08 검수 합격량40kg/36kg 입고 {"시연 참치":{"opening":0,"incoming":40,"outgoing":0,"waste":0,"adjustment":0,"closing":40},"시연 쌀":{"opening":0,"incoming":50,"outgoing":0,"waste":0,"adjustment":0,"closing":50},"시연 두부":{"opening":0,"incoming":36,"outgoing":0,"waste":0,"adjustment":0,"closing":36}}
+PASS 검수 재전송 중복 입고 없음 
+PASS 09 사용35.1kg씩, 잔량4.9/14.9/0.9kg {"시연 참치":{"opening":0,"incoming":40,"outgoing":35.1,"waste":0,"adjustment":0,"closing":4.9},"시연 쌀":{"opening":0,"incoming":50,"outgoing":35.1,"waste":0,"adjustment":0,"closing":14.9},"시연 두부":{"opening":0,"incoming":36,"outgoing":35.1,"waste":0,"adjustment":0,"closing":0.9}}
+PASS 10 조리지시서 저장·Excel·인쇄PDF; 재고 비차감 

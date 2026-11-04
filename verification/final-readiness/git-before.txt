@@ -1,0 +1,26 @@
+ M MERGE_REPORT.md
+ M docs/analysis/FUNCTIONAL_TEST_REPORT.md
+ M docs/analysis/IMPLEMENTATION_PLAN.md
+ M docs/analysis/REMAINING_ISSUES.md
+ M docs/analysis/REQUIREMENT_TRACEABILITY_MATRIX.md
+ M docs/analysis/requirement_catalog.json
+ M integration_tests/test_requirements.py
+ M meals/models.py
+ M meals/urls.py
+ M scripts/verify_integration.sh
+ M templates/workflow/hub.html
+?? AGENTS.md
+?? docs/analysis/DIETITIAN_FEEDBACK_VERIFICATION.md
+?? integration_tests/browser_cooking.cjs
+?? integration_tests/test_cooking.py
+?? meals/cooking.py
+?? meals/cooking_export.py
+?? meals/cooking_views.py
+?? meals/migrations/0005_cookinginstruction.py
+?? meals/migrations/0006_cookinginstruction_line_notes.py
+?? templates/workflow/cooking_detail.html
+?? templates/workflow/cooking_index.html
+?? verification/cooking-format/
+?? verification/environment/
+?? verification/feedback/
+?? verification/final-readiness/

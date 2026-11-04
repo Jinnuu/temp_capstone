@@ -1,0 +1,6 @@
+PASS AST meals/cooking.py
+PASS AST meals/cooking_views.py
+PASS AST meals/models.py
+PASS AST meals/urls.py
+PASS AST meals/migrations/0005_cookinginstruction.py
+PASS AST integration_tests/test_cooking.py

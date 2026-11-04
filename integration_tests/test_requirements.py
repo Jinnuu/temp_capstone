@@ -1,5 +1,5 @@
 import uuid
-from datetime import date,timedelta
+from datetime import date,timedelta,datetime,timezone as datetime_timezone
 from decimal import Decimal
 from django.test import TestCase,Client
 from django.urls import reverse
@@ -215,11 +215,22 @@ class RequirementWorkflows(TestCase):
         self.assertEqual(row['uninspected'],0)
 
     def test_weekly_ledger_opening_waste_adjustment_and_closing(self):
-        now=timezone.now();record_inventory(self.ing.pk,'입고',10,self.operator,uuid.uuid4(),now-timedelta(days=8))
+        # UTC Oct 15 16:00 is Seoul Oct 16 01:00. Query business dates,
+        # not now.date() (UTC), so this test is independent of execution time.
+        now=datetime(2026,10,15,16,tzinfo=datetime_timezone.utc)
+        record_inventory(self.ing.pk,'입고',10,self.operator,uuid.uuid4(),now-timedelta(days=8))
         record_inventory(self.ing.pk,'입고',2,self.operator,uuid.uuid4(),now)
         record_inventory(self.ing.pk,'폐기',1,self.operator,uuid.uuid4(),now)
-        response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':str(now.date()-timedelta(days=1)),'end_date':str(now.date())})
-        row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))
+        with timezone.override('Asia/Seoul'):
+            business_date=timezone.localdate(now)
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':str(business_date-timedelta(days=1)),'end_date':str(business_date)})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))
+            # The two new transactions are outside Oct 15 in business time.
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':'2026-10-15','end_date':'2026-10-15'})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,0,0,10))
+        with timezone.override('UTC'):
+            response=self.client.get(reverse('procurement:workflow_ledger'),{'start_date':'2026-10-15','end_date':'2026-10-15'})
+            row=response.context['rows'][0];self.assertEqual((row['opening'],row['incoming'],row['waste'],row['closing']),(10,2,1,11))
 
     def test_complete_ui_headcount_snapshot_order_inspection_usage_flow(self):
         self.client.post(reverse('procurement:workflow'),{'plan':self.plan.pk,'manual':350,'final':350,'confirm':'on'})

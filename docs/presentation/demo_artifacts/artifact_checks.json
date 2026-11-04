@@ -1,0 +1,86 @@
+{
+  "screenshots": {
+    "01_dashboard.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "01_dashboard_after.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "01_dashboard_selected.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "02_mealplan.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "03_recipe.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "04_headcount.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "04a_ai_predictions.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "05_ingredient_requirements.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "06_procurement_plan.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "07_purchase_order.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "08_inspection.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "09_inventory_ledger.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "09_weekly_ledger.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "10_cooking_instruction.png": {
+      "width": 1920,
+      "height": 1080
+    },
+    "10_cooking_print.png": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "xlsx": {
+    "sheets": [
+      "1016-석식",
+      "계산근거"
+    ],
+    "rows": 3,
+    "totals": [
+      35.1,
+      35.1,
+      35.1
+    ],
+    "package_usage": [
+      11.7,
+      1.755,
+      7.02
+    ]
+  },
+  "existing_model_files": {
+    "ml_models/best_model_dinner.pkl": "c7a6d0b97c9f3a0dddde98edc8b96d5f6e115bbd8a3dba4026c95448c22ae3bf",
+    "ml_models/best_model_breakfast.pkl": "bf2fdfe01b19b25e50d8b2b302c9fa3e631c894a169b1aa22401d30742dc0a77",
+    "ml_models/best_model_lunch.pkl": "3cbd67a14b9629a7af4b987efad924ec1584b50d51fd8a05a36f71d1635a6055"
+  }
+}

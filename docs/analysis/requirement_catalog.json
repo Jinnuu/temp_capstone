@@ -2598,13 +2598,13 @@
       "description": "조리지시서 기존 구현물 시스템 통합",
       "source": "2026-개정-D05-N차_스프린트백로그(태스크목록).md:L762",
       "uc": 9,
-      "code": "procurement/workflow_views.py:inspections; procurement/views_new_docs.py; templates/workflow/inspections.html",
+      "code": "meals/models.py:CookingInstruction; meals/cooking.py; meals/cooking_views.py; meals/urls.py; templates/workflow/cooking_*.html; meals/cooking_export.py; meals/migrations/0006_cookinginstruction_line_notes.py",
       "initial": "UNVERIFIED",
-      "status": "MISSING",
-      "gap": "전용 조리지시서가 두 기준 브랜치/현재 소스에서 발견되지 않음. 별도 구현 소스·브랜치 확보 필요.",
+      "status": "PARTIAL",
+      "gap": "실제 Excel 6시트 분석 및 구조 비교, 조리지시서16개 포함 양 DB117개와 Chromium 흐름 통과. 입고일/메뉴별 대상집단 규칙과 실프린터·현업 인수 미완료.",
       "priority": "P1",
       "acceptance": "조리지시서 기존 구현물 시스템 통합",
-      "test": "소스/문서 조사만으로 완료 판정하지 않음. 외부 구현·연구/운영/현장 증빙 확보 후 재검증.",
+      "test": "integration_tests/test_cooking.py 16/16; browser_cooking.cjs; verification/cooking-format/{sqlite,mariadb}.log; browser.json",
       "initial_gap": "업체 username 정렬과 실업체명 차이; 실제 인쇄 미검증",
       "initial_code": "procurement/views_new_docs.py; templates/docs/doc_inspection_log.html"
     },
@@ -2970,10 +2970,8 @@
     }
   ],
   "final_counts": {
+    "PARTIAL": 65,
     "COMPLETE": 78,
-    "PARTIAL": 64,
-    "MISSING": 1,
-    "BROKEN": 0,
     "UNVERIFIED": 53
   },
   "initial_counts": {

@@ -67,3 +67,9 @@ urlpatterns = [
     path("api/diet-menu/<int:diet_menu_id>/delete/", delete_diet_menu_api, name="delete_diet_menu_api"),
     path("mealplan/bulk-delete/", bulk_delete_mealplans, name="bulk_delete_mealplans"),
 ]
+
+from . import cooking_views
+urlpatterns += [
+    path("cooking/", cooking_views.cooking_index, name="cooking_index"),
+    path("cooking/<int:pk>/", cooking_views.cooking_detail, name="cooking_detail"),
+]
