@@ -1,0 +1,26 @@
+{
+  "sqlite-baseline": {
+    "cases": 139,
+    "passed": 139,
+    "skipped": 0,
+    "failed": 0
+  },
+  "mariadb-baseline": {
+    "cases": 139,
+    "passed": 139,
+    "skipped": 0,
+    "failed": 0
+  },
+  "sqlite-final": {
+    "cases": 166,
+    "passed": 164,
+    "skipped": 2,
+    "failed": 0
+  },
+  "mariadb-final": {
+    "cases": 166,
+    "passed": 166,
+    "skipped": 0,
+    "failed": 0
+  }
+}

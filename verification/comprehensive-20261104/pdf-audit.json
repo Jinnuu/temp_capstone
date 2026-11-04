@@ -1,0 +1,14 @@
+{
+  "vendor-order": {
+    "pages": 1,
+    "text_checked": true
+  },
+  "cooking": {
+    "pages": 1,
+    "text_checked": true
+  },
+  "settlement": {
+    "pages": 1,
+    "text_checked": true
+  }
+}

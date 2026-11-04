@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{% static 'css/sprint7_meal_search.css' %}?v=meal-search-v1">
 {% endblock %}
 
-{% block content %}
+{% block content %}<div hidden>{% csrf_token %}</div>
 <div class="sp-meal-page wide">
   <section class="sp-meal-hero">
     <div>
@@ -163,7 +163,7 @@
 
     const res = await fetch("{% url 'meals:add_diet_menu_api' %}", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json", "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value},
       body: JSON.stringify(payload)
     });
 
@@ -179,7 +179,8 @@
       const token = document.createElement("span");
       token.className = "sp-token";
       token.dataset.menuId = item.id;
-      token.innerHTML = `${item.name} <button type="button">×</button>`;
+      token.textContent = item.name + ' ';
+      const remove = document.createElement('button');remove.type='button';remove.textContent='×';token.appendChild(remove);
       area.appendChild(token);
     });
     bindRemove(cell);
@@ -195,7 +196,7 @@
 
     const res = await fetch("{% url 'meals:remove_diet_menu_api' %}", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json", "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value},
       body: JSON.stringify(payload)
     });
 
@@ -235,7 +236,9 @@
     results.slice(0, 8).forEach((menu) => {
       const item = document.createElement("div");
       item.className = "sp-suggest-item";
-      item.innerHTML = `<strong>${menu.name}</strong><span>${menu.category || "기타"}</span>`;
+      const title=document.createElement('strong');title.textContent=menu.name;
+      const category=document.createElement('span');category.textContent=menu.category || '기타';
+      item.append(title,category);
       item.onmousedown = (event) => {
         event.preventDefault();
         addMenu(cell, menu);

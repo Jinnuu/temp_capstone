@@ -1,3 +1,6 @@
+from config.input_validation import object_by_integer_id
+from django.utils.http import content_disposition_header
+from config.export_safety import literal_workbook, worksheet_title
 import uuid
 from collections import defaultdict
 from datetime import date, datetime, timedelta
@@ -504,92 +507,34 @@ def weekly_procurement_report(request):
 
 
 def get_vendor_procurement_data(start_date, end_date, supplier=None):
-    WEEKDAYS_KO = ["월", "화", "수", "목", "금", "토", "일"]
-    meal_order = Case(
-        When(meal_type=DietPlan.MealType.BREAKFAST, then=Value(1)),
-        When(meal_type=DietPlan.MealType.LUNCH, then=Value(2)),
-        When(meal_type=DietPlan.MealType.DINNER, then=Value(3)),
-        default=Value(4),
-        output_field=IntegerField(),
-    )
-
-    base_qs = OrderItem.objects.select_related("ingredient", "purchase_order__supplier")
+    """New snapshots use order dates; historical meal rows keep procurement-day grouping."""
+    base = OrderItem.objects.select_related('ingredient', 'purchase_order__supplier', 'purchase_order__workflow_plan')
     if supplier:
-        base_qs = base_qs.filter(purchase_order__supplier=supplier)
-
-    grouped_orders = []
-    seen_item_ids = set()
-
-    total_item_count = 0
-    total_order_qty = Decimal("0")
-    total_amount = 0
-
-    curr_date = start_date
-    while curr_date <= end_date:
-        if curr_date.weekday() in (5, 6):
-            curr_date += timedelta(days=1)
-            continue
-
-        order_date = curr_date
-        next_day = order_date + timedelta(days=1)
-
-        if order_date.weekday() == 4:  # 금요일
-            query = (
-                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
-                | Q(target_date=order_date + timedelta(days=1))  # 토요일 전체
-                | Q(target_date=order_date + timedelta(days=2))  # 일요일 전체
-                | Q(target_date=order_date + timedelta(days=3), meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])  # 차주 월요일
-            )
-        else:  # 월, 화, 수, 목
-            query = (
-                Q(target_date=order_date, meal_type=DietPlan.MealType.DINNER)
-                | Q(target_date=next_day, meal_type__in=[DietPlan.MealType.BREAKFAST, DietPlan.MealType.LUNCH])
-            )
-
-        date_qs = base_qs.filter(query).distinct()
-
-        if seen_item_ids:
-            date_qs = date_qs.exclude(id__in=seen_item_ids)
-
-        date_items = list(date_qs.order_by("target_date", meal_order, "ingredient__name"))
-
-        if date_items:
-            for item in date_items:
-                seen_item_ids.add(item.id)
-                if item.target_date and item.meal_type:
-                    item.meal_date_display = f"{item.target_date.strftime('%m/%d')} {item.meal_type}"
-                elif item.target_date:
-                    item.meal_date_display = item.target_date.strftime("%m/%d")
-                else:
-                    item.meal_date_display = "-"
-
-                total_item_count += 1
-                total_order_qty += to_decimal(item.missing_qty)
-                total_amount += (item.estimated_price or 0)
-
-            order_date_display = f"{curr_date.strftime('%Y-%m-%d')} ({WEEKDAYS_KO[curr_date.weekday()]})"
-            grouped_orders.append({
-                "date": curr_date,
-                "order_date": curr_date,
-                "order_date_display": order_date_display,
-                "items": date_items,
-            })
-
-        curr_date += timedelta(days=1)
-
-    subtotal = int(total_amount / 1.1) if total_amount > 0 else 0
-    vat = total_amount - subtotal
-
-    return {
-        "grouped_orders": grouped_orders,
-        "report_data": grouped_orders,
-        "total_item_count": total_item_count,
-        "total_order_qty": total_order_qty,
-        "total_amount": total_amount,
-        "subtotal": subtotal,
-        "vat": vat,
-    }
-
+        base = base.filter(purchase_order__supplier=supplier)
+    groups=[]; seen=set(); totals=defaultdict(lambda: Decimal('0')); amount=0; count=0
+    day=start_date
+    while day<=end_date:
+        direct = Q(target_date=day) & (Q(purchase_order__workflow_plan__isnull=False) | Q(meal_type__isnull=True) | Q(meal_type=''))
+        direct |= Q(target_date__isnull=True, purchase_order__created_at__date=day)
+        legacy = Q(pk__in=[])
+        if day.weekday()<5:
+            last=day+timedelta(days=3 if day.weekday()==4 else 1)
+            legacy = Q(target_date=day, meal_type='석식') | Q(target_date=last, meal_type__in=['조식','중식'])
+            if day.weekday()==4:
+                legacy |= Q(target_date__gt=day, target_date__lt=last)
+            legacy &= Q(purchase_order__workflow_plan__isnull=True, meal_type__in=['조식','중식','석식'])
+        items=list(base.filter(direct | legacy).exclude(pk__in=seen).order_by('target_date','meal_type','ingredient__name'))
+        for item in items:
+            seen.add(item.pk)
+            item.meal_date_display=(item.target_date.strftime('%m/%d') if item.target_date else day.strftime('%m/%d')) + (' '+item.meal_type if item.meal_type else '')
+            totals[item.purchase_unit]+=item.purchase_quantity
+            amount+=item.estimated_price or 0;count+=1
+        if items:
+            groups.append({'date':day,'order_date':day,'order_date_display':str(day),'items':items})
+        day+=timedelta(days=1)
+    return {'grouped_orders':groups,'report_data':groups,'total_item_count':count,
+        'total_order_qty':' / '.join(f'{qty.normalize():f} {unit}' for unit,qty in sorted(totals.items())) or '0',
+        'total_amount':amount,'subtotal':None,'vat':None}
 
 def vendor_procurement_report(request):
     start_date_str = request.GET.get("start_date", "").strip()
@@ -623,7 +568,7 @@ def vendor_procurement_report(request):
     selected_supplier = None
 
     if supplier_id:
-        selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        selected_supplier = object_by_integer_id(get_user_model(), supplier_id)
 
     proc_data = get_vendor_procurement_data(start_date, end_date, selected_supplier)
 
@@ -659,7 +604,7 @@ def export_weekly_procurement_excel(request):
     ws = wb.active
     ws.title = "주간발주서"
 
-    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "공급처", "주문일자"]
+    headers = ["No", "식단일", "분류", "식재료명", "규격", "단위", "단가", "기준량(재고 단위)", "발주량", "금액", "공급처", "주문일자"]
     ws.append(headers)
 
     for i, item in enumerate(items, 1):
@@ -668,11 +613,11 @@ def export_weekly_procurement_excel(request):
             item.display_date.strftime("%Y-%m-%d") if item.display_date else "-",
             item.ingredient.category or "-",
             item.ingredient.name,
-            item.ingredient.spec or "-",
-            item.ingredient.unit,
-            item.order_unit_price,
-            float(item.required_qty),
-            float(item.missing_qty),
+            item.purchase_spec or "-",
+            item.purchase_unit,
+            float(item.purchase_price),
+            f"{item.required_qty} {item.ingredient.unit}",
+            float(item.purchase_quantity),
             item.estimated_price,
             item.purchase_order.supplier.name or item.purchase_order.supplier.username,
             item.purchase_order.created_at.strftime("%Y-%m-%d")
@@ -680,6 +625,7 @@ def export_weekly_procurement_excel(request):
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f'attachment; filename="weekly_procurement_{monday}.xlsx"'
+    literal_workbook(wb)
     wb.save(response)
     return response
 
@@ -706,7 +652,7 @@ def export_vendor_procurement_excel(request):
 
     supplier = None
     if supplier_id:
-        supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        supplier = object_by_integer_id(get_user_model(), supplier_id)
         supplier_title = supplier.name or supplier.username
     else:
         supplier_title = "전체납품업체통합"
@@ -715,9 +661,9 @@ def export_vendor_procurement_excel(request):
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = f"발주명세서_{supplier_title}"
+    ws.title = worksheet_title(f"구매발주서_{supplier_title}")
 
-    headers = ["No", "식단일", "공급처", "분류", "식재료명", "규격", "단위", "단가", "소요량", "발주량", "금액", "주문일자"]
+    headers = ["No", "식단일", "공급처", "분류", "식재료명", "규격", "단위", "단가", "기준량(재고 단위)", "발주량", "금액", "주문일자"]
     ws.append(headers)
 
     item_idx = 1
@@ -734,11 +680,11 @@ def export_vendor_procurement_excel(request):
                 supplier_name,
                 item.ingredient.category or "-",
                 item.ingredient.name,
-                item.ingredient.spec or "-",
-                item.ingredient.unit,
-                item.order_unit_price,
-                float(item.required_qty),
-                float(item.missing_qty),
+                item.purchase_spec or "-",
+                item.purchase_unit,
+                float(item.purchase_price),
+                f"{item.required_qty} {item.ingredient.unit}",
+                float(item.purchase_quantity),
                 item.estimated_price,
                 order_date_str
             ])
@@ -746,7 +692,8 @@ def export_vendor_procurement_excel(request):
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     filename = f"vendor_procurement_{supplier_title}_{start_date}.xlsx"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response["Content-Disposition"] = content_disposition_header(True, filename)
+    literal_workbook(wb)
     wb.save(response)
     return response
 
@@ -773,7 +720,7 @@ def daily_inspection_report(request):
     ).select_related("ingredient", "purchase_order__supplier").order_by("ingredient__category", "ingredient__name")
 
     if supplier_id:
-        selected_supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        selected_supplier = object_by_integer_id(get_user_model(), supplier_id)
         order_items = order_items.filter(purchase_order__supplier=selected_supplier)
 
     report_items = order_items
@@ -813,7 +760,7 @@ def export_daily_inspection_excel(request):
     filename_suffix = "전체"
     selected_supplier_name = "전체"
     if supplier_id:
-        supplier = get_object_or_404(get_user_model(), id=supplier_id)
+        supplier = object_by_integer_id(get_user_model(), supplier_id)
         order_items = order_items.filter(purchase_order__supplier=supplier)
         selected_supplier_name = supplier.name or supplier.username
         filename_suffix = selected_supplier_name
@@ -913,7 +860,7 @@ def export_daily_inspection_excel(request):
         ws.cell(row=current_row, column=2, value=item.ingredient.name)
         ws.cell(row=current_row, column=3, value=item.ingredient.spec or "-")
         ws.cell(row=current_row, column=4, value=item.ingredient.unit)
-        ws.cell(row=current_row, column=5, value=float(item.missing_qty))
+        ws.cell(row=current_row, column=5, value=float(item.required_qty if item.package_quantity is not None else item.missing_qty))
         ws.cell(row=current_row, column=6, value="-") # 주문비고
         ws.cell(row=current_row, column=7, value="-") # 원산지
         # H to M are blank
@@ -932,6 +879,7 @@ def export_daily_inspection_excel(request):
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     filename = f"daily_inspection_{target_date}_{filename_suffix}.xlsx"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response["Content-Disposition"] = content_disposition_header(True, filename)
+    literal_workbook(wb)
     wb.save(response)
     return response

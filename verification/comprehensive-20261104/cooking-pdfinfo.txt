@@ -1,0 +1,19 @@
+Title:           S&P
+Creator:         Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36
+Producer:        Skia/PDF m148
+CreationDate:    Wed Nov  4 22:46:53 2026 KST
+ModDate:         Wed Nov  4 22:46:53 2026 KST
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       594.96 x 841.92 pts (A4)
+Page rot:        0
+File size:       186075 bytes
+Optimized:       no
+PDF version:     1.4

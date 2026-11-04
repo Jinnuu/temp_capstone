@@ -1,0 +1,9 @@
+{
+  "containers_removed": {
+    "snp-comprehensive-browser-20261104": true,
+    "snp-comprehensive-db-20261104": true,
+    "snp-comprehensive-cleanup-20261104": true
+  },
+  "network_removed": true,
+  "socket_directory_removed": true
+}

@@ -1,3 +1,5 @@
+from config.export_safety import literal_workbook, worksheet_title
+from config.input_validation import validate_month_query
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 import calendar
@@ -96,6 +98,7 @@ def prediction_create_view(request):
     return render(request, "forecasting/predict_form.html", {"form": form})
 
 
+@validate_month_query
 def prediction_calendar_view(request):
     today = date.today()
     selected_year = int(request.GET.get("year", today.year))
@@ -389,6 +392,7 @@ def export_weekly_forecast_excel(request):
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     filename = f"weekly_forecast_{monday}.xlsx"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    literal_workbook(wb)
     wb.save(response)
     return response
 

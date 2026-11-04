@@ -80,7 +80,7 @@
 
             <div class="sp-field">
               <label>단위</label>
-              <span class="sp-unit-badge">단위</span>
+              <input type="hidden" name="recipe_unit[]" class="js-recipe-unit"><span class="sp-unit-badge">단위</span>
             </div>
 
             <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
@@ -119,6 +119,7 @@ function setIngredient(row, item) {
 
   textInput.value = item.name;
   hiddenInput.value = item.id;
+  row.querySelector(".js-recipe-unit").value = item.unit || "";
   unitBadge.textContent = item.unit || "단위";
   selected.textContent = `${item.name} / ${item.unit || "단위"}${item.category ? " / " + item.category : ""}`;
 

@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "stock": {
+    "tuna": "5.9kg",
+    "tofu": "0.9kg"
+  },
+  "orders": 2,
+  "items": 2,
+  "inspections": 2,
+  "inventory_logs": 6,
+  "ordered_amount": 11700,
+  "accepted_value": 11200,
+  "tuna_lot_remainders": [
+    "3.9",
+    "2"
+  ],
+  "predictions": [
+    {
+      "meal_type": "dinner",
+      "predicted_count": 133,
+      "model_name": "best_model_dinner.pkl"
+    },
+    {
+      "meal_type": "lunch",
+      "predicted_count": 210,
+      "model_name": "best_model_lunch.pkl"
+    },
+    {
+      "meal_type": "breakfast",
+      "predicted_count": 40,
+      "model_name": "best_model_breakfast.pkl"
+    }
+  ],
+  "excel_snapshot_values": true,
+  "recipe_upload_and_mealplan_upload_persisted": true,
+  "no_inventory_change_from_cooking": true
+}

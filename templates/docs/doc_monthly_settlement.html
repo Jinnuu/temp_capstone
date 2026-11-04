@@ -172,16 +172,29 @@
   .text-right { text-align: right !important; padding-right: 6px !important; }
 
   @media print {
-    header, nav, .document-toolbar, .sp-actions, .no-print, #docPagination {
+    header, nav, footer, .sp-top-button, .document-toolbar, .sp-actions, .no-print, #docPagination {
       display: none !important;
     }
-    body {
+    html, body {
       background: white !important;
+      height: auto !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .sp-main {
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 0 !important;
+      max-width: none !important;
     }
     .a4-container {
       padding: 0 !important;
+      display: block !important;
     }
     .a4-page {
+      min-height: 0 !important;
+      height: auto !important;
       box-shadow: none !important;
       padding: 0 !important;
       width: 100% !important;
@@ -319,7 +332,7 @@
           <th style="width: 12%;">대분류</th>
           <th style="width: 22%;">식재료명</th>
           <th style="width: 8%;">단위</th>
-          <th style="width: 10%;">단가(원)</th>
+          <th style="width: 10%;">환산 단가(원)</th>
           <th style="width: 12%;">발주량</th>
           <th style="width: 14%;">금액(원)</th>
         </tr>
@@ -334,7 +347,7 @@
             <td>{{ item.category }}</td>
             <td class="text-left fw-bold">{{ item.ingredient_name }}</td>
             <td>{{ item.unit }}</td>
-            <td class="text-right">{{ item.unit_price }}</td>
+            <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
             <td class="text-right fw-bold">{{ item.quantity }}</td>
             <td class="text-right fw-bold">{{ item.amount }}</td>
           </tr>

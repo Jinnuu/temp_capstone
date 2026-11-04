@@ -54,10 +54,10 @@
                                 {% endif %}
 
                                 <td class="fw-bold">{{ item.ingredient.name }}</td>
-                                <td class="small text-muted text-center">{{ item.ingredient.spec|default:"-" }}</td>
+                                <td class="small text-muted text-center">{{ item.purchase_spec|default:"-" }}</td>
                                 <td class="small text-muted text-truncate" style="max-width: 240px;" title="{{ item.ingredient.description }}">{{ item.ingredient.description|default:"-" }}</td>
-                                <td class="text-center">{{ item.required_qty|floatformat:2 }} <small>{{ item.ingredient.unit }}</small></td>
-                                <td class="text-end">{{ item.order_unit_price|floatformat:0 }}원</td>
+                                <td class="text-center">{{ item.purchase_quantity|floatformat:2 }} <small>{{ item.purchase_unit }}</small></td>
+                                <td class="text-end">{{ item.purchase_price|floatformat:2 }}원</td>
                                 <td class="text-end pe-4 fw-bold text-dark">{{ item.estimated_price|floatformat:0 }}원</td>
                             </tr>
                             {% endfor %}

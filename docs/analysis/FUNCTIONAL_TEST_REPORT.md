@@ -326,3 +326,8 @@ docker rm -f "$container_name"
 ## 2026-11-04 후속 통합
 
 후속 통합 검증은 `verification/kanghoon2-20261104/`에 별도 보존했다. 기존 117개와 신규 22개를 구분하고, 최종 로그 및 브라우저 JSON을 기준으로 후속 통합 보고서에 결과를 기록한다. 과거 실행 기록을 이번 실행으로 대체하지 않는다.
+
+
+## 2026-11-04 실제 서비스 종합 재검증
+
+실제 재실행 결과: 수정 전 SQLite/MariaDB 각각139/139. 추가 결함 수정 후 총166개(기존139＋서비스25＋동시성2), SQLite164pass/2행잠금skip, MariaDB166pass. 기존JS4pass, 실제Chromium 업무1시나리오22단계 및 인쇄보완1시나리오 통과. 과거 통과 로그로 대체하지 않았다. 상세: [종합 검증 보고서](INTEGRATION_VERIFICATION_REPORT.md), `verification/comprehensive-20261104/`. 외부공개운영 보안 경고6개와 미검증 사항은 별도다.

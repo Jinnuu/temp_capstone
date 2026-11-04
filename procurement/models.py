@@ -65,6 +65,26 @@ class OrderItem(models.Model):
     order_unit_price = models.IntegerField(help_text="발주 생성 시점의 과거 단가 스냅샷")
     estimated_price = models.IntegerField()
 
+    @property
+    def purchase_quantity(self):
+        return self.package_quantity if self.package_quantity is not None else self.missing_qty
+
+    @property
+    def purchase_unit(self):
+        return self.order_unit if self.package_quantity is not None else self.ingredient.unit
+
+    @property
+    def purchase_spec(self):
+        return self.spec_snapshot if self.package_quantity is not None else self.ingredient.spec
+
+    @property
+    def purchase_price(self):
+        if self.package_quantity is not None and self.purchase_order.workflow_plan_id:
+            line = self.purchase_order.workflow_plan.lines.filter(ingredient_id=self.ingredient_id, order_date=self.target_date).first()
+            if line:
+                return line.unit_price
+        return self.order_unit_price
+
     class Meta:
         # SQL: UNIQUE(order_id, ingredient_id, target_date, meal_type) 반영
         constraints = [

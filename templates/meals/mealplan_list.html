@@ -14,7 +14,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block content %}<div hidden>{% csrf_token %}</div>
 <div class="sp-page">
   <section class="sp-hero">
     <div>
@@ -232,11 +232,10 @@ function renderMealTokens(mealType, menus) {
   menus.forEach((menu) => {
     const token = document.createElement("span");
     token.className = "sp-menu-token";
-    token.innerHTML = `
-      <span class="sp-menu-mini-thumb">${menuInitial(menu.name)}</span>
-      <span>${menu.name}</span>
-      <button type="button" title="삭제" onclick="removeMealMenu('${mealType}', ${menu.id})">×</button>
-    `;
+    const initial=document.createElement('span');initial.className='sp-menu-mini-thumb';initial.textContent=menuInitial(menu.name);
+    const name=document.createElement('span');name.textContent=menu.name;
+    const remove=document.createElement('button');remove.type='button';remove.title='삭제';remove.textContent='×';remove.onclick=()=>removeMealMenu(mealType,menu.id);
+    token.append(initial,name,remove);
     box.appendChild(token);
   });
 }
@@ -309,7 +308,7 @@ async function addMealMenu(mealType, menuNameOverride) {
 
   const response = await fetch("{% url 'meals:add_diet_menu_api' %}", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value},
     body: JSON.stringify({
       date: currentMealDate,
       meal_type: mealType,
@@ -341,7 +340,7 @@ async function removeMealMenu(mealType, menuId) {
   const key = mealKeyMap[mealType];
   const response = await fetch("{% url 'meals:remove_diet_menu_api' %}", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value},
     body: JSON.stringify({
       date: currentMealDate,
       meal_type: mealType,

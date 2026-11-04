@@ -76,7 +76,7 @@
                 {% endfor %}
               </td>
               <td>
-                <a class="sp-release-btn small" href="{% url 'meals:menu_update' menu.id %}">수정</a>
+                <a class="sp-release-btn small" href="{% url 'meals:menu_update' menu.id %}">수정</a><form method="post" action="{% url 'meals:menu_delete' menu.id %}" style="display:inline" onsubmit="return confirm('메뉴를 삭제하시겠습니까? 사용 확정된 식단의 메뉴는 삭제할 수 없습니다.');">{% csrf_token %}<button type="submit" class="sp-release-btn small">삭제</button></form>
               </td>
             </tr>
           {% empty %}

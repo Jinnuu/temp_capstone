@@ -83,7 +83,7 @@
                     <div class="sp-ingredient-results"></div>
                   </div>
                   <div class="sp-ingredient-selected">
-                    {{ recipe.ingredient.name }} / {{ recipe.ingredient.unit|default:"단위" }}{% if recipe.ingredient.category %} / {{ recipe.ingredient.category }}{% endif %}
+                    {{ recipe.ingredient.name }} / {{ recipe.unit|default:recipe.ingredient.unit }}{% if recipe.ingredient.category %} / {{ recipe.ingredient.category }}{% endif %}
                   </div>
                 </div>
 
@@ -94,7 +94,7 @@
 
                 <div class="sp-field">
                   <label>단위</label>
-                  <span class="sp-unit-badge">{{ recipe.ingredient.unit|default:"단위" }}</span>
+                  <input type="hidden" name="recipe_unit[]" class="js-recipe-unit" value="{{ recipe.unit|default:recipe.ingredient.unit }}"><span class="sp-unit-badge">{{ recipe.unit|default:recipe.ingredient.unit }}</span>
                 </div>
 
                 <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
@@ -119,7 +119,7 @@
 
               <div class="sp-field">
                 <label>단위</label>
-                <span class="sp-unit-badge">단위</span>
+                <input type="hidden" name="recipe_unit[]" class="js-recipe-unit"><span class="sp-unit-badge">단위</span>
               </div>
 
               <button type="button" class="sp-btn" onclick="removeRecipeRow(this)">삭제</button>
@@ -159,6 +159,7 @@ function setIngredient(row, item) {
 
   textInput.value = item.name;
   hiddenInput.value = item.id;
+  row.querySelector(".js-recipe-unit").value = item.unit || "";
   unitBadge.textContent = item.unit || "단위";
   selected.textContent = `${item.name} / ${item.unit || "단위"}${item.category ? " / " + item.category : ""}`;
 

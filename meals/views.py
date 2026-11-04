@@ -1,3 +1,5 @@
+from config.export_safety import literal_workbook, worksheet_title
+from config.input_validation import validate_month_query
 import calendar
 import re
 import json
@@ -11,7 +13,9 @@ from django.db.models import Case, IntegerField, Value, When
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
+from django.utils.http import url_has_allowed_host_and_scheme
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -141,6 +145,7 @@ def mealplan_create(request):
     return render(request, "meals/mealplan_create.html", context)
 
 
+@validate_month_query
 def mealplan_list(request):
     today = date.today()
     selected_year = int(request.GET.get("year", today.year))
@@ -233,44 +238,48 @@ def mealplan_list(request):
     return render(request, "meals/mealplan_list.html", context)
 
 
-def save_recipe_rows(menu, ingredient_ids, amounts):
-    valid_count = 0
-    skipped_count = 0
-    seen_ingredient_ids = set()
-
-    for ingredient_id, amount in zip(ingredient_ids, amounts):
-        if not ingredient_id or not amount:
-            continue
-
-        amount_decimal = to_decimal(amount)
-
-        if amount_decimal is None or amount_decimal <= 0:
-            skipped_count += 1
-            continue
-
+def _recipe_input_errors(view):
+    from functools import wraps
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
         try:
-            ingredient = Ingredient.objects.get(id=ingredient_id)
-        except Ingredient.DoesNotExist:
-            skipped_count += 1
+            return view(request, *args, **kwargs)
+        except ValidationError as exc:
+            return HttpResponse('레시피 입력 오류: ' + ' / '.join(exc.messages), status=400, content_type='text/plain; charset=utf-8')
+    return wrapped
+
+
+def save_recipe_rows(menu, ingredient_ids, amounts, *, units=None, previous_units=None):
+    from procurement.workflow import quantity, convert
+    units = units or []
+    previous_units = previous_units or {}
+    if len(ingredient_ids) != len(amounts) or (units and len(units) != len(ingredient_ids)):
+        raise ValidationError('식재료·사용량·단위 행 수가 일치하지 않습니다.')
+    rows=[];seen=set();skipped=0
+    for index, (ingredient_id, amount) in enumerate(zip(ingredient_ids, amounts)):
+        if not ingredient_id and not amount:
             continue
+        if not str(ingredient_id).isdigit() or not amount:
+            raise ValidationError('식재료와 양수 사용량을 입력하세요.')
+        ingredient = Ingredient.objects.filter(pk=ingredient_id).first()
+        if ingredient is None:
+            raise ValidationError('등록된 식재료를 선택하세요.')
+        number = quantity(amount, '1인량', positive=True)
+        unit = (units[index] if units else '') or previous_units.get(ingredient.pk) or ingredient.unit
+        convert(number, unit, ingredient.unit)
+        Recipe(menu=menu, ingredient=ingredient, required_amount=number, unit=unit).full_clean(validate_unique=False, validate_constraints=False)
+        if ingredient.pk in seen:
+            skipped+=1;continue
+        seen.add(ingredient.pk)
+        rows.append((ingredient,number,unit))
+    if previous_units and not rows:
+        raise ValidationError('기존 레시피를 보존했습니다. 유효한 식재료를 입력하세요.')
+    for ingredient,number,unit in rows:
+        Recipe.objects.update_or_create(menu=menu, ingredient=ingredient, defaults={'required_amount':number,'unit':unit})
+    return len(rows),skipped
 
-        if ingredient.id in seen_ingredient_ids:
-            skipped_count += 1
-            continue
 
-        seen_ingredient_ids.add(ingredient.id)
-
-        Recipe.objects.update_or_create(
-            menu=menu,
-            ingredient=ingredient,
-            defaults={"required_amount": amount_decimal},
-        )
-
-        valid_count += 1
-
-    return valid_count, skipped_count
-
-
+@_recipe_input_errors
 def recipe_create(request):
     menus = Menu.objects.all().order_by("name")
     ingredients = Ingredient.objects.all().order_by("name")
@@ -287,8 +296,9 @@ def recipe_create(request):
         menu = get_object_or_404(Menu, id=menu_id)
 
         with transaction.atomic():
+            previous_units = dict(Recipe.objects.filter(menu=menu).values_list('ingredient_id', 'unit'))
             Recipe.objects.filter(menu=menu).delete()
-            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, required_amounts)
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, required_amounts, units=request.POST.getlist("recipe_unit[]"), previous_units=previous_units)
 
         if valid_count:
             messages.success(request, f"{menu.name} 레시피 식재료 {valid_count}개가 저장되었습니다.")
@@ -308,6 +318,7 @@ def recipe_create(request):
     return render(request, "meals/recipe_create.html", context)
 
 
+@_recipe_input_errors
 def menu_create(request):
     if request.method == "POST":
         name = (request.POST.get("name") or "").strip()
@@ -324,7 +335,7 @@ def menu_create(request):
                 name=name,
                 category=category,
             )
-            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts)
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts, units=request.POST.getlist("recipe_unit[]"))
 
         if valid_count:
             messages.success(request, f"{menu.name} 메뉴와 식재료 {valid_count}개가 저장되었습니다.")
@@ -354,13 +365,17 @@ def menu_list(request):
     return render(request, "meals/menu_list.html", {"menus": menus})
 
 
+@require_POST
 def menu_delete(request, menu_id):
     menu = get_object_or_404(Menu, id=menu_id)
+    if DietMenu.objects.filter(menu=menu, diet_plan__is_served=True).exists():
+        return HttpResponse('사용 확정된 식단에 연결된 메뉴는 삭제할 수 없습니다.', status=409)
     menu.delete()
     messages.success(request, "메뉴가 삭제되었습니다.")
     return redirect("meals:menu_list")
 
 
+@_recipe_input_errors
 def menu_update(request, menu_id):
     menu = get_object_or_404(Menu.objects.prefetch_related("recipes__ingredient"), id=menu_id)
 
@@ -379,8 +394,9 @@ def menu_update(request, menu_id):
             menu.category = category
             menu.save()
 
+            previous_units = dict(Recipe.objects.filter(menu=menu).values_list('ingredient_id', 'unit'))
             Recipe.objects.filter(menu=menu).delete()
-            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts)
+            valid_count, skipped_count = save_recipe_rows(menu, ingredient_ids, amounts, units=request.POST.getlist("recipe_unit[]"), previous_units=previous_units)
 
         if valid_count:
             messages.success(request, f"{menu.name} 레시피 식재료 {valid_count}개가 저장되었습니다.")
@@ -450,18 +466,25 @@ def search_menus_api(request):
     return JsonResponse({"results": results})
 
 
-@csrf_exempt
+@transaction.atomic
 def add_diet_menu_api(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            if not isinstance(data, dict) or data.get('meal_type') not in DietPlan.MealType.values:
+                raise ValueError('올바른 날짜·식사 정보를 입력하세요.')
             date_str = data.get("date")
             meal_type = data.get("meal_type")
             menu_id = data.get("menu_id")
             menu_name = data.get("menu_name")
 
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            existing = DietPlan.objects.select_for_update().filter(target_date=target_date, meal_type=meal_type).first()
+            if existing and existing.is_served:
+                return JsonResponse({'status':'error','message':'이미 사용 확정된 식단은 수정할 수 없습니다.'}, status=409)
 
+            if menu_name is not None and (not isinstance(menu_name, str) or not menu_name.strip() or len(menu_name)>100):
+                raise ValueError('메뉴명은 1~100자로 입력하세요.')
             if menu_id:
                 menu = Menu.objects.get(id=menu_id)
             elif menu_name:
@@ -487,26 +510,31 @@ def add_diet_menu_api(request):
                     "menus": menu_data,
                 }
             )
-        except Exception as e:
+        except (ValueError, TypeError, Menu.DoesNotExist, Menu.MultipleObjectsReturned) as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
     return JsonResponse({"status": "error"}, status=405)
 
 
-@csrf_exempt
+@transaction.atomic
 def remove_diet_menu_api(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            if not isinstance(data, dict) or data.get('meal_type') not in DietPlan.MealType.values:
+                raise ValueError('올바른 날짜·식사 정보를 입력하세요.')
             date_str = data.get("date")
             meal_type = data.get("meal_type")
             menu_id = data.get("menu_id")
 
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            plan = DietPlan.objects.get(target_date=target_date, meal_type=meal_type)
+            existing = DietPlan.objects.select_for_update().filter(target_date=target_date, meal_type=meal_type).first()
+            if existing and existing.is_served:
+                return JsonResponse({'status':'error','message':'이미 사용 확정된 식단은 수정할 수 없습니다.'}, status=409)
+            plan = DietPlan.objects.select_for_update().get(target_date=target_date, meal_type=meal_type)
             DietMenu.objects.filter(diet_plan=plan, menu_id=menu_id).delete()
 
-            if not plan.diet_menus.exists():
+            if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction"):
                 plan.delete()
                 return JsonResponse({"status": "success", "menus": []})
 
@@ -516,7 +544,7 @@ def remove_diet_menu_api(request):
             return JsonResponse({"status": "success", "menus": menu_data})
         except DietPlan.DoesNotExist:
             return JsonResponse({"status": "success"})
-        except Exception as e:
+        except (ValueError, TypeError, Menu.DoesNotExist, Menu.MultipleObjectsReturned) as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
     return JsonResponse({"status": "error"}, status=405)
@@ -693,6 +721,7 @@ def weekly_meal_plan_document(request):
     return render(request, "docs/weekly_report.html", context)
 
 
+@validate_month_query
 def monthly_meal_plan_document(request):
     """
     월간 식단표 문서화 기능을 위한 뷰입니다. (조회 전용)
@@ -860,11 +889,12 @@ def export_weekly_mealplan_excel(request):
     )
     filename = f"Weekly_MealPlan_{start_date.strftime('%Y-%m-%d')}.xlsx"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    literal_workbook(wb)
     wb.save(response)
     return response
 
 
-@csrf_exempt
+@transaction.atomic
 def delete_diet_menu_api(request, diet_menu_id):
     """
     AJAX: 개별 DietMenu 레코드를 삭제합니다.
@@ -875,10 +905,12 @@ def delete_diet_menu_api(request, diet_menu_id):
 
     try:
         dm = get_object_or_404(DietMenu, pk=diet_menu_id)
-        plan = dm.diet_plan
+        plan = DietPlan.objects.select_for_update().get(pk=dm.diet_plan_id)
+        if plan.is_served:
+            return JsonResponse({'status':'error','message':'이미 사용 확정된 식단은 수정할 수 없습니다.'},status=409)
         dm.delete()
 
-        if not plan.diet_menus.exists():
+        if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction"):
             plan.delete()
             return JsonResponse({"status": "success", "menus": []})
 
@@ -889,6 +921,7 @@ def delete_diet_menu_api(request, diet_menu_id):
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 
+@transaction.atomic
 def bulk_delete_mealplans(request):
     """
     주간 또는 월간 식단 데이터를 일괄로 삭제합니다.
@@ -900,6 +933,8 @@ def bulk_delete_mealplans(request):
 
     params = request.POST
     redirect_url = params.get("redirect_url") or reverse("meals:mealplan_list")
+    if not url_has_allowed_host_and_scheme(redirect_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        redirect_url = reverse('meals:mealplan_list')
 
     try:
         # 주간 삭제
@@ -911,16 +946,18 @@ def bulk_delete_mealplans(request):
         if start_date_str and end_date_str:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-            deleted_count, _ = DietPlan.objects.filter(
-                target_date__gte=start_date, target_date__lte=end_date
-            ).delete()
+            selected = DietPlan.objects.select_for_update().filter(target_date__gte=start_date, target_date__lte=end_date)
+            if end_date < start_date or selected.filter(is_served=True).exists():
+                raise ValueError('기간 또는 사용 확정된 식단을 확인하세요. 삭제하지 않았습니다.')
+            deleted_count, _ = selected.delete()
             messages.success(request, f"{start_date_str}~{end_date_str} 기간의 식단 {deleted_count}건이 삭제되었습니다.")
         elif year_str and month_str:
             year = int(year_str)
             month = int(month_str)
-            deleted_count, _ = DietPlan.objects.filter(
-                target_date__year=year, target_date__month=month
-            ).delete()
+            selected = DietPlan.objects.select_for_update().filter(target_date__year=year, target_date__month=month)
+            if not 1<=month<=12 or selected.filter(is_served=True).exists():
+                raise ValueError('월 또는 사용 확정된 식단을 확인하세요. 삭제하지 않았습니다.')
+            deleted_count, _ = selected.delete()
             messages.success(request, f"{year}년 {month}월 전체 식단 {deleted_count}건이 삭제되었습니다.")
         else:
             messages.error(request, "삭제할 기간 정보가 올바르지 않습니다.")

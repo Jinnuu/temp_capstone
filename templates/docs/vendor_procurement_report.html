@@ -172,9 +172,9 @@
               <td style="font-weight:600; color:#2b8a3e;">{{ item.purchase_order.supplier.name|default:item.purchase_order.supplier.username }}</td>
               <td>{{ item.ingredient.category|default:"-" }}</td>
               <td style="text-align:left; padding-left:8px; font-weight:bold;">{{ item.ingredient.name }}</td>
-              <td>{{ item.ingredient.spec|default:"-" }} / {{ item.ingredient.unit }}</td>
-              <td style="text-align:right; padding-right:6px;">{{ item.order_unit_price|default:0 }}</td>
-              <td style="font-weight:bold;">{{ item.missing_qty }}</td>
+              <td>{{ item.purchase_spec|default:"-" }} / {{ item.purchase_unit }}</td>
+              <td style="text-align:right; padding-right:6px;">{{ item.purchase_price|default:0 }}</td>
+              <td style="font-weight:bold;">{{ item.purchase_quantity }}</td>
               <td style="text-align:right; padding-right:6px; font-weight:bold;">{{ item.estimated_price|default:0 }}</td>
             </tr>
             {% endfor %}

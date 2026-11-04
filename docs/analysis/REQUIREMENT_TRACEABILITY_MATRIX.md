@@ -249,3 +249,8 @@ D02 연구 패키지 버전과 서비스 환경이 다르지만 AI 모델을 검
 ## 2026-11-04 후속 통합
 
 이번 통합은 기존 요구 ID/완료 집계를 재정의하지 않는다. 공급업체 현황은 Supplier 연락처+기존 User 계정 연결, 식재료 수정은 PK/재고 유지와 단위 변경 차단, 월간 문서는 단위별 발주 참고 집계, 기간 조리지시서는 기존 확정 식수 계산·비고·Excel 연결로 보완했다. 코드: procurement/supplier_views.py, procurement/team_document_views.py, inventory/views.py:ingredient_update. 검증: integration_tests/test_kanghoon2.py의 22개와 기존 117개, Chromium 3개 시나리오. 상세 결과·제약은 KANGHOON2_MERGE_REPORT.md를 참조한다.
+
+
+## 2026-11-04 실제 서비스 종합 재검증
+
+UC-001/002: CSRF·served이력 보호, 실제 다음월요일 조중식 편집, 레시피 단위/오류입력 원자성 검증. UC-006/008: 새/레거시 주문을 문서에 빠짐없이 연결하고 실제 포장수/단가를 출력. UC-010/012: 합격량 중복입고와 초과출고의 실제MariaDB경합 검증. UC-013: 월간 단위환산 단가와 인쇄 보완. 기존 requirement ID/전체완료 집계는 변경하지 않았다. 증거는 신규 `test_service_verification.py`25개/`test_concurrency.py`2개, 기존139개 재실행과 실제브라우저에 연결했다. [종합 검증 보고서](INTEGRATION_VERIFICATION_REPORT.md)의 제한을 따르며 실제사용자인수 완료를 뜻하지 않는다.

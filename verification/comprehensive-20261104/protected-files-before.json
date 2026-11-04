@@ -1,0 +1,13 @@
+{
+  "docs/analysis/OCTOBER_2026_COMMIT_AUDIT.md": "89a6ef081698bcc97f8cbbb6c010318b4b1540351352497fec3486b74cb04c4b",
+  "requirements.txt": "7353f261e72510545004798cb4d0ef4ad7630d683dacec0a0cb75c8088929d28",
+  "ml_models/best_model_breakfast.pkl": "bf2fdfe01b19b25e50d8b2b302c9fa3e631c894a169b1aa22401d30742dc0a77",
+  "ml_models/best_model_dinner.pkl": "c7a6d0b97c9f3a0dddde98edc8b96d5f6e115bbd8a3dba4026c95448c22ae3bf",
+  "ml_models/best_model_lunch.pkl": "3cbd67a14b9629a7af4b987efad924ec1584b50d51fd8a05a36f71d1635a6055",
+  "docs/reference/2026-\uac1c\uc815-D03-\uc18c\ud504\ud2b8\uc6e8\uc5b4\uae30\ub2a5\uc544\ud0a4\ud14d\ucc98.md": "4b4bce8260ebd0e774947f3dd752c75b42ec7e450d17bce29401978fca3c9a24",
+  "docs/reference/2026-\uac1c\uc815-D04-\ud504\ub85c\ub355\ud2b8\ubc31\ub85c\uadf8(\uc694\uad6c\uc0ac\ud56d\uc815\uc758).md": "6668bdd48fe49a6d0166217659f24c666f5f7f51509c13241b0aae4d45734d3f",
+  "docs/reference/2026-\uac1c\uc815-D02-\ud504\ub85c\uc81d\ud2b8\uad00\ub9ac\uacc4\ud68d\uc11c(\uc694\uc57d).md": "3553d4d5f4dd693711e4386a2e1cf38521d65c51c73e682098ce6ac145e8611c",
+  "docs/reference/2026-\uac1c\uc815-D01-\uc2dc\uc2a4\ud15c\uc815\uc758\uc11c.md": "4d99460e80e1b1cc4e45a62055926607d56d94057b24c861e82a9747a2bf964e",
+  "docs/reference/(8.7~8.9)\uc870\ub9ac\uc9c0\uc2dc\uc11c.xlsx": "edbb8fcdbd7e6030b9aced075ef6035f3ca350c372f6fa0a35b473cfa2d003c7",
+  "docs/reference/2026-\uac1c\uc815-D05-N\ucc28_\uc2a4\ud504\ub9b0\ud2b8\ubc31\ub85c\uadf8(\ud0dc\uc2a4\ud06c\ubaa9\ub85d).md": "ec562e1ec7ea1620e7463688df6a4a415eb7199e913d58e630fef8f9d6384f4d"
+}

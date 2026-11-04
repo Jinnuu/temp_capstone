@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.views.generic import CreateView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 
 
 class CustomLoginView(LoginView):
@@ -40,9 +41,22 @@ class SignUpForm(UserCreationForm):
         self.fields["password1"].help_text = ""
         self.fields["password2"].help_text = ""
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.name = user.username[:50]
+        user.is_active = False
+        if commit:
+            user.save()
+        return user
+
+
 class SignUpView(CreateView):
     form_class=SignUpForm
     template_name="accounts/signup.html"
     # success_url=reverse("login")
     success_url=reverse_lazy("login")
     
+
+    def form_valid(self, form):
+        messages.info(self.request, '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.')
+        return super().form_valid(form)

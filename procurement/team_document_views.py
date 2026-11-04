@@ -70,6 +70,7 @@ def monthly_settlement_view(request):
         qty = item.required_qty
         unit_price = item.order_unit_price or item.ingredient.unit_price or 0
         amount = item.estimated_price
+        unit_price = Decimal(amount) / qty if qty else Decimal("0")
 
         # Supplier agg
         supplier_agg[sup_name]["supplier_name"] = sup_name

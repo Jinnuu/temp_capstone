@@ -251,11 +251,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const chip = document.createElement("span");
         chip.className = "badge bg-white text-dark border shadow-sm p-2 d-inline-flex align-items-center gap-2 rounded-pill fs-6";
-        chip.innerHTML = `
-            <span>${name}</span>
-            <input type="hidden" name="${target}_menu" value="${name}">
-            <button type="button" class="btn-close btn-close-sm remove-meal-chip" aria-label="삭제" style="font-size:0.7rem;"></button>
-        `;
+        const label=document.createElement('span');label.textContent=name;
+        const value=document.createElement('input');value.type='hidden';value.name=`${target}_menu`;value.value=name;
+        const remove=document.createElement('button');remove.type='button';remove.className='btn-close btn-close-sm remove-meal-chip';remove.setAttribute('aria-label','삭제');
+        chip.append(label,value,remove);
         listContainer.appendChild(chip);
     }
 

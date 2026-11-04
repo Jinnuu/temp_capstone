@@ -1,3 +1,5 @@
+from config.export_safety import literal_workbook, worksheet_title
+from config.input_validation import validate_month_query
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -356,6 +358,7 @@ def weekly_inventory_report(request):
     }
     return render(request, 'docs/weekly_inventory_report.html', context)
 
+@validate_month_query
 def monthly_inventory_report(request):
     """월수불명세서 조회 뷰"""
     year = int(request.GET.get('year', timezone.now().year))
@@ -412,6 +415,7 @@ def monthly_inventory_report(request):
     }
     return render(request, 'docs/monthly_inventory_report.html', context)
 
+@validate_month_query
 def export_inventory_excel(request):
     """수불 내역 엑셀 다운로드 (주간/월간 지원)"""
     report_type = request.GET.get('type', 'weekly')
@@ -498,6 +502,7 @@ def export_inventory_excel(request):
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f"attachment; filename={filename}"
+    literal_workbook(wb)
     wb.save(response)
     return response
 

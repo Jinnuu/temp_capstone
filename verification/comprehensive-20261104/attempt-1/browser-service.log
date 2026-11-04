@@ -1,0 +1,11 @@
+locator.getAttribute: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[name=ingredient]').locator('option').filter({ hasText: 'QA 참치' }).first()[22m
+
+    at choose (/home/woohyeak/sprint7-integration/verification/comprehensive-20261104/browser-service.cjs:14:112)
+    at /home/woohyeak/sprint7-integration/verification/comprehensive-20261104/browser-service.cjs:37:110 {
+  log: [
+    "  - waiting for locator('[name=ingredient]').locator('option').filter({ hasText: 'QA 참치' }).first()"
+  ],
+  name: 'TimeoutError'
+}
