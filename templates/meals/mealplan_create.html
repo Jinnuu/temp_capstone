@@ -11,6 +11,16 @@
     .guide-card {
         background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     }
+
+    .sp-meal-badge-list .badge {
+        font-size: 1.15rem !important; /* 1.5배 폰트 크기 확대 */
+        padding: 8px 16px !important; /* 1.5배 패딩 확대 */
+        margin-bottom: 8px !important; /* 1.5배 간격 */
+    }
+
+    .sp-meal-badge-list .badge .btn-close {
+        font-size: 0.85rem !important; /* 1.5배 닫기버튼 크기 확대 */
+    }
 </style>
 
 <section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
@@ -28,8 +38,6 @@
         <a href="{% url 'meals:menu_list' %}" class="btn btn-outline-secondary">메뉴 목록</a>
     </div>
 </section>
-
-
 
 <div class="row g-4">
     <div class="col-lg-8">
@@ -177,7 +185,7 @@
 
                     <div class="p-3 rounded-4 bg-light border">
                         <strong class="d-block mb-1">2. 끼니별 메뉴 입력</strong>
-                        <span class="text-muted small">메뉴명을 타이핑하고 Enter 또는 [+] 버튼을 눌러 직관적으로 배지를 추가하세요.</span>
+                        <span class="text-muted small">메뉴명을 입력 후 Enter/[+] 버튼으로 추가하세요. 신규 메뉴는 레시피 등록 후 발주할 수 있습니다.</span>
                     </div>
 
                     <div class="p-3 rounded-4 bg-light border">
@@ -196,6 +204,15 @@
     </div>
 </div>
 
+<!-- 등록된 메뉴 목록 데이터를 JS 배열로 주입 -->
+<script>
+    const validMenus = [
+        {% for menu in menus %}
+            "{{ menu.name|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // 1. Date change auto-redirect to load existing meal plans
@@ -208,13 +225,24 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 2. Add meal chip function
+    // 2. Add meal chip function with validation
     function addMealChip(target, menuName) {
         const name = menuName.trim();
         if (!name) return;
 
+        // Preserve Sprint-final's name-based creation. Procurement reports missing recipes.
+
         const listContainer = document.getElementById(`${target}-badge-list`);
         if (!listContainer) return;
+
+        // 중복 추가 방지
+        const existingInputs = listContainer.querySelectorAll(`input[name="${target}_menu"]`);
+        for (let input of existingInputs) {
+            if (input.value === name) {
+                alert("이미 추가된 메뉴입니다.");
+                return;
+            }
+        }
 
         const emptyMsg = listContainer.querySelector(".empty-msg");
         if (emptyMsg) {

@@ -1,0 +1,199 @@
+Processing /wheels/xlrd-2.0.2-py2.py3-none-any.whl
+Processing /wheels/xlwt-1.3.0-py2.py3-none-any.whl
+Installing collected packages: xlwt, xlrd
+
+Successfully installed xlrd-2.0.2 xlwt-1.3.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying sessions.0001_initial... OK
+Isolated browser fixtures ready
+Performing system checks...
+
+System check identified no issues (0 silenced).
+November 04, 2026 - 21:53:38
+Django version 6.0.3, using settings 'config.test_settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+[04/Nov/2026 21:54:49] "HEAD /accounts/login/ HTTP/1.1" 200 0
+[04/Nov/2026 21:54:49] "GET /accounts/login/ HTTP/1.1" 200 7014
+[04/Nov/2026 21:54:49] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:49] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:49] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "POST /accounts/login/ HTTP/1.1" 302 0
+[04/Nov/2026 21:54:50] "GET / HTTP/1.1" 200 33136
+[04/Nov/2026 21:54:50] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:50] "GET /static/css/dashboard_professor.css?v=sprint7-professor-v1 HTTP/1.1" 200 7304
+[04/Nov/2026 21:54:50] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:50] "GET /procurement/workflow/ HTTP/1.1" 200 7952
+[04/Nov/2026 21:54:50] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:50] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:50] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:50] "POST /procurement/workflow/ HTTP/1.1" 302 0
+[04/Nov/2026 21:54:50] "GET /procurement/workflow/ HTTP/1.1" 200 8197
+[04/Nov/2026 21:54:50] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:50] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:50] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:50] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "GET /meals/cooking/?date=2026-10-16 HTTP/1.1" 200 5687
+[04/Nov/2026 21:54:50] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:50] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:50] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:50] "GET /meals/cooking/1/ HTTP/1.1" 200 8268
+[04/Nov/2026 21:54:50] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:50] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:50] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:50] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:50] "POST /meals/cooking/1/ HTTP/1.1" 302 0
+[04/Nov/2026 21:54:51] "GET /meals/cooking/1/ HTTP/1.1" 200 8663
+[04/Nov/2026 21:54:51] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:51] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:51] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:51] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:51] "GET /meals/cooking/1/?format=xlsx HTTP/1.1" 200 7050
+[04/Nov/2026 21:54:51] "GET /procurement/workflow/ HTTP/1.1" 200 7975
+[04/Nov/2026 21:54:51] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:51] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:51] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:51] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:51] "POST /procurement/workflow/ HTTP/1.1" 302 0
+[04/Nov/2026 21:54:51] "GET /procurement/workflow/ HTTP/1.1" 200 8197
+[04/Nov/2026 21:54:51] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:54:51] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:51] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:51] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:51] "GET /meals/cooking/1/ HTTP/1.1" 200 8438
+[04/Nov/2026 21:54:51] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:54:51] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:54:51] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:54:51] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:19] "GET /accounts/login/ HTTP/1.1" 200 7014
+[04/Nov/2026 21:55:19] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:19] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:19] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:19] "POST /accounts/login/ HTTP/1.1" 302 0
+[04/Nov/2026 21:55:19] "GET / HTTP/1.1" 200 33135
+[04/Nov/2026 21:55:19] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:19] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:19] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:19] "GET /static/css/dashboard_professor.css?v=sprint7-professor-v1 HTTP/1.1" 200 7304
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/ HTTP/1.1" 200 7975
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "POST /procurement/workflow/ HTTP/1.1" 302 0
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/ HTTP/1.1" 200 8197
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/preview/ HTTP/1.1" 200 6878
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "POST /procurement/workflow/preview/ HTTP/1.1" 302 0
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/plans/1/ HTTP/1.1" 200 6759
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "POST /procurement/workflow/plans/1/ HTTP/1.1" 302 0
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/plans/1/ HTTP/1.1" 200 7436
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:20] "GET /procurement/workflow/inspections/ HTTP/1.1" 200 6109
+[04/Nov/2026 21:55:20] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:20] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:20] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:20] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /procurement/workflow/inspections/1/ HTTP/1.1" 200 6772
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:21] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:21] "POST /procurement/workflow/inspections/1/ HTTP/1.1" 302 0
+[04/Nov/2026 21:55:21] "GET /procurement/workflow/inspections/ HTTP/1.1" 200 6307
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:21] "GET /meals/deduct_inventory/?date=2026-11-06&meal_type=%EC%84%9D%EC%8B%9D HTTP/1.1" 200 8417
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_release_patch.css?v=recipe-deduct-final-v2 HTTP/1.1" 200 4479
+[04/Nov/2026 21:55:21] "POST /meals/deduct_inventory/?date=2026-11-06&meal_type=%EC%84%9D%EC%8B%9D HTTP/1.1" 302 0
+[04/Nov/2026 21:55:21] "GET /meals/mealplan_list/ HTTP/1.1" 200 44754
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:21] "GET /static/css/sp_final_fix_v2.css?v=sprint7-final-fix-v2 HTTP/1.1" 200 1135
+[04/Nov/2026 21:55:21] "GET /static/css/sp_final.css?v=sprint7-final HTTP/1.1" 200 15480
+[04/Nov/2026 21:55:21] "GET /procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08 HTTP/1.1" 200 6414
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132
+[04/Nov/2026 21:55:21] "GET /procurement/workflow/plans/1/ HTTP/1.1" 200 7243
+[04/Nov/2026 21:55:21] "GET /static/css/ui_patch_v4.css?v=nav-calendar-meal-upload-v1 HTTP/1.1" 200 2444
+[04/Nov/2026 21:55:21] "GET /static/css/sprint7_nav_safety.css?v=nav-safety-v1 HTTP/1.1" 200 961
+[04/Nov/2026 21:55:21] "GET /static/css/workflow.css HTTP/1.1" 200 2493
+[04/Nov/2026 21:55:21] "GET /static/css/system.css?v=sprint7-blue-ui-v4 HTTP/1.1" 200 12132

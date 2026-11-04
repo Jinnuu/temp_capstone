@@ -321,3 +321,8 @@ docker rm -f "$container_name"
 실제 참고6시트 분석 및 웹/출력 양식 개선 후 SQLite117/117(8.562초), MariaDB117/117(9.854초), 양쪽 스크립트 종료0. 조리지시서 기존12+신규4=16개이며 원본 구조 비교·날짜별 다운로드·재료별 비고·긴 비고 페이지 분할 검증을 포함한다. Django check 및 migration0006 적용·검사 통과. Chromium 조회/수정/저장/다운로드/인쇄 버튼/CSS·A4 PDF/식수 재계산 모두 통과, page errors0. 로그는 verification/cooking-format/에 있다. 실제 원본 파일은 이번에 제공되어 해시 보존 및 전체 분석 완료했으며 이전 미제공 기록을 대체한다.
 
 신규 migration: meals/0006_cookinginstruction_line_notes.py(JSON 비고 필드). 기존 데이터 삭제/모델 제약 완화 없음. 기존0005 포함 양 DB 검증 완료. 구조별 일치/차이, 수정파일, 미완료 정책과 프린터 한계는 DIETITIAN_FEEDBACK_VERIFICATION.md 최신 절을 따른다. 원본의 입고일 묶음/메뉴별 별도 식수를 임의로 구현하지 않았으며 전체 조리지시서 상태는 PARTIAL로 유지한다.
+
+
+## 2026-11-04 후속 통합
+
+후속 통합 검증은 `verification/kanghoon2-20261104/`에 별도 보존했다. 기존 117개와 신규 22개를 구분하고, 최종 로그 및 브라우저 JSON을 기준으로 후속 통합 보고서에 결과를 기록한다. 과거 실행 기록을 이번 실행으로 대체하지 않는다.

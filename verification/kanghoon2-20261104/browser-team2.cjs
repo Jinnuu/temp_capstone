@@ -1,0 +1,43 @@
+const {chromium}=require('/tmp/snp-browser/node_modules/playwright');
+const assert=require('node:assert/strict');const fs=require('node:fs');
+(async()=>{
+ const root='verification/kanghoon2-20261104',base=process.env.SNP_BROWSER_BASE;
+ assert.ok(base,'Use only the disposable task app');
+ const browser=await chromium.launch({headless:true,executablePath:'/home/woohyeak/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome',args:['--no-sandbox']});
+ const page=await browser.newPage({viewport:{width:1920,height:1080},acceptDownloads:true});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**/*',r=>r.abort());
+ const steps=[];
+ try {
+  await page.goto(base+'/accounts/login/');await page.locator('[name=username]').fill('browser-nutritionist');await page.locator('[name=password]').fill('browser-test-only');
+  await Promise.all([page.waitForURL(base+'/'),page.getByRole('button',{name:'로그인',exact:true}).click()]);
+  await page.goto(base+'/procurement/suppliers/');
+  await page.getByRole('button',{name:'+ 신규 거래처 등록',exact:true}).click();
+  const add=page.locator('#addModal form');await add.locator('[name=name]').fill('가나다 식품');await add.locator('[name=category]').fill('통조림');await add.locator('[name=phone_number]').fill('02-0000-0000');
+  const option=await add.locator('select[name=user] option').filter({hasText:'browser-vendor'}).getAttribute('value');
+  await add.locator('[name=user]').selectOption(option);await add.getByRole('button',{name:'저장하기',exact:true}).click();
+  const row=page.locator('tbody tr').filter({hasText:'가나다 식품'});assert.equal(await row.count(),1);steps.push('create profile explicitly linked to existing vendor');
+  await row.getByRole('button',{name:'수정',exact:true}).click();
+  await page.locator('#edit_name').fill('가나다 식품 수정');await page.locator('#editForm').getByRole('button',{name:'수정 완료',exact:true}).click();
+  assert.match(await page.locator('tbody').innerText(),/가나다 식품 수정/);await page.reload();assert.match(await page.locator('tbody').innerText(),/가나다 식품 수정/);steps.push('edit and reload linked supplier profile');
+  await page.screenshot({path:root+'/supplier-screen.png',fullPage:true});
+  await page.goto(base+'/procurement/docs/monthly-settlement/?month=2026-11');
+  assert.match(await page.locator('body').innerText(),/4500/);assert.match(await page.locator('body').innerText(),/45 kg/);assert.match(await page.locator('body').innerText(),/가나다 식품 수정/);assert.match(await page.locator('body').innerText(),/세금 기준 미등록/);
+  await page.pdf({path:root+'/monthly-settlement.pdf',format:'A4',printBackground:true});steps.push('monthly report reflects actual 45kg/4500 order, linked supplier name and unconfirmed tax');
+  await page.goto(base+'/procurement/docs/monthly-settlement/?month=2025-01');
+  assert.match(await page.locator('body').innerText(),/조회 기간의 발주 내역이 없습니다/);assert.doesNotMatch(await page.locator('body').innerText(),/CJ프레시웨이|3,795,000/);steps.push('empty month has no sample rows');
+  await page.goto(base+'/inventory/ingredients/');await page.locator('tbody tr').filter({hasText:'브라우저 참치'}).getByRole('link',{name:'수정',exact:true}).click();
+  await page.locator('[name=unit_price]').fill('101');await page.getByRole('button',{name:'수정 저장',exact:true}).click();await page.locator('tbody tr').filter({hasText:'브라우저 참치'}).getByRole('link',{name:'수정',exact:true}).click();assert.equal(await page.locator('[name=unit_price]').inputValue(),'101');steps.push('ingredient edit persists without replacing item identity');
+  const ledger=base+'/procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08';
+  await page.goto(ledger);const before=await page.locator('table').first().innerText();assert.match(before,/4\.9/);
+  await page.goto(base+'/procurement/docs/cooking-instruction/?start_date=2026-11-06&end_date=2026-11-06');
+  assert.match(await page.locator('body').innerText(),/35\.1 kg/);assert.match(await page.locator('body').innerText(),/남은 재고 확인 후 가열/);assert.match(await page.locator('body').innerText(),/배식 전에 중심 온도 확인/);
+  await page.pdf({path:root+'/cooking-period.pdf',format:'A4',printBackground:true});
+  await page.getByRole('link',{name:/2026-11-06 석식 조회·수정·Excel/}).click();
+  const download=page.waitForEvent('download');await page.getByRole('link',{name:'저장한 지시사항 Excel 출력',exact:true}).click();await(await download).saveAs(root+'/cooking-final.xlsx');
+  await page.goto(ledger);assert.equal(await page.locator('table').first().innerText(),before);steps.push('period cooking reuses confirmed count/notes, canonical Excel and unchanged inventory');
+  await page.goto(base+'/meals/mealplan/weekly/?start_date=2026-11-02');assert.match(await page.locator('body').innerText(),/다음 월요일 조식·중식/);steps.push('next-Monday weekly editor preserved');
+  await page.goto(base+'/procurement/suppliers/');page.once('dialog',d=>d.accept());await page.locator('tbody tr').filter({hasText:'가나다 식품 수정'}).getByRole('button',{name:'삭제',exact:true}).click();
+  await page.goto(base+'/procurement/docs/monthly-settlement/?month=2026-11');assert.match(await page.locator('body').innerText(),/4500/);assert.match(await page.locator('body').innerText(),/가나다 식품 수정/);steps.push('deleting contact profile preserves supplier account and historical order');
+  assert.deepEqual(errors,[]);fs.writeFileSync(root+'/browser-team2.json',JSON.stringify({passed:true,steps,pageErrors:errors},null,2));console.log('BROWSER_TEAM2_PASS',steps.length,'checkpoints, one scenario');
+ } finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -41,3 +41,14 @@ urlpatterns += [
     path("workflow/recipes/", workflow.recipe_detail, name="workflow_recipes"),
     path("workflow/recipes/<int:pk>/", workflow.recipe_detail, name="workflow_recipe_edit"),
 ]
+
+from . import supplier_views, team_document_views
+urlpatterns += [
+    path('suppliers/', supplier_views.supplier_list, name='supplier_list'),
+    path('suppliers/create/', supplier_views.supplier_create, name='supplier_create'),
+    path('suppliers/<int:pk>/update/', supplier_views.supplier_update, name='supplier_update'),
+    path('suppliers/<int:pk>/delete/', supplier_views.supplier_delete, name='supplier_delete'),
+    path('docs/monthly-settlement/', team_document_views.monthly_settlement_view, name='doc_monthly_settlement'),
+    path('monthly-settlement/', team_document_views.monthly_settlement_view, name='monthly_settlement_view'),
+    path('docs/cooking-instruction/', team_document_views.doc_cooking_instruction, name='doc_cooking_instruction'),
+]

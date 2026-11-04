@@ -18,3 +18,5 @@ urlpatterns = [
     path("reports/export/excel/", views.export_inventory_excel, name="export_inventory_excel"),
     path('docs/inventory-status/', doc_inventory_status, name='doc_inventory_status'),
 ]
+
+urlpatterns += [path("ingredients/<int:pk>/update/", views.ingredient_update, name="ingredient_update")]

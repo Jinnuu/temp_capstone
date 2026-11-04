@@ -76,7 +76,7 @@ def doc_menu_overview(request):
                         portion_g = "환산 확인 필요"
                         total_qty_val = 0
 
-                    total_qty_str = f"{round(total_qty_val, 1)} {unit}"
+                    total_qty_str = f"{round(total_qty_val, 2)} {unit}"
 
                     ing_list.append({
                         "name": ing.name,

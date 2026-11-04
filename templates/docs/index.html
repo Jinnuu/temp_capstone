@@ -107,7 +107,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block content %}<nav class="my-3"><a href="{% url 'procurement:supplier_list' %}">공급업체 현황</a> · <a href="{% url 'procurement:doc_monthly_settlement' %}">월간 발주 정산서</a> · <a href="{% url 'procurement:doc_cooking_instruction' %}">기간별 조리지시서</a></nav>
 <section class="sp-card"><h2>확정 식수부터 검수·수불까지</h2><p><a href="{% url 'procurement:workflow' %}">예상 식수 입력·최종 확정</a> · <a href="{% url 'procurement:workflow_preview' %}">발주예정서</a> · <a href="{% url 'procurement:workflow_inspections' %}">급식물품 검수일지·검수 기록</a> · <a href="{% url 'procurement:workflow_ledger' %}">급식재료 수불현황</a> · <a href="{% url 'procurement:workflow_settlement' %}">월말 정산</a></p></section>
 <section class="docs-header">
   <h1 class="h2 fw-bold">문서화 센터</h1>

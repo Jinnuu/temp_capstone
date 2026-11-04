@@ -1,0 +1,13 @@
+{
+  "baseline_archive_removed": true,
+  "containers": {
+    "snp-kanghoon2-browser-20261104": true,
+    "snp-kanghoon2-db-20261104": true,
+    "snp-kanghoon2-db-final-20261104": true
+  },
+  "network_removed": true,
+  "socket_directories": {
+    "/tmp/snp-kanghoon2-db-socket-20261104": true,
+    "/tmp/snp-kanghoon2-db-final-socket-20261104": true
+  }
+}

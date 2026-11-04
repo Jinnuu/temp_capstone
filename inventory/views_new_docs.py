@@ -2,41 +2,75 @@
 신규 실무 문서 뷰 (inventory 앱)
 - doc_inventory_status: 급식재료 수불현황 (A4 가로, 2줄 양식)
 """
-import calendar
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from django.shortcuts import render
 from django.utils import timezone
-from django.db.models import Sum, Case, When, F, Value, DecimalField
+from django.db.models import Sum, Case, When, F, Value, DecimalField, OuterRef, Exists
 from .models import Ingredient, InventoryLog
 
 
 def doc_inventory_status(request):
-    """[신규] 급식재료 수불현황 (실무 양식) - doc_inventory_status.html"""
-    today = timezone.now().date()
+    """[신규] 급식재료 수불현황 (기간 조회, 실사용 품목 필터링) - doc_inventory_status.html"""
+    today = timezone.localdate()
 
-    target_month_str = request.GET.get("month", "").strip()
-    if target_month_str:
+    import calendar
+    month_value = request.GET.get('month', '')
+    legacy_start = legacy_end = ''
+    try:
+        if month_value:
+            parsed = datetime.strptime(month_value, '%Y-%m').date()
+            legacy_start = parsed.isoformat()
+            legacy_end = parsed.replace(day=calendar.monthrange(parsed.year, parsed.month)[1]).isoformat()
+        elif request.GET.get('year') or request.GET.get('month_num'):
+            parsed = date(int(request.GET.get('year', today.year)), int(request.GET.get('month_num', today.month)), 1)
+            legacy_start = parsed.isoformat()
+            legacy_end = parsed.replace(day=calendar.monthrange(parsed.year, parsed.month)[1]).isoformat()
+    except ValueError:
+        pass
+    start_date_str = request.GET.get("start_date", legacy_start).strip()
+    end_date_str = request.GET.get("end_date", legacy_end).strip()
+
+    if start_date_str:
         try:
-            parsed = datetime.strptime(target_month_str, "%Y-%m")
-            year = parsed.year
-            month = parsed.month
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         except ValueError:
-            year = today.year
-            month = today.month
+            start_date = date(today.year, today.month, 1)
     else:
-        year = int(request.GET.get("year", today.year))
-        month = int(request.GET.get("month_num", today.month))
+        start_date = date(today.year, today.month, 1)
 
-    start_date = date(year, month, 1)
-    _, last_day = calendar.monthrange(year, month)
-    end_date = date(year, month, last_day)
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            end_date = today
+    else:
+        end_date = today
+
+    if end_date < start_date:
+        end_date = start_date
 
     start_dt = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-    next_month_first = end_date + timezone.timedelta(days=1)
-    end_dt = timezone.make_aware(datetime.combine(next_month_first, datetime.min.time()))
+    end_dt = timezone.make_aware(
+        datetime.combine(end_date + timedelta(days=1), datetime.min.time())
+    )
 
-    ingredients = Ingredient.objects.exclude(name__icontains="테스트").order_by("category", "name")
+    # 기간 내 InventoryLog가 1건이라도 있는 Ingredient만 필터링 (실사용 품목 필터)
+    active_logs_subquery = InventoryLog.objects.filter(
+        ingredient=OuterRef("pk"),
+        transaction_date__gte=start_dt,
+        transaction_date__lt=end_dt,
+    )
+
+    ingredients = (
+        Ingredient.objects.exclude(name__icontains="테스트")
+        .annotate(has_activity=Exists(active_logs_subquery))
+
+        .order_by("category", "name")
+    )
+
+    if request.GET.get("activity_only") == "1":
+        ingredients = ingredients.filter(has_activity=True)
 
     inventory_list = []
     total_prev_amount = 0
@@ -45,6 +79,7 @@ def doc_inventory_status(request):
     total_curr_amount = 0
 
     for item in ingredients:
+        # 기초 재고 (start_date 이전 누적)
         prev_logs = InventoryLog.objects.filter(ingredient=item, transaction_date__lt=start_dt)
         prev_qty = prev_logs.aggregate(
             total=Sum(Case(
@@ -57,11 +92,18 @@ def doc_inventory_status(request):
             ))
         )['total'] or Decimal('0')
 
-        month_logs = InventoryLog.objects.filter(ingredient=item, transaction_date__gte=start_dt, transaction_date__lt=end_dt)
-        in_qty = month_logs.filter(log_type='입고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')
-        out_qty = (month_logs.filter(log_type='출고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')) + \
-                  (month_logs.filter(log_type='폐기').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0'))
-        adj_qty = month_logs.filter(log_type='조정').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')
+        # 기간 내 수불 내역
+        period_logs = InventoryLog.objects.filter(
+            ingredient=item,
+            transaction_date__gte=start_dt,
+            transaction_date__lt=end_dt,
+        )
+        in_qty = period_logs.filter(log_type='입고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')
+        out_qty = (
+            (period_logs.filter(log_type='출고').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')) +
+            (period_logs.filter(log_type='폐기').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0'))
+        )
+        adj_qty = period_logs.filter(log_type='조정').aggregate(Sum('quantity'))['quantity__sum'] or Decimal('0')
 
         curr_qty = prev_qty + in_qty - out_qty + adj_qty
 
@@ -105,10 +147,10 @@ def doc_inventory_status(request):
     }
 
     context = {
-        "year": year,
-        "month": str(month).zfill(2),
-        "target_month": f"{year}-{str(month).zfill(2)}",
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
         "inventory_list": inventory_list,
         "totals": totals,
+        "item_count": len(inventory_list),
     }
     return render(request, "docs/doc_inventory_status.html", context)

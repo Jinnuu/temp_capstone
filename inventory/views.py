@@ -505,3 +505,26 @@ def _existing_transaction_time(key):
     from procurement.models import InventoryTransactionKey
     previous = InventoryTransactionKey.objects.filter(request_key=key).select_related("inventory_log").first()
     return previous.inventory_log.transaction_date if previous else timezone.now()
+
+
+def ingredient_update(request, pk):
+    from procurement.workflow import invalidate_plans
+    ingredient = get_object_or_404(Ingredient, pk=pk)
+    original_unit = ingredient.unit
+    form = IngredientForm(request.POST or None, instance=ingredient)
+    if request.method == 'POST' and form.is_valid():
+        if form.cleaned_data['unit'] != original_unit and (
+                InventoryLog.objects.filter(ingredient=ingredient).exists() or
+                ingredient.used_in_recipes.exists() or ingredient.supply_specs.exists()):
+            form.add_error('unit', '재고·레시피·납품규격이 연결된 품목의 기준 단위는 직접 변경할 수 없습니다.')
+        for field in ['unit_price', 'safe_stock_level', 'yearly_demand', 'total_amount']:
+            value = form.cleaned_data.get(field)
+            if value is not None and value < 0:
+                form.add_error(field, '0 이상의 값을 입력하세요.')
+        if not form.errors:
+            with transaction.atomic():
+                form.save()
+                invalidate_plans()
+            messages.success(request, '식재료 정보를 수정했습니다. 연결 발주예정서를 재검토하세요.')
+            return redirect('inventory:ingredient_list')
+    return render(request, 'inventory/ingredient_form.html', {'form': form, 'ingredient': ingredient, 'is_update': True})

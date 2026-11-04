@@ -321,6 +321,9 @@ class RequirementWorkflows(TestCase):
 
     def test_expired_receipt_blocks_planning_until_disposal(self):
         now=timezone.now()
+        today=timezone.localdate(now)
+        self.plan.target_date=today+timedelta(days=(4-today.weekday())%7)
+        self.plan.save(update_fields=['target_date'])
         record_inventory(self.ing.pk,'입고',3,self.operator,uuid.uuid4(),now-timedelta(days=3),expiration=now.date()-timedelta(days=1))
         save_headcount(self.plan.pk,350,350)
         with self.assertRaises(ValidationError):create_plan(self.plan.target_date,self.plan.target_date,self.operator,uuid.uuid4())

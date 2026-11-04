@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "steps": [
+    "create profile explicitly linked to existing vendor",
+    "edit and reload linked supplier profile",
+    "monthly report reflects actual 45kg/4500 order, linked supplier name and unconfirmed tax",
+    "empty month has no sample rows",
+    "ingredient edit persists without replacing item identity",
+    "period cooking reuses confirmed count/notes, canonical Excel and unchanged inventory",
+    "next-Monday weekly editor preserved",
+    "deleting contact profile preserves supplier account and historical order"
+  ],
+  "pageErrors": []
+}

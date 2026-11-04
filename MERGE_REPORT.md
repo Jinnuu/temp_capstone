@@ -243,3 +243,8 @@ docker rm -f sprint7-integration-db-audit
 ## 실제 Excel 양식 후속 결과
 
 참고 Excel 전체6시트 조사,6열 조리지시서/계산근거 분리, 재료별 비고 저장과 날짜별 식사 Excel 생성, 긴 한글 비고/페이지 구분을 보완했다. 신규 migration meals/0006_cookinginstruction_line_notes. SQLite/MariaDB117/117 및 실제 Chromium 조회·저장·다운로드·인쇄PDF·식수변경 흐름 통과. 원본 SHA-256 보존, 기존 서비스 변경 없음, 이번 임시 앱/DB/네트워크 정리 완료. 입고일묶음·대상집단별 식수·실제 프린터 인수는 미완료로 남겼다. 상세는 DIETITIAN_FEEDBACK_VERIFICATION.md 최종 절과 verification/cooking-format/.
+
+
+## 2026-11-04: comprehensive-improvement2 후속 통합
+
+원본 `sprint-final` 1aa6302와 팀원 4cb648f를 별도 브랜치에서 통합했다. 세부 충돌 해결·기능 보존·보류 사항·실행 명령은 [후속 통합 보고서](docs/analysis/KANGHOON2_MERGE_REPORT.md)에 기록한다. 배포·push는 수행하지 않았다.

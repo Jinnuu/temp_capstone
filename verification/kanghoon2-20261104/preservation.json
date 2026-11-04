@@ -1,0 +1,19 @@
+{
+  "baseline": "1aa6302",
+  "target": "4cb648f",
+  "byte_identical": {
+    "requirements.txt": true,
+    "forecasting/services/prediction_service.py": true,
+    "forecasting/services/processor.py": true,
+    "procurement/workflow.py": true,
+    "inventory/lot_services.py": true,
+    "meals/cooking.py": true,
+    "meals/cooking_views.py": true,
+    "meals/cooking_export.py": true,
+    "meals/release_patch_views.py": true,
+    "inventory/release_patch_views.py": true,
+    "static/js/smart_order.js": true,
+    "all_tracked_ai_artifacts": true
+  },
+  "ai_artifact_files": 3
+}

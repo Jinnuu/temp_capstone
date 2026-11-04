@@ -61,13 +61,20 @@
                     <div class="sp-day-top">
                       <strong>{{ cell.day }}</strong>
                       {% if cell.has_prediction %}
-                        <em>{{ cell.total_count }}명</em>
+                        <em>총 {{ cell.total_count }}명</em>
                       {% endif %}
                     </div>
 
                     {% if cell.has_prediction %}
-                      <p class="sp-calendar-main">{{ cell.prediction_summary }}</p>
-                      <span class="sp-badge blue">식재료 산출 가능</span>
+                      <div class="sp-meal-breakdown" style="margin-top: 6px; font-size: 0.85rem;">
+                        {% for pred in cell.predictions %}
+                          <div class="sp-meal-item">
+                            <span>{{ pred.get_meal_type_display }}:</span>
+                            <strong>{{ pred.predicted_count }}명</strong>
+                          </div>
+                        {% endfor %}
+                      </div>
+                      <span class="sp-badge blue" style="margin-top: 6px; display: inline-block;">식재료 산출 가능</span>
                     {% else %}
                       <p class="sp-muted">예측 미생성</p>
                       <span class="sp-badge">미생성</span>

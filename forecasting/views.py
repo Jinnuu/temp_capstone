@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, datetime, timedelta
 import calendar
 import traceback
@@ -42,10 +43,16 @@ def prediction_create_view(request):
                 AttendancePrediction.MealType.DINNER,
             ]
 
+            if AttendancePrediction.objects.filter(prediction_date=prediction_date, meal_type__in=meal_types).values('meal_type').distinct().count() == len(meal_types):
+                messages.info(request, '해당 날짜의 조·중·석식 예측이 이미 있습니다.')
+                return redirect(reverse('forecasting:prediction_list') + '?' + urlencode({'target_date': prediction_date}))
+
             success_count = 0
             failed_meals = []
 
             for meal_type in meal_types:
+                if AttendancePrediction.objects.filter(prediction_date=prediction_date, meal_type=meal_type).exists():
+                    continue
                 try:
                     run_attendance_prediction(
                         prediction_date=prediction_date,
@@ -97,60 +104,37 @@ def prediction_calendar_view(request):
     cal = calendar.Calendar(firstweekday=6)
     month_days = cal.monthdatescalendar(selected_year, selected_month)
 
-    predictions = (
-        AttendancePrediction.objects.filter(
-            prediction_date__year=selected_year,
-            prediction_date__month=selected_month,
-        )
-        .order_by("prediction_date", "meal_type", "-created_at")
+    # 해당 월의 모든 예측 데이터 조회
+    predictions = AttendancePrediction.objects.filter(
+        prediction_date__year=selected_year,
+        prediction_date__month=selected_month,
     )
 
-    prediction_map = {}
-
-    for prediction in predictions:
-        day_map = prediction_map.setdefault(prediction.prediction_date, {})
-
-        if prediction.meal_type not in day_map:
-            day_map[prediction.meal_type] = prediction.predicted_count
+    # 날짜별로 예측 데이터 그룹화 (Key: date 객체, Value: [AttendancePrediction 객체들])
+    predictions_by_date = defaultdict(list)
+    for p in predictions:
+        predictions_by_date[p.prediction_date].append(p)
 
     calendar_weeks = []
-
     for week in month_days:
         row = []
-
         for day in week:
             if day.month != selected_month:
                 row.append(None)
                 continue
 
-            day_predictions = prediction_map.get(day, {})
-            ordered_meal_types = [
-                AttendancePrediction.MealType.BREAKFAST,
-                AttendancePrediction.MealType.LUNCH,
-                AttendancePrediction.MealType.DINNER,
-            ]
+            day_preds = predictions_by_date.get(day, [])
+            has_prediction = len(day_preds) > 0
+            total_count = sum(p.predicted_count for p in day_preds)
 
-            summary_parts = []
-
-            for meal_type in ordered_meal_types:
-                count = day_predictions.get(meal_type)
-
-                if count is not None:
-                    summary_parts.append(f"{MEAL_LABELS.get(meal_type, meal_type)} {count}명")
-
-            total_count = sum(day_predictions.values()) if day_predictions else None
-
-            row.append(
-                {
-                    "date": day,
-                    "day": day.day,
-                    "is_today": day == today,
-                    "has_prediction": bool(day_predictions),
-                    "prediction_summary": " · ".join(summary_parts),
-                    "total_count": total_count,
-                }
-            )
-
+            row.append({
+                "date": day,
+                "day": day.day,
+                "is_today": day == today,
+                "has_prediction": has_prediction,
+                "predictions": day_preds,  # 해당 날짜의 조식/중식/석식 예측 객체 목록
+                "total_count": total_count,
+            })
         calendar_weeks.append(row)
 
     context = {
@@ -159,9 +143,7 @@ def prediction_calendar_view(request):
         "months": range(1, 13),
         "calendar_weeks": calendar_weeks,
     }
-
     return render(request, "forecasting/prediction_calendar.html", context)
-
 
 def prediction_result_view(request, prediction_id):
     prediction = get_object_or_404(AttendancePrediction, id=prediction_id)
