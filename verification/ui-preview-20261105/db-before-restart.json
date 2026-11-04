@@ -1,0 +1,94 @@
+{
+  "accounts_user": {
+    "rows": 5,
+    "sha256": "aa069d2e7fc266208d3c5f2974e1a2bb43d41bcf34c7178870e5553bd60bfc0a"
+  },
+  "accounts_user_groups": {
+    "rows": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accounts_user_user_permissions": {
+    "rows": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "forecasting_attendanceprediction": {
+    "rows": 6,
+    "sha256": "213e873b1b224e21b3599114270ba1c41745102a35d5161822109d7912561b16"
+  },
+  "forecasting_mealforecast": {
+    "rows": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "inventory_ingredient": {
+    "rows": 2,
+    "sha256": "99f4c67a2196ff2dd758a1bdb39bfe5f1849002af19686e98c02ade702144ea9"
+  },
+  "inventory_ingredientcategory": {
+    "rows": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "inventory_inventorylog": {
+    "rows": 6,
+    "sha256": "6049e6712690c5f9b820da51bed562b248e5b6075ede8b807435c22740fa324e"
+  },
+  "inventory_stockallocation": {
+    "rows": 3,
+    "sha256": "422c8dabbcf6a545e682530f4bbe2b609d0f1ed9d79136bcd512f8b59637b16c"
+  },
+  "inventory_stocklot": {
+    "rows": 3,
+    "sha256": "559a28bdefc6ba63cdd792b134df1e684da750d8729a6e1b872b322098ac16f8"
+  },
+  "inventory_supplyspecification": {
+    "rows": 2,
+    "sha256": "40f47ccec9923658a7b98f62a0bda5cce9719917344565228ccdc9469d6cfd88"
+  },
+  "meals_cookinginstruction": {
+    "rows": 1,
+    "sha256": "de50da85264f39910596880b7d105a126c93e996a93f1bfa7e19767e74d9b51d"
+  },
+  "meals_dietmenu": {
+    "rows": 3,
+    "sha256": "48375b7ed06696f1d1d8f074952ee90fbc121ade851bee32b7d7edbf23b8490c"
+  },
+  "meals_dietplan": {
+    "rows": 3,
+    "sha256": "1357b2cb4ff3d9142b8d83d4423f222e52d32980e89155bd3d8c876b5d6487ff"
+  },
+  "meals_menu": {
+    "rows": 3,
+    "sha256": "4b1d8c919687a5fc9be508f0e741077527fec5692d761042856f6081653bff01"
+  },
+  "meals_recipe": {
+    "rows": 3,
+    "sha256": "1432ec65da46a1fd00cb22288c8e88dbcd9a821958ea71eaba4887d8540ac0b5"
+  },
+  "procurement_goodsinspection": {
+    "rows": 2,
+    "sha256": "dee0b6b7e39a321c26f72a333504332b72d8f63127e2456c253a5f5a19537095"
+  },
+  "procurement_inventorytransactionkey": {
+    "rows": 2,
+    "sha256": "020211c3d1a43dc42da1c9a886643a8284d6f61ccce793dc7e8f7287aaf0e691"
+  },
+  "procurement_orderitem": {
+    "rows": 2,
+    "sha256": "70f4c369d56648ad58ade175cf0075bea49896cead0fa86092356cd3481be4f9"
+  },
+  "procurement_procurementplan": {
+    "rows": 1,
+    "sha256": "c259c5505db0550c5368c98a3ab1b130c2f19ace6ca5056028ddbd2d123caffc"
+  },
+  "procurement_procurementplanline": {
+    "rows": 2,
+    "sha256": "ab5532f22a983f7d36a6f1b7e0ed980854fe7b44a694cdb22b304b65d541e7f8"
+  },
+  "procurement_purchaseorder": {
+    "rows": 2,
+    "sha256": "97c4c2a8cd80f65ac3e5bd3e73afd43c85732b9ce6d55f770e7996f27eea08f2"
+  },
+  "procurement_supplier": {
+    "rows": 2,
+    "sha256": "e99a3c6ba540d2c15e4f8211a26d23738abee7cea1d15fbe5e0ea6f42ad58f57"
+  }
+}

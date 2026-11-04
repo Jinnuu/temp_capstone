@@ -1,0 +1,116 @@
+{
+  "passed": true,
+  "steps": [
+    {
+      "name": "three independent layouts + unsaved work",
+      "detail": {
+        "dimensions": [
+          {
+            "mode": "reference",
+            "nav": {
+              "x": 0,
+              "y": 139.84375,
+              "width": 1920
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1920
+            },
+            "accent": "#e66344"
+          },
+          {
+            "mode": "green",
+            "nav": {
+              "x": 0,
+              "y": 0,
+              "width": 224
+            },
+            "header": {
+              "x": 224,
+              "y": 0,
+              "width": 1696
+            },
+            "accent": "#286447"
+          },
+          {
+            "mode": "civic",
+            "nav": {
+              "x": 0,
+              "y": 115.84375,
+              "width": 204
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1920
+            },
+            "accent": "#344054"
+          }
+        ],
+        "unchangedDOM": true
+      }
+    },
+    {
+      "name": "keyboard and navigation persistence",
+      "detail": "Home/ArrowRight selects green; subsequent page green"
+    },
+    {
+      "name": "file selection preserved",
+      "detail": "same input/file survives all three switches without submit"
+    },
+    {
+      "name": "same live data: dashboard",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: inventory",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: headcount",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: procurement",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: ledger",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: cooking",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: mealplan",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "same live data: recipe",
+      "detail": "three 1920x1080 screenshots; text invariant"
+    },
+    {
+      "name": "comparison isolation",
+      "detail": "same views; frames pinned, controls disabled, parent selection unchanged"
+    },
+    {
+      "name": "tablet/keyboard navigation",
+      "detail": "768px all modes, Escape closes, horizontal tables contained"
+    },
+    {
+      "name": "print chrome excluded",
+      "detail": "all three PDFs with actual business sheet"
+    },
+    {
+      "name": "admin compatibility",
+      "detail": "native admin + mode selector, no Bootstrap global admin replacement"
+    },
+    {
+      "name": "browser restart persistence",
+      "detail": "new Chromium process retained last selection"
+    }
+  ],
+  "pageErrors": []
+}

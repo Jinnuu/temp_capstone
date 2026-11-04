@@ -1,0 +1,73 @@
+name: snp-ui-preview
+services:
+  db:
+    image: mariadb:10.6
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: snp_ui_preview
+      MARIADB_USER: snp_ui_preview
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets: [db_password, db_root_password]
+    volumes: [preview_db:/var/lib/mysql]
+    networks: [preview]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 512m
+  web:
+    image: snp-ui-preview-web:three-modes
+    build:
+      context: .
+      dockerfile: deploy/ui-preview/Dockerfile
+      target: app
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ['/tmp:size=512m,mode=1777']
+    environment:
+      SNP_UI_PREVIEW: '1'
+      SNP_PREVIEW_ALLOWED_HOSTS: ${SNP_PREVIEW_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      SNP_PREVIEW_CSRF_ORIGINS: ${SNP_PREVIEW_CSRF_ORIGINS:-}
+      SNP_PREVIEW_HTTPS: ${SNP_PREVIEW_HTTPS:-0}
+    secrets: [db_password, django_secret, demo_password]
+    networks: [preview]
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8000/accounts/login/', headers={'Host':'localhost'}),timeout=5).close()"]
+      interval: 15s
+      timeout: 8s
+      start_period: 60s
+      retries: 10
+    mem_limit: 3g
+  proxy:
+    image: snp-ui-preview-proxy:three-modes
+    build:
+      context: .
+      dockerfile: deploy/ui-preview/Dockerfile
+      target: proxy
+    restart: unless-stopped
+    ports: ['${SNP_PREVIEW_BIND:-127.0.0.1}:${SNP_PREVIEW_PORT:-8011}:8080']
+    networks: [preview, ingress]
+    depends_on:
+      web: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8080/healthz']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    mem_limit: 128m
+networks:
+  preview:
+    internal: true
+  ingress:
+    driver: bridge
+volumes:
+  preview_db:
+secrets:
+  db_password: {file: ./.ui-preview/db_password}
+  db_root_password: {file: ./.ui-preview/db_root_password}
+  django_secret: {file: ./.ui-preview/django_secret}
+  demo_password: {file: ./.ui-preview/demo_password}

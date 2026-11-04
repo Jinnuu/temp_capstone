@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "syntheticHistory": true,
+  "predictionDate": "2026-11-13",
+  "threeMealResults": [
+    "\n              #4\n              2026-11-13\n              조식\n              37명\n              best_model_breakfast.pkl\n              \n                \n                  식재료 산출\n                \n              \n            ",
+    "\n              #5\n              2026-11-13\n              중식\n              225명\n              best_model_lunch.pkl\n              \n                \n                  식재료 산출\n                \n              \n            ",
+    "\n              #6\n              2026-11-13\n              석식\n              133명\n              best_model_dinner.pkl\n              \n                \n                  식재료 산출\n                \n              \n            "
+  ],
+  "accuracyEvaluation": false
+}

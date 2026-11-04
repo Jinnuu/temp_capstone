@@ -1,0 +1,4 @@
+
+# Preserve CSV interoperability and raw Docker command output.
+deploy/ui-preview/ai_data/*.csv text eol=crlf
+verification/ui-preview-20261105/*.log -whitespace

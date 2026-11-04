@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "poll_wait_seconds": 26.3,
+  "health": {
+    "snp-ui-preview-db-1": "healthy",
+    "snp-ui-preview-web-1": "healthy",
+    "snp-ui-preview-proxy-1": "healthy"
+  }
+}

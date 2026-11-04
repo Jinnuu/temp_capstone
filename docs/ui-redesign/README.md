@@ -12,3 +12,5 @@
 - [스크린샷](screenshots/)
 
 운영 DB·8000/8007 서비스·AI 모델을 변경하지 않았다. 실험 브랜치를 실행할 때도 반드시 별도 DB와 포트를 사용한다. 테스트 절차와 격리 컨테이너 명령은 검증 보고서와 `verification/ui-three-modes-20261105/`를 참조한다. 운영 배포는 이 작업에 포함되지 않는다.
+
+독립 Docker 시범 서비스: [접속·실행 안내](DOCKER_PREVIEW.md), [실행 검증 결과](DOCKER_PREVIEW_TEST_REPORT.md). 기존 서비스와 별도8011포트/DB/네트워크로 실행한다.

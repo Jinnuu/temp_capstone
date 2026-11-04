@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "existing_containers_compared": 17,
+  "changed_existing_resources": [],
+  "no_existing_network_or_volume_attached": true,
+  "sprint_final_local_and_remote": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "model_file_hashes_unchanged": true,
+  "http_status": {
+    "http://127.0.0.1:8000/accounts/login/": 200,
+    "http://127.0.0.1:8007/accounts/login/": 200,
+    "http://127.0.0.1:8011/accounts/login/": 200,
+    "http://100.65.149.96:8011/accounts/login/": 200
+  },
+  "preview": [
+    {
+      "name": "snp-ui-preview-db-1",
+      "image_id": "sha256:6055d4ee6a6045626442cafe4feaf7419e878c65baf3af658265e24114af1cd7",
+      "health": "healthy",
+      "networks": [
+        "snp-ui-preview_preview"
+      ],
+      "volumes": [
+        "snp-ui-preview_preview_db"
+      ]
+    },
+    {
+      "name": "snp-ui-preview-web-1",
+      "image_id": "sha256:1641caa80838ad95a041d98c947d8ab58e535f37f6321e909fc462f5eded9e5f",
+      "health": "healthy",
+      "networks": [
+        "snp-ui-preview_preview"
+      ],
+      "volumes": []
+    },
+    {
+      "name": "snp-ui-preview-proxy-1",
+      "image_id": "sha256:26a385b9c7eed23d185450b169862b3145425e79b60bf3c2d5ed34202cd3bbd1",
+      "health": "healthy",
+      "networks": [
+        "snp-ui-preview_ingress",
+        "snp-ui-preview_preview"
+      ],
+      "volumes": []
+    }
+  ]
+}

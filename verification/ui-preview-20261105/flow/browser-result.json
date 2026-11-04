@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "steps": [
+    {
+      "name": "AI prediction",
+      "detail": "existing stored models executed offline; no model change; three meal persistence audited separately",
+      "url": "http://127.0.0.1:8011/forecasting/results/?target_date=2026-11-06"
+    },
+    {
+      "name": "headcount confirmation",
+      "detail": "AI reference distinct from manual360/final351",
+      "url": "http://127.0.0.1:8011/procurement/workflow/"
+    },
+    {
+      "name": "requirements/orders",
+      "detail": "35.1kg each -> tuna min8 adjusted9cans/45kg/4500, tofu12trays/36kg/7200; two vendors",
+      "url": "http://127.0.0.1:8011/procurement/workflow/plans/1/"
+    },
+    {
+      "name": "vendor documents",
+      "detail": "new snapshot rows appear in real report and Excel, frozen package price",
+      "url": "http://127.0.0.1:8011/procurement/vendor-report/?start_date=2026-11-06&end_date=2026-11-06"
+    },
+    {
+      "name": "no preinspection receipt",
+      "detail": "order issuance leaves zero stock",
+      "url": "http://127.0.0.1:8011/procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08"
+    },
+    {
+      "name": "inspection/idempotency",
+      "detail": "45 delivered/40 accepted and36/36; identical inspection resubmission once only",
+      "url": "http://127.0.0.1:8011/procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08"
+    },
+    {
+      "name": "usage/FIFO/weekly ledger",
+      "detail": "tuna0+42-35.1-1=5.9; tofu0+36-35.1=.9; two lots audited",
+      "url": "http://127.0.0.1:8011/procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08"
+    },
+    {
+      "name": "cooking sheet",
+      "detail": "save/reload notes, Excel/PDF/period view; stock remains unchanged",
+      "url": "http://127.0.0.1:8011/procurement/workflow/ledger/?start_date=2026-11-02&end_date=2026-11-08"
+    },
+    {
+      "name": "monthly settlement",
+      "detail": "ordered11700 vs accepted11200; unit-correct report and separate accepted-value view",
+      "url": "http://127.0.0.1:8011/procurement/workflow/settlement/?month=2026-11"
+    },
+    {
+      "name": "unused menu deletion",
+      "detail": "real POST/CSRF delete control removes only disposable unserved menu",
+      "url": "http://127.0.0.1:8011/meals/menu_list/?q=QA%20%EC%82%AD%EC%A0%9C%20%EB%A9%94%EB%89%B4"
+    },
+    {
+      "name": "XSS text safety",
+      "detail": "malicious-looking menu entered/stored/searched/opened without HTML execution",
+      "url": "http://127.0.0.1:8011/meals/mealplan_list/?year=2026&month=11"
+    },
+    {
+      "name": "CSRF negative",
+      "detail": "authenticated mutation without token rejected403",
+      "url": "http://127.0.0.1:8011/meals/mealplan_list/?year=2026&month=11"
+    },
+    {
+      "name": "supplier authorization",
+      "detail": "supplier login cannot read internal business records",
+      "url": "http://127.0.0.1:8011/meals/mealplan_list/?year=2026&month=11"
+    },
+    {
+      "name": "signup approval boundary",
+      "detail": "signup persists but cannot self-grant internal access",
+      "url": "http://127.0.0.1:8011/meals/mealplan_list/?year=2026&month=11"
+    },
+    {
+      "name": "admin activation",
+      "detail": "administrator activates pending user through Django admin; user can then login",
+      "url": "http://127.0.0.1:8011/admin/accounts/user/?q=qa-pending"
+    }
+  ],
+  "pageErrors": [],
+  "serverErrors": []
+}

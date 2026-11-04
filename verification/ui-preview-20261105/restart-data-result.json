@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "business_tables_compared": 23,
+  "row_counts_and_digests_identical": true,
+  "database_reset": false
+}

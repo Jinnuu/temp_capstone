@@ -1,0 +1,12 @@
+{
+  "existing_container_count": 17,
+  "network_count": 22,
+  "volume_count": 55,
+  "image_count": 55,
+  "port_8011_before": "available",
+  "existing_snp_login_http": {
+    "8000": 200,
+    "8007": 200
+  },
+  "raw_audit": "Local only: .ui-preview/audit (not committed)"
+}

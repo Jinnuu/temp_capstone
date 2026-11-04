@@ -4,7 +4,7 @@
 
 ## 환경과 보호
 
-- Docker `capstone-web:sprint7`, Django 5.2.8, 기존 AI 패키지/모델 그대로. 저장소 read-only bind, 임시 `/tmp` SQLite, 네트워크 격리 MariaDB 10.6 Unix socket.
+- Docker `capstone-web:sprint7`, Django 6.0.3, 기존 AI 패키지/모델 그대로. 저장소 read-only bind, 임시 `/tmp` SQLite, 네트워크 격리 MariaDB 10.6 Unix socket.
 - 브라우저는 실제 Playwright Chromium, 1920×1080 데스크톱과 768×1024 태블릿. 외부 CDN 없이 동작.
 - 작업 전 미커밋 코드는 없었고 사용자 ZIP 한 개가 미추적 상태였다. ZIP는 그대로 보존·Git 제외했다.
 - `snp-ui-modes-20261105` 앱과 동명의 새 네트워크, `snp-ui-db-20261105` DB만 작업용으로 생성했다. 기존 서비스/볼륨/네트워크는 변경하지 않았다.
@@ -93,7 +93,7 @@ SPRINT7_DB_SOCKET_DIR=/tmp/작업전용소켓 bash scripts/verify_integration.sh
 - 관리자 화면은 기본 Django 레이아웃을 유지한 별도 최소 테마다.
 - 원래 폼/문서의 데이터 표시·예외 문구는 보존했으므로 모든 개별 템플릿을 새 컴포넌트로 재작성한 것은 아니다. 화면별 모든 CRUD/필터 조합을 E2E로 전수 통과했다고 주장하지 않는다.
 - 비교 창은 축소 조회 전용. 저장/업로드는 일반 화면에서 수행한다.
-- 실제 서비스 실행·배포는 하지 않았다. 새 브랜치만 push하며 sprint-final로 병합하지 않는다.
+- 초기 UI 개발 검증에서는 실제 서비스를 배포하지 않았다. 이후 별도 사용자 승인으로 독립8011 시범 서비스를 구성했다. 최신 실행 상태는 DOCKER_PREVIEW_TEST_REPORT.md 참조. sprint-final로 병합하지 않는다.
 
 ## 검증용 앱 생성 예시
 

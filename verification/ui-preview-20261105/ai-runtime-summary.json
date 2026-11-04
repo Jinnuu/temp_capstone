@@ -1,0 +1,6 @@
+{
+  "sbert_fallback_observed": true,
+  "offline_mode": true,
+  "model_retraining": false,
+  "synthetic_input": true
+}

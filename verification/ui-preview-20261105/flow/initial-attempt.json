@@ -1,0 +1,42 @@
+{
+  "error": "TimeoutError: page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+  "steps": [
+    {
+      "name": "login/dashboard",
+      "detail": "authenticated navigation",
+      "url": "http://127.0.0.1:8011/procurement/workflow/"
+    },
+    {
+      "name": "supplier registry",
+      "detail": "create two profiles, explicitly reuse supplier account, reload",
+      "url": "http://127.0.0.1:8011/procurement/suppliers/"
+    },
+    {
+      "name": "ingredient CRUD/search",
+      "detail": "created two kg items, search and saved edit forms reread",
+      "url": "http://127.0.0.1:8011/inventory/ingredients/2/update/"
+    },
+    {
+      "name": "explicit packaging",
+      "detail": "5kg/can 500won, 3kg/tray 600won; master base prices deliberately differ",
+      "url": "http://127.0.0.1:8011/procurement/workflow/specs/"
+    },
+    {
+      "name": "recipe create/edit/reload",
+      "detail": "100g/ingredient retained after legacy menu editor resave",
+      "url": "http://127.0.0.1:8011/meals/menu_list/"
+    },
+    {
+      "name": "Excel uploads",
+      "detail": "recipe XLSX and mealplan XLSX submitted from actual forms",
+      "url": "http://127.0.0.1:8011/meals/mealplan_list/"
+    },
+    {
+      "name": "daily/weekly editing",
+      "detail": "saved/reloaded Friday dinner; actual CSRF-protected next-Monday add and remove",
+      "url": "http://127.0.0.1:8011/meals/mealplan/weekly/?start_date=2026-11-02"
+    }
+  ],
+  "pageErrors": [],
+  "serverErrors": []
+}
