@@ -29,7 +29,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = os.environ.get('SNP_PREVIEW_HTTPS') == '1'
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
-# Proxy overwrites X-Forwarded-Proto from its own connection; no arbitrary client trust.
+# Proxy sets HTTPS for the exact Cloudflare public hostname, HTTP for local
+# access; arbitrary incoming X-Forwarded-Proto is never trusted.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'same-origin'

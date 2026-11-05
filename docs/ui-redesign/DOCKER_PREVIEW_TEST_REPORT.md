@@ -79,3 +79,7 @@ SQLite와 별개로 **실제 시범 MariaDB에서 업무 브라우저 시나리�
 6. 전체 호스트 재부팅은 하지 않았다. 실제 수행한 검증은 시범 Compose3서비스 재시작이며 restart unless-stopped 정책을 설정했다.
 
 시범용 메뉴/식단/발주/검수 조작은 가능하다. 운영 서비스 전환 또는 상용 배포 완료로 판정하지 않는다. 원격 반영은 UI 실험 브랜치만 대상으로 하며 PR/안정 브랜치 병합은 수행하지 않는다.
+
+## 후속 HTTPS 접속 수정
+
+기존 사용자가 구성한 ui.jinnuu.site 경로를 조사하여 Host400 및 HTTPS/CSRF 설정을 수정했다. 최신 공개 도메인 검증은 [CLOUDFLARE_FIX_REPORT.md](CLOUDFLARE_FIX_REPORT.md) 참조. 위 HTTP 경고 기록은 최초 Preview 검증 시점의 결과다.

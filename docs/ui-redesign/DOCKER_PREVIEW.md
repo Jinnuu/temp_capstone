@@ -4,6 +4,7 @@
 
 ## 접속
 
+- 공개 HTTPS: **https://ui.jinnuu.site/**
 - 같은 서버: **http://127.0.0.1:8011/**
 - Tailscale 연결된 기기: **http://100.65.149.96:8011/**
 - 서버 IP 경로: **http://14.138.108.72:8011/** (외부 방화벽/라우팅은 별도 확인 필요)
@@ -15,7 +16,7 @@
 cat .ui-preview/credentials.txt
 ```
 
-포트는 8011을 신규로 사용한다. 현재 HTTP이므로 외부 공개보다는 Tailscale 또는 SSH 터널을 권장한다. HTTPS 설정 전 Secure 쿠키를 강제로 켜면 HTTP 로그인은 유지되지 않는다. 기존 Cloudflare Tunnel/DNS/호스트명은 변경하지 않았다. 별도 호스트명 사용 시 새 ingress를 승인된 방식으로 추가하고 프록시 TLS 전달과 CSRF/Host allowlist를 함께 검증해야 한다.
+포트는8011을 사용한다. 공개 HTTPS는 기존 Cloudflare Tunnel의 `ui.jinnuu.site → http://127.0.0.1:8011` 경로를 사용한다. 터널 자체는 변경하지 않았다. 해당 도메인은 Django Host/CSRF 허용 목록과 Nginx의 고정 HTTPS 원본 정책으로 처리하고, 공개 쿠키에는 Secure를 적용한다. 기존 localhost/Tailscale HTTP 로그인도 유지한다. 후속 장애 원인·수정·실제 브라우저 증거는 [Cloudflare 수정 보고서](CLOUDFLARE_FIX_REPORT.md) 참조.
 
 ## 구성
 

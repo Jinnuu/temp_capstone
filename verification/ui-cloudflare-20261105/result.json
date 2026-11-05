@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "steps": [
+    "HTTPS form login and dashboard",
+    "HTTPS session and CSRF cookies Secure",
+    "all three modes and page/reload persistence",
+    "same-origin JS and CSS loaded",
+    "menu and ingredient search APIs",
+    "HTTPS CSRF-protected idempotent POST (existing menu only)",
+    "missing CSRF token rejected",
+    "Django recognizes HTTPS: token alone without Origin/Referer rejected",
+    "three live HTTPS comparison frames",
+    "existing localhost and Tailscale HTTP logins retained"
+  ],
+  "pageErrors": [],
+  "serverErrors": [],
+  "mixedContentRequests": []
+}

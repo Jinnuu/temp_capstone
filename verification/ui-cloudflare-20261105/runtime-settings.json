@@ -1,0 +1,17 @@
+{
+  "DEBUG": false,
+  "ALLOWED_HOSTS": [
+    "localhost",
+    "127.0.0.1",
+    "100.65.149.96",
+    "14.138.108.72",
+    "ui.jinnuu.site"
+  ],
+  "CSRF_TRUSTED_ORIGINS": [
+    "https://ui.jinnuu.site"
+  ],
+  "SECURE_PROXY_SSL_HEADER": [
+    "HTTP_X_FORWARDED_PROTO",
+    "https"
+  ]
+}

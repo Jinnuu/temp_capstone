@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "unchanged_containers_including_preview_db": 18,
+  "changed_protected_containers": [],
+  "cloudflared_pid": 1816,
+  "cloudflared_private_network": false,
+  "cloudflared_configuration_version": 27,
+  "ui_tunnel_origin": "http://127.0.0.1:8011",
+  "tunnel_config_modified": false,
+  "http_login_status": {
+    "capstone.jinnuu.site": 200,
+    "sprint7.jinnuu.site": 200,
+    "demo.jinnuu.site": 200,
+    "ui.jinnuu.site": 200
+  },
+  "before": {
+    "local": 200,
+    "ui_host_header": 400,
+    "public_https": 400
+  },
+  "after": {
+    "local": 200,
+    "ui_host_header": 200,
+    "public_https": 200
+  },
+  "urllib_probe_note": "Python urllib probes received HTTP403 (exact cause unconfirmed); curl and real Chromium passed. No bypass setting was changed.",
+  "business_table_comparison": {
+    "baseline": "previous preview verification db-after-restart.json",
+    "tables": 20,
+    "changed": [],
+    "account_tables_excluded": "Login updates and sessions are expected in preview only."
+  }
+}
