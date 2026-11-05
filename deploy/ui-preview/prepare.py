@@ -14,7 +14,7 @@ if not 1024 <= args.port <= 65535:
 root = Path(__file__).resolve().parents[2] / '.ui-preview'
 root.mkdir(mode=0o700, exist_ok=True)
 root.chmod(0o700)
-for key in ['db_password', 'db_root_password', 'django_secret', 'demo_password', 'recovery_cache_password']:
+for key in ['db_password', 'db_root_password', 'django_secret', 'demo_password', 'preview_admin_password', 'recovery_cache_password']:
     target = root / key
     if not target.exists():
         with target.open('x') as out:
@@ -31,8 +31,4 @@ if not env.exists():
         sock.bind((args.bind, args.port))
     env.write_text(f'SNP_PREVIEW_BIND={args.bind}\nSNP_PREVIEW_PORT={args.port}\nSNP_PREVIEW_ALLOWED_HOSTS={args.hosts}\n')
     env.chmod(0o600)
-credentials = root / 'credentials.txt'
-if not credentials.exists():
-    credentials.write_text('Preview-only accounts: verify-admin / verify-nutritionist / verify-supplier\nPassword: ' + (root / 'demo_password').read_text())
-    credentials.chmod(0o600)
-print('Preview secrets ready; existing files preserved. Credentials: .ui-preview/credentials.txt')
+print('Preview secrets ready; existing files preserved. Administrator and demo secrets are separate; values are never printed.')

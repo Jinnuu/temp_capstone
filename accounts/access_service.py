@@ -1,12 +1,53 @@
 """Audited, serialized account transitions; no password/email/legacy role writes."""
 from django.contrib.auth.models import Group
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
+from contextlib import contextmanager
 from .models import User,AccessAudit,AccessPolicy
 from .rbac import PREFIX,ROLE_LABELS,roles,can,account_can_login,approval_mode,is_main,is_admin_identity
 
 
 class AccessRejected(ValidationError):pass
+
+
+def _supplier_target_allowed(actor, target):
+    if not can(actor, 'catalog.write'):
+        raise AccessRejected('업체 관리 권한이 없습니다.', code='supplier_permission')
+    if target and ((not is_main(actor) and is_admin_identity(target)) or
+                   (target.is_superuser and not actor.is_superuser)):
+        raise AccessRejected('이 관리자 계정에 연결된 업체는 변경할 수 없습니다.', code='protected_admin_identity')
+
+
+def protect_supplier_target(actor, target):
+    """Read-side guard; mutation paths recheck under the shared policy lock."""
+    try:
+        _supplier_target_allowed(actor, target)
+    except AccessRejected as exc:
+        audit(actor, target, 'supplier.access_denied', result='DENIED', reason=exc.code)
+        raise PermissionDenied(exc.messages[0]) from exc
+
+
+@contextmanager
+def supplier_account_change(actor, target_id=None, *, action='supplier.profile_changed'):
+    """Serialize with role changes; denied audit survives mutation rollback.
+
+    The caller must acquire profile locks *after* entering this context.
+    No contact data, credentials or password hashes are included in audit payloads.
+    """
+    target = None
+    try:
+        with transaction.atomic():
+            policy_lock()
+            actor = User.objects.select_for_update().get(pk=actor.pk)
+            target = User.objects.select_for_update().get(pk=target_id) if target_id else None
+            _supplier_target_allowed(actor, target)
+            yield target
+            audit(actor, target, action, after={'changed': True})
+    except AccessRejected as exc:
+        audit(actor, target, 'supplier.change_denied', result='DENIED', reason=exc.code)
+        raise PermissionDenied(exc.messages[0]) from exc
 
 
 def snapshot(user):
@@ -35,7 +76,8 @@ def set_roles(user,names):
 def register(user, signup_type="DIETITIAN"):
     with transaction.atomic():
         user.rbac_managed=True
-        user.account_state='ACTIVE' if approval_mode()=='auto' else 'PENDING'
+        automatic = approval_mode() == 'auto' and not getattr(settings, 'ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL', False)
+        user.account_state='ACTIVE' if automatic else 'PENDING'
         user.is_active=user.account_state=='ACTIVE'
         user.save();set_roles(user,{signup_type})
         audit(user,user,'signup.'+('auto_approved' if user.is_active else 'pending'),after=snapshot(user))

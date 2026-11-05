@@ -1,0 +1,18 @@
+Found 1 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F
+======================================================================
+FAIL: test_empty_month_has_zero_items_not_example_twelve (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_empty_month_has_zero_items_not_example_twelve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 265, in test_empty_month_has_zero_items_not_example_twelve
+    self.assertContains(response,'총 품목 수: <span class="val">0</span>',html=False)
+AssertionError: False is not true : Couldn't find '총 품목 수: <span class="val">0</span>' in the following response
+[isolated response body omitted to avoid recording temporary CSRF tokens]
+
+----------------------------------------------------------------------
+Ran 1 test in 0.061s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...

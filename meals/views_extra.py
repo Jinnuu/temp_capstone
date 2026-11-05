@@ -7,6 +7,7 @@ from datetime import datetime, date
 import openpyxl
 from django.contrib import messages
 from django.db import transaction
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
 from .models import DietMenu, DietPlan, Menu
@@ -180,11 +181,16 @@ def _save_grouped_mealplans(grouped):
     plan_count = 0
     menu_count = 0
     for (target_date, meal_type), payload in grouped.items():
+        existing = DietPlan.objects.select_for_update().filter(target_date=target_date, meal_type=meal_type).first()
+        if existing and existing.is_served:
+            raise ValidationError("이미 사용 완료된 식단은 업로드로 변경할 수 없습니다.")
         plan, _ = DietPlan.objects.update_or_create(
             target_date=target_date,
             meal_type=meal_type,
             defaults={"headcount": payload.get("headcount") or 0, "final_headcount": None, "headcount_confirmed_at": None, "is_confirmed": False},
         )
+        from procurement.workflow import invalidate_plans
+        invalidate_plans([plan.pk])
         DietMenu.objects.filter(diet_plan=plan).delete()
         seen = set()
         for menu_name in sorted(payload.get("menus", []), key=lambda name: get_menu_priority_and_category(name)[0]):

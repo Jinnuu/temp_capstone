@@ -1,0 +1,26 @@
+{
+  "rows": [
+    {
+      "mode": "green",
+      "method": "CSS body zoom 200%, not browser native zoom",
+      "viewport": 1920,
+      "documentWidth": 1920,
+      "hasHeading": true,
+      "noBodyOverflow": true,
+      "keyboardReachesControls": true
+    },
+    {
+      "mode": "civic",
+      "method": "CSS body zoom 200%, not browser native zoom",
+      "viewport": 1920,
+      "documentWidth": 1920,
+      "hasHeading": true,
+      "noBodyOverflow": true,
+      "keyboardReachesControls": true
+    }
+  ],
+  "limitations": [
+    "Only dashboard smoke checks",
+    "No native browser zoom, screen-reader, contrast or WCAG acceptance certification"
+  ]
+}

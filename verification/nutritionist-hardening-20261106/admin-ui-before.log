@@ -1,0 +1,26 @@
+Found 2 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+FF
+======================================================================
+FAIL: test_native_admin_does_not_allow_served_menu_edit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_native_admin_does_not_allow_served_menu_edit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 235, in test_native_admin_does_not_allow_served_menu_edit
+    self.assertEqual(self.client.get(reverse('admin:meals_menu_change',args=[self.menu.pk])).status_code,403)
+AssertionError: 200 != 403
+
+======================================================================
+FAIL: test_supplier_does_not_have_empty_internal_navigation_groups (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_supplier_does_not_have_empty_internal_navigation_groups)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 259, in test_supplier_does_not_have_empty_internal_navigation_groups
+    self.assertNotContains(r,'01</span> 식단·레시피')
+AssertionError: 1 != 0 :'01</span> 식단·레시피' unexpectedly found in the following response
+[isolated response body omitted to avoid recording temporary CSRF tokens]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.164s
+
+FAILED (failures=2)
+Destroying test database for alias 'default'...

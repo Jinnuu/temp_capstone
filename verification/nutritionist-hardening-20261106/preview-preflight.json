@@ -1,0 +1,1 @@
+{"database": {"engine": "django.db.backends.mysql", "name": "snp_ui_preview", "host": "db"}, "approval_mode": "auto", "users": 9, "admin_name_collision": false, "main": [{"pk": 1, "username": "verify-admin", "active": true, "staff": true, "superuser": true, "state": "ACTIVE"}]}

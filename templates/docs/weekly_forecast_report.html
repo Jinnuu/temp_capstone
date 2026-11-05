@@ -260,7 +260,9 @@
                         <th style="width: 70px;">일자</th>
                         <th style="width: 60px;">끼니</th>
                         <th>식단(메뉴명)</th>
-                        <th style="width: 80px;">예측 식수</th>
+                        <th style="width: 80px;">AI 예측 식수</th>
+                        <th>수동 예상 식수</th>
+                        <th>최종 확정 식수</th>
                         <th style="width: 80px;">실제 식수</th>
                         <th style="width: 80px;">오차율(%)</th>
                     </tr>
@@ -280,27 +282,29 @@
                             -
                             {% endfor %}
                         </td>
-                        <td style="font-weight: 600;">{{ item.predicted_count }}</td>
-                        <td style="font-weight: 600;">{{ item.actual_count|default:"-" }}</td>
+                        <td style="font-weight: 600;">{{ item.predicted_count|default_if_none:"미생성" }}</td>
+                        <td>{{ item.manual_count }}</td>
+                        <td>{{ item.final_count|default_if_none:"미확정" }}</td>
+                        <td style="font-weight: 600;">{{ item.actual_count|default_if_none:"미입력" }}</td>
                         <td
                             class="{% if item.error_rate > 0 %}error-up{% elif item.error_rate < 0 %}error-down{% else %}error-zero{% endif %}">
-                            {% if item.actual_count != None %}
+                            {% if item.error_rate != None %}
                             {{ item.error_rate|floatformat:1 }}%
                             {% else %}
-                            -
+                            산출 불가
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" style="padding: 50px; color: #888;">해당 기간의 예측 데이터가 없습니다.</td>
+                        <td colspan="9" style="padding: 50px; color: #888;">해당 기간의 예측 데이터가 없습니다.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
             <div style="margin-top: 40px; text-align: center; font-size: 0.9rem;">
-                <p>위와 같이 AI 수요 예측 및 실적 대조 결과를 보고합니다.</p>
+                <p>AI 예측·수동 예상·최종 확정·실측을 구분합니다. 실측 미입력 또는 0명인 경우 백분율 오차는 산출하지 않습니다.</p>
                 <div style="margin-top: 50px; display: flex; justify-content: center; gap: 80px;">
                     <span>담당자: ______________ (인)</span>
                     <span>확인자: ______________ (인)</span>

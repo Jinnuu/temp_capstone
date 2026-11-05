@@ -1,3 +1,4 @@
+from .money import recorded_amount, accepted_amount
 import calendar
 import uuid
 from collections import defaultdict
@@ -17,6 +18,7 @@ from forecasting.models import AttendancePrediction
 from inventory.models import Ingredient, IngredientCategory, InventoryLog, SupplySpecification, StockLot
 from meals.models import DietPlan, Menu, Recipe
 from accounts.supplier_identity import eligible_order_accounts
+from accounts.access_service import protect_supplier_target, supplier_account_change
 from .models import ProcurementPlan, GoodsInspection, PurchaseOrder, OrderItem
 from .workflow import (build_preview, create_plan, confirm_orders, inspect_item, record_inventory,
                        save_headcount, invalidate_plans, current_stock)
@@ -163,6 +165,8 @@ def specifications(request,pk=None):
 def suppliers(request,pk=None):
     from accounts.supplier_identity import eligible_order_accounts
     user=get_object_or_404(eligible_order_accounts().filter(role='SUPPLIER'),pk=pk) if pk else None
+    if user and request.method != 'POST':
+        protect_supplier_target(request.user, user)
     initial={name:getattr(user,name) for name in ['username','name','phone_number']} if user else {}
     form=SupplierForm(request.POST or None,initial=initial)
     if request.method=='POST' and form.is_valid():
@@ -170,8 +174,8 @@ def suppliers(request,pk=None):
         if get_user_model().objects.filter(username=data['username']).exclude(pk=user.pk if user else None).exists():
             form.add_error('username','중복된 업체 식별자입니다.')
         else:
-            with transaction.atomic():
-                user=user or get_user_model()(role='SUPPLIER')
+            with supplier_account_change(request.user, user.pk if user else None) as locked:
+                user=locked or get_user_model()(role='SUPPLIER')
                 for key,value in data.items():setattr(user,key,value)
                 if not user.pk:user.set_unusable_password()
                 user.save()
@@ -206,12 +210,20 @@ def recipe_detail(request,pk=None):
     recipe=get_object_or_404(Recipe,pk=pk) if pk else None
     form=RecipeDetailForm(request.POST or None,instance=recipe)
     if request.method=='POST' and form.is_valid():
-        with transaction.atomic():
-            saved=form.save()
-            notes=request.POST.get('cooking_notes','')
-            Menu.objects.filter(pk=saved.menu_id).update(cooking_notes=notes)
-            invalidate_plans()
-        return redirect('procurement:workflow_recipes')
+        from meals.change_policy import guard_menu_change, mark_menu_change
+        try:
+            with transaction.atomic():
+                affected = {form.cleaned_data['menu'].pk}
+                if recipe:
+                    affected.add(recipe.menu_id)
+                guard_menu_change(affected)
+                saved=form.save()
+                notes=request.POST.get('cooking_notes','')
+                Menu.objects.filter(pk=saved.menu_id).update(cooking_notes=notes)
+                mark_menu_change(affected)
+            return redirect('procurement:workflow_recipes')
+        except ValidationError as exc:
+            _errors(form, exc)
     return render(request,'workflow/recipes.html',{'title':'레시피 단위·조리 정보','form':form,'recipe':recipe,'recipes':Recipe.objects.select_related('menu','ingredient').order_by('menu__name','ingredient__name')})
 
 
@@ -251,7 +263,7 @@ def settlement(request):
     for supplier in suppliers:
         items=OrderItem.objects.filter(purchase_order__supplier=supplier,target_date__range=(start,end))
         inspections=GoodsInspection.objects.filter(order_item__purchase_order__supplier=supplier,inspected_at__date__range=(start,end)).select_related('order_item')
-        ordered=items.aggregate(amount=Sum('estimated_price'))['amount'] or 0
-        inspected_value=sum((Decimal(x.order_item.estimated_price)*x.accepted_qty/x.order_item.required_qty for x in inspections if x.order_item.required_qty),Decimal('0'))
+        ordered=sum((recorded_amount(item) for item in items), Decimal('0'))
+        inspected_value=sum((accepted_amount(x.order_item, x.accepted_qty) for x in inspections if x.order_item.required_qty),Decimal('0'))
         rows.append({'supplier':supplier,'ordered_amount':ordered,'inspected_amount':inspected_value,'uninspected':items.filter(inspection__isnull=True).count()})
     return render(request,'workflow/settlement.html',{'rows':rows,'start':start,'end':end,'suppliers':eligible_order_accounts().filter(role='SUPPLIER').order_by('name')})

@@ -254,10 +254,10 @@
 
     <!-- 요약 카드 -->
     <div class="summary-card">
-      <div>총 품목 수: <span class="val">{{ item_details|length|default:"12" }}</span> 건</div>
+      <div>총 품목 수: <span class="val">{{ item_details|length }}</span> 건</div>
       <div>총 소요/발주량: <span class="val">{{ grand_total_qty }}</span></div>
-      <div>공급가액: <span class="val">{{ subtotal }}</span> 원</div>
-      <div>부가세: <span class="val">{{ vat }}</span> 원</div>
+      <div>공급가액(미확정): <span class="val">{{ subtotal }}</span> 원</div>
+      <div>부가세(미확정): <span class="val">{{ vat }}</span> 원</div>
       <div>발주 금액 합계: <span class="val" style="color: #d63384;">{{ grand_total_amount }}</span> 원</div>
     </div>
 
@@ -280,7 +280,7 @@
           {% for sup in supplier_summary %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td class="text-left fw-bold">{{ sup.supplier_name }}</td>
+            <td class="text-left fw-bold">{{ sup.supplier_name }} <small>(거래처 #{{ sup.supplier_id }})</small></td>
             <td>{{ sup.item_count }} 건</td>
             <td class="text-right">{{ sup.total_qty }}</td>
             <td class="text-right fw-bold">{{ sup.total_amount }}</td>
@@ -343,7 +343,7 @@
           <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ item.target_date }}</td>
-            <td class="text-left">{{ item.supplier_name }}</td>
+            <td class="text-left">{{ item.supplier_name }} <small>(거래처 #{{ item.supplier_id }})</small></td>
             <td>{{ item.category }}</td>
             <td class="text-left fw-bold">{{ item.ingredient_name }}</td>
             <td>{{ item.unit }}</td>

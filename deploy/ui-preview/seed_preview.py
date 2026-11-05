@@ -1,19 +1,23 @@
-"""Idempotent synthetic account bootstrap for this new preview DB only."""
+"""Idempotent account bootstrap; existing passwords and renamed MAIN survive."""
 import os
 from pathlib import Path
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.preview_settings')
 django.setup()
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.core.management import CommandError
+from accounts.preview_bootstrap import bootstrap_accounts
+
 if os.environ.get('SNP_UI_PREVIEW') != '1' or settings.DATABASES['default']['NAME'] != 'snp_ui_preview' or settings.DATABASES['default']['HOST'] != 'db':
     raise RuntimeError('Refusing to seed outside the isolated preview database')
-password = Path('/run/secrets/demo_password').read_text().strip()
-with transaction.atomic():
-    for name, label, role, staff in [('verify-admin','시범 관리자','ADMIN',True),('verify-nutritionist','시범 영양사','NUTRITIONIST',False),('verify-supplier','시범 공급업체','SUPPLIER',False)]:
-        user, created = get_user_model().objects.get_or_create(username=name, defaults={'name':label,'role':role,'is_staff':staff,'is_superuser':staff,'is_active':True})
-        if created:
-            user.set_password(password)
-            user.save()
-print('Preview accounts ready; existing users and business records preserved.')
+
+
+def read_secret(name):
+    try:
+        return (Path('/run/secrets') / name).read_text()
+    except OSError:
+        raise CommandError('Required preview bootstrap secret unavailable; no credentials were logged.') from None
+
+
+bootstrap_accounts(read_secret)
+print('Preview accounts ready; existing users, credentials and business records preserved.')

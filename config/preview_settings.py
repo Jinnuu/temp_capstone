@@ -53,3 +53,6 @@ EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = os.environ.get('SNP_DEFAULT_FROM_EMAIL','')
 # Explicit guard used by the operator-only confirmed-signup command.
 SNP_UI_PREVIEW = True
+
+# Kept explicit so operators can stage/approve public-signup policy separately.
+ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL = os.environ.get('SNP_PUBLIC_SIGNUP_REQUIRES_APPROVAL', '0') == '1'

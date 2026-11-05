@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "steps": [
+    "SUB cannot edit supplier-admin through either legacy POST with valid CSRF",
+    "rejected edits preserve original account and profile",
+    "HTML and JSON preserve AI/manual360/final351/actual-null semantics",
+    "actual attendance report Excel downloads from real browser",
+    "served meal upload fails with original headcounts and menu intact",
+    "order detail never fabricates a 10-percent payable amount",
+    "Green/Civic summary text is at least14px and mobile banner photo at most73px",
+    "supplier navigation has no empty internal groups"
+  ],
+  "pageErrors": [],
+  "scope": "task tmpfs SQLite only"
+}

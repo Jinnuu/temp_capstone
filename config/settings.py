@@ -119,6 +119,8 @@ ACCOUNT_RECOVERY_TIMEOUT = 1800
 PASSWORD_RESET_TIMEOUT = 1800
 
 # Production retains approval unless explicitly configured otherwise.
+# Explicit opt-in for public deployments; does not silently transition Preview.
+ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL = os.environ.get('ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL', '0') == '1'
 ACCOUNT_APPROVAL_MODE = os.environ.get('ACCOUNT_APPROVAL_MODE', 'manual')
 if ACCOUNT_APPROVAL_MODE not in ('auto', 'manual'):
     from django.core.exceptions import ImproperlyConfigured

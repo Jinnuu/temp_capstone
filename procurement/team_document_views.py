@@ -1,3 +1,4 @@
+from .money import recorded_amount, TAX_PENDING
 """Team document layouts using preserved workflow semantics."""
 from collections import defaultdict
 from datetime import date, datetime, timedelta
@@ -69,14 +70,15 @@ def monthly_settlement_view(request):
         category = item.ingredient.category or "기타"
         qty = item.required_qty
         unit_price = item.order_unit_price or item.ingredient.unit_price or 0
-        amount = item.estimated_price
+        amount = recorded_amount(item)
         unit_price = Decimal(amount) / qty if qty else Decimal("0")
 
+        supplier_agg[supplier_user.pk]["supplier_id"] = supplier_user.pk
         # Supplier agg
-        supplier_agg[sup_name]["supplier_name"] = sup_name
-        supplier_agg[sup_name]["item_count"] += 1
-        supplier_agg[sup_name]["total_qty"][item.ingredient.unit] += qty
-        supplier_agg[sup_name]["total_amount"] += amount
+        supplier_agg[supplier_user.pk]["supplier_name"] = sup_name
+        supplier_agg[supplier_user.pk]["item_count"] += 1
+        supplier_agg[supplier_user.pk]["total_qty"][item.ingredient.unit] += qty
+        supplier_agg[supplier_user.pk]["total_amount"] += amount
 
         # Category agg
         category_agg[category]["category_name"] = category
@@ -88,6 +90,7 @@ def monthly_settlement_view(request):
         grand_total_amount += amount
 
         item_details.append({
+            "supplier_id": supplier_user.pk,
             "supplier_name": sup_name,
             "category": category,
             "ingredient_name": item.ingredient.name,
@@ -108,7 +111,7 @@ def monthly_settlement_view(request):
     for summary in supplier_summary + category_summary:
         summary['total_qty'] = quantities(summary['total_qty'])
     # Tax-inclusive prices, exemptions and invoicing are not specified by existing data.
-    subtotal = vat = '확인 필요 (세금 기준 미등록)'
+    subtotal = vat = TAX_PENDING
 
     context = {
         "year": year,

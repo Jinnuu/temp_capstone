@@ -1,0 +1,558 @@
+[
+  {
+    "Id": "14dbc5b3a2c15921e024ffc372b929c4aea409c97db45aa1392d39b3cd3d4b44",
+    "Name": "/snp-ui-preview-recovery-mail-1",
+    "Image": "sha256:6ef0ff608cf86acec9caf014811ad5e166b2095cb5dfd12112fd29c37c5a718c",
+    "Created": "2026-11-05T14:22:17.96691896Z",
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+        "Destination": "/run/secrets/django_secret",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+        "Destination": "/run/secrets/smtp_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ],
+    "StartedAt": "2026-11-05T14:22:28.483743507Z",
+    "Networks": {
+      "snp-ui-preview_ingress": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-recovery-mail-1",
+          "recovery-mail"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "8d7b308ac0b591ea1d10b59343a0aabb8da69b79f3c8ff87b101dad7a16d85d5",
+        "EndpointID": "d22cb7d52fd30085c79978df5ea21033e12b8eb29fab566dbedacc1a37c78db3",
+        "Gateway": "192.168.96.1",
+        "IPAddress": "192.168.96.2",
+        "MacAddress": "8e:d6:15:78:06:12",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-recovery-mail-1",
+          "recovery-mail",
+          "14dbc5b3a2c1"
+        ]
+      },
+      "snp-ui-preview_preview": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-recovery-mail-1",
+          "recovery-mail"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+        "EndpointID": "4e0573336409f779d6e89cb76a1f47d1a9b558c85df659c11a38ecb7bb1d24be",
+        "Gateway": "",
+        "IPAddress": "192.168.80.6",
+        "MacAddress": "06:3b:21:a8:06:0e",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-recovery-mail-1",
+          "recovery-mail",
+          "14dbc5b3a2c1"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "0eba2f38784d2b8b9fb6ea18e73a75aef38fb2813fd10f34e944cb13568b676a",
+    "Name": "/snp-ui-preview-proxy-1",
+    "Image": "sha256:545c0da80b05a7de929667c999fd8db73fe5ecda4891a3198a6cb3bc5cd2e407",
+    "Created": "2026-11-05T14:22:17.828138353Z",
+    "Mounts": [],
+    "StartedAt": "2026-11-05T14:22:28.478910076Z",
+    "Networks": {
+      "snp-ui-preview_ingress": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-proxy-1",
+          "proxy"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "8d7b308ac0b591ea1d10b59343a0aabb8da69b79f3c8ff87b101dad7a16d85d5",
+        "EndpointID": "d0266e2608a8690235482991ace9d001117b143e492ed3efa2450c31c9f558dd",
+        "Gateway": "192.168.96.1",
+        "IPAddress": "192.168.96.3",
+        "MacAddress": "e2:53:7d:b3:d4:2b",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-proxy-1",
+          "proxy",
+          "0eba2f38784d"
+        ]
+      },
+      "snp-ui-preview_preview": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-proxy-1",
+          "proxy"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+        "EndpointID": "9b13121bd2f502e74c88f7f81bacae040d93cb45c2c9720ab9fdf3a2fd00dcd8",
+        "Gateway": "",
+        "IPAddress": "192.168.80.5",
+        "MacAddress": "5e:8e:10:11:7b:4a",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-proxy-1",
+          "proxy",
+          "0eba2f38784d"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "2b6bf3a60510eb21fd40b8037299eb6dc0b0032a8926c624f76fcc429d407161",
+    "Name": "/snp-ui-preview-web-1",
+    "Image": "sha256:6ef0ff608cf86acec9caf014811ad5e166b2095cb5dfd12112fd29c37c5a718c",
+    "Created": "2026-11-05T14:21:39.758070047Z",
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+        "Destination": "/run/secrets/django_secret",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/demo_password",
+        "Destination": "/run/secrets/demo_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+        "Destination": "/run/secrets/smtp_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ],
+    "StartedAt": "2026-11-05T14:21:41.536589373Z",
+    "Networks": {
+      "snp-ui-preview_preview": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-web-1",
+          "web"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+        "EndpointID": "d97b7bc1a9ba33385aa9e85e03ebb746f03fa45e88558914e111b4a8e7e0f256",
+        "Gateway": "",
+        "IPAddress": "192.168.80.3",
+        "MacAddress": "f2:7f:fe:ad:61:ef",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-web-1",
+          "web",
+          "2b6bf3a60510"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "8649463dd9fa5862904a9c6dd6b2e998ca1e0f74d5a351e63a959da10213b0d5",
+    "Name": "/snp-ui-preview-recovery-cache-1",
+    "Image": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "Created": "2026-11-05T07:26:07.589737935Z",
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ],
+    "StartedAt": "2026-11-05T07:26:09.996291993Z",
+    "Networks": {
+      "snp-ui-preview_preview": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-recovery-cache-1",
+          "recovery-cache"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+        "EndpointID": "e08f561f5cc202985dbb40b16d0beec9aa70123c0587869be0574e5de9ed80b0",
+        "Gateway": "",
+        "IPAddress": "192.168.80.2",
+        "MacAddress": "1a:73:a1:8c:a0:cc",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-recovery-cache-1",
+          "recovery-cache",
+          "8649463dd9fa"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "8241a958a52fa5c36b2b21eaeb0c2bf6c9470a628aa731f2e2da01a30dad3244",
+    "Name": "/snp-ui-preview-db-1",
+    "Image": "sha256:6055d4ee6a6045626442cafe4feaf7419e878c65baf3af658265e24114af1cd7",
+    "Created": "2026-11-04T18:33:36.427519372Z",
+    "Mounts": [
+      {
+        "Type": "volume",
+        "Name": "snp-ui-preview_preview_db",
+        "Source": "/var/lib/docker/volumes/snp-ui-preview_preview_db/_data",
+        "Destination": "/var/lib/mysql",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_root_password",
+        "Destination": "/run/secrets/db_root_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ],
+    "StartedAt": "2026-11-04T18:57:13.430932197Z",
+    "Networks": {
+      "snp-ui-preview_preview": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "snp-ui-preview-db-1",
+          "db"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+        "EndpointID": "469fc99caa1c2f5ae06256966ee113e518e4550f399eda919edb2b9ff11dcc53",
+        "Gateway": "",
+        "IPAddress": "192.168.80.4",
+        "MacAddress": "0e:e9:5a:b5:5a:ce",
+        "IPPrefixLen": 20,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-ui-preview-db-1",
+          "db",
+          "8241a958a52f"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "6288dfabbd22746023e281107ddfb9f27ae25f2009536afb9861b047bd55f9c3",
+    "Name": "/snp-presentation",
+    "Image": "sha256:a4eebcfde418886215df694c29d592e8742b9fdb54d3b3cfb9acd8871fca140a",
+    "Created": "2026-10-18T15:02:31.994561617Z",
+    "Mounts": [],
+    "StartedAt": "2026-10-18T15:39:31.331904543Z",
+    "Networks": {
+      "nextcloud-project_default": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": null,
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c7797da1cfc06185fbeaa3b9c8d009190e19b070f897f5102f8715ee57aeece4",
+        "EndpointID": "b78619a785b185bfa6d7efab78b3ed3661953d3435a8cbc15a129f606f3ac3db",
+        "Gateway": "172.18.0.1",
+        "IPAddress": "172.18.0.2",
+        "MacAddress": "f2:7f:2d:d3:d7:14",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-presentation",
+          "6288dfabbd22"
+        ]
+      },
+      "proxy-network": {
+        "IPAMConfig": {},
+        "Links": null,
+        "Aliases": [],
+        "DriverOpts": {},
+        "GwPriority": 0,
+        "NetworkID": "863ee0fd77f33b5eb3e44ba3e9eb35087850f3cdd445778473eb3937a6f7ac01",
+        "EndpointID": "77a43f5565b8bc073507e842b519361681e30292ab584414cb1b35f9892281ed",
+        "Gateway": "172.19.0.1",
+        "IPAddress": "172.19.0.4",
+        "MacAddress": "a2:3b:2e:9a:00:c3",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-presentation",
+          "6288dfabbd22"
+        ]
+      },
+      "scholarpilot_core_default": {
+        "IPAMConfig": {},
+        "Links": null,
+        "Aliases": [],
+        "DriverOpts": {},
+        "GwPriority": 0,
+        "NetworkID": "92aad3d5db8abf89b9484e34c8778b252ab26cb75589b0fc3a729aa33569d2b0",
+        "EndpointID": "4d34076ea8771fd9d98237d8d6a1e2926fdab6baba62112957d53dcabf0a7c91",
+        "Gateway": "172.21.0.1",
+        "IPAddress": "172.21.0.2",
+        "MacAddress": "72:f2:ee:a4:a9:27",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "snp-presentation",
+          "6288dfabbd22"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "1c7f76154122eea9e3b86ef6b2ab8a29b07b4731254ff803664f81f4ccef66bd",
+    "Name": "/my-capstone-sprint7",
+    "Image": "sha256:8b128d4a45565b0a80c623b923c83d0441632ecfd759fb20f768be0da91947b3",
+    "Created": "2026-06-08T12:36:13.957315676Z",
+    "Mounts": [],
+    "StartedAt": "2026-09-05T02:38:46.436661546Z",
+    "Networks": {
+      "nextcloud-project_default": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone-sprint7",
+          "my-capstone-sprint7"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c7797da1cfc06185fbeaa3b9c8d009190e19b070f897f5102f8715ee57aeece4",
+        "EndpointID": "92cf84dd85766afd4d52b7991fa269446e741f97e9a4dc5964a2e636263dc40b",
+        "Gateway": "172.18.0.1",
+        "IPAddress": "172.18.0.4",
+        "MacAddress": "be:a7:d9:54:b8:9d",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone-sprint7",
+          "1c7f76154122"
+        ]
+      },
+      "proxy-network": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone-sprint7",
+          "my-capstone-sprint7"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "863ee0fd77f33b5eb3e44ba3e9eb35087850f3cdd445778473eb3937a6f7ac01",
+        "EndpointID": "393838621c778c2729edf9e52a5eeb8b5c36d61c749dac7169c7d26ed8e69d20",
+        "Gateway": "172.19.0.1",
+        "IPAddress": "172.19.0.3",
+        "MacAddress": "8e:bd:ea:79:8f:1d",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone-sprint7",
+          "1c7f76154122"
+        ]
+      },
+      "scholarpilot_core_default": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone-sprint7",
+          "my-capstone-sprint7"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "92aad3d5db8abf89b9484e34c8778b252ab26cb75589b0fc3a729aa33569d2b0",
+        "EndpointID": "a3e5bf018e9d94c1ddc35d6123d7a11825d6973e3000e5dbf82bc2a2917d65ff",
+        "Gateway": "172.21.0.1",
+        "IPAddress": "172.21.0.7",
+        "MacAddress": "d2:8d:8a:56:04:8b",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone-sprint7",
+          "1c7f76154122"
+        ]
+      }
+    }
+  },
+  {
+    "Id": "af87f930cc3d71df0416e2620d2af53186b8f76eeeafcf892a7653b209190cba",
+    "Name": "/my-capstone",
+    "Image": "sha256:19badeda32155f84d93d22097b7da4404a10cd6188b15a12ae9790e78131afbb",
+    "Created": "2026-05-21T20:06:02.301724675Z",
+    "Mounts": [],
+    "StartedAt": "2026-09-05T02:38:46.467089255Z",
+    "Networks": {
+      "nextcloud-project_default": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone",
+          "my-capstone"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "c7797da1cfc06185fbeaa3b9c8d009190e19b070f897f5102f8715ee57aeece4",
+        "EndpointID": "91bc39ecb974df17a11c4d50e2f5d0ff1ba16b4dd793a4c8c62002bb666dcca9",
+        "Gateway": "172.18.0.1",
+        "IPAddress": "172.18.0.3",
+        "MacAddress": "5a:97:2f:3f:8a:b8",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone",
+          "af87f930cc3d"
+        ]
+      },
+      "proxy-network": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone",
+          "my-capstone"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "863ee0fd77f33b5eb3e44ba3e9eb35087850f3cdd445778473eb3937a6f7ac01",
+        "EndpointID": "28836142a24363d12f11e01cdeccff4521337a68d37789be16ae34af49b6593e",
+        "Gateway": "172.19.0.1",
+        "IPAddress": "172.19.0.2",
+        "MacAddress": "4e:0e:50:e4:af:16",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone",
+          "af87f930cc3d"
+        ]
+      },
+      "scholarpilot_core_default": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": [
+          "my-capstone",
+          "my-capstone"
+        ],
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "92aad3d5db8abf89b9484e34c8778b252ab26cb75589b0fc3a729aa33569d2b0",
+        "EndpointID": "969a2f9b4e9520b47744995bb2851f047c99ab374252e1c23a1ec398f5571a5f",
+        "Gateway": "172.21.0.1",
+        "IPAddress": "172.21.0.6",
+        "MacAddress": "46:88:51:6b:03:3b",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "my-capstone",
+          "af87f930cc3d"
+        ]
+      }
+    }
+  }
+]

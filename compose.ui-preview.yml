@@ -29,6 +29,7 @@ services:
     environment: &preview_environment
       SNP_UI_PREVIEW: '1'
       ACCOUNT_APPROVAL_MODE: ${ACCOUNT_APPROVAL_MODE:-auto}
+      SNP_PUBLIC_SIGNUP_REQUIRES_APPROVAL: ${SNP_PUBLIC_SIGNUP_REQUIRES_APPROVAL:-0}
       SNP_PREVIEW_ALLOWED_HOSTS: ${SNP_PREVIEW_ALLOWED_HOSTS:-localhost,127.0.0.1}
       SNP_PREVIEW_CSRF_ORIGINS: ${SNP_PREVIEW_CSRF_ORIGINS:-}
       SNP_PREVIEW_HTTPS: ${SNP_PREVIEW_HTTPS:-0}
@@ -39,7 +40,7 @@ services:
       SNP_SMTP_TLS: ${SNP_SMTP_TLS:-1}
       SNP_SMTP_SSL: ${SNP_SMTP_SSL:-0}
       SNP_DEFAULT_FROM_EMAIL: ${SNP_DEFAULT_FROM_EMAIL:-}
-    secrets: [db_password, django_secret, demo_password, recovery_cache_password, smtp_password]
+    secrets: [db_password, django_secret, demo_password, preview_admin_password, recovery_cache_password, smtp_password]
     networks: [preview]
     depends_on:
       db: {condition: service_healthy}
@@ -118,6 +119,8 @@ secrets:
   db_password: {file: ./.ui-preview/db_password}
   db_root_password: {file: ./.ui-preview/db_root_password}
   django_secret: {file: ./.ui-preview/django_secret}
+  preview_admin_password:
+    file: ./.ui-preview/preview_admin_password
   demo_password: {file: ./.ui-preview/demo_password}
 
   recovery_cache_password: {file: ./.ui-preview/recovery_cache_password}

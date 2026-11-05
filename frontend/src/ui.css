@@ -307,8 +307,8 @@ html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dashboard-intro .fre
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dashboard-intro .fresh-hero img {min-height:210px;height:100%;max-height:230px;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed {margin:0;padding:16px;align-self:stretch;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed h2 {font-size:17px;margin:0 0 12px;}
-html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed p {font-size:12px;margin:10px 0 0;}
-html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed :is(th,td) {padding:8px!important;font-size:12px;}
+html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed p {font-size:14px;margin:10px 0 0;}
+html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-confirmed :is(th,td) {padding:8px!important;font-size:14px;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .pf-page>.pf-shell>.pf-main>.pf-stat-grid {display:none;}
 html[data-snp-mode=green] .fresh-dietitian-banner h2 {font-size:25px;}
 html[data-snp-mode=civic] .fresh-dietitian-banner h2 {font-size:22px;}
@@ -318,3 +318,12 @@ html[data-snp-mode=civic] .fresh-dietitian-banner h2 {font-size:22px;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .pf-page>.pf-title {margin:0 0 14px;padding:0;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .pf-page>.pf-title h1 {font-size:24px;margin:0 0 4px;}
 html:is([data-snp-mode=green],[data-snp-mode=civic]) .pf-page>.pf-title p {font-size:12px;margin:0;}
+
+/* Keep today's work visible on narrow screens; retain all three modes. */
+@media(max-width:767px){
+ html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dashboard-intro .fresh-hero {min-height:0;}
+ html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dashboard-intro .fresh-hero img {height:72px;min-height:72px;max-height:72px;}
+ html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dietitian-banner h2 {font-size:20px;word-break:keep-all;}
+ html:is([data-snp-mode=green],[data-snp-mode=civic]) .fresh-dashboard-intro .fresh-hero>div {padding:12px;}
+ .fresh-confirmed {overflow-x:auto;}
+}

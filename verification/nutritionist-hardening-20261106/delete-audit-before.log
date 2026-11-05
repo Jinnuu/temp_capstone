@@ -1,0 +1,17 @@
+Found 1 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F
+======================================================================
+FAIL: test_linked_profile_delete_failure_is_audited_without_deleting (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_linked_profile_delete_failure_is_audited_without_deleting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 273, in test_linked_profile_delete_failure_is_audited_without_deleting
+    self.assertTrue(AccessAudit.objects.filter(actor=self.main,target=self.vendor,result='DENIED',action='supplier.delete_denied').exists())
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 0.040s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...

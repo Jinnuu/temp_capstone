@@ -225,113 +225,30 @@ def get_monday_sunday_range(date_str):
 
 
 def weekly_forecast_report_view(request):
+    from .services.reporting import weekly_rows
+    from django.http import JsonResponse
     target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
-
-    meal_mapping = {
-        "breakfast": "조식",
-        "lunch": "중식",
-        "dinner": "석식",
-    }
-    
-    # 1. 대상 기간의 식단(DietPlan) 조회
-    diet_plans = DietPlan.objects.filter(
-        target_date__range=[monday, sunday]
-    ).prefetch_related("diet_menus__menu").order_by("target_date")
-
-    # 2. 대상 기간의 예측(AttendancePrediction) 조회
-    predictions = AttendancePrediction.objects.filter(
-        prediction_date__range=[monday, sunday]
-    ).order_by("prediction_date")
-
-    # 3. 데이터 매핑 (날짜/끼니 기준)
-    prediction_map = {}
-    for p in predictions:
-        meal_ko = meal_mapping.get(p.meal_type)
-        if meal_ko:
-            prediction_map[(p.prediction_date, meal_ko)] = p.predicted_count
-
-    report_items = []
-    
-    current_date = monday
-    while current_date <= sunday:
-        day_plans = diet_plans.filter(target_date=current_date)
-        meal_order = {"조식": 1, "중식": 2, "석식": 3}
-        day_plans_list = sorted(list(day_plans), key=lambda x: meal_order.get(x.meal_type, 99))
-        
-        day_span = len(day_plans_list) if day_plans_list else 1
-        is_first_of_day = True
-        
-        weekdays = ["월", "화", "수", "목", "금", "토", "일"]
-        weekday_str = weekdays[current_date.weekday()]
-
-        if not day_plans_list:
-            # 식단이 없는 날짜도 표시할 수 있도록 빈 항목 추가 (선택사항)
-            pass
-        
-        for plan in day_plans_list:
-            predicted = prediction_map.get((current_date, plan.meal_type), 0)
-            actual = plan.headcount
-            
-            error_rate = 0
-            if actual and actual > 0:
-                error_rate = ((predicted - actual) / actual) * 100
-            
-            menus = [dm.menu.name for dm in plan.diet_menus.all()]
-            
-            report_items.append({
-                "date": current_date,
-                "weekday": weekday_str,
-                "meal_type": plan.meal_type,
-                "menus": menus,
-                "predicted_count": predicted,
-                "actual_count": actual,
-                "error_rate": error_rate,
-                "is_first_of_day": is_first_of_day,
-                "day_span": day_span,
-            })
-            is_first_of_day = False
-            
-        current_date += timedelta(days=1)
-
-    context = {
-        "target_date": target_date,
-        "monday": monday,
-        "sunday": sunday,
+    rows = weekly_rows(monday, sunday)
+    if request.GET.get('format') == 'json':
+        return JsonResponse({'report_items': rows})
+    return render(request, "docs/weekly_forecast_report.html", {
+        "target_date": target_date, "monday": monday, "sunday": sunday,
         "prev_week_date": (monday - timedelta(days=7)).isoformat(),
-        "next_week_date": (monday + timedelta(days=7)).isoformat(),
-        "report_items": report_items,
-    }
-    return render(request, "docs/weekly_forecast_report.html", context)
+        "next_week_date": (monday + timedelta(days=7)).isoformat(), "report_items": rows,
+    })
 
 
 def export_weekly_forecast_excel(request):
     target_date, monday, sunday = get_monday_sunday_range(request.GET.get("date"))
 
-    meal_mapping = {
-        "breakfast": "조식",
-        "lunch": "중식",
-        "dinner": "석식",
-    }
-
-    diet_plans = DietPlan.objects.filter(
-        target_date__range=[monday, sunday]
-    ).prefetch_related("diet_menus__menu").order_by("target_date")
-
-    predictions = AttendancePrediction.objects.filter(
-        prediction_date__range=[monday, sunday]
-    )
-
-    prediction_map = {}
-    for p in predictions:
-        meal_ko = meal_mapping.get(p.meal_type)
-        if meal_ko:
-            prediction_map[(p.prediction_date, meal_ko)] = p.predicted_count
+    from .services.reporting import weekly_rows
+    report_items = weekly_rows(monday, sunday)
 
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "주간예측보고서"
 
-    headers = ["날짜", "요일", "끼니", "식단(메뉴명)", "예측 식수", "실제 식수", "오차율(%)"]
+    headers = ["날짜", "요일", "끼니", "식단(메뉴명)", "AI 예측 식수", "수동 예상 식수", "최종 확정 식수", "실제 식수", "예측 오차율(%)"]
     ws.append(headers)
     
     header_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
@@ -344,36 +261,14 @@ def export_weekly_forecast_excel(request):
         cell.border = header_border
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    current_date = monday
-    while current_date <= sunday:
-        day_plans = diet_plans.filter(target_date=current_date)
-        meal_order = {"조식": 1, "중식": 2, "석식": 3}
-        day_plans_list = sorted(list(day_plans), key=lambda x: meal_order.get(x.meal_type, 99))
-        
-        weekdays = ["월", "화", "수", "목", "금", "토", "일"]
-        weekday_str = weekdays[current_date.weekday()]
-
-        for plan in day_plans_list:
-            predicted = prediction_map.get((current_date, plan.meal_type), 0)
-            actual = plan.headcount
-            error_rate = ""
-            if actual and actual > 0:
-                error_rate = f"{((predicted - actual) / actual) * 100:.1f}%"
-            elif actual == 0 or actual is None:
-                error_rate = "-"
-                
-            menus = ", ".join([dm.menu.name for dm in plan.diet_menus.all()])
-            
-            ws.append([
-                current_date.strftime("%Y-%m-%d"),
-                weekday_str,
-                plan.meal_type,
-                menus,
-                predicted,
-                actual if actual is not None else 0,
-                error_rate
-            ])
-        current_date += timedelta(days=1)
+    for item in report_items:
+        ws.append([
+            item['date'].isoformat(), item['weekday'], item['meal_type'], ', '.join(item['menus']),
+            item['predicted_count'] if item['predicted_count'] is not None else '미생성',
+            item['manual_count'], item['final_count'] if item['final_count'] is not None else '미확정',
+            item['actual_count'] if item['actual_count'] is not None else '미입력',
+            round(item['error_rate'], 1) if item['error_rate'] is not None else '산출 불가',
+        ])
 
     ws.column_dimensions["A"].width = 15
     ws.column_dimensions["B"].width = 8
@@ -381,7 +276,9 @@ def export_weekly_forecast_excel(request):
     ws.column_dimensions["D"].width = 40
     ws.column_dimensions["E"].width = 12
     ws.column_dimensions["F"].width = 12
-    ws.column_dimensions["G"].width = 12
+    ws.column_dimensions["G"].width = 16
+    ws.column_dimensions["H"].width = 14
+    ws.column_dimensions["I"].width = 18
 
     for row in ws.iter_rows(min_row=2):
         for cell in row:

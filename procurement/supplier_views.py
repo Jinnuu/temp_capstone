@@ -12,6 +12,7 @@ from django.views.decorators.http import require_GET, require_POST
 from .models import Supplier
 from .workflow_views import _can_manage
 from accounts.supplier_identity import eligible_order_accounts
+from accounts.access_service import supplier_account_change, audit
 
 
 class SupplierProfileForm(forms.ModelForm):
@@ -60,7 +61,14 @@ def _save(request, instance=None):
     form = SupplierProfileForm(request.POST, instance=instance)
     if not form.is_valid():
         return render(request, 'workflow/form.html', {'title': '거래처 입력 오류', 'form': form}, status=400)
-    with transaction.atomic():
+    target_id = instance.user_id if instance else getattr(form.cleaned_data.get('user'), 'pk', None)
+    with supplier_account_change(request.user, target_id):
+        if instance:
+            instance = get_object_or_404(Supplier.objects.select_for_update(), pk=instance.pk)
+            # Validate against the locked current row, including account linkage.
+            form = SupplierProfileForm(request.POST, instance=instance)
+            if not form.is_valid():
+                return render(request, 'workflow/form.html', {'title': '거래처 입력 오류', 'form': form}, status=400)
         supplier = form.save(commit=False)
         if supplier.user_id is None:
             supplier.user = get_user_model()(username='supplier-' + uuid.uuid4().hex,
@@ -86,8 +94,7 @@ def supplier_create(request):
 @user_passes_test(_can_manage)
 @require_POST
 def supplier_update(request, pk):
-    with transaction.atomic():
-        return _save(request, get_object_or_404(Supplier.objects.select_for_update(), pk=pk))
+    return _save(request, get_object_or_404(Supplier, pk=pk))
 
 
 @login_required
@@ -95,10 +102,12 @@ def supplier_update(request, pk):
 @require_POST
 def supplier_delete(request, pk):
     try:
-        with transaction.atomic():
+        current = get_object_or_404(Supplier, pk=pk)
+        with supplier_account_change(request.user, current.user_id, action='supplier.profile_deleted'):
             supplier = get_object_or_404(Supplier.objects.select_for_update(), pk=pk)
             supplier.delete()  # Historical orders and account identity remain intact.
     except ProtectedError:
+        audit(request.user, current.user, 'supplier.delete_denied', result='DENIED', reason='linked_membership')
         messages.error(request, '포털 계정이 연결된 거래처는 삭제할 수 없습니다. 업체 연결을 먼저 확인하세요.')
         return redirect('procurement:supplier_list')
     messages.success(request, '연락처 현황만 삭제했습니다. 발주 연동 계정과 이력은 유지됩니다.')

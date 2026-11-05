@@ -1,0 +1,25 @@
+{
+  "containers_unchanged": false,
+  "compared_containers": [
+    "/snp-ui-preview-recovery-mail-1",
+    "/snp-ui-preview-proxy-1",
+    "/snp-ui-preview-web-1",
+    "/snp-ui-preview-recovery-cache-1",
+    "/snp-ui-preview-db-1",
+    "/snp-presentation",
+    "/my-capstone-sprint7",
+    "/my-capstone"
+  ],
+  "account_summary_unchanged": true,
+  "stable_branch": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "http_read_only": {
+    "http://127.0.0.1:8000/accounts/login/": 200,
+    "http://127.0.0.1:8007/accounts/login/": 200,
+    "http://127.0.0.1:8010/accounts/login/": 200,
+    "https://ui.jinnuu.site/accounts/login/": "HTTPError"
+  },
+  "limitations": [
+    "No passwords, hashes, sessions or secret environment values fetched for this comparison",
+    "Container/account summary equality is not a full business-row or database-file comparison"
+  ]
+}

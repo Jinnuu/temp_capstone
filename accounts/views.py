@@ -98,6 +98,6 @@ class SignUpView(CreateView):
     
 
     def form_valid(self, form):
-        from .rbac import approval_mode
-        messages.info(self.request, '가입이 완료되었습니다. 바로 로그인할 수 있습니다.' if approval_mode()=='auto' else '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.info(self.request, '가입이 완료되었습니다. 바로 로그인할 수 있습니다.' if self.object.is_active else '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.')
+        return response

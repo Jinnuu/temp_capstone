@@ -23,8 +23,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from inventory.models import Ingredient
 from .models import DietMenu, DietPlan, Menu, Recipe
+from .change_policy import guard_menu_change, mark_menu_change, guard_plan_delete
 
 
+
+
+def _has_procurement_reference(plan_id):
+    from procurement.models import ProcurementPlan
+    return any(plan_id in plan.meal_ids for plan in ProcurementPlan.objects.only('meal_ids'))
 
 
 def to_decimal(value):
@@ -99,6 +105,8 @@ def mealplan_create(request):
 
             if valid_items:
                 diet_plan, _ = DietPlan.objects.get_or_create(target_date=meal_date, meal_type=meal_type)
+                from procurement.workflow import invalidate_plans
+                invalidate_plans([diet_plan.pk])
                 diet_plan.final_headcount = None
                 diet_plan.headcount_confirmed_at = None
                 diet_plan.is_confirmed = False
@@ -249,7 +257,9 @@ def _recipe_input_errors(view):
     return wrapped
 
 
+@transaction.atomic
 def save_recipe_rows(menu, ingredient_ids, amounts, *, units=None, previous_units=None):
+    guard_menu_change([menu.pk])
     from procurement.workflow import quantity, convert
     units = units or []
     previous_units = previous_units or {}
@@ -276,6 +286,7 @@ def save_recipe_rows(menu, ingredient_ids, amounts, *, units=None, previous_unit
         raise ValidationError('기존 레시피를 보존했습니다. 유효한 식재료를 입력하세요.')
     for ingredient,number,unit in rows:
         Recipe.objects.update_or_create(menu=menu, ingredient=ingredient, defaults={'required_amount':number,'unit':unit})
+    mark_menu_change([menu.pk])
     return len(rows),skipped
 
 
@@ -370,6 +381,8 @@ def menu_delete(request, menu_id):
     menu = get_object_or_404(Menu, id=menu_id)
     if DietMenu.objects.filter(menu=menu, diet_plan__is_served=True).exists():
         return HttpResponse('사용 확정된 식단에 연결된 메뉴는 삭제할 수 없습니다.', status=409)
+    from procurement.workflow import invalidate_plans
+    invalidate_plans(set(DietPlan.objects.filter(diet_menus__menu=menu).values_list("pk", flat=True)))
     menu.delete()
     messages.success(request, "메뉴가 삭제되었습니다.")
     return redirect("meals:menu_list")
@@ -390,6 +403,7 @@ def menu_update(request, menu_id):
             return render(request, "meals/menu_update.html", {"menu": menu})
 
         with transaction.atomic():
+            guard_menu_change([menu.pk])
             menu.name = name
             menu.category = category
             menu.save()
@@ -497,6 +511,8 @@ def add_diet_menu_api(request):
                 meal_type=meal_type,
             )
 
+            from procurement.workflow import invalidate_plans
+            invalidate_plans([plan.pk])
             DietMenu.objects.get_or_create(diet_plan=plan, menu=menu)
 
             sorted_menus = plan.diet_menus.all().select_related("menu").order_by("id")
@@ -532,9 +548,11 @@ def remove_diet_menu_api(request):
             if existing and existing.is_served:
                 return JsonResponse({'status':'error','message':'이미 사용 확정된 식단은 수정할 수 없습니다.'}, status=409)
             plan = DietPlan.objects.select_for_update().get(target_date=target_date, meal_type=meal_type)
+            from procurement.workflow import invalidate_plans
+            invalidate_plans([plan.pk])
             DietMenu.objects.filter(diet_plan=plan, menu_id=menu_id).delete()
 
-            if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction"):
+            if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction") and not _has_procurement_reference(plan.pk):
                 plan.delete()
                 return JsonResponse({"status": "success", "menus": []})
 
@@ -908,9 +926,11 @@ def delete_diet_menu_api(request, diet_menu_id):
         plan = DietPlan.objects.select_for_update().get(pk=dm.diet_plan_id)
         if plan.is_served:
             return JsonResponse({'status':'error','message':'이미 사용 확정된 식단은 수정할 수 없습니다.'},status=409)
+        from procurement.workflow import invalidate_plans
+        invalidate_plans([plan.pk])
         dm.delete()
 
-        if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction"):
+        if not plan.diet_menus.exists() and plan.final_headcount is None and not hasattr(plan, "cooking_instruction") and not _has_procurement_reference(plan.pk):
             plan.delete()
             return JsonResponse({"status": "success", "menus": []})
 
@@ -949,6 +969,7 @@ def bulk_delete_mealplans(request):
             selected = DietPlan.objects.select_for_update().filter(target_date__gte=start_date, target_date__lte=end_date)
             if end_date < start_date or selected.filter(is_served=True).exists():
                 raise ValueError('기간 또는 사용 확정된 식단을 확인하세요. 삭제하지 않았습니다.')
+            guard_plan_delete(selected)
             deleted_count, _ = selected.delete()
             messages.success(request, f"{start_date_str}~{end_date_str} 기간의 식단 {deleted_count}건이 삭제되었습니다.")
         elif year_str and month_str:
@@ -957,6 +978,7 @@ def bulk_delete_mealplans(request):
             selected = DietPlan.objects.select_for_update().filter(target_date__year=year, target_date__month=month)
             if not 1<=month<=12 or selected.filter(is_served=True).exists():
                 raise ValueError('월 또는 사용 확정된 식단을 확인하세요. 삭제하지 않았습니다.')
+            guard_plan_delete(selected)
             deleted_count, _ = selected.delete()
             messages.success(request, f"{year}년 {month}월 전체 식단 {deleted_count}건이 삭제되었습니다.")
         else:

@@ -1,0 +1,1 @@
+{"users": 9, "admin_name_collision": false, "main": [{"pk": 1, "username": "verify-admin", "active": true, "staff": true, "superuser": true, "state": "ACTIVE"}], "approval_mode": "auto"}

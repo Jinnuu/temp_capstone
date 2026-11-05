@@ -1,3 +1,4 @@
+from .money import recorded_amount, review_totals
 from config.input_validation import object_by_integer_id
 from django.utils.http import content_disposition_header
 from config.export_safety import literal_workbook, worksheet_title
@@ -229,9 +230,10 @@ def order_detail(request, pk):
         "ingredient__name",
     )
 
-    subtotal = order.total_amount
-    vat = int(subtotal * 0.1)
-    total = subtotal + vat
+    monetary_review = review_totals(order.items.all())
+    subtotal = monetary_review["recorded_total"]
+    vat = monetary_review["tax_amount"]
+    total = monetary_review["payable_amount"]
 
     return render(
         request,
@@ -240,6 +242,7 @@ def order_detail(request, pk):
             "order": order,
             "items": items,
             "subtotal": subtotal,
+            "tax_note": "확인 필요 (세금 기준 미등록)",
             "vat": vat,
             "total": total,
         },
@@ -530,7 +533,7 @@ def get_vendor_procurement_data(start_date, end_date, supplier=None, order=None)
             seen.add(item.pk)
             item.meal_date_display=(item.target_date.strftime('%m/%d') if item.target_date else day.strftime('%m/%d')) + (' '+item.meal_type if item.meal_type else '')
             totals[item.purchase_unit]+=item.purchase_quantity
-            amount+=item.estimated_price or 0;count+=1
+            amount+=recorded_amount(item);count+=1
         if items:
             groups.append({'date':day,'order_date':day,'order_date_display':str(day),'items':items})
         day+=timedelta(days=1)
@@ -620,7 +623,7 @@ def export_weekly_procurement_excel(request):
             float(item.purchase_price),
             f"{item.required_qty} {item.ingredient.unit}",
             float(item.purchase_quantity),
-            item.estimated_price,
+            recorded_amount(item),
             item.purchase_order.supplier.name or item.purchase_order.supplier.username,
             item.purchase_order.created_at.strftime("%Y-%m-%d")
         ])
@@ -687,7 +690,7 @@ def export_vendor_procurement_excel(request):
                 float(item.purchase_price),
                 f"{item.required_qty} {item.ingredient.unit}",
                 float(item.purchase_quantity),
-                item.estimated_price,
+                recorded_amount(item),
                 order_date_str
             ])
             item_idx += 1
@@ -726,7 +729,7 @@ def daily_inspection_report(request):
         order_items = order_items.filter(purchase_order__supplier=selected_supplier)
 
     report_items = order_items
-    total_amount = sum(item.estimated_price for item in report_items)
+    total_amount = sum((recorded_amount(item) for item in report_items), Decimal('0'))
 
     context = {
         "target_date": target_date,

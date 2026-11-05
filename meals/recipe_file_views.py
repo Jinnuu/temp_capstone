@@ -9,6 +9,19 @@ from django.views.decorators.http import require_GET, require_POST
 from inventory.models import Ingredient
 
 from .models import Menu, Recipe
+from .change_policy import guard_menu_change, mark_menu_change
+from django.core.exceptions import ValidationError
+from functools import wraps
+
+def recipe_change_errors(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        try:
+            return view(*args, **kwargs)
+        except ValidationError as exc:
+            return JsonResponse({"ok": False, "message": " / ".join(exc.messages)}, status=409)
+    return wrapped
+
 
 
 HEADER_ALIASES = {
@@ -100,6 +113,7 @@ def _get_or_create_ingredient(name, created_names):
 
 
 @require_POST
+@recipe_change_errors
 @transaction.atomic
 def recipe_upload_api(request):
     """엑셀 파일로 메뉴-식재료-사용량 레시피를 일괄 등록한다.
@@ -188,6 +202,7 @@ def recipe_upload_api(request):
         if menu_created:
             created_menus.append(menu.name)
 
+        guard_menu_change([menu.pk])
         ingredient = _get_or_create_ingredient(ingredient_name, created_ingredients)
 
         unit = _normalize_text(value_for("unit")) or ingredient.unit
@@ -204,6 +219,7 @@ def recipe_upload_api(request):
             defaults={"required_amount": amount, "unit": unit},
         )
 
+        mark_menu_change([menu.pk])
         processed_count += 1
 
     return JsonResponse(

@@ -1,0 +1,51 @@
+{
+  "rounds": [
+    {
+      "removed_task_containers": [
+        {
+          "id": "5a3b675062bb",
+          "name": "snp-hardening-browser-20261106",
+          "anonymous_volume_names": []
+        },
+        {
+          "id": "cef9b56f2e2f",
+          "name": "snp-hardening-browser-proxy-20261106",
+          "anonymous_volume_names": []
+        },
+        {
+          "id": "d2809112bca8",
+          "name": "snp-hardening-cache-20261106",
+          "anonymous_volume_names": [
+            "8b3404ca953489755c411bfcb668eddb72475fb492377dd10fc1b5ebe53e6cd3"
+          ]
+        },
+        {
+          "id": "204b3838d607",
+          "name": "snp-hardening-db-20261106",
+          "anonymous_volume_names": []
+        }
+      ],
+      "removed_empty_task_network": "snp-hardening-tests-20261106",
+      "preview_and_production_resources_not_cleanup_targets": true
+    },
+    {
+      "removed_task_containers": [
+        {
+          "id": "d2d2b695d348",
+          "name": "snp-hardening-cache-20261106",
+          "anonymous_volume_names": [
+            "78196fb2b8e87a864606cc6610ea727cf65a297cd95585ea4a9b6857dc50582b"
+          ]
+        },
+        {
+          "id": "a71358fe2897",
+          "name": "snp-hardening-db-20261106",
+          "anonymous_volume_names": []
+        }
+      ],
+      "removed_empty_task_network": "snp-hardening-tests-20261106"
+    }
+  ],
+  "remaining_task_containers": 0,
+  "preview_and_production_resources_not_cleanup_targets": true
+}

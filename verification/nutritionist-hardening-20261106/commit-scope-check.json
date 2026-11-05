@@ -1,0 +1,7 @@
+{
+  "staged_files_reviewed": 136,
+  "forbidden_paths_staged": false,
+  "credential_signature_findings": 0,
+  "limitations": "Pattern scan and explicit file review; not a guarantee against every possible secret",
+  "user_untracked_script_excluded": true
+}

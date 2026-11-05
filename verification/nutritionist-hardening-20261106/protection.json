@@ -1,0 +1,31 @@
+{
+  "containers_unchanged": true,
+  "compared_containers": [
+    "/snp-ui-preview-recovery-mail-1",
+    "/snp-ui-preview-proxy-1",
+    "/snp-ui-preview-web-1",
+    "/snp-ui-preview-recovery-cache-1",
+    "/snp-ui-preview-db-1",
+    "/snp-presentation",
+    "/my-capstone-sprint7",
+    "/my-capstone"
+  ],
+  "account_summary_unchanged": true,
+  "stable_branch": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "http_read_only": {
+    "http://127.0.0.1:8000/accounts/login/": 200,
+    "http://127.0.0.1:8007/accounts/login/": 200,
+    "http://127.0.0.1:8010/accounts/login/": 200,
+    "https://ui.jinnuu.site/accounts/login/": {
+      "python_urllib_status": 403,
+      "curl_status": 200
+    }
+  },
+  "limitations": [
+    "No credential values were output. The account summary comparison excludes passwords, hashes, sessions, tokens and secret environment values.",
+    "Container/account summary equality is not a full business-row or database-file comparison",
+    "Public Python client returned an HTTP error while curl returned200; no claim of new public-browser/auth verification or diagnosed Cloudflare cause."
+  ],
+  "raw_array_order_equal": false,
+  "comparison_note": "Only recovery-mail Mounts array order differed; destination/source/type/mode/content metadata are identical after sorting by destination."
+}

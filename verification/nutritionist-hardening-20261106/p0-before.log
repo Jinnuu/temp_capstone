@@ -1,0 +1,241 @@
+Found 18 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_accesspolicy_user_access_revision_user_account_state_and_more... OK
+  Applying accounts.0003_initialize_access_roles... OK
+  Applying accounts.0004_adminrolerequest_announcement... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying procurement.0010_supplierdeliveryline_supplierfulfillment_and_more... OK
+  Applying procurement.0011_initialize_portal_roles... OK
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_actual_zero_is_not_missing_and_percentage_undefined (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_actual_zero_is_not_missing_and_percentage_undefined) ... FAIL
+test_bulk_upload_is_atomic_when_later_plan_is_served (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_bulk_upload_is_atomic_when_later_plan_is_served) ... FAIL
+test_excel_shares_measured_semantics (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_excel_shares_measured_semantics) ... FAIL
+test_general_supplier_cannot_edit_another_company (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_general_supplier_cannot_edit_another_company) ... ok
+test_main_can_edit_supplier_admin_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_main_can_edit_supplier_admin_and_audit) ... FAIL
+test_missing_actual_is_not_manual_or_final (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_actual_is_not_manual_or_final) ... FAIL
+test_missing_prediction_is_not_zero (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_prediction_is_not_zero) ... FAIL
+test_monthly_same_name_suppliers_remain_separate (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_monthly_same_name_suppliers_remain_separate) ... ERROR
+test_order_detail_does_not_invent_tax (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_order_detail_does_not_invent_tax) ... FAIL
+test_positive_actual_percentage_uses_measured_value (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_positive_actual_percentage_uses_measured_value) ... FAIL
+test_recipe_change_used_by_served_plan_is_blocked (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_recipe_change_used_by_served_plan_is_blocked) ... FAIL
+test_served_upload_is_rejected_and_original_preserved (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_served_upload_is_rejected_and_original_preserved) ... FAIL
+test_sub_can_edit_general_supplier_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_can_edit_general_supplier_and_audit) ... FAIL
+test_sub_cannot_delete_supplier_admin_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_delete_supplier_admin_profile) ... FAIL
+test_sub_cannot_edit_own_supplier_admin (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_own_supplier_admin) ... FAIL
+test_sub_cannot_edit_supplier_admin_through_legacy_form (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_through_legacy_form) ... FAIL
+test_sub_cannot_edit_supplier_admin_via_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_via_profile) ... FAIL
+test_upload_marks_existing_orders_for_review (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_upload_marks_existing_orders_for_review) ... ok
+
+======================================================================
+ERROR: test_monthly_same_name_suppliers_remain_separate (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_monthly_same_name_suppliers_remain_separate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 158, in test_monthly_same_name_suppliers_remain_separate
+    self.assertEqual({row['supplier_id'] for row in response.context['supplier_summary']},{self.vendor.pk,self.vendor_sub.pk})
+                      ~~~^^^^^^^^^^^^^^^
+KeyError: 'supplier_id'
+
+======================================================================
+FAIL: test_actual_zero_is_not_missing_and_percentage_undefined (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_actual_zero_is_not_missing_and_percentage_undefined)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 99, in test_actual_zero_is_not_missing_and_percentage_undefined
+    self.assertEqual(row['actual_count'],0);self.assertIsNone(row['error_rate'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 0
+
+======================================================================
+FAIL: test_bulk_upload_is_atomic_when_later_plan_is_served (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_bulk_upload_is_atomic_when_later_plan_is_served)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 129, in test_bulk_upload_is_atomic_when_later_plan_is_served
+    self.assertFalse(DietPlan.objects.filter(target_date=date(2026,11,5)).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_excel_shares_measured_semantics (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_excel_shares_measured_semantics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 116, in test_excel_shares_measured_semantics
+    self.assertEqual(rows[0][4:],('AI 예측 식수','수동 예상 식수','최종 확정 식수','실제 식수','예측 오차율(%)'))
+AssertionError: Tuples differ: ('예측 식수', '실제 식수', '오차율(%)') != ('AI 예측 식수', '수동 예상 식수', '최종 확정 식수', '실제 식수', '예측 오차율(%)')
+
+First differing element 0:
+'예측 식수'
+'AI 예측 식수'
+
+Second tuple contains 2 additional elements.
+First extra element 3:
+'실제 식수'
+
+- ('예측 식수', '실제 식수', '오차율(%)')
++ ('AI 예측 식수', '수동 예상 식수', '최종 확정 식수', '실제 식수', '예측 오차율(%)')
+
+======================================================================
+FAIL: test_main_can_edit_supplier_admin_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_main_can_edit_supplier_admin_and_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 77, in test_main_can_edit_supplier_admin_and_audit
+    self.assertTrue(AccessAudit.objects.filter(actor=self.main,target=self.vendor_sub,result='SUCCESS',action__startswith='supplier.').exists())
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_actual_is_not_manual_or_final (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_actual_is_not_manual_or_final)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 92, in test_missing_actual_is_not_manual_or_final
+    self.assertIsNone(row['actual_count']);self.assertIsNone(row['error_rate'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 is not None
+
+======================================================================
+FAIL: test_missing_prediction_is_not_zero (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_prediction_is_not_zero)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 109, in test_missing_prediction_is_not_zero
+    self.assertIsNone(row['predicted_count']);self.assertIsNone(row['error_rate'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 is not None
+
+======================================================================
+FAIL: test_order_detail_does_not_invent_tax (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_order_detail_does_not_invent_tax)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 149, in test_order_detail_does_not_invent_tax
+    self.assertIsNone(response.context['vat']);self.assertIsNone(response.context['total'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 100 is not None
+
+======================================================================
+FAIL: test_positive_actual_percentage_uses_measured_value (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_positive_actual_percentage_uses_measured_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 104, in test_positive_actual_percentage_uses_measured_value
+    self.assertEqual(row['actual_count'],125);self.assertAlmostEqual(float(row['error_rate']),4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 125
+
+======================================================================
+FAIL: test_recipe_change_used_by_served_plan_is_blocked (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_recipe_change_used_by_served_plan_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 142, in test_recipe_change_used_by_served_plan_is_blocked
+    with self.assertRaises(ValidationError):save_recipe_rows(self.menu,[self.ing.pk],['200'],units=['g'])
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValidationError not raised
+
+======================================================================
+FAIL: test_served_upload_is_rejected_and_original_preserved (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_served_upload_is_rejected_and_original_preserved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 123, in test_served_upload_is_rejected_and_original_preserved
+    self.assertEqual((self.plan.headcount,self.plan.final_headcount),(120,100))
+AssertionError: Tuples differ: (999, None) != (120, 100)
+
+First differing element 0:
+999
+120
+
+- (999, None)
++ (120, 100)
+
+======================================================================
+FAIL: test_sub_can_edit_general_supplier_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_can_edit_general_supplier_and_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 83, in test_sub_can_edit_general_supplier_and_audit
+    self.assertTrue(AccessAudit.objects.filter(actor=self.sub,target=self.vendor,result='SUCCESS',action__startswith='supplier.').exists())
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_sub_cannot_delete_supplier_admin_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_delete_supplier_admin_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 70, in test_sub_cannot_delete_supplier_admin_profile
+    self.assertEqual(self.client.post(reverse('procurement:supplier_delete',args=[self.protected_profile.pk])).status_code,403)
+AssertionError: 302 != 403
+
+======================================================================
+FAIL: test_sub_cannot_edit_own_supplier_admin (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_own_supplier_admin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 59, in test_sub_cannot_edit_own_supplier_admin
+    self.assertEqual(r.status_code,403)
+AssertionError: 302 != 403
+
+======================================================================
+FAIL: test_sub_cannot_edit_supplier_admin_through_legacy_form (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_through_legacy_form)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 52, in test_sub_cannot_edit_supplier_admin_through_legacy_form
+    self.assertEqual(r.status_code,403)
+AssertionError: 302 != 403
+
+======================================================================
+FAIL: test_sub_cannot_edit_supplier_admin_via_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_via_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 64, in test_sub_cannot_edit_supplier_admin_via_profile
+    self.assertEqual(r.status_code,403)
+AssertionError: 302 != 403
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.467s
+
+FAILED (failures=15, errors=1)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

@@ -66,16 +66,16 @@
                 </tbody>
                 <tfoot class="bg-light fw-bold">
                     <tr>
-                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">총 공급가액 (식재료액합계)</td>
+                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">기록된 발주금액 (검토용)</td>
                         <td class="text-end pe-4 border-bottom-0 fs-5">{{ subtotal|floatformat:0 }}원</td>
                     </tr>
                     <tr>
-                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">부가가치세 (10%)</td>
-                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ vat|floatformat:0 }}원</td>
+                        <td colspan="7" class="text-end pe-4 py-3 border-bottom-0">부가가치세</td>
+                        <td class="text-end pe-4 border-bottom-0 fs-5">{{ tax_note }}</td>
                     </tr>
                     <tr class="table-secondary">
-                        <td colspan="5" class="text-end pe-4 py-4 fs-4 text-dark">최종 결제 총액</td>
-                        <td class="text-end pe-4 py-4 fs-3 text-danger">{{ total|floatformat:0 }}원</td>
+                        <td colspan="5" class="text-end pe-4 py-4 fs-4 text-dark">최종 지급액</td>
+                        <td class="text-end pe-4 py-4 fs-3 text-danger">미확정 — 세금·정산 기준 확인 필요</td>
                     </tr>
                 </tfoot>
             </table>

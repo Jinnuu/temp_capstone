@@ -1,0 +1,20 @@
+Creating test database for alias 'default'...
+Found 1 test(s).
+System check identified no issues (0 silenced).
+E
+======================================================================
+ERROR: test_money_keeps_documented_overdelivery_supported_by_inspection (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_money_keeps_documented_overdelivery_supported_by_inspection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_nutritionist_hardening.py", line 284, in test_money_keeps_documented_overdelivery_supported_by_inspection
+    self.assertEqual(accepted_amount(item,inspection.accepted_qty),Decimal('4000')/Decimal('3'))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/procurement/money.py", line 24, in accepted_amount
+    raise ValidationError('합격 수량이 발주 수량 범위를 벗어났습니다.')
+django.core.exceptions.ValidationError: ['합격 수량이 발주 수량 범위를 벗어났습니다.']
+
+----------------------------------------------------------------------
+Ran 1 test in 0.021s
+
+FAILED (errors=1)
+Destroying test database for alias 'default'...

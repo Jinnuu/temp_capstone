@@ -1,0 +1,109 @@
+Found 39 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_accesspolicy_user_access_revision_user_account_state_and_more... OK
+  Applying accounts.0003_initialize_access_roles... OK
+  Applying accounts.0004_adminrolerequest_announcement... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying procurement.0010_supplierdeliveryline_supplierfulfillment_and_more... OK
+  Applying procurement.0011_initialize_portal_roles... OK
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_actual_zero_is_not_missing_and_percentage_undefined (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_actual_zero_is_not_missing_and_percentage_undefined) ... ok
+test_ajax_change_marks_plan_for_review (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_ajax_change_marks_plan_for_review) ... ok
+test_bulk_upload_is_atomic_when_later_plan_is_served (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_bulk_upload_is_atomic_when_later_plan_is_served) ... ok
+test_excel_shares_measured_semantics (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_excel_shares_measured_semantics) ... ok
+test_general_supplier_cannot_edit_another_company (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_general_supplier_cannot_edit_another_company) ... ok
+test_latest_prediction_is_selected_consistently (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_latest_prediction_is_selected_consistently) ... ok
+test_main_can_edit_supplier_admin_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_main_can_edit_supplier_admin_and_audit) ... ok
+test_missing_actual_is_not_manual_or_final (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_actual_is_not_manual_or_final) ... ok
+test_missing_prediction_is_not_zero (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_missing_prediction_is_not_zero) ... ok
+test_money_preserves_fractional_accepted_value_and_unknown_tax (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_money_preserves_fractional_accepted_value_and_unknown_tax) ... ok
+test_money_rejects_invalid_snapshot_without_silent_zero (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_money_rejects_invalid_snapshot_without_silent_zero) ... ok
+test_monthly_same_name_suppliers_remain_separate (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_monthly_same_name_suppliers_remain_separate) ... ok
+test_negative_legacy_actual_is_not_accuracy_evidence (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_negative_legacy_actual_is_not_accuracy_evidence) ... ok
+test_order_detail_does_not_invent_tax (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_order_detail_does_not_invent_tax) ... ok
+test_positive_actual_percentage_uses_measured_value (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_positive_actual_percentage_uses_measured_value) ... ok
+test_public_approval_opt_in_preserves_existing_accounts (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_public_approval_opt_in_preserves_existing_accounts) ... ok
+test_public_supplier_waits_when_approval_opted_in (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_public_supplier_waits_when_approval_opted_in) ... ok
+test_recipe_change_used_by_served_plan_is_blocked (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_recipe_change_used_by_served_plan_is_blocked) ... ok
+test_report_json_uses_same_four_counts (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_report_json_uses_same_four_counts) ... ok
+test_served_upload_is_rejected_and_original_preserved (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_served_upload_is_rejected_and_original_preserved) ... ok
+test_snapshot_referenced_plan_cannot_be_bulk_deleted (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_snapshot_referenced_plan_cannot_be_bulk_deleted) ... ok
+test_sub_can_edit_general_supplier_and_audit (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_can_edit_general_supplier_and_audit) ... ok
+test_sub_cannot_delete_supplier_admin_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_delete_supplier_admin_profile) ... ok
+test_sub_cannot_edit_own_supplier_admin (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_own_supplier_admin) ... ok
+test_sub_cannot_edit_supplier_admin_through_legacy_form (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_through_legacy_form) ... ok
+test_sub_cannot_edit_supplier_admin_via_profile (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_sub_cannot_edit_supplier_admin_via_profile) ... ok
+test_upload_marks_existing_orders_for_review (integration_tests.test_nutritionist_hardening.NutritionistHardeningTests.test_upload_marks_existing_orders_for_review) ... ok
+test_apply_preserves_identity_credentials_privileges_and_audit (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_apply_preserves_identity_credentials_privileges_and_audit) ... ok
+test_apply_requires_exact_pk (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_apply_requires_exact_pk) ... ok
+test_collision_never_merges_or_deletes (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_collision_never_merges_or_deletes) ... ok
+test_default_is_dry_run_and_reports_no_password (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_default_is_dry_run_and_reports_no_password) ... ok
+test_non_preview_is_rejected (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_non_preview_is_rejected) ... ok
+test_repeat_apply_is_idempotent (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_repeat_apply_is_idempotent) ... ok
+test_rollback_by_same_pk_preserves_audit_foreign_key (integration_tests.test_preview_admin_safety.PreviewAdminRenameTests.test_rollback_by_same_pk_preserves_audit_foreign_key) ... ok
+test_admin_secret_is_separate (integration_tests.test_preview_admin_safety.PreviewBootstrapSafetyTests.test_admin_secret_is_separate) ... ok
+test_existing_renamed_main_is_preserved_without_password_reads (integration_tests.test_preview_admin_safety.PreviewBootstrapSafetyTests.test_existing_renamed_main_is_preserved_without_password_reads) ... ok
+test_missing_or_shared_admin_secret_fails_atomically (integration_tests.test_preview_admin_safety.PreviewBootstrapSafetyTests.test_missing_or_shared_admin_secret_fails_atomically) ... ok
+test_non_admin_username_collision_fails_without_granting_privileges (integration_tests.test_preview_admin_safety.PreviewBootstrapSafetyTests.test_non_admin_username_collision_fails_without_granting_privileges) ... ok
+test_repeated_seed_preserves_existing_password_and_accounts (integration_tests.test_preview_admin_safety.PreviewBootstrapSafetyTests.test_repeated_seed_preserves_existing_password_and_accounts) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 0.685s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

@@ -38,6 +38,9 @@ class BusinessAccessMiddleware:
             if cap in ('accounts.manage','admins.manage'):
                 from accounts.access_service import audit
                 audit(request.user, None, 'admin.access_denied', result='DENIED', reason='insufficient_permission')
+            elif name in ('procurement:supplier_create', 'procurement:supplier_update', 'procurement:supplier_delete'):
+                from accounts.access_service import audit
+                audit(request.user, None, 'supplier.access_denied', result='DENIED', reason='insufficient_permission')
             return HttpResponseForbidden('이 작업을 수행할 권한이 없습니다. 관리자에게 역할을 확인해 주세요.')
         request.snp_required_capability = cap
         return None
