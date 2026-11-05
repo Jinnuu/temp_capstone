@@ -1,0 +1,14 @@
+{
+  "task_owned_test_containers": [
+    "snp-auth-test-db-20261105",
+    "snp-auth-test-web-20261105",
+    "snp-auth-test-proxy-20261105",
+    "snp-auth-test-mail-20261105",
+    "snp-auth-test-cache-20261105"
+  ],
+  "persistent_volumes_attached": false,
+  "original_container_name_overlap": false,
+  "network": "snp-auth-tests-20261105",
+  "tests_completed": true,
+  "cleanup_completed": true
+}

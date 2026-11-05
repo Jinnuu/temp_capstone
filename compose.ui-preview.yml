@@ -26,12 +26,19 @@ services:
     restart: unless-stopped
     read_only: true
     tmpfs: ['/tmp:size=512m,mode=1777']
-    environment:
+    environment: &preview_environment
       SNP_UI_PREVIEW: '1'
       SNP_PREVIEW_ALLOWED_HOSTS: ${SNP_PREVIEW_ALLOWED_HOSTS:-localhost,127.0.0.1}
       SNP_PREVIEW_CSRF_ORIGINS: ${SNP_PREVIEW_CSRF_ORIGINS:-}
       SNP_PREVIEW_HTTPS: ${SNP_PREVIEW_HTTPS:-0}
-    secrets: [db_password, django_secret, demo_password]
+      SNP_RECOVERY_DELIVERY_MODE: ${SNP_RECOVERY_DELIVERY_MODE:-disabled}
+      SNP_SMTP_HOST: ${SNP_SMTP_HOST:-}
+      SNP_SMTP_PORT: ${SNP_SMTP_PORT:-587}
+      SNP_SMTP_USER: ${SNP_SMTP_USER:-}
+      SNP_SMTP_TLS: ${SNP_SMTP_TLS:-1}
+      SNP_SMTP_SSL: ${SNP_SMTP_SSL:-0}
+      SNP_DEFAULT_FROM_EMAIL: ${SNP_DEFAULT_FROM_EMAIL:-}
+    secrets: [db_password, django_secret, demo_password, recovery_cache_password, smtp_password]
     networks: [preview]
     depends_on:
       db: {condition: service_healthy}
@@ -42,6 +49,46 @@ services:
       start_period: 60s
       retries: 10
     mem_limit: 3g
+  recovery-cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ['/tmp:mode=1777', '/data:mode=1777']
+    secrets: [recovery_cache_password]
+    networks: [preview]
+    entrypoint: [sh, -ec]
+    command:
+      - |
+        umask 077
+        printf 'requirepass %s\nsave ""\nappendonly no\nmaxmemory 64mb\nmaxmemory-policy noeviction\n' "$$(cat /run/secrets/recovery_cache_password)" > /tmp/recovery.conf
+        chown redis:redis /tmp/recovery.conf
+        exec /usr/local/bin/docker-entrypoint.sh redis-server /tmp/recovery.conf
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$(cat /run/secrets/recovery_cache_password)" redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 128m
+  recovery-mail:
+    image: snp-ui-preview-web:three-modes
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ['/tmp:mode=1777']
+    environment: *preview_environment
+    secrets: [db_password, django_secret, recovery_cache_password, smtp_password]
+    entrypoint: [python, -B, manage.py]
+    command: [run_recovery_mail]
+    networks: [preview, ingress]
+    depends_on:
+      db: {condition: service_healthy}
+      recovery-cache: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, 'import django; django.setup(); from accounts.recovery import store; store().ping()']
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    mem_limit: 256m
   proxy:
     image: snp-ui-preview-proxy:three-modes
     build:
@@ -71,3 +118,6 @@ secrets:
   db_root_password: {file: ./.ui-preview/db_root_password}
   django_secret: {file: ./.ui-preview/django_secret}
   demo_password: {file: ./.ui-preview/demo_password}
+
+  recovery_cache_password: {file: ./.ui-preview/recovery_cache_password}
+  smtp_password: {file: ./.ui-preview/smtp_password}

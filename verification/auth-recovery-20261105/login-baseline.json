@@ -1,0 +1,7 @@
+{
+  "validExistingAccountLogin": true,
+  "correctPasswordStatus": 302,
+  "incorrectPasswordStatus": 200,
+  "csrf403": false,
+  "existingAccountsModified": false
+}

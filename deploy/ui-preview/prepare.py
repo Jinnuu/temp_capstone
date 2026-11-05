@@ -14,13 +14,17 @@ if not 1024 <= args.port <= 65535:
 root = Path(__file__).resolve().parents[2] / '.ui-preview'
 root.mkdir(mode=0o700, exist_ok=True)
 root.chmod(0o700)
-for key in ['db_password', 'db_root_password', 'django_secret', 'demo_password']:
+for key in ['db_password', 'db_root_password', 'django_secret', 'demo_password', 'recovery_cache_password']:
     target = root / key
     if not target.exists():
         with target.open('x') as out:
             out.write(secrets.token_urlsafe(64 if key == 'django_secret' else 36) + '\n')
         # Compose mounts individual files for the non-root web process. Parent is 0700.
         target.chmod(0o644)
+smtp = root / 'smtp_password'
+if not smtp.exists():
+    smtp.write_text('')
+    smtp.chmod(0o644)
 env = root / 'compose.env'
 if not env.exists():
     with socket.socket() as sock:

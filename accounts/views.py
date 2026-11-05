@@ -5,10 +5,13 @@ from django.views.generic import CreateView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django import forms
+from .auth_forms import ApprovalAuthenticationForm
 
 
 class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
+    authentication_form = ApprovalAuthenticationForm
 
 class CustomLogoutView(LogoutView):
     # next_page=reverse("home")
@@ -17,9 +20,14 @@ class CustomLogoutView(LogoutView):
 User=get_user_model()
 
 class SignUpForm(UserCreationForm):
+    email = forms.EmailField(label="이메일", required=True, max_length=254, widget=forms.EmailInput(attrs={"class":"form-control","autocomplete":"email"}))
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()
+
     class Meta:
         model = User
-        fields = ("username",)
+        fields = ("username", "email")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

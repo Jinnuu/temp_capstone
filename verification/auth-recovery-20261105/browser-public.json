@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "steps": [
+    "empty login form renders both required-field errors",
+    "invalid password rejected by form, not a CSRF/proxy error",
+    "existing active account HTTPS login, session reload and Secure cookies",
+    "CSRF-protected POST logout",
+    "all three modes show login/signup/username/password pages; email signup field present",
+    "live recovery explicitly unavailable; no false delivery success",
+    "valid-CSRF recovery POST fails explicitly with 503 while SMTP disabled",
+    "missing login CSRF token rejected",
+    "local and Tailscale login pages remain reachable"
+  ],
+  "pageErrors": [],
+  "actualExternalEmailDelivery": false,
+  "newLiveAccountsCreated": false,
+  "livePasswordsReset": false
+}

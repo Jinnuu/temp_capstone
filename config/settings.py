@@ -109,3 +109,10 @@ LOGOUT_REDIRECT_URL = "/"
 
 # 대용량 폼 전송 (식자재 1200개 이상 등록 시 TooManyFieldsSent 에러 해결)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# Recovery stays disabled until a delivery transport and shared store are configured.
+ACCOUNT_RECOVERY_DELIVERY_MODE = 'disabled'
+ACCOUNT_RECOVERY_REDIS_URL = os.environ.get('ACCOUNT_RECOVERY_REDIS_URL','redis://127.0.0.1:6379/15')
+ACCOUNT_RECOVERY_BASE_URL = 'https://ui.jinnuu.site'
+ACCOUNT_RECOVERY_TIMEOUT = 1800
+PASSWORD_RESET_TIMEOUT = 1800

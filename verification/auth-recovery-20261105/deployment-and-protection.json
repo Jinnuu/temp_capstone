@@ -1,0 +1,24 @@
+{
+  "account_count": 8,
+  "additional_registrations": 1,
+  "additional_active_accounts": 0,
+  "email_missing": 7,
+  "delivery_mode": "disabled",
+  "delivery_available": false,
+  "queue_length": 0,
+  "auth_backends": [
+    "django.contrib.auth.backends.ModelBackend"
+  ],
+  "session_engine": "django.contrib.sessions.backends.db",
+  "existing_account_credentials_roles_approval_email_unchanged": true,
+  "unchanged_existing_containers_including_preview_db": 18,
+  "protected_resource_changes": [],
+  "sprint_final_unchanged": true,
+  "http_login_status": {
+    "8000": 200,
+    "8007": 200,
+    "8010": 200,
+    "8011": 200
+  },
+  "deployed_auth_source_matches": true
+}

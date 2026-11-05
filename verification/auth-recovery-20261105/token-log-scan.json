@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "captured_emails": 2,
+  "token_links_checked": 3,
+  "raw_tokens_in_app_proxy_worker_mail_server_logs": 0,
+  "mailbox": "isolated SMTP capture, not external mail"
+}

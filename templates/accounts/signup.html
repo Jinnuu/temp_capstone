@@ -27,6 +27,7 @@
                         {% endfor %}
                     </div>
 
+                    <div class="mb-3"><label for="{{ form.email.id_for_label }}" class="form-label">이메일</label>{{ form.email }}{{ form.email.errors }}<p class="form-text">아이디 찾기와 비밀번호 재설정에 사용할 이메일을 입력하세요.</p></div>
                     <div class="mb-3">
                         <label for="{{ form.password1.id_for_label }}" class="form-label">비밀번호</label>
                         {{ form.password1 }}

@@ -25,6 +25,8 @@ cat .ui-preview/credentials.txt
 | snp-ui-preview-proxy-1 | snp-ui-preview-proxy:three-modes | Nginx, 호스트8011→8080; 빌드된 정적 파일 직접 제공 |
 | snp-ui-preview-web-1 | snp-ui-preview-web:three-modes | Gunicorn 26.2.0 sync2 workers; 내부8000, non-root/read-only |
 | snp-ui-preview-db-1 | mariadb:10.6 | 전용 DB snp_ui_preview, 외부 DB 포트 없음 |
+| snp-ui-preview-recovery-cache-1 | redis:7-alpine | 복구용 일시 상태/제한/메일 큐, 외부 포트 없음 |
+| snp-ui-preview-recovery-mail-1 | snp-ui-preview-web:three-modes | 비동기 메일 작업자, 기본 발송 비활성 |
 
 - Compose 프로젝트: `snp-ui-preview`.
 - 전용 internal 네트워크: `snp-ui-preview_preview` (DB/앱/프록시), 호스트 포트 제공용 `snp-ui-preview_ingress` (프록시만). 기존 네트워크 external 연결 없음.
@@ -75,3 +77,5 @@ docker compose -p snp-ui-preview --env-file .ui-preview/compose.env -f compose.u
 자세한 실제 결과는 [DOCKER_PREVIEW_TEST_REPORT.md](DOCKER_PREVIEW_TEST_REPORT.md), 증거는 `verification/ui-preview-20261105/` 참조. 기존 업무 E2E는 **빈 테스트 DB에서 최초 1회용**이므로 실행 중 시범 데이터에 반복 실행하지 않는다. 반복 검증이 필요하면 별도의 새 Compose 프로젝트/DB로 진행한다.
 
 Gunicorn/Nginx 구성 참고: [Gunicorn deployment](https://gunicorn.org/deploy/), [Compose secrets](https://docs.docker.com/compose/how-tos/use-secrets/), [Compose networking](https://docs.docker.com/compose/how-tos/networking/).
+
+계정 복구 후속 구현으로5개 서비스가 실행된다. 새 secret 준비, 가입 이메일·승인 정책, SMTP 구성과 발송 제한은 [AUTH_RECOVERY.md](AUTH_RECOVERY.md)를 따른다. 발송 disabled는 오류를 감춘 성공 상태가 아니며 공개 화면에도 실제 미발송을 표시한다.

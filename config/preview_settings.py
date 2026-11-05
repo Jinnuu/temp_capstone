@@ -36,3 +36,18 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'same-origin'
 
 TEMPLATES[0]['OPTIONS']['context_processors'] = [*TEMPLATES[0]['OPTIONS']['context_processors'], 'config.preview_context.preview_banner']
+
+from urllib.parse import quote
+ACCOUNT_RECOVERY_REDIS_URL = 'redis://:'+quote(secret('recovery_cache_password'),safe='')+'@recovery-cache:6379/0'
+ACCOUNT_RECOVERY_DELIVERY_MODE = os.environ.get('SNP_RECOVERY_DELIVERY_MODE','disabled')
+if ACCOUNT_RECOVERY_DELIVERY_MODE not in ('disabled','smtp'):
+    raise RuntimeError('Preview recovery supports disabled or explicitly configured SMTP only')
+ACCOUNT_RECOVERY_BASE_URL = 'https://ui.jinnuu.site'
+EMAIL_HOST = os.environ.get('SNP_SMTP_HOST','')
+EMAIL_PORT = int(os.environ.get('SNP_SMTP_PORT','587'))
+EMAIL_HOST_USER = os.environ.get('SNP_SMTP_USER','')
+EMAIL_HOST_PASSWORD = Path('/run/secrets/smtp_password').read_text().strip()
+EMAIL_USE_TLS = os.environ.get('SNP_SMTP_TLS','1') == '1'
+EMAIL_USE_SSL = os.environ.get('SNP_SMTP_SSL','0') == '1'
+EMAIL_TIMEOUT = 10
+DEFAULT_FROM_EMAIL = os.environ.get('SNP_DEFAULT_FROM_EMAIL','')

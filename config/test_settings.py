@@ -13,3 +13,4 @@ DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "/tmp/s
 SECRET_KEY = "isolated-integration-tests-only"
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+ACCOUNT_RECOVERY_REDIS_URL = os.environ.get('ACCOUNT_RECOVERY_REDIS_URL','redis://127.0.0.1:6379/15')

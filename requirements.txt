@@ -52,3 +52,6 @@ typing_extensions==4.15.0
 tzdata==2025.3
 xgboost==3.2.0
 xlrd==2.0.2
+
+# Atomic account-recovery rate limits and email queue
+redis==8.1.0

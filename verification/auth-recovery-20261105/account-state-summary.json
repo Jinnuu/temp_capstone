@@ -1,0 +1,7 @@
+{
+  "users": 7,
+  "active": 5,
+  "inactive": 2,
+  "email_missing": 7,
+  "configured_email_backend": "django.core.mail.backends.smtp.EmailBackend"
+}

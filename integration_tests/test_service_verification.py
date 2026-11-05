@@ -95,7 +95,7 @@ class ServiceVerification(TestCase):
 
     def test_public_signup_requires_admin_activation(self):
         client=Client()
-        response=client.post(reverse('signup'),{'username':'verify-new-user','password1':'Isolated-Test-Only-Pass-837!','password2':'Isolated-Test-Only-Pass-837!'})
+        response=client.post(reverse('signup'),{'username':'verify-new-user','email':'new-user@example.invalid','password1':'Isolated-Test-Only-Pass-837!','password2':'Isolated-Test-Only-Pass-837!'})
         self.assertEqual(response.status_code,302)
         user=get_user_model().objects.get(username='verify-new-user')
         self.assertFalse(user.is_active)
@@ -184,7 +184,7 @@ class ServiceVerification(TestCase):
 
     def test_signup_cannot_escalate_role_or_staff(self):
         client=Client()
-        client.post(reverse('signup'),{'username':'verify-untrusted','password1':'Isolated-Test-Only-Pass-837!','password2':'Isolated-Test-Only-Pass-837!','role':'ADMIN','is_staff':'1','is_active':'1'})
+        client.post(reverse('signup'),{'username':'verify-untrusted','email':'untrusted@example.invalid','password1':'Isolated-Test-Only-Pass-837!','password2':'Isolated-Test-Only-Pass-837!','role':'ADMIN','is_staff':'1','is_active':'1'})
         user=get_user_model().objects.get(username='verify-untrusted')
         self.assertEqual(user.role,'NUTRITIONIST');self.assertFalse(user.is_staff);self.assertFalse(user.is_active)
 

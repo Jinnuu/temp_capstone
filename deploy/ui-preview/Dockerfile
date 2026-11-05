@@ -13,7 +13,7 @@ COPY --from=clean_runtime / /
 ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin LANG=C.UTF-8
 USER root
 WORKDIR /srv/snp
-RUN python -m pip install --no-cache-dir --no-deps gunicorn==26.2.0 xlrd==2.0.2 xlwt==1.3.0
+RUN python -m pip install --no-cache-dir --no-deps gunicorn==26.2.0 xlrd==2.0.2 xlwt==1.3.0 redis==8.1.0
 COPY accounts accounts
 COPY config config
 COPY forecasting forecasting
@@ -34,7 +34,7 @@ ENV DJANGO_SETTINGS_MODULE=config.preview_settings PYTHONDONTWRITEBYTECODE=1 PYT
     HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
 USER 10001:10001
 ENTRYPOINT ["snp-preview-entrypoint"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--no-control-socket", "--timeout", "180", "--access-logfile", "-", "--error-logfile", "-", "--worker-tmp-dir", "/tmp"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--no-control-socket", "--timeout", "180", "--access-logfile", "-", "--access-logformat", "%(h)s %(m)s %({x-snp-log-path}i)s %(s)s", "--error-logfile", "-", "--worker-tmp-dir", "/tmp"]
 
 FROM nginx:alpine AS proxy
 COPY deploy/ui-preview/nginx.conf /etc/nginx/conf.d/default.conf
