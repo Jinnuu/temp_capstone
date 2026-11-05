@@ -87,7 +87,8 @@ def _find_supplier(value):
     if "first_name" in user_fields:
         query |= Q(first_name=value)
 
-    return User.objects.filter(query).first()
+    from accounts.supplier_identity import eligible_order_accounts
+    return eligible_order_accounts(User.objects.filter(query)).first()
 
 
 def ingredient_upload_flexible(request):

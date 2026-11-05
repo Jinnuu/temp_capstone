@@ -29,6 +29,11 @@ class PreviewForm(forms.Form):
 
 
 class SpecificationForm(forms.ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        from accounts.supplier_identity import eligible_order_accounts
+        self.fields['supplier'].queryset=eligible_order_accounts(self.fields['supplier'].queryset)
+
     class Meta:
         model=SupplySpecification
         fields=['ingredient','supplier','label','base_quantity','base_unit','order_unit','order_increment','unit_price']

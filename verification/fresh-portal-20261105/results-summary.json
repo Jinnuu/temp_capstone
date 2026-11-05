@@ -1,0 +1,46 @@
+{
+  "baselineDjangoCases": 218,
+  "newDjangoCases": 42,
+  "uniqueDjangoCases": 260,
+  "databases": {
+    "sqlite": {
+      "discovered": 260,
+      "passed": 256,
+      "skipped": 4,
+      "failed": 0,
+      "errors": 0
+    },
+    "mariadb": {
+      "discovered": 260,
+      "passed": 260,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  "javascriptTests": 10,
+  "screenshots": 36,
+  "browserScenarios": {
+    "business": {
+      "passed": true,
+      "checkpoints": 21
+    },
+    "portal": {
+      "passed": true,
+      "checkpoints": 12
+    },
+    "orderIdentity": {
+      "passed": true,
+      "checkpoints": 2
+    },
+    "recovery": {
+      "passed": true,
+      "checkpoints": 10
+    },
+    "publicHttps": {
+      "passed": true,
+      "checkpoints": 14
+    }
+  },
+  "externalSmtpDelivery": "NOT_CONFIGURED_NOT_VERIFIED"
+}

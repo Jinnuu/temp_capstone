@@ -81,3 +81,8 @@ docker compose -p snp-ui-preview --env-file .ui-preview/compose.env -f compose.u
 ## 2026-11-05 후속 승인·권한 변경
 
 위 문서의 manual 가입 정책과 ModelBackend 설명은 `85e83f9` 당시 기준이다. 현재 UI 브랜치는 [RBAC_AND_APPROVAL.md](RBAC_AND_APPROVAL.md)의 환경별 승인 정책, ApprovalBackend, 감사 기반 관리자 화면을 적용했다. 기본 정책은 manual이고 Preview만 auto다. 이메일 소유권·요청 제한·토큰·SMTP 미설정 처리 규칙은 유지했다. 최신 실행 결과는 [RBAC_AND_APPROVAL_TEST_REPORT.md](RBAC_AND_APPROVAL_TEST_REPORT.md)를 따른다.
+
+
+## 영양사 피드백·공급업체 포털 후속
+
+현재 UI 브랜치의 가입 유형, MAIN/SUB 계층과 공급업체 예외 권한은 [FRESH_PORTAL_IMPLEMENTATION.md](FRESH_PORTAL_IMPLEMENTATION.md), 최신 실행 결과는 [FRESH_PORTAL_TEST_REPORT.md](FRESH_PORTAL_TEST_REPORT.md)를 따른다. 이 문서의 이전 결과는 당시 구현의 기록으로 보존한다.

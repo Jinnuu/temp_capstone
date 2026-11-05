@@ -78,3 +78,11 @@ compareSelect?.addEventListener('change',()=>{
  document.querySelectorAll<HTMLIFrameElement>('[data-snp-preview-mode]').forEach(frame=>frame.src=compareSelect.value+'?snp_preview=1');
 });
 export {};
+
+// Signup identity changes presentation only; the server validates every field.
+const supplierFields=document.querySelector<HTMLDetailsElement>('.fresh-supplier-fields');
+const signupTypes=document.querySelectorAll<HTMLInputElement>('input[name=signup_type]');
+if(supplierFields&&signupTypes.length){
+ const updateSignup=()=>{const supplier=Array.from(signupTypes).some(input=>input.checked&&input.value==='SUPPLIER');supplierFields.open=supplier;};
+ signupTypes.forEach(input=>input.addEventListener('change',updateSignup));updateSignup();
+}

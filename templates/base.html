@@ -10,21 +10,22 @@
   <link rel="stylesheet" href="{% static 'css/system.css' %}">
   <link rel="stylesheet" href="{% static 'css/ui_patch_v4.css' %}">
   {% block extra_css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'ui/build/snp-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'ui/build/snp-ui.css' %}?v=fresh-portal-20261105">
 </head>
 <body class="sp-body snp-shell">
 <a class="snp-skip-link snp-ui-chrome" href="#snp-workspace">본문 바로가기</a>
 <div class="snp-application">
   <header class="sp-header snp-header snp-ui-chrome">
     <a href="{% url 'home' %}" class="snp-brand" aria-label="식수센스 운영현황"><span class="snp-brand-mark">SNP</span><span><strong>식수센스</strong><small>급식 운영 관리</small></span></a>
-    <form class="snp-global-search" method="get" action="{% url 'inventory:ingredient_list' %}" role="search">
+    <form class="snp-global-search" method="get" action="{% if 'portal.read' in snp_caps and 'inventory.read' not in snp_caps %}{% url 'procurement:portal_orders' %}{% else %}{% url 'inventory:ingredient_list' %}{% endif %}" role="search">
       <label class="visually-hidden" for="snp-global-search">식재료명 검색</label>
-      <input id="snp-global-search" type="search" name="search" placeholder="식재료명을 검색하세요" autocomplete="off">
+      <input id="snp-global-search" type="search" name="{% if 'portal.read' in snp_caps and 'inventory.read' not in snp_caps %}q{% else %}search{% endif %}" placeholder="식재료명을 검색하세요" autocomplete="off">
       <button type="submit" aria-label="식재료 검색">검색</button>
     </form>
     <div class="snp-account">
+      {% if user.is_authenticated %}<a href="{% url 'workspaces' %}">업무 영역</a>{% endif %}
       {% if snp_admin %}<a href="{% url 'account_admin_users' %}">사용자 관리</a>{% endif %}
-      {% if user.is_authenticated %}<span><strong>{{ user.name|default:user.username }}</strong><small>{{ user.get_role_display }}</small></span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="snp-text-button">로그아웃</button></form>{% else %}<a href="{% url 'login' %}">로그인</a><a href="{% url 'signup' %}">가입 신청</a>{% endif %}
+      {% if user.is_authenticated %}<span><strong>{{ user.name|default:user.username }}</strong><small>{{ snp_role_summary|default:user.get_role_display }}</small></span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="snp-text-button">로그아웃</button></form>{% else %}<a href="{% url 'login' %}">로그인</a><a href="{% url 'signup' %}">가입 신청</a>{% endif %}
     </div>
     <div class="snp-appearance">{% include 'ui/mode_switcher.html' %}<a class="snp-compare-link" href="{% url 'ui_compare' %}">나란히 비교</a></div>
     <button class="snp-nav-toggle" id="snp-nav-toggle" type="button" aria-controls="snp-navigation" aria-expanded="false">업무 메뉴</button>
@@ -41,7 +42,7 @@
   </div>
 </div>
 <noscript><p>JavaScript가 꺼져 있어 레퍼런스형으로 표시됩니다. 폼 업무는 그대로 사용할 수 있습니다.</p></noscript>
-<script type="module" src="{% static 'ui/build/snp-ui.js' %}"></script>
+<script type="module" src="{% static 'ui/build/snp-ui.js' %}?v=fresh-portal-20261105"></script>
 {% if snp_readonly %}<script>document.querySelectorAll('main form[method=post], main form[method=POST]').forEach(function(form){form.querySelectorAll('input,select,textarea,button').forEach(function(field){field.disabled=true;});form.addEventListener('submit',function(event){event.preventDefault();});});</script><p class="snp-readonly-note" role="note">현재 역할은 이 화면의 조회만 허용합니다.</p>{% endif %}
 {% block extra_js %}{% endblock %}
 </body>

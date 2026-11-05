@@ -146,6 +146,16 @@ def home(request):
         .order_by("calc_stock", "name")[:8]
     )
 
+    from procurement.models import OrderItem, SupplierFulfillment
+    from accounts.models import Announcement, AccessAudit
+    daily_confirmed = list(DietPlan.objects.filter(target_date=selected_date).values('meal_type','headcount','final_headcount'))
+    prediction_by_meal={item['meal_label']:item['predicted_count'] for item in selected_prediction_rows}
+    for item in daily_confirmed:item['predicted_count']=prediction_by_meal.get(item['meal_type'])
+    inspection_pending_count = OrderItem.objects.filter(inspection__isnull=True).exclude(purchase_order__status='완료').count()
+    incoming_count = SupplierFulfillment.objects.filter(delivery_date=selected_date).exclude(state='REJECTED').exclude(order__status='완료').count()
+    notices = Announcement.objects.filter(active=True).order_by('-published_at')[:5]
+    # Personal activity only; no other users' account/audit history on business dashboard.
+    activities = AccessAudit.objects.filter(actor=request.user).order_by('-pk')[:6]
     pending_order_count = PurchaseOrder.objects.filter(
         status=PurchaseOrder.Status.PENDING
     ).count()
@@ -166,6 +176,11 @@ def home(request):
             "low_stock_items": low_stock_items,          # 사이드바에는 이쁘게 8개 노출
             "total_low_stock_count": total_low_stock_count, # 🌟 상단 스탯 카드용 진짜 전체 개수 토스!
             "pending_order_count": pending_order_count,
+            "daily_confirmed": daily_confirmed,
+            "inspection_pending_count": inspection_pending_count,
+            "incoming_count": incoming_count,
+            "notices": notices,
+            "activities": activities,
         },
     )
 

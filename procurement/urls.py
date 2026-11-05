@@ -52,3 +52,12 @@ urlpatterns += [
     path('monthly-settlement/', team_document_views.monthly_settlement_view, name='monthly_settlement_view'),
     path('docs/cooking-instruction/', team_document_views.doc_cooking_instruction, name='doc_cooking_instruction'),
 ]
+
+from . import portal_views
+urlpatterns += [
+ path('portal/',portal_views.portal_home,name='portal_home'),
+ path('portal/orders/',portal_views.portal_orders,name='portal_orders'),
+ path('portal/orders/<int:pk>/',portal_views.portal_detail,name='portal_detail'),
+ path('portal/orders/<int:pk>/export/',portal_views.portal_export,name='portal_export'),
+ path('supplier-memberships/',portal_views.membership_reviews,name='membership_reviews'),
+]

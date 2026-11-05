@@ -5,11 +5,13 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from .models import Supplier
 from .workflow_views import _can_manage
+from accounts.supplier_identity import eligible_order_accounts
 
 
 class SupplierProfileForm(forms.ModelForm):
@@ -20,7 +22,7 @@ class SupplierProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['name'].max_length = 50
-        self.fields['user'].queryset = get_user_model().objects.filter(role='SUPPLIER').filter(
+        self.fields['user'].queryset = eligible_order_accounts(get_user_model().objects.filter(role='SUPPLIER')).filter(
             Q(supplier_profile__isnull=True) | Q(supplier_profile=self.instance.pk)
         ).order_by('name')
 
@@ -50,7 +52,7 @@ def supplier_list(request):
             Q(mobile__icontains=query) | Q(remarks__icontains=query))
     return render(request, 'procurement/supplier_list.html', {
         'suppliers': suppliers, 'query': query, 'can_manage': _can_manage(request.user),
-        'available_accounts': get_user_model().objects.filter(role='SUPPLIER', supplier_profile__isnull=True).order_by('name'),
+        'available_accounts': eligible_order_accounts(get_user_model().objects.filter(role='SUPPLIER', supplier_profile__isnull=True)).order_by('name'),
     })
 
 
@@ -92,8 +94,12 @@ def supplier_update(request, pk):
 @user_passes_test(_can_manage)
 @require_POST
 def supplier_delete(request, pk):
-    with transaction.atomic():
-        supplier = get_object_or_404(Supplier.objects.select_for_update(), pk=pk)
-        supplier.delete()  # Contact profile only. User FK, historical orders and stock are retained.
+    try:
+        with transaction.atomic():
+            supplier = get_object_or_404(Supplier.objects.select_for_update(), pk=pk)
+            supplier.delete()  # Historical orders and account identity remain intact.
+    except ProtectedError:
+        messages.error(request, '포털 계정이 연결된 거래처는 삭제할 수 없습니다. 업체 연결을 먼저 확인하세요.')
+        return redirect('procurement:supplier_list')
     messages.success(request, '연락처 현황만 삭제했습니다. 발주 연동 계정과 이력은 유지됩니다.')
     return redirect('procurement:supplier_list')

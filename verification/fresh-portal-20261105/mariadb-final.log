@@ -1,0 +1,489 @@
+{"passed": true, "restoredAccounts": 9, "originalIdentityStateAndFlagsUnchanged": true, "highestAdminsPreservedWithoutAdditionalPromotion": true, "verifiedMembershipsFromExplicitLegacyLinksOnly": true}
+System check identified no issues (0 silenced).
+No changes detected
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Running migrations:
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+Found 260 test(s).
+Creating test database for alias 'default' ('test_snp_auth_verification')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_accesspolicy_user_access_revision_user_account_state_and_more... OK
+  Applying accounts.0003_initialize_access_roles... OK
+  Applying accounts.0004_adminrolerequest_announcement... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying procurement.0010_supplierdeliveryline_supplierfulfillment_and_more... OK
+  Applying procurement.0011_initialize_portal_roles... OK
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_active_state_with_inconsistent_flag_is_still_blocked (integration_tests.test_access_management.AccountAccessTests.test_active_state_with_inconsistent_flag_is_still_blocked) ... ok
+test_admin_ui_search_detail_matrix_and_audit (integration_tests.test_access_management.AccountAccessTests.test_admin_ui_search_detail_matrix_and_audit) ... ok
+test_anonymous_management_requires_login (integration_tests.test_access_management.AccountAccessTests.test_anonymous_management_requires_login) ... ok
+test_api_validation_csrf_and_protected_fields (integration_tests.test_access_management.AccountAccessTests.test_api_validation_csrf_and_protected_fields) ... ok
+test_audit_contains_only_state_not_secrets (integration_tests.test_access_management.AccountAccessTests.test_audit_contains_only_state_not_secrets) ... ok
+test_auto_signup_immediate_login_without_privilege_escalation (integration_tests.test_access_management.AccountAccessTests.test_auto_signup_immediate_login_without_privilege_escalation) ... ok
+test_concurrent_revision_and_invalid_role_rejected (integration_tests.test_access_management.AccountAccessTests.test_concurrent_revision_and_invalid_role_rejected) ... ok
+test_confirmed_pending_approval_idempotent_preserves_identity (integration_tests.test_access_management.AccountAccessTests.test_confirmed_pending_approval_idempotent_preserves_identity) ... ok
+test_inventory_cook_and_dietitian_capabilities (integration_tests.test_access_management.AccountAccessTests.test_inventory_cook_and_dietitian_capabilities) ... ok
+test_last_admin_guard_when_no_other_active_admin (integration_tests.test_access_management.AccountAccessTests.test_last_admin_guard_when_no_other_active_admin) ... ok
+test_manual_signup_pending_and_audited (integration_tests.test_access_management.AccountAccessTests.test_manual_signup_pending_and_audited) ... ok
+test_multi_roles_and_immediate_revocation (integration_tests.test_access_management.AccountAccessTests.test_multi_roles_and_immediate_revocation) ... ok
+test_native_admin_user_and_group_mutation_disabled (integration_tests.test_access_management.AccountAccessTests.test_native_admin_user_and_group_mutation_disabled) ... ok
+test_policy_environment_audited_once (integration_tests.test_access_management.AccountAccessTests.test_policy_environment_audited_once) ... ok
+test_preview_command_guard (integration_tests.test_access_management.AccountAccessTests.test_preview_command_guard) ... ok
+test_preview_command_only_confirmed_target_and_rerun (integration_tests.test_access_management.AccountAccessTests.test_preview_command_only_confirmed_target_and_rerun) ... ok
+test_regular_user_admin_pages_and_direct_api_denied_audited (integration_tests.test_access_management.AccountAccessTests.test_regular_user_admin_pages_and_direct_api_denied_audited) ... ok
+test_restore_suspended_preserves_roles_and_login (integration_tests.test_access_management.AccountAccessTests.test_restore_suspended_preserves_roles_and_login) ... ok
+test_role_matrix_all_mutations_denied_to_viewer (integration_tests.test_access_management.AccountAccessTests.test_role_matrix_all_mutations_denied_to_viewer) ... ok
+test_roles_only_conversion_of_legacy_user_retains_workflow (integration_tests.test_access_management.AccountAccessTests.test_roles_only_conversion_of_legacy_user_retains_workflow) ... ok
+test_self_admin_and_superuser_protection (integration_tests.test_access_management.AccountAccessTests.test_self_admin_and_superuser_protection) ... ok
+test_suspended_and_unknown_never_classified_as_signup (integration_tests.test_access_management.AccountAccessTests.test_suspended_and_unknown_never_classified_as_signup) ... ok
+test_suspended_login_and_existing_session_blocked (integration_tests.test_access_management.AccountAccessTests.test_suspended_login_and_existing_session_blocked) ... ok
+test_unknown_route_fails_closed_and_supplier_unchanged (integration_tests.test_access_management.AccountAccessTests.test_unknown_route_fails_closed_and_supplier_unchanged) ... ok
+test_active_login_logout_and_safe_next (integration_tests.test_account_recovery.AccountRecoveryContracts.test_active_login_logout_and_safe_next) ... ok
+test_bad_password_does_not_reveal_approval (integration_tests.test_account_recovery.AccountRecoveryContracts.test_bad_password_does_not_reveal_approval) ... ok
+test_correct_inactive_password_explains_approval_without_altering_user (integration_tests.test_account_recovery.AccountRecoveryContracts.test_correct_inactive_password_explains_approval_without_altering_user) ... ok
+test_csrf_enforced_on_requests_and_identity_confirmation (integration_tests.test_account_recovery.AccountRecoveryContracts.test_csrf_enforced_on_requests_and_identity_confirmation) ... ok
+test_email_change_invalidates_reset_and_identity_proof (integration_tests.test_account_recovery.AccountRecoveryContracts.test_email_change_invalidates_reset_and_identity_proof) ... ok
+test_identity_token_expiry_tampering_and_atomic_single_use (integration_tests.test_account_recovery.AccountRecoveryContracts.test_identity_token_expiry_tampering_and_atomic_single_use) ... ok
+test_inactive_unusable_unknown_email_never_receive_reset (integration_tests.test_account_recovery.AccountRecoveryContracts.test_inactive_unusable_unknown_email_never_receive_reset) ... ok
+test_password_email_default_token_and_new_password_invalidate_sessions (integration_tests.test_account_recovery.AccountRecoveryContracts.test_password_email_default_token_and_new_password_invalidate_sessions) ... ok
+test_rate_limits_shared_across_endpoints_and_unknown_addresses (integration_tests.test_account_recovery.AccountRecoveryContracts.test_rate_limits_shared_across_endpoints_and_unknown_addresses) ... ok
+test_recovery_pages_have_all_mode_controls_and_private_headers (integration_tests.test_account_recovery.AccountRecoveryContracts.test_recovery_pages_have_all_mode_controls_and_private_headers) ... ok
+test_registered_and_unknown_email_have_same_response_and_queue_path (integration_tests.test_account_recovery.AccountRecoveryContracts.test_registered_and_unknown_email_have_same_response_and_queue_path) ... ok
+test_reset_token_expiry_invalid_token_and_weak_password (integration_tests.test_account_recovery.AccountRecoveryContracts.test_reset_token_expiry_invalid_token_and_weak_password) ... ok
+test_send_failure_logged_without_email_or_token (integration_tests.test_account_recovery.AccountRecoveryContracts.test_send_failure_logged_without_email_or_token) ... ok
+test_shared_email_lists_all_usernames_but_reset_excludes_inactive (integration_tests.test_account_recovery.AccountRecoveryContracts.test_shared_email_lists_all_usernames_but_reset_excludes_inactive) ... ok
+test_signup_requires_email_and_preserves_admin_approval (integration_tests.test_account_recovery.AccountRecoveryContracts.test_signup_requires_email_and_preserves_admin_approval) ... ok
+test_unconfigured_email_and_store_outage_are_not_success (integration_tests.test_account_recovery.AccountRecoveryContracts.test_unconfigured_email_and_store_outage_are_not_success) ... Recovery queue unavailable.
+ok
+test_username_email_receipt_requires_proof_before_display (integration_tests.test_account_recovery.AccountRecoveryContracts.test_username_email_receipt_requires_proof_before_display) ... ok
+test_offline_prediction_pipeline_persists_three_meals (integration_tests.test_ai.PredictionCompatibilityTests.test_offline_prediction_pipeline_persists_three_meals) ... === ARTIFACT CHECK ===
+artifact keys: ['model', 'menu_kmeans', 'target', 'best_model_name', 'test_mae']
+artifact target: breakfast
+artifact feature_columns length: 0
+======================
+[Init] SBERT 모델 로딩 중...
+Warning: SBERT 로드 실패. 텍스트 피처는 제외됩니다. (sentence-transformers 미설치)
+df['date'] dtype: datetime64[ns]
+holiday_df['next_holiday'] dtype: datetime64[ns]
+=== FEATURE CHECK ===
+meal_type: breakfast
+X_input columns: ['lunch', 'dinner', 'weekday', 'is_weekend', 'is_holiday', 'is_day_off', 'tomorrow_is_day_off', 'd_day_holiday', 'menu_cluster', 'emb_mean', 'lag_1', 'lag_2', 'ewm_5']
+artifact feature_columns: []
+X_input shape: (1, 13)
+=====================
+OFFLINE_PIPELINE breakfast: prediction=46
+=== ARTIFACT CHECK ===
+artifact keys: ['model', 'menu_kmeans', 'target', 'best_model_name', 'test_mae']
+artifact target: lunch
+artifact feature_columns length: 0
+======================
+[Init] SBERT 모델 로딩 중...
+Warning: SBERT 로드 실패. 텍스트 피처는 제외됩니다. (sentence-transformers 미설치)
+df['date'] dtype: datetime64[ns]
+holiday_df['next_holiday'] dtype: datetime64[ns]
+=== FEATURE CHECK ===
+meal_type: lunch
+X_input columns: ['breakfast', 'dinner', 'weekday', 'is_weekend', 'is_holiday', 'is_day_off', 'tomorrow_is_day_off', 'd_day_holiday', 'lag_1', 'lag_2', 'lag_3', 'lag_7', 'ewm_3', 'ewm_7', 'ewm_14', 'menu_cluster', 'emb_mean']
+artifact feature_columns: []
+X_input shape: (1, 17)
+=====================
+OFFLINE_PIPELINE lunch: prediction=219
+=== ARTIFACT CHECK ===
+artifact keys: ['model', 'menu_kmeans', 'target', 'best_model_name', 'test_mae']
+artifact target: dinner
+artifact feature_columns length: 0
+======================
+[Init] SBERT 모델 로딩 중...
+Warning: SBERT 로드 실패. 텍스트 피처는 제외됩니다. (sentence-transformers 미설치)
+df['date'] dtype: datetime64[ns]
+holiday_df['next_holiday'] dtype: datetime64[ns]
+=== FEATURE CHECK ===
+meal_type: dinner
+X_input columns: ['breakfast', 'lunch', 'weekday', 'is_weekend', 'is_holiday', 'is_day_off', 'tomorrow_is_day_off', 'd_day_holiday', 'd_day_exam', 'lag_1', 'ewm_7', 'd_day_min']
+artifact feature_columns: []
+X_input shape: (1, 12)
+=====================
+OFFLINE_PIPELINE dinner: prediction=132
+ok
+test_three_persisted_estimators_load_and_predict (integration_tests.test_ai.PredictionCompatibilityTests.test_three_persisted_estimators_load_and_predict) ... ARTIFACT_SMOKE breakfast: VotingRegressor, 13 features, prediction=48.50973983872329
+ARTIFACT_SMOKE lunch: VotingRegressor, 17 features, prediction=174.10567585269018
+ARTIFACT_SMOKE dinner: StackingRegressor, 12 features, prediction=136.8275649867025
+ok
+test_confirmed_count_units_and_explicit_package (integration_tests.test_cooking.CookingInstructionsTest.test_confirmed_count_units_and_explicit_package) ... ok
+test_daily_workbook_separate_meals_and_confirmed_counts (integration_tests.test_cooking.CookingInstructionsTest.test_daily_workbook_separate_meals_and_confirmed_counts) ... ok
+test_excel_numeric_total_and_literal_formula_text (integration_tests.test_cooking.CookingInstructionsTest.test_excel_numeric_total_and_literal_formula_text) ... ok
+test_html_navigation_and_date_validation (integration_tests.test_cooking.CookingInstructionsTest.test_html_navigation_and_date_validation) ... ok
+test_incompatible_units_warn (integration_tests.test_cooking.CookingInstructionsTest.test_incompatible_units_warn) ... ok
+test_invalid_revision_and_oversized_notes_rejected (integration_tests.test_cooking.CookingInstructionsTest.test_invalid_revision_and_oversized_notes_rejected) ... ok
+test_line_notes_save_export_and_conflicting_revision (integration_tests.test_cooking.CookingInstructionsTest.test_line_notes_save_export_and_conflicting_revision) ... ok
+test_long_notes_continue_and_print_pages_repeat_headers (integration_tests.test_cooking.CookingInstructionsTest.test_long_notes_continue_and_print_pages_repeat_headers) ... ok
+test_missing_spec_keeps_total_and_does_not_guess_label (integration_tests.test_cooking.CookingInstructionsTest.test_missing_spec_keeps_total_and_does_not_guess_label) ... ok
+test_no_recipe_warning (integration_tests.test_cooking.CookingInstructionsTest.test_no_recipe_warning) ... ok
+test_recalculates_after_headcount_change (integration_tests.test_cooking.CookingInstructionsTest.test_recalculates_after_headcount_change) ... ok
+test_reference_all_sheets_and_export_structure (integration_tests.test_cooking.CookingInstructionsTest.test_reference_all_sheets_and_export_structure) ... ok
+test_save_edit_conflict_and_no_stock_mutation (integration_tests.test_cooking.CookingInstructionsTest.test_save_edit_conflict_and_no_stock_mutation) ... ok
+test_supplier_and_anonymous_access_denied (integration_tests.test_cooking.CookingInstructionsTest.test_supplier_and_anonymous_access_denied) ... ok
+test_unconfirmed_never_uses_manual_999 (integration_tests.test_cooking.CookingInstructionsTest.test_unconfirmed_never_uses_manual_999) ... ok
+test_zero_is_valid (integration_tests.test_cooking.CookingInstructionsTest.test_zero_is_valid) ... ok
+test_completed_prediction_retry_never_reruns_models (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_completed_prediction_retry_never_reruns_models) ... ok
+test_empty_month_has_real_zero_not_template_samples (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_empty_month_has_real_zero_not_template_samples) ... ok
+test_existing_menu_name_creation_api_is_preserved (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_existing_menu_name_creation_api_is_preserved) ... ok
+test_ingredient_edit_cannot_reinterpret_existing_units (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_ingredient_edit_cannot_reinterpret_existing_units) ... ok
+test_ingredient_edit_keeps_primary_key_and_inventory (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_ingredient_edit_keeps_primary_key_and_inventory) ... ok
+test_ingredient_edit_rejects_negative_price (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_ingredient_edit_rejects_negative_price) ... ok
+test_inventory_period_and_legacy_month_preserve_opening_balance (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_inventory_period_and_legacy_month_preserve_opening_balance) ... ok
+test_month_invalid_and_cooking_range_invalid (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_month_invalid_and_cooking_range_invalid) ... ok
+test_month_selection_prefers_target_date_and_only_falls_back_for_null (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_month_selection_prefers_target_date_and_only_falls_back_for_null) ... ok
+test_monthly_quantities_keep_units_and_zero_price (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_monthly_quantities_keep_units_and_zero_price) ... ok
+test_new_supplier_is_not_a_nutritionist_and_cannot_login (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_new_supplier_is_not_a_nutritionist_and_cannot_login) ... ok
+test_no_free_text_package_or_volume_mass_guessing (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_no_free_text_package_or_volume_mass_guessing) ... ok
+test_non_supplier_account_cannot_be_linked (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_non_supplier_account_cannot_be_linked) ... ok
+test_prediction_calendar_exposes_each_meal_count (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_prediction_calendar_exposes_each_meal_count) ... ok
+test_prediction_retry_only_runs_missing_meals (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_prediction_retry_only_runs_missing_meals) ... ok
+test_profile_update_keeps_identity_and_delete_retains_history (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_profile_update_keeps_identity_and_delete_retains_history) ... ok
+test_supplier_account_collision_and_invalid_input_are_rejected (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_supplier_account_collision_and_invalid_input_are_rejected) ... ok
+test_supplier_get_does_not_seed_accounts_or_profiles (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_supplier_get_does_not_seed_accounts_or_profiles) ... ok
+test_supplier_links_existing_account_without_replacing_orders (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_supplier_links_existing_account_without_replacing_orders) ... ok
+test_supplier_mutations_require_admin_and_internal_documents_require_login (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_supplier_mutations_require_admin_and_internal_documents_require_login) ... ok
+test_team_cooking_uses_final_count_saved_notes_without_stock_changes (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_team_cooking_uses_final_count_saved_notes_without_stock_changes) ... ok
+test_team_cooking_zero_unconfirmed_and_missing_spec (integration_tests.test_kanghoon2.KanghoonSecondIntegration.test_team_cooking_zero_unconfirmed_and_missing_spec) ... ok
+test_ai_absent_manual_confirmation_and_ui (integration_tests.test_requirements.RequirementWorkflows.test_ai_absent_manual_confirmation_and_ui) ... ok
+test_ai_failure_does_not_block_manual_workflow (integration_tests.test_requirements.RequirementWorkflows.test_ai_failure_does_not_block_manual_workflow) ... Traceback (most recent call last):
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: 모델 미가용
+Traceback (most recent call last):
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: 모델 미가용
+Traceback (most recent call last):
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+  File "/workspace/forecasting/views.py", line 59, in prediction_create_view
+    run_attendance_prediction(
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: 모델 미가용
+ok
+test_all_new_ui_routes_render (integration_tests.test_requirements.RequirementWorkflows.test_all_new_ui_routes_render) ... ok
+test_bulk_upload_clears_old_confirmation (integration_tests.test_requirements.RequirementWorkflows.test_bulk_upload_clears_old_confirmation) ... ok
+test_business_authentication_and_admin_permissions (integration_tests.test_requirements.RequirementWorkflows.test_business_authentication_and_admin_permissions) ... ok
+test_category_rename_reclassifies_and_duplicate_shows_error (integration_tests.test_requirements.RequirementWorkflows.test_category_rename_reclassifies_and_duplicate_shows_error) ... ok
+test_changed_headcount_recipe_or_spec_marks_review (integration_tests.test_requirements.RequirementWorkflows.test_changed_headcount_recipe_or_spec_marks_review) ... ok
+test_complete_ui_headcount_snapshot_order_inspection_usage_flow (integration_tests.test_requirements.RequirementWorkflows.test_complete_ui_headcount_snapshot_order_inspection_usage_flow) ... ok
+test_conflicting_reinspection_does_not_overwrite (integration_tests.test_requirements.RequirementWorkflows.test_conflicting_reinspection_does_not_overwrite) ... ok
+test_daily_edit_empty_selection_removes_menus_without_deleting_plan (integration_tests.test_requirements.RequirementWorkflows.test_daily_edit_empty_selection_removes_menus_without_deleting_plan) ... ok
+test_daily_edit_preserves_plan_identity_and_forecast (integration_tests.test_requirements.RequirementWorkflows.test_daily_edit_preserves_plan_identity_and_forecast) ... ok
+test_deduction_blocks_short_stock_and_negative_headcount (integration_tests.test_requirements.RequirementWorkflows.test_deduction_blocks_short_stock_and_negative_headcount) ... ok
+test_duplicate_plan_and_confirm_requests_create_once (integration_tests.test_requirements.RequirementWorkflows.test_duplicate_plan_and_confirm_requests_create_once) ... ok
+test_expired_lot_cannot_be_consumed_but_can_be_disposed (integration_tests.test_requirements.RequirementWorkflows.test_expired_lot_cannot_be_consumed_but_can_be_disposed) ... ok
+test_expired_receipt_blocks_planning_until_disposal (integration_tests.test_requirements.RequirementWorkflows.test_expired_receipt_blocks_planning_until_disposal) ... ok
+test_explicit_mass_conversion_and_seven_can_example (integration_tests.test_requirements.RequirementWorkflows.test_explicit_mass_conversion_and_seven_can_example) ... ok
+test_fifo_allocates_oldest_receipt_and_tracks_expiry (integration_tests.test_requirements.RequirementWorkflows.test_fifo_allocates_oldest_receipt_and_tracks_expiry) ... ok
+test_final_confirmation_overrides_ai (integration_tests.test_requirements.RequirementWorkflows.test_final_confirmation_overrides_ai) ... ok
+test_friday_group_and_weekend_only (integration_tests.test_requirements.RequirementWorkflows.test_friday_group_and_weekend_only) ... ok
+test_incompatible_units_and_recipe_missing_block (integration_tests.test_requirements.RequirementWorkflows.test_incompatible_units_and_recipe_missing_block) ... ok
+test_inspection_document_date_supplier_filter_and_empty_state (integration_tests.test_requirements.RequirementWorkflows.test_inspection_document_date_supplier_filter_and_empty_state) ... ok
+test_inspection_partial_acceptance_and_duplicate_receipt (integration_tests.test_requirements.RequirementWorkflows.test_inspection_partial_acceptance_and_duplicate_receipt) ... ok
+test_inspection_ui_and_actual_monthly_settlement (integration_tests.test_requirements.RequirementWorkflows.test_inspection_ui_and_actual_monthly_settlement) ... ok
+test_invalid_inspections_never_receive_stock (integration_tests.test_requirements.RequirementWorkflows.test_invalid_inspections_never_receive_stock) ... ok
+test_inventory_request_idempotency_and_shortage (integration_tests.test_requirements.RequirementWorkflows.test_inventory_request_idempotency_and_shortage) ... ok
+test_issued_order_preview_shows_actual_adjusted_quantity (integration_tests.test_requirements.RequirementWorkflows.test_issued_order_preview_shows_actual_adjusted_quantity) ... ok
+test_kg_orders_follow_explicit_fractional_increment (integration_tests.test_requirements.RequirementWorkflows.test_kg_orders_follow_explicit_fractional_increment) ... ok
+test_legacy_requirement_screen_uses_final_and_all_stock_types (integration_tests.test_requirements.RequirementWorkflows.test_legacy_requirement_screen_uses_final_and_all_stock_types) ... ok
+test_legacy_simple_order_uses_idempotent_validated_snapshot (integration_tests.test_requirements.RequirementWorkflows.test_legacy_simple_order_uses_idempotent_validated_snapshot) ... ok
+test_legacy_smart_post_requires_final_and_creates_reviewable_snapshot (integration_tests.test_requirements.RequirementWorkflows.test_legacy_smart_post_requires_final_and_creates_reviewable_snapshot) ... ok
+test_manual_and_final_headcounts_store_zero_and_timestamp (integration_tests.test_requirements.RequirementWorkflows.test_manual_and_final_headcounts_store_zero_and_timestamp) ... ok
+test_manual_change_clears_confirmation (integration_tests.test_requirements.RequirementWorkflows.test_manual_change_clears_confirmation) ... ok
+test_missing_spec_and_supplier_block_with_named_errors (integration_tests.test_requirements.RequirementWorkflows.test_missing_spec_and_supplier_block_with_named_errors) ... ok
+test_negative_nan_infinity_fractional_headcount_rejected (integration_tests.test_requirements.RequirementWorkflows.test_negative_nan_infinity_fractional_headcount_rejected) ... ok
+test_new_ingredient_form_accepts_managed_category (integration_tests.test_requirements.RequirementWorkflows.test_new_ingredient_form_accepts_managed_category) ... ok
+test_no_final_headcount_blocks_snapshot (integration_tests.test_requirements.RequirementWorkflows.test_no_final_headcount_blocks_snapshot) ... ok
+test_no_receipt_before_inspection_and_legacy_cannot_bypass (integration_tests.test_requirements.RequirementWorkflows.test_no_receipt_before_inspection_and_legacy_cannot_bypass) ... ok
+test_order_preview_notes_persist_and_blank_print_does_not_change_final (integration_tests.test_requirements.RequirementWorkflows.test_order_preview_notes_persist_and_blank_print_does_not_change_final) ... ok
+test_pack_description_is_not_parsed_without_coefficient (integration_tests.test_requirements.RequirementWorkflows.test_pack_description_is_not_parsed_without_coefficient) ... ok
+test_purchase_requisition_prints_category_once_per_group (integration_tests.test_requirements.RequirementWorkflows.test_purchase_requisition_prints_category_once_per_group) ... ok
+test_real_ai_then_final_confirmation_through_inspection_and_fifo_usage (integration_tests.test_requirements.RequirementWorkflows.test_real_ai_then_final_confirmation_through_inspection_and_fifo_usage) ... === ARTIFACT CHECK ===
+artifact keys: ['model', 'menu_kmeans', 'target', 'best_model_name', 'test_mae']
+artifact target: dinner
+artifact feature_columns length: 0
+======================
+[Init] SBERT 모델 로딩 중...
+Warning: SBERT 로드 실패. 텍스트 피처는 제외됩니다. (sentence-transformers 미설치)
+df['date'] dtype: datetime64[ns]
+holiday_df['next_holiday'] dtype: datetime64[ns]
+=== FEATURE CHECK ===
+meal_type: dinner
+X_input columns: ['breakfast', 'lunch', 'weekday', 'is_weekend', 'is_holiday', 'is_day_off', 'tomorrow_is_day_off', 'd_day_holiday', 'd_day_exam', 'lag_1', 'ewm_7', 'd_day_min']
+artifact feature_columns: []
+X_input shape: (1, 12)
+=====================
+ok
+test_recipe_api_preserves_inventory_unit_and_rejects_nonpositive_amounts (integration_tests.test_requirements.RequirementWorkflows.test_recipe_api_preserves_inventory_unit_and_rejects_nonpositive_amounts) ... ok
+test_recipe_api_returns_recipe_unit_instead_of_inventory_unit (integration_tests.test_requirements.RequirementWorkflows.test_recipe_api_returns_recipe_unit_instead_of_inventory_unit) ... ok
+test_recipe_unit_and_cooking_notes_ui (integration_tests.test_requirements.RequirementWorkflows.test_recipe_unit_and_cooking_notes_ui) ... ok
+test_repeated_ingredient_aggregated_safety_applied_once (integration_tests.test_requirements.RequirementWorkflows.test_repeated_ingredient_aggregated_safety_applied_once) ... ok
+test_round_up_and_manual_adjustment_snapshot (integration_tests.test_requirements.RequirementWorkflows.test_round_up_and_manual_adjustment_snapshot) ... ok
+test_same_legacy_stock_form_request_is_not_double_counted (integration_tests.test_requirements.RequirementWorkflows.test_same_legacy_stock_form_request_is_not_double_counted) ... ok
+test_stock_change_since_preview_requires_recalculation (integration_tests.test_requirements.RequirementWorkflows.test_stock_change_since_preview_requires_recalculation) ... ok
+test_stock_surplus_yields_zero_order (integration_tests.test_requirements.RequirementWorkflows.test_stock_surplus_yields_zero_order) ... ok
+test_supplier_and_spec_edit_from_ui (integration_tests.test_requirements.RequirementWorkflows.test_supplier_and_spec_edit_from_ui) ... ok
+test_two_suppliers_split_orders_and_sort_by_real_name (integration_tests.test_requirements.RequirementWorkflows.test_two_suppliers_split_orders_and_sort_by_real_name) ... ok
+test_weekly_ledger_opening_waste_adjustment_and_closing (integration_tests.test_requirements.RequirementWorkflows.test_weekly_ledger_opening_waste_adjustment_and_closing) ... ok
+test_zero_negative_noninteger_or_underorder_adjustment_rejected (integration_tests.test_requirements.RequirementWorkflows.test_zero_negative_noninteger_or_underorder_adjustment_rejected) ... ok
+test_bad_months_are_400_not_server_errors (integration_tests.test_service_verification.ServiceVerification.test_bad_months_are_400_not_server_errors) ... ok
+test_bulk_delete_cannot_redirect_to_external_site (integration_tests.test_service_verification.ServiceVerification.test_bulk_delete_cannot_redirect_to_external_site) ... ok
+test_bulk_delete_cannot_remove_used_plan (integration_tests.test_service_verification.ServiceVerification.test_bulk_delete_cannot_remove_used_plan) ... ok
+test_csrf_all_three_menu_mutations_reject_missing_token (integration_tests.test_service_verification.ServiceVerification.test_csrf_all_three_menu_mutations_reject_missing_token) ... ok
+test_csrf_valid_token_preserves_json_menu_creation (integration_tests.test_service_verification.ServiceVerification.test_csrf_valid_token_preserves_json_menu_creation) ... ok
+test_invalid_meal_type_does_not_create_plan_or_menu (integration_tests.test_service_verification.ServiceVerification.test_invalid_meal_type_does_not_create_plan_or_menu) ... ok
+test_invalid_recipe_edit_cannot_erase_previous_recipe (integration_tests.test_service_verification.ServiceVerification.test_invalid_recipe_edit_cannot_erase_previous_recipe) ... ok
+test_invalid_supplier_identifier_is_not_500 (integration_tests.test_service_verification.ServiceVerification.test_invalid_supplier_identifier_is_not_500) ... ok
+test_legacy_recipe_update_preserves_explicit_gram_unit (integration_tests.test_service_verification.ServiceVerification.test_legacy_recipe_update_preserves_explicit_gram_unit) ... ok
+test_malformed_payload_is_validation_error (integration_tests.test_service_verification.ServiceVerification.test_malformed_payload_is_validation_error) ... ok
+test_menu_delete_get_is_read_only (integration_tests.test_service_verification.ServiceVerification.test_menu_delete_get_is_read_only) ... ok
+test_monthly_base_unit_rate_matches_frozen_order_amount (integration_tests.test_service_verification.ServiceVerification.test_monthly_base_unit_rate_matches_frozen_order_amount) ... ok
+test_public_signup_requires_admin_activation (integration_tests.test_service_verification.ServiceVerification.test_public_signup_requires_admin_activation) ... ok
+test_recipe_api_returns_recipe_unit_instead_of_stock_unit (integration_tests.test_service_verification.ServiceVerification.test_recipe_api_returns_recipe_unit_instead_of_stock_unit) ... ok
+test_served_plan_cannot_add_or_remove_links (integration_tests.test_service_verification.ServiceVerification.test_served_plan_cannot_add_or_remove_links) ... ok
+test_served_plan_delete_endpoint_preserves_cooking_history (integration_tests.test_service_verification.ServiceVerification.test_served_plan_delete_endpoint_preserves_cooking_history) ... ok
+test_signup_cannot_escalate_role_or_staff (integration_tests.test_service_verification.ServiceVerification.test_signup_cannot_escalate_role_or_staff) ... ok
+test_untrusted_names_are_literal_in_all_workbooks (integration_tests.test_service_verification.ServiceVerification.test_untrusted_names_are_literal_in_all_workbooks) ... ok
+test_unused_menu_deletes_only_with_csrf_post (integration_tests.test_service_verification.ServiceVerification.test_unused_menu_deletes_only_with_csrf_post) ... ok
+test_vendor_name_with_excel_invalid_characters_exports (integration_tests.test_service_verification.ServiceVerification.test_vendor_name_with_excel_invalid_characters_exports) ... ok
+test_vendor_xlsx_shows_ordered_packages_not_shortage (integration_tests.test_service_verification.ServiceVerification.test_vendor_xlsx_shows_ordered_packages_not_shortage) ... ok
+test_weekend_manual_order_is_not_dropped (integration_tests.test_service_verification.ServiceVerification.test_weekend_manual_order_is_not_dropped) ... ok
+test_weekly_editor_supplies_csrf_cookie_and_header (integration_tests.test_service_verification.ServiceVerification.test_weekly_editor_supplies_csrf_cookie_and_header) ... ok
+test_weekly_xlsx_uses_snapshot_package_amounts (integration_tests.test_service_verification.ServiceVerification.test_weekly_xlsx_uses_snapshot_package_amounts) ... ok
+test_workflow_order_appears_in_vendor_document (integration_tests.test_service_verification.ServiceVerification.test_workflow_order_appears_in_vendor_document) ... ok
+test_acceptance_edits_allowed_only_before_dispatch_or_inspection (integration_tests.test_supplier_portal.PortalContracts.test_acceptance_edits_allowed_only_before_dispatch_or_inspection) ... ok
+test_admin_request_preserves_login_roles_and_rejects_forgery (integration_tests.test_supplier_portal.PortalContracts.test_admin_request_preserves_login_roles_and_rejects_forgery) ... ok
+test_admin_request_review_revision_and_duplicate_protection (integration_tests.test_supplier_portal.PortalContracts.test_admin_request_review_revision_and_duplicate_protection) ... ok
+test_buyer_sees_delivery_plan_not_auto_accepted_quantity (integration_tests.test_supplier_portal.PortalContracts.test_buyer_sees_delivery_plan_not_auto_accepted_quantity) ... ok
+test_canonical_order_account_cannot_be_reassigned_to_another_company (integration_tests.test_supplier_portal.PortalContracts.test_canonical_order_account_cannot_be_reassigned_to_another_company) ... ok
+test_dashboard_counts_are_real_and_company_scoped (integration_tests.test_supplier_portal.PortalContracts.test_dashboard_counts_are_real_and_company_scoped) ... ok
+test_delivery_bad_dates_and_quantities (integration_tests.test_supplier_portal.PortalContracts.test_delivery_bad_dates_and_quantities) ... ok
+test_dietitian_signup_auto_no_admin (integration_tests.test_supplier_portal.PortalContracts.test_dietitian_signup_auto_no_admin) ... ok
+test_download_reuses_vendor_export_only_owned_order (integration_tests.test_supplier_portal.PortalContracts.test_download_reuses_vendor_export_only_owned_order) ... ok
+test_green_civic_reference_dashboard_data_not_fake (integration_tests.test_supplier_portal.PortalContracts.test_green_civic_reference_dashboard_data_not_fake) ... ok
+test_idor_detail_json_export_and_post_all_denied (integration_tests.test_supplier_portal.PortalContracts.test_idor_detail_json_export_and_post_all_denied) ... ok
+test_invalid_transition_and_duplicate_revision_rejected (integration_tests.test_supplier_portal.PortalContracts.test_invalid_transition_and_duplicate_revision_rejected) ... ok
+test_legacy_completed_orders_are_read_only_without_invented_supplier_history (integration_tests.test_supplier_portal.PortalContracts.test_legacy_completed_orders_are_read_only_without_invented_supplier_history) ... ok
+test_legacy_system_admin_alias_preserves_main_not_staff_promotion (integration_tests.test_supplier_portal.PortalContracts.test_legacy_system_admin_alias_preserves_main_not_staff_promotion) ... ok
+test_linked_supplier_profile_delete_is_graceful_and_preserved (integration_tests.test_supplier_portal.PortalContracts.test_linked_supplier_profile_delete_is_graceful_and_preserved) ... ok
+test_main_approves_supplier_sub_admin_and_can_revoke (integration_tests.test_supplier_portal.PortalContracts.test_main_approves_supplier_sub_admin_and_can_revoke) ... ok
+test_main_last_and_self_protected (integration_tests.test_supplier_portal.PortalContracts.test_main_last_and_self_protected) ... ok
+test_main_rejects_request_keeps_general_account (integration_tests.test_supplier_portal.PortalContracts.test_main_rejects_request_keeps_general_account) ... ok
+test_membership_changes_require_admin_and_revision (integration_tests.test_supplier_portal.PortalContracts.test_membership_changes_require_admin_and_revision) ... ok
+test_membership_duplicate_company_create_rejected (integration_tests.test_supplier_portal.PortalContracts.test_membership_duplicate_company_create_rejected) ... ok
+test_membership_self_approval_and_staff_forgery_denied (integration_tests.test_supplier_portal.PortalContracts.test_membership_self_approval_and_staff_forgery_denied) ... ok
+test_new_company_approved_explicitly_without_credentials_change (integration_tests.test_supplier_portal.PortalContracts.test_new_company_approved_explicitly_without_credentials_change) ... ok
+test_new_company_owner_becomes_eligible_after_explicit_approval_only (integration_tests.test_supplier_portal.PortalContracts.test_new_company_owner_becomes_eligible_after_explicit_approval_only) ... ok
+test_order_list_json_search_and_sort_scoped (integration_tests.test_supplier_portal.PortalContracts.test_order_list_json_search_and_sort_scoped) ... ok
+test_other_item_and_inventory_fields_are_rejected (integration_tests.test_supplier_portal.PortalContracts.test_other_item_and_inventory_fields_are_rejected) ... ok
+test_pending_membership_denies_all_data_routes (integration_tests.test_supplier_portal.PortalContracts.test_pending_membership_denies_all_data_routes) ... ok
+test_portal_csrf_and_unauthorized_api_calls (integration_tests.test_supplier_portal.PortalContracts.test_portal_csrf_and_unauthorized_api_calls) ... ok
+test_portal_employee_is_not_a_separate_order_counterparty (integration_tests.test_supplier_portal.PortalContracts.test_portal_employee_is_not_a_separate_order_counterparty) ... ok
+test_rejection_requires_reason_terminal_and_not_buyer_cancel (integration_tests.test_supplier_portal.PortalContracts.test_rejection_requires_reason_terminal_and_not_buyer_cancel) ... ok
+test_role_landing_and_workspaces (integration_tests.test_supplier_portal.PortalContracts.test_role_landing_and_workspaces) ... ok
+test_role_migration_does_not_restore_previously_demoted_legacy_admin (integration_tests.test_supplier_portal.PortalContracts.test_role_migration_does_not_restore_previously_demoted_legacy_admin) ... ok
+test_shared_company_accounts_reuse_legacy_owner (integration_tests.test_supplier_portal.PortalContracts.test_shared_company_accounts_reuse_legacy_owner) ... ok
+test_signup_invalid_type_cannot_gain_roles (integration_tests.test_supplier_portal.PortalContracts.test_signup_invalid_type_cannot_gain_roles) ... ok
+test_state_machine_does_not_modify_order_or_stock (integration_tests.test_supplier_portal.PortalContracts.test_state_machine_does_not_modify_order_or_stock) ... ok
+test_sub_audit_scope_excludes_admin_security_history (integration_tests.test_supplier_portal.PortalContracts.test_sub_audit_scope_excludes_admin_security_history) ... ok
+test_sub_can_manage_general_roles_and_state (integration_tests.test_supplier_portal.PortalContracts.test_sub_can_manage_general_roles_and_state) ... ok
+test_sub_cannot_access_native_admin_or_security_policy_post (integration_tests.test_supplier_portal.PortalContracts.test_sub_cannot_access_native_admin_or_security_policy_post) ... ok
+test_sub_cannot_manage_main_other_sub_or_self (integration_tests.test_supplier_portal.PortalContracts.test_sub_cannot_manage_main_other_sub_or_self) ... ok
+test_sub_cannot_review_requests_or_grant_admin_aliases (integration_tests.test_supplier_portal.PortalContracts.test_sub_cannot_review_requests_or_grant_admin_aliases) ... ok
+test_supplier_cannot_access_internal_views_or_api (integration_tests.test_supplier_portal.PortalContracts.test_supplier_cannot_access_internal_views_or_api) ... ok
+test_supplier_signup_requires_company_and_contact (integration_tests.test_supplier_portal.PortalContracts.test_supplier_signup_requires_company_and_contact) ... ok
+test_admin_keeps_its_own_permissioned_structure_with_mode_control (integration_tests.test_ui_modes.ThreeModeShell.test_admin_keeps_its_own_permissioned_structure_with_mode_control) ... ok
+test_compare_view_has_read_only_separate_modes (integration_tests.test_ui_modes.ThreeModeShell.test_compare_view_has_read_only_separate_modes) ... ok
+test_compare_view_respects_existing_business_auth_policy (integration_tests.test_ui_modes.ThreeModeShell.test_compare_view_respects_existing_business_auth_policy) ... ok
+test_existing_operational_navigation_and_csrf_remain (integration_tests.test_ui_modes.ThreeModeShell.test_existing_operational_navigation_and_csrf_remain) ... ok
+test_login_and_signup_also_have_mode_switcher (integration_tests.test_ui_modes.ThreeModeShell.test_login_and_signup_also_have_mode_switcher) ... ok
+test_modes_exist_on_all_representative_screens (integration_tests.test_ui_modes.ThreeModeShell.test_modes_exist_on_all_representative_screens) ... ok
+test_only_explicit_preview_gets_same_origin_frame_permission (integration_tests.test_ui_modes.ThreeModeShell.test_only_explicit_preview_gets_same_origin_frame_permission) ... ok
+test_preview_flag_does_not_relax_unlisted_routes (integration_tests.test_ui_modes.ThreeModeShell.test_preview_flag_does_not_relax_unlisted_routes) ... ok
+test_preview_flag_never_bypasses_authentication_or_supplier_policy (integration_tests.test_ui_modes.ThreeModeShell.test_preview_flag_never_bypasses_authentication_or_supplier_policy) ... ok
+test_shell_has_skip_link_search_and_local_dependencies (integration_tests.test_ui_modes.ThreeModeShell.test_shell_has_skip_link_search_and_local_dependencies) ... ok
+test_all_documents_and_main_screens_render (integration_tests.test_workflows.WorkflowCase.test_all_documents_and_main_screens_render) ... ok
+test_bulk_delete_requires_post_and_preserves_other_dates (integration_tests.test_workflows.WorkflowCase.test_bulk_delete_requires_post_and_preserves_other_dates) ... ok
+test_comma_ids_use_all_inventory_log_types (integration_tests.test_workflows.WorkflowCase.test_comma_ids_use_all_inventory_log_types) ... ok
+test_csv_ingredient_upload_preserves_missing_columns (integration_tests.test_workflows.WorkflowCase.test_csv_ingredient_upload_preserves_missing_columns) ... ok
+test_dashboard_total_is_not_capped_at_eight (integration_tests.test_workflows.WorkflowCase.test_dashboard_total_is_not_capped_at_eight) ... ok
+test_date_requirement_fallback (integration_tests.test_workflows.WorkflowCase.test_date_requirement_fallback) ... ok
+test_excel_exports_open_as_real_workbooks (integration_tests.test_workflows.WorkflowCase.test_excel_exports_open_as_real_workbooks) ... ok
+test_friday_group_covers_weekend_and_next_monday (integration_tests.test_workflows.WorkflowCase.test_friday_group_covers_weekend_and_next_monday) ... ok
+test_ingredient_upload_rolls_back_on_bad_number (integration_tests.test_workflows.WorkflowCase.test_ingredient_upload_rolls_back_on_bad_number) ... ok
+test_legacy_xls_ingredient_upload (integration_tests.test_workflows.WorkflowCase.test_legacy_xls_ingredient_upload) ... ok
+test_migration_graph_has_no_conflicts (integration_tests.test_workflows.WorkflowCase.test_migration_graph_has_no_conflicts) ... ok
+test_named_amounts_take_priority_over_date (integration_tests.test_workflows.WorkflowCase.test_named_amounts_take_priority_over_date) ... ok
+test_new_menu_name_api_and_delete_endpoint (integration_tests.test_workflows.WorkflowCase.test_new_menu_name_api_and_delete_endpoint) ... ok
+test_order_creation_receipt_and_repeated_confirmation (integration_tests.test_workflows.WorkflowCase.test_order_creation_receipt_and_repeated_confirmation) ... ok
+test_preserved_release_patch_routes (integration_tests.test_workflows.WorkflowCase.test_preserved_release_patch_routes) ... ok
+test_real_prediction_through_order_receipt_deduction_and_report (integration_tests.test_workflows.WorkflowCase.test_real_prediction_through_order_receipt_deduction_and_report) ... === ARTIFACT CHECK ===
+artifact keys: ['model', 'menu_kmeans', 'target', 'best_model_name', 'test_mae']
+artifact target: dinner
+artifact feature_columns length: 0
+======================
+[Init] SBERT 모델 로딩 중...
+Warning: SBERT 로드 실패. 텍스트 피처는 제외됩니다. (sentence-transformers 미설치)
+df['date'] dtype: datetime64[ns]
+holiday_df['next_holiday'] dtype: datetime64[ns]
+=== FEATURE CHECK ===
+meal_type: dinner
+X_input columns: ['breakfast', 'lunch', 'weekday', 'is_weekend', 'is_holiday', 'is_day_off', 'tomorrow_is_day_off', 'd_day_holiday', 'd_day_exam', 'lag_1', 'ewm_7', 'd_day_min']
+artifact feature_columns: []
+X_input shape: (1, 12)
+=====================
+ok
+test_recipe_release_upload_to_deduction_flow_is_idempotent (integration_tests.test_workflows.WorkflowCase.test_recipe_release_upload_to_deduction_flow_is_idempotent) ... ok
+test_repeated_ids_and_nonshortage_do_not_force_minimum (integration_tests.test_workflows.WorkflowCase.test_repeated_ids_and_nonshortage_do_not_force_minimum) ... ok
+test_safety_reserve_not_duplicated_across_menus_or_days (integration_tests.test_workflows.WorkflowCase.test_safety_reserve_not_duplicated_across_menus_or_days) ... ok
+test_selected_weekday_and_no_duplicate_meals (integration_tests.test_workflows.WorkflowCase.test_selected_weekday_and_no_duplicate_meals) ... ok
+test_simple_order_preserves_post_date (integration_tests.test_workflows.WorkflowCase.test_simple_order_preserves_post_date) ... ok
+test_single_ingredient_id_uses_annotated_stock (integration_tests.test_workflows.WorkflowCase.test_single_ingredient_id_uses_annotated_stock) ... ok
+test_sufficient_stock_yields_no_order (integration_tests.test_workflows.WorkflowCase.test_sufficient_stock_yields_no_order) ... ok
+test_titled_multisheet_ingredient_upload_matches_supplier_name (integration_tests.test_workflows.WorkflowCase.test_titled_multisheet_ingredient_upload_matches_supplier_name) ... ok
+test_unconfirmed_ai_is_not_used_as_final_smart_order (integration_tests.test_workflows.WorkflowCase.test_unconfirmed_ai_is_not_used_as_final_smart_order) ... ok
+test_unknown_supplier_does_not_erase_existing_mapping (integration_tests.test_workflows.WorkflowCase.test_unknown_supplier_does_not_erase_existing_mapping) ... ok
+test_weekday_order_group_uses_dinner_then_next_breakfast_lunch (integration_tests.test_workflows.WorkflowCase.test_weekday_order_group_uses_dinner_then_next_breakfast_lunch) ... ok
+test_weekend_only_has_no_order_day_group (integration_tests.test_workflows.WorkflowCase.test_weekend_only_has_no_order_day_group) ... ok
+test_weekly_page_keeps_search_and_next_monday_editing (integration_tests.test_workflows.WorkflowCase.test_weekly_page_keeps_search_and_next_monday_editing) ... ok
+test_weekly_recipe_document_links_menu_recipe_and_explicit_headcount (integration_tests.test_workflows.WorkflowCase.test_weekly_recipe_document_links_menu_recipe_and_explicit_headcount) ... ok
+test_wide_upload_keeps_headcount_and_row_upload_overwrites (integration_tests.test_workflows.WorkflowCase.test_wide_upload_keeps_headcount_and_row_upload_overwrites) ... ok
+test_bulk_upload_update_or_create_overwrite (meals.tests.MealPlanBulkUploadTestCase.test_bulk_upload_update_or_create_overwrite) ... ok
+test_csv_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_csv_bulk_upload_success) ... ok
+test_grid_calendar_excel_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_excel_upload_success) ... ok
+test_grid_calendar_with_title_and_disclaimer_noise (meals.tests.MealPlanBulkUploadTestCase.test_grid_calendar_with_title_and_disclaimer_noise) ... ok
+test_invalid_date_format (meals.tests.MealPlanBulkUploadTestCase.test_invalid_date_format) ... ok
+test_invalid_meal_type (meals.tests.MealPlanBulkUploadTestCase.test_invalid_meal_type) ... ok
+test_menu_sorting_by_category_priority (meals.tests.MealPlanBulkUploadTestCase.test_menu_sorting_by_category_priority) ... ok
+test_missing_required_headers (meals.tests.MealPlanBulkUploadTestCase.test_missing_required_headers) ... ok
+test_xlsx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xlsx_bulk_upload_success) ... ok
+test_xltx_bulk_upload_success (meals.tests.MealPlanBulkUploadTestCase.test_xltx_bulk_upload_success) ... ok
+test_daily_inspection_report_status_code (procurement.tests.DailyInspectionReportTest.test_daily_inspection_report_status_code)
+검수일지 페이지가 정상적으로 로드되는지 확인 ... ok
+test_daily_inspection_report_with_date (procurement.tests.DailyInspectionReportTest.test_daily_inspection_report_with_date)
+특정 날짜 파라미터와 함께 검수일지 페이지 접근 ... ok
+test_order_status_update_invalid (procurement.tests.PurchaseOrderStatusUpdateTest.test_order_status_update_invalid)
+존재하지 않는 상태값으로의 변경은 무시되는지 테스트 ... ok
+test_order_status_update_success (procurement.tests.PurchaseOrderStatusUpdateTest.test_order_status_update_success)
+정상적으로 발주 상태가 업데이트 되는지 확인하는 테스트 ... ok
+test_two_admins_cannot_remove_each_other_simultaneously (integration_tests.test_access_management.AccessConcurrencyTests.test_two_admins_cannot_remove_each_other_simultaneously) ... ok
+test_concurrent_identical_inspection_only_receives_once (integration_tests.test_concurrency.ConcurrentInventoryContracts.test_concurrent_identical_inspection_only_receives_once) ... ok
+test_concurrent_outgoing_cannot_overspend_stock (integration_tests.test_concurrency.ConcurrentInventoryContracts.test_concurrent_outgoing_cannot_overspend_stock) ... ok
+test_upgrade_preserves_inventory_logs_users_orders_and_items (integration_tests.test_migrations.ExistingDataMigrationTests.test_upgrade_preserves_inventory_logs_users_orders_and_items) ... ok
+test_duplicate_supplier_actions_only_commit_once (integration_tests.test_supplier_portal.PortalConcurrencyContracts.test_duplicate_supplier_actions_only_commit_once) ... ok
+
+----------------------------------------------------------------------
+Ran 260 tests in 21.616s
+
+OK
+Destroying test database for alias 'default' ('test_snp_auth_verification')...

@@ -80,6 +80,8 @@ class IngredientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from accounts.supplier_identity import eligible_order_accounts
+        self.fields['supplier'].queryset=eligible_order_accounts(self.fields['supplier'].queryset)
         from .models import IngredientCategory
         known = set(Ingredient.objects.exclude(category__isnull=True).values_list("category", flat=True))
         known.update(IngredientCategory.objects.values_list("name", flat=True))

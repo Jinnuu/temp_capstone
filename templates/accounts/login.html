@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}로그인 | 식수센스{% endblock %}
 
-{% block content %}
+{% block content %}<div class="fresh-auth-banner" aria-hidden="true"><img src="{% static 'ui/images/fresh-produce-original.png' %}" width="2172" height="724" alt=""><span>식수센스 · 건강한 급식 운영</span></div>
 <section class="row justify-content-center py-4 py-md-5">
     <div class="col-12 col-md-8 col-lg-5">
         <div class="card border-0 shadow-sm rounded-4">

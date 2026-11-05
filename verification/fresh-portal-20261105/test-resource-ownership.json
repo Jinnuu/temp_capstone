@@ -1,0 +1,31 @@
+{
+  "network": "snp-fresh-tests-20261105",
+  "purpose": "task-only synthetic verification",
+  "containers": [
+    {
+      "id": "0d5786fbca7ff14113935cabe071374fe60d2aef5bb8e16a7aad664fd1ecda8c",
+      "name": "snp-fresh-browser-proxy-20261105",
+      "image": "snp-ui-preview-proxy:three-modes"
+    },
+    {
+      "id": "7bca49a6dbe6c1dc981ba2571aca4d4691d3b89417d5557528cd3053a7ba250d",
+      "name": "snp-fresh-browser-app-20261105",
+      "image": "snp-ui-preview-web:three-modes"
+    },
+    {
+      "id": "dd67051110a65c2d3d45c0c8e3548ad0712d7348e4d7bf9597c0649cc8750b1d",
+      "name": "snp-fresh-test-mail-20261105",
+      "image": "python:3.10-slim"
+    },
+    {
+      "id": "700af2c4d34f5cda96953d3d9e46db3402dfce9fcd0fff96511b949356be0510",
+      "name": "snp-fresh-test-cache-20261105",
+      "image": "redis:7-alpine"
+    },
+    {
+      "id": "f688f0b2d13e40c442a60e6d7577e9ecd5f53b1dbc55cc98b30ba15c693c09e7",
+      "name": "snp-fresh-test-db-20261105",
+      "image": "mariadb:10.6"
+    }
+  ]
+}

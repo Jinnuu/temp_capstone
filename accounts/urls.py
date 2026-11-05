@@ -24,3 +24,11 @@ urlpatterns += [
     path('manage/users/<int:pk>/', access_views.detail, name='account_admin_detail'),
     path('manage/api/users/<int:pk>/', access_views.api, name='account_admin_api'),
 ]
+from . import request_views, workspaces
+urlpatterns += [
+    path('workspaces/', workspaces.choose_workspace, name='workspaces'),
+    path('admin-request/', request_views.request_admin, name='admin_request'),
+    path('manage/requests/', request_views.requests, name='account_admin_requests'),
+    path('manage/requests/<int:pk>/review/', request_views.review, name='account_admin_review'),
+]
+urlpatterns += [path('manage/dashboard/', request_views.dashboard, name='account_admin_dashboard')]

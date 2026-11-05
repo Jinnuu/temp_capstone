@@ -144,3 +144,34 @@ class GoodsInspection(models.Model):
 class InventoryTransactionKey(models.Model):
     request_key = models.UUIDField(unique=True)
     inventory_log = models.OneToOneField("inventory.InventoryLog", on_delete=models.PROTECT)
+
+
+class SupplierMembership(models.Model):
+    """Verified portal membership; never rewrites legacy order ownership."""
+    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='portal_membership')
+    supplier = models.ForeignKey(Supplier, null=True, blank=True, on_delete=models.PROTECT, related_name='memberships')
+    registered_via_portal = models.BooleanField(default=False)
+    requested_company = models.CharField(max_length=100)
+    contact_name = models.CharField(max_length=50)
+    contact_phone = models.CharField(max_length=30)
+    status = models.CharField(max_length=12, choices=[('PENDING','소속 확인 대기'),('VERIFIED','확인 완료'),('REJECTED','확인 거절')], default='PENDING')
+    verified_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='verified_supplier_memberships')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_note = models.CharField(max_length=500, blank=True)
+    revision = models.PositiveIntegerField(default=0)
+
+
+class SupplierFulfillment(models.Model):
+    order = models.OneToOneField(PurchaseOrder, on_delete=models.PROTECT, related_name='fulfillment')
+    state = models.CharField(max_length=20, choices=[('NEW','신규'),('ACKNOWLEDGED','접수 확인'),('ACCEPTED','수락'),('REJECTED','거절'),('PREPARING','출고 준비'),('DISPATCHED','출고 완료')], default='NEW')
+    delivery_date = models.DateField(null=True, blank=True)
+    rejection_reason = models.CharField(max_length=500, blank=True)
+    notes = models.CharField(max_length=1000, blank=True)
+    revision = models.PositiveIntegerField(default=0)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class SupplierDeliveryLine(models.Model):
+    order_item = models.OneToOneField(OrderItem, on_delete=models.PROTECT, related_name='delivery_plan')
+    planned_quantity = models.DecimalField(max_digits=18, decimal_places=6)

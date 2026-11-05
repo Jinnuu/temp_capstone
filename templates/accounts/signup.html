@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}회원가입 | 식수센스{% endblock %}
 
-{% block content %}
+{% block content %}<div class="fresh-auth-banner" aria-hidden="true"><img src="{% static 'ui/images/fresh-produce-original.png' %}" width="2172" height="724" alt=""><span>식수센스 · 건강한 급식 운영</span></div>
 <section class="row justify-content-center py-4 py-md-5">
     <div class="col-12 col-md-9 col-lg-6">
         <div class="card border-0 shadow-sm rounded-4">
@@ -14,6 +15,8 @@
                 </div>
 
                 <form method="post" novalidate>
+                    <fieldset class="fresh-signup-types"><legend>가입 유형</legend>{{ form.signup_type }}{{ form.signup_type.errors }}</fieldset>
+                    <details class="fresh-supplier-fields"><summary>공급업체 가입 정보 (공급업체 선택 시 필수)</summary><p>가입 후 로그인할 수 있지만, 소속 확인 전에는 발주 정보에 접근할 수 없습니다.</p><p>{{ form.company_name.label_tag }} {{ form.company_name }} {{ form.company_name.errors }}</p><p>{{ form.contact_name.label_tag }} {{ form.contact_name }} {{ form.contact_name.errors }}</p><p>{{ form.contact_phone.label_tag }} {{ form.contact_phone }} {{ form.contact_phone.errors }}</p></details>
                     {% csrf_token %}
 
                     <div class="mb-3">
@@ -64,6 +67,7 @@
                 </form>
 
                 <div class="text-center mt-4 text-muted small">
+                    <p>관리자 권한은 가입만으로 부여되지 않습니다. 일반 가입·로그인 후 <a href="{% url 'admin_request' %}">관리자 권한 신청</a>을 제출하세요.</p>
                     이미 계정이 있으신가요?
                     <a href="{% url 'login' %}" class="text-decoration-none fw-semibold">로그인</a>
                 </div>

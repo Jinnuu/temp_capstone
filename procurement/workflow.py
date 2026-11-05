@@ -135,6 +135,9 @@ def build_preview(start, end, days=None):
             try:
                 if not ing.supplier_id:
                     raise ValidationError('공급업체를 지정하세요.')
+                from accounts.supplier_identity import eligible_order_accounts
+                if not eligible_order_accounts().filter(pk=ing.supplier_id).exists():
+                    raise ValidationError('직원 로그인 계정이 아닌 업체 발주 계정을 지정하세요.')
                 spec=SupplySpecification.objects.filter(ingredient=ing,supplier_id=ing.supplier_id).first()
                 if not spec:
                     raise ValidationError('납품 포장규격을 등록하세요.')
@@ -217,6 +220,9 @@ def confirm_orders(plan_id,actor,adjustments=None):
 
 @transaction.atomic
 def inspect_item(item_id,actor,delivered,accepted,condition,specification,notes='',expiration=None):
+    from accounts.rbac import can
+    if getattr(actor,'role',None)=='SUPPLIER' and not can(actor,'inspection.write'):
+        raise ValidationError('공급업체 계정은 검수 합격량을 확정할 수 없습니다.')
     item=OrderItem.objects.select_for_update().select_related('purchase_order','ingredient').get(pk=item_id)
     # Matching duplicate submissions are idempotent; differing edits require a correction workflow.
     delivered=quantity(delivered,'납품량');accepted=quantity(accepted,'합격량')
@@ -255,6 +261,9 @@ def inspect_item(item_id,actor,delivered,accepted,condition,specification,notes=
 
 @transaction.atomic
 def record_inventory(ingredient_id,kind,amount,actor,request_key,when,expiration=None,notes=''):
+    from accounts.rbac import can
+    if getattr(actor,'role',None)=='SUPPLIER' and not can(actor,'inventory.write'):
+        raise ValidationError('공급업체 계정은 재고 거래를 확정할 수 없습니다.')
     key=uuid.UUID(str(request_key))
     previous=InventoryTransactionKey.objects.filter(request_key=key).select_related('inventory_log').first()
     if previous:
@@ -302,6 +311,8 @@ def create_manual_plan(ingredient_quantities,target_date,actor,request_key):
     for ingredient_id,amount in totals.items():
         ing=Ingredient.objects.filter(pk=ingredient_id).select_related('supplier').first()
         if not ing or not ing.supplier_id:raise ValidationError('식재료와 공급업체를 지정하세요.')
+        from accounts.supplier_identity import eligible_order_accounts
+        if not eligible_order_accounts().filter(pk=ing.supplier_id).exists():raise ValidationError('업체 발주 계정을 지정하세요. 직원 계정으로 발주할 수 없습니다.')
         spec=SupplySpecification.objects.filter(ingredient=ing,supplier=ing.supplier).first()
         if not spec:raise ValidationError(f'{ing.name}: 납품규격을 등록하세요.')
         size=convert(quantity(spec.base_quantity,positive=True),spec.base_unit,ing.unit)

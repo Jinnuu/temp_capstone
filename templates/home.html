@@ -13,6 +13,11 @@
     <h1>운영현황</h1>
     <p>오늘 식단, 예측 식수, 부족 재고, 발주 대기 상태를 한 화면에서 확인합니다.</p>
   </header>
+<div class="fresh-dashboard-intro"><header class="fresh-hero fresh-dietitian-banner"><div><p class="fresh-eyebrow">FRESH NUTRITION WORKSPACE</p><h2>건강한 식단, 차분한 하루의 시작</h2><p>선택한 날짜의 식단과 식수, 발주·입고 업무를 함께 확인하세요.</p><a class="fresh-primary" href="{% url 'procurement:workflow' %}">영양사 업무 시작 →</a></div><img src="{% static 'ui/images/fresh-produce-original.png' %}" alt="" width="2172" height="724" fetchpriority="high"></header>
+
+<section class="fresh-panel fresh-confirmed"><h2>{{ selected_date|date:'m월 d일' }} 식사별 식수</h2><div class="table-responsive"><table class="table"><thead><tr><th>식사</th><th>AI 참고</th><th>영양사 입력</th><th>최종 확정</th></tr></thead><tbody>{% for item in daily_confirmed %}<tr><th>{{ item.meal_type }}</th><td>{% if item.predicted_count != None %}{{ item.predicted_count }}명{% else %}예측 없음{% endif %}</td><td>{{ item.headcount }}명</td><td>{% if item.final_headcount != None %}{{ item.final_headcount }}명{% else %}미확정{% endif %}</td></tr>{% empty %}<tr><td colspan="4">선택 날짜의 식단이 없습니다.</td></tr>{% endfor %}</tbody></table></div><p>AI는 참고값이며 최종 확정과 구분합니다. 미확정 식수는 자동 대체하지 않습니다.</p></section></div>
+<div class="fresh-kpis fresh-dashboard-kpis"><article><span>발주 대기</span><strong>{{ pending_order_count }}<small>건</small></strong></article><article><span>선택일 입고 예정</span><strong>{{ incoming_count }}<small>건</small></strong></article><article><span>검수 필요 품목</span><strong>{{ inspection_pending_count }}<small>개</small></strong></article><article><span>부족 재고</span><strong>{{ total_low_stock_count }}<small>개</small></strong></article></div>
+
 
   <div class="pf-shell">
     <div class="pf-main">
@@ -217,4 +222,4 @@
     </aside>
   </div>
 </div>
-{% endblock %}
+<div class="fresh-notice-grid"><section class="fresh-panel"><h2>공지사항</h2>{% for notice in notices %}<article><h3>{{ notice.title }}</h3><p>{{ notice.message|linebreaksbr }}</p><small>{{ notice.published_at }}</small></article>{% empty %}<p>등록된 공지사항이 없습니다.</p>{% endfor %}</section><section class="fresh-panel"><h2>내 최근 활동</h2><ul>{% for item in activities %}<li>{{ item.created_at|date:'m-d H:i' }} · {{ item.action }} · {{ item.result }}</li>{% empty %}<li>기록된 활동이 없습니다.</li>{% endfor %}</ul></section></div>{% endblock %}

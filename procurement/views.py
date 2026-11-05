@@ -506,11 +506,13 @@ def weekly_procurement_report(request):
     return render(request, "docs/weekly_procurement_report.html", context)
 
 
-def get_vendor_procurement_data(start_date, end_date, supplier=None):
+def get_vendor_procurement_data(start_date, end_date, supplier=None, order=None):
     """New snapshots use order dates; historical meal rows keep procurement-day grouping."""
     base = OrderItem.objects.select_related('ingredient', 'purchase_order__supplier', 'purchase_order__workflow_plan')
     if supplier:
         base = base.filter(purchase_order__supplier=supplier)
+    if order is not None:
+        base=base.filter(purchase_order=order)
     groups=[]; seen=set(); totals=defaultdict(lambda: Decimal('0')); amount=0; count=0
     day=start_date
     while day<=end_date:
@@ -657,7 +659,7 @@ def export_vendor_procurement_excel(request):
     else:
         supplier_title = "전체납품업체통합"
 
-    proc_data = get_vendor_procurement_data(start_date, end_date, supplier)
+    proc_data = get_vendor_procurement_data(start_date, end_date, supplier, order=getattr(request, 'snp_portal_order', None))
 
     wb = openpyxl.Workbook()
     ws = wb.active

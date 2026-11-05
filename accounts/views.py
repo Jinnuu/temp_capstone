@@ -13,6 +13,13 @@ class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = ApprovalAuthenticationForm
 
+    def get_success_url(self):
+        explicit = self.get_redirect_url()
+        if explicit:
+            return explicit
+        from .workspaces import landing_url
+        return landing_url(self.request.user)
+
 class CustomLogoutView(LogoutView):
     # next_page=reverse("home")
     next_page=reverse_lazy("home")
@@ -21,6 +28,22 @@ User=get_user_model()
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(label="이메일", required=True, max_length=254, widget=forms.EmailInput(attrs={"class":"form-control","autocomplete":"email"}))
+
+    signup_type = forms.ChoiceField(label='가입 유형', choices=[('DIETITIAN','영양사로 가입'),('SUPPLIER','공급업체로 가입')], required=False, initial='DIETITIAN', widget=forms.RadioSelect)
+    company_name = forms.CharField(label='업체명', max_length=100, required=False)
+    contact_name = forms.CharField(label='담당자', max_length=50, required=False)
+    contact_phone = forms.CharField(label='연락처', max_length=30, required=False)
+
+    def clean_signup_type(self):
+        return self.cleaned_data.get('signup_type') or 'DIETITIAN'
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('signup_type') == 'SUPPLIER':
+            for key in ('company_name','contact_name','contact_phone'):
+                if not (cleaned.get(key) or '').strip():
+                    self.add_error(key,'공급업체 가입 시 필수 항목입니다.')
+        return cleaned
 
     def clean_email(self):
         return self.cleaned_data["email"].strip().lower()
@@ -55,7 +78,15 @@ class SignUpForm(UserCreationForm):
         user.is_active = False
         if commit:
             from .access_service import register
-            register(user)
+            from django.db import transaction
+            with transaction.atomic():
+                kind = self.cleaned_data.get('signup_type', 'DIETITIAN')
+                user.role = 'SUPPLIER' if kind == 'SUPPLIER' else 'NUTRITIONIST'
+                if kind=='SUPPLIER':user.name=self.cleaned_data['company_name'].strip()[:50]
+                register(user, kind)
+                if kind == 'SUPPLIER':
+                    from procurement.models import SupplierMembership
+                    SupplierMembership.objects.create(account=user, registered_via_portal=True, requested_company=' '.join(self.cleaned_data['company_name'].split()), contact_name=self.cleaned_data['contact_name'].strip(), contact_phone=self.cleaned_data['contact_phone'].strip())
         return user
 
 

@@ -9,3 +9,5 @@ EMAIL_HOST = 'auth-mail'
 EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = 'snp-test@example.invalid'
+# Separate repeated browser scenarios without touching any production recovery store.
+ACCOUNT_RECOVERY_NAMESPACE = os.environ.get('ACCOUNT_RECOVERY_NAMESPACE', 'snp:recovery')

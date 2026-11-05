@@ -1,0 +1,8 @@
+{
+  "allMatch": true,
+  "files": [
+    "ui/build/snp-ui.css",
+    "ui/build/snp-ui.js",
+    "ui/images/fresh-produce-original.png"
+  ]
+}

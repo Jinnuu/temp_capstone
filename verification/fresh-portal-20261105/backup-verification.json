@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "restoredAccounts": 9,
+  "restoredMigrationRecords": 50,
+  "migratedRestoredSnapshot": true,
+  "identityAndActiveFlagsPreserved": true,
+  "originalHighestAdminsPreserved": true,
+  "backupBytes": 73988,
+  "backupSha256": "adced74d5ac3305a5bc75e7be0fee2c63e64b9272c52db8ee082356f4950dc42",
+  "backupPrivateAndGitIgnored": true
+}

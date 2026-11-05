@@ -1,11 +1,12 @@
 import json
 from django.contrib import messages
 from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_http_methods
 from .models import User, AccessAudit
-from .rbac import ROLE_LABELS, ROLE_CAPS, roles, approval_mode, capabilities
+from .rbac import ROLE_LABELS, ROLE_CAPS, roles, approval_mode, capabilities, is_main, is_admin_identity, selectable_roles
 from .access_service import change_access, AccessRejected, snapshot
 
 
@@ -13,6 +14,8 @@ from .access_service import change_access, AccessRejected, snapshot
 def users(request):
     query = request.GET.get('q', '').strip()[:150]
     records = User.objects.prefetch_related('groups').filter(Q(username__icontains=query)|Q(name__icontains=query)|Q(email__icontains=query)).order_by('username')
+    if not is_main(request.user):
+        records = records.exclude(Q(is_superuser=True)|Q(role='ADMIN')|Q(groups__name__in=['SNP_ROLE_MAIN_ADMIN','SNP_ROLE_SYSTEM_ADMIN','SNP_ROLE_SUB_ADMIN'])).distinct()
     state = request.GET.get('state', '')
     if state in User.AccountState.values:
         records = records.filter(account_state=state)
@@ -25,6 +28,7 @@ def users(request):
 @require_http_methods(['GET', 'POST'])
 def detail(request, pk):
     target = get_object_or_404(User, pk=pk)
+    protect_target(request.user, target)
     status = 200
     if request.method == 'POST':
         try:
@@ -36,12 +40,16 @@ def detail(request, pk):
             messages.error(request, '입력값이 올바르지 않습니다.' if isinstance(exc, ValueError) else ' '.join(exc.messages))
             status = 409 if getattr(exc, 'code', '') == 'conflict' else 400
             target.refresh_from_db()
-    return render(request, 'accounts/manage_detail.html', {'target': target, 'roles': ROLE_LABELS.items(), 'selected_roles': roles(target), 'effective_caps': sorted(capabilities(target)), 'states': User.AccountState.choices, 'history': AccessAudit.objects.filter(target=target)[:30]}, status=status)
+    choices=selectable_roles(request.user)
+    if target.role=='SUPPLIER':choices={name:label for name,label in choices.items() if name in ('SUPPLIER','SUB_ADMIN')}
+    else:choices.pop('SUPPLIER',None)
+    return render(request, 'accounts/manage_detail.html', {'target': target, 'roles': choices.items(), 'selected_roles': roles(target), 'effective_caps': sorted(capabilities(target)), 'states': User.AccountState.choices, 'history': scoped_logs(request.user).filter(target=target)[:30]}, status=status)
 
 
 @require_http_methods(['GET', 'POST'])
 def api(request, pk):
     target = get_object_or_404(User, pk=pk)
+    protect_target(request.user, target)
     if request.method == 'GET':
         return JsonResponse({**snapshot(target), 'capabilities': sorted(capabilities(target))})
     try:
@@ -67,7 +75,31 @@ def matrix(request):
 
 @require_GET
 def logs(request):
-    records = AccessAudit.objects.all()
+    records = scoped_logs(request.user)
     if request.GET.get('result') in ('SUCCESS', 'DENIED'):
         records = records.filter(result=request.GET['result'])
     return render(request, 'accounts/manage_audit.html', {'records': records[:200]})
+
+
+def protect_target(actor, target):
+    if not is_main(actor) and is_admin_identity(target):
+        from .access_service import audit
+        audit(actor, target, 'admin.access_denied', result='DENIED', reason='protected_admin_identity')
+        raise PermissionDenied('운영 관리자는 관리자 계정을 조회하거나 변경할 수 없습니다.')
+
+
+def scoped_logs(actor):
+    rows = AccessAudit.objects.all()
+    if is_main(actor):
+        return rows
+    # Do not expose policy/security/admin-identity history to an operational admin.
+    ids = []
+    for row in rows.select_related('target')[:2000]:
+        if not row.target or is_admin_identity(row.target):
+            continue
+        if row.action.startswith(('policy.', 'admin.request')):
+            continue
+        if {'MAIN_ADMIN','SYSTEM_ADMIN','SUB_ADMIN'} & (set(row.before.get('roles',[]))|set(row.after.get('roles',[]))):
+            continue
+        ids.append(row.pk)
+    return rows.filter(pk__in=ids)

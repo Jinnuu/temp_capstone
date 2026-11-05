@@ -16,6 +16,7 @@ from django.utils import timezone
 from forecasting.models import AttendancePrediction
 from inventory.models import Ingredient, IngredientCategory, InventoryLog, SupplySpecification, StockLot
 from meals.models import DietPlan, Menu, Recipe
+from accounts.supplier_identity import eligible_order_accounts
 from .models import ProcurementPlan, GoodsInspection, PurchaseOrder, OrderItem
 from .workflow import (build_preview, create_plan, confirm_orders, inspect_item, record_inventory,
                        save_headcount, invalidate_plans, current_stock)
@@ -120,7 +121,7 @@ def inspection(request,pk):
             return redirect('procurement:workflow_inspections')
         except ValidationError as exc:
             _errors(form,exc)
-    return render(request,'workflow/form.html',{'title':f'급식물품 검수 기록 · {item.ingredient.name} ({item.ingredient.unit})','form':form,'inspection':existing})
+    return render(request,'workflow/form.html',{'title':f'급식물품 검수 기록 · {item.ingredient.name} ({item.ingredient.unit})','form':form,'inspection':existing,'supplier_fulfillment':getattr(item.purchase_order,'fulfillment',None),'supplier_delivery':getattr(item,'delivery_plan',None),'supplier_base_unit':item.ingredient.unit})
 
 
 @login_required
@@ -160,7 +161,8 @@ def specifications(request,pk=None):
 @login_required
 @user_passes_test(_can_manage)
 def suppliers(request,pk=None):
-    user=get_object_or_404(get_user_model(),pk=pk,role='SUPPLIER') if pk else None
+    from accounts.supplier_identity import eligible_order_accounts
+    user=get_object_or_404(eligible_order_accounts().filter(role='SUPPLIER'),pk=pk) if pk else None
     initial={name:getattr(user,name) for name in ['username','name','phone_number']} if user else {}
     form=SupplierForm(request.POST or None,initial=initial)
     if request.method=='POST' and form.is_valid():
@@ -174,7 +176,7 @@ def suppliers(request,pk=None):
                 if not user.pk:user.set_unusable_password()
                 user.save()
             return redirect('procurement:workflow_suppliers')
-    return render(request,'workflow/master.html',{'title':'업체 관리','form':form,'suppliers':get_user_model().objects.filter(role='SUPPLIER').order_by('name')})
+    return render(request,'workflow/master.html',{'title':'업체 관리','form':form,'suppliers':eligible_order_accounts().filter(role='SUPPLIER').order_by('name')})
 
 
 @login_required
@@ -252,4 +254,4 @@ def settlement(request):
         ordered=items.aggregate(amount=Sum('estimated_price'))['amount'] or 0
         inspected_value=sum((Decimal(x.order_item.estimated_price)*x.accepted_qty/x.order_item.required_qty for x in inspections if x.order_item.required_qty),Decimal('0'))
         rows.append({'supplier':supplier,'ordered_amount':ordered,'inspected_amount':inspected_value,'uninspected':items.filter(inspection__isnull=True).count()})
-    return render(request,'workflow/settlement.html',{'rows':rows,'start':start,'end':end,'suppliers':get_user_model().objects.filter(role='SUPPLIER').order_by('name')})
+    return render(request,'workflow/settlement.html',{'rows':rows,'start':start,'end':end,'suppliers':eligible_order_accounts().filter(role='SUPPLIER').order_by('name')})

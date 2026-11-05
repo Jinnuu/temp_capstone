@@ -1,0 +1,3 @@
+Migrations for 'procurement':
+  procurement/migrations/0012_suppliermembership_registered_via_portal.py
+    + Add field registered_via_portal to suppliermembership

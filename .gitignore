@@ -59,3 +59,6 @@ db.sqlite3
 
 # Local UI preview secrets and access credentials
 /.ui-preview/
+
+# User-provided design reference contains third-party branding and contacts.
+/DOREMI.png

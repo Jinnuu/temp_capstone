@@ -85,3 +85,8 @@ docker compose -p snp-ui-preview --env-file .ui-preview/compose.env -f compose.u
 DB/cache 컨테이너를 재생성하지 않는다. 시작 스크립트의 기존 migrate/중복 방지 seed 뒤에 정책 감사 동기화만 추가했다. 롤백 시 우선 Preview 쓰기를 중단하고 이후 신규 가입/업무 데이터를 보존한 뒤, 보관 이미지와 백업을 별도 DB에서 검증해야 한다. 백업 복원은 후속 데이터를 되돌릴 수 있으므로 자동 복원 명령은 실행하지 않았다. 기존 운영 DB/볼륨 삭제·초기화나 전체 Compose down은 하지 않는다.
 
 실제 SMTP는 여전히 미설정이다. 기존 SMTP 환경변수/secret 및 비동기 복구 구조를 보존했다. 공개 화면은 메일 미설정을 알리고 요청을 503으로 거부한다. 실제 외부 수신은 검증하지 않았다.
+
+
+## 영양사 피드백·공급업체 포털 후속
+
+현재 UI 브랜치의 가입 유형, MAIN/SUB 계층과 공급업체 예외 권한은 [FRESH_PORTAL_IMPLEMENTATION.md](FRESH_PORTAL_IMPLEMENTATION.md), 최신 실행 결과는 [FRESH_PORTAL_TEST_REPORT.md](FRESH_PORTAL_TEST_REPORT.md)를 따른다. 이 문서의 이전 결과는 당시 구현의 기록으로 보존한다.

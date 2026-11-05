@@ -50,3 +50,22 @@ class AccessAudit(models.Model):
 
     class Meta:
         ordering = ['-pk']
+
+
+class AdminRoleRequest(models.Model):
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='admin_role_request')
+    reason = models.TextField(max_length=1000)
+    status = models.CharField(max_length=12, choices=[('PENDING','승인 대기'),('APPROVED','승인'),('REJECTED','거절')], default='PENDING')
+    revision = models.PositiveIntegerField(default=0)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='reviewed_admin_requests')
+    decision_note = models.CharField(max_length=500, blank=True)
+
+
+class Announcement(models.Model):
+    title = models.CharField(max_length=150)
+    message = models.TextField(max_length=2000)
+    active = models.BooleanField(default=True)
+    published_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

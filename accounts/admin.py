@@ -26,3 +26,19 @@ class ProtectedGroupAdmin(GroupAdmin):
     def has_change_permission(self, request, obj=None): return False
     def has_add_permission(self, request): return False
     def has_delete_permission(self, request, obj=None): return False
+
+from .models import Announcement
+from .rbac import is_main
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('title','active','published_at')
+    exclude = ('author',)
+    def has_add_permission(self,request): return is_main(request.user)
+    def has_change_permission(self,request,obj=None): return is_main(request.user)
+    def has_delete_permission(self,request,obj=None): return False
+    def save_model(self,request,obj,form,change):
+        from .access_service import audit
+        obj.author=request.user
+        super().save_model(request,obj,form,change)
+        audit(request.user,None,'announcement.saved',after={'id':obj.pk,'active':obj.active})

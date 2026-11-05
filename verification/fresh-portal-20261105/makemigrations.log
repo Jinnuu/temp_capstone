@@ -1,0 +1,9 @@
+Migrations for 'accounts':
+  accounts/migrations/0004_adminrolerequest_announcement.py
+    + Create model AdminRoleRequest
+    + Create model Announcement
+Migrations for 'procurement':
+  procurement/migrations/0010_supplierdeliveryline_supplierfulfillment_and_more.py
+    + Create model SupplierDeliveryLine
+    + Create model SupplierFulfillment
+    + Create model SupplierMembership

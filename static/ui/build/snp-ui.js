@@ -537,3 +537,10 @@ P?.addEventListener("change", () => {
 		"/meals/cooking/"
 	].includes(P.value) && document.querySelectorAll("[data-snp-preview-mode]").forEach((e) => e.src = P.value + "?snp_preview=1");
 });
+var F = document.querySelector(".fresh-supplier-fields"), I = document.querySelectorAll("input[name=signup_type]");
+if (F && I.length) {
+	let e = () => {
+		F.open = Array.from(I).some((e) => e.checked && e.value === "SUPPLIER");
+	};
+	I.forEach((t) => t.addEventListener("change", e)), e();
+}

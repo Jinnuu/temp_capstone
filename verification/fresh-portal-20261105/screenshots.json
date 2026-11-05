@@ -1,0 +1,258 @@
+{
+  "passed": true,
+  "count": 36,
+  "screens": [
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "login",
+      "url": "/accounts/login/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-login.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "login",
+      "url": "/accounts/login/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-login.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "signup",
+      "url": "/accounts/signup/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-signup.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "signup",
+      "url": "/accounts/signup/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-signup.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "dietitian",
+      "url": "/?date=2026-11-06",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-dietitian.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "dietitian",
+      "url": "/?date=2026-11-06",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-dietitian.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "mealplan",
+      "url": "/meals/mealplan_list/?year=2026&month=11",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-mealplan.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "mealplan",
+      "url": "/meals/mealplan_list/?year=2026&month=11",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-mealplan.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "orders",
+      "url": "/procurement/workflow/preview/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-orders.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "orders",
+      "url": "/procurement/workflow/preview/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-orders.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "inspections",
+      "url": "/procurement/workflow/inspections/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-inspections.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "inspections",
+      "url": "/procurement/workflow/inspections/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-inspections.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "inventory",
+      "url": "/inventory/ingredients/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-inventory.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "inventory",
+      "url": "/inventory/ingredients/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-inventory.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "supplier",
+      "url": "/procurement/portal/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-supplier.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "supplier",
+      "url": "/procurement/portal/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-supplier.png"
+    },
+    {
+      "mode": "green",
+      "device": "desktop",
+      "name": "admin",
+      "url": "/accounts/manage/dashboard/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-desktop-admin.png"
+    },
+    {
+      "mode": "green",
+      "device": "mobile",
+      "name": "admin",
+      "url": "/accounts/manage/dashboard/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/green-mobile-admin.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "login",
+      "url": "/accounts/login/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-login.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "login",
+      "url": "/accounts/login/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-login.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "signup",
+      "url": "/accounts/signup/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-signup.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "signup",
+      "url": "/accounts/signup/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-signup.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "dietitian",
+      "url": "/?date=2026-11-06",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-dietitian.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "dietitian",
+      "url": "/?date=2026-11-06",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-dietitian.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "mealplan",
+      "url": "/meals/mealplan_list/?year=2026&month=11",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-mealplan.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "mealplan",
+      "url": "/meals/mealplan_list/?year=2026&month=11",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-mealplan.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "orders",
+      "url": "/procurement/workflow/preview/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-orders.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "orders",
+      "url": "/procurement/workflow/preview/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-orders.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "inspections",
+      "url": "/procurement/workflow/inspections/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-inspections.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "inspections",
+      "url": "/procurement/workflow/inspections/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-inspections.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "inventory",
+      "url": "/inventory/ingredients/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-inventory.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "inventory",
+      "url": "/inventory/ingredients/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-inventory.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "supplier",
+      "url": "/procurement/portal/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-supplier.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "supplier",
+      "url": "/procurement/portal/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-supplier.png"
+    },
+    {
+      "mode": "civic",
+      "device": "desktop",
+      "name": "admin",
+      "url": "/accounts/manage/dashboard/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-desktop-admin.png"
+    },
+    {
+      "mode": "civic",
+      "device": "mobile",
+      "name": "admin",
+      "url": "/accounts/manage/dashboard/",
+      "screenshot": "verification/fresh-portal-20261105/screenshots/civic-mobile-admin.png"
+    }
+  ]
+}
