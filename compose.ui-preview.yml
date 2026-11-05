@@ -28,6 +28,7 @@ services:
     tmpfs: ['/tmp:size=512m,mode=1777']
     environment: &preview_environment
       SNP_UI_PREVIEW: '1'
+      ACCOUNT_APPROVAL_MODE: ${ACCOUNT_APPROVAL_MODE:-auto}
       SNP_PREVIEW_ALLOWED_HOSTS: ${SNP_PREVIEW_ALLOWED_HOSTS:-localhost,127.0.0.1}
       SNP_PREVIEW_CSRF_ORIGINS: ${SNP_PREVIEW_CSRF_ORIGINS:-}
       SNP_PREVIEW_HTTPS: ${SNP_PREVIEW_HTTPS:-0}

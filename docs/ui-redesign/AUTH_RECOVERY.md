@@ -77,3 +77,7 @@ docker compose -p snp-ui-preview --env-file .ui-preview/compose.env -f compose.u
 - 복구 응답은 no-store. 주소는 고정된 HTTPS 공개 원본에서 생성해 요청 Host를 이용한 링크 변조를 피한다.
 
 외부 Cloudflare/메일 제공자의 독립적인 로그 정책은 이 애플리케이션 로그 검사 범위 밖이다. [실제 검증 보고서](AUTH_RECOVERY_TEST_REPORT.md)를 참고한다.
+
+## 2026-11-05 후속 승인·권한 변경
+
+위 문서의 manual 가입 정책과 ModelBackend 설명은 `85e83f9` 당시 기준이다. 현재 UI 브랜치는 [RBAC_AND_APPROVAL.md](RBAC_AND_APPROVAL.md)의 환경별 승인 정책, ApprovalBackend, 감사 기반 관리자 화면을 적용했다. 기본 정책은 manual이고 Preview만 auto다. 이메일 소유권·요청 제한·토큰·SMTP 미설정 처리 규칙은 유지했다. 최신 실행 결과는 [RBAC_AND_APPROVAL_TEST_REPORT.md](RBAC_AND_APPROVAL_TEST_REPORT.md)를 따른다.

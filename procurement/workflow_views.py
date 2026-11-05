@@ -138,7 +138,8 @@ def stock_transaction(request):
 
 
 def _can_manage(user):
-    return user.is_authenticated and (user.is_staff or user.role=='ADMIN')
+    from accounts.rbac import can
+    return can(user, 'catalog.write')
 
 
 @login_required

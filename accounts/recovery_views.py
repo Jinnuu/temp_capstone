@@ -105,7 +105,8 @@ class PasswordConfirmView(RecoveryPrivacyMixin,PasswordResetConfirmView):
 
     def get_user(self, uidb64):
         user=super().get_user(uidb64)
-        return user if user and user.is_active and user.has_usable_password() else None
+        from .rbac import account_can_login
+        return user if user and account_can_login(user) and user.has_usable_password() else None
 
 
 class PasswordCompleteView(RecoveryPrivacyMixin,PasswordResetCompleteView):

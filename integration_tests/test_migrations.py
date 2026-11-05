@@ -8,7 +8,8 @@ from django.test import TransactionTestCase
 
 class ExistingDataMigrationTests(TransactionTestCase):
     def test_upgrade_preserves_inventory_logs_users_orders_and_items(self):
-        old_targets=[('inventory','0006_ingredient_description'),('procurement','0004_remove_orderitem_unique_order_ingredient_date_and_more')]
+        # Include accounts explicitly: historical ORM and actual schema must match.
+        old_targets=[('accounts','0001_initial'),('inventory','0006_ingredient_description'),('procurement','0004_remove_orderitem_unique_order_ingredient_date_and_more')]
         latest=MigrationExecutor(connection).loader.graph.leaf_nodes()
         executor=MigrationExecutor(connection)
         executor.migrate(old_targets)

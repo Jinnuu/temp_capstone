@@ -248,7 +248,8 @@ class RequirementWorkflows(TestCase):
         self.assertEqual(anonymous.get(reverse('procurement:order_list')).status_code,302)
         self.client.force_login(self.vendor);self.assertEqual(self.client.get(reverse('procurement:workflow')).status_code,403)
         user=get_user_model().objects.create_user(username='ordinary')
-        self.client.force_login(user);self.assertEqual(self.client.get(reverse('procurement:workflow_specs')).status_code,302)
+        # Explicit server-side RBAC now rejects instead of redirecting to login.
+        self.client.force_login(user);self.assertEqual(self.client.get(reverse('procurement:workflow_specs')).status_code,403)
 
     def test_all_new_ui_routes_render(self):
         for name in ['workflow','workflow_preview','workflow_inspections','workflow_transaction','workflow_ledger','workflow_settlement','workflow_specs','workflow_suppliers','workflow_categories','workflow_recipes']:

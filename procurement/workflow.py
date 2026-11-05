@@ -186,7 +186,8 @@ def create_plan(start,end,actor,request_key,days=None):
 @transaction.atomic
 def confirm_orders(plan_id,actor,adjustments=None):
     plan=ProcurementPlan.objects.select_for_update().get(pk=plan_id)
-    if plan.created_by_id!=actor.pk and not actor.is_staff:
+    from accounts.rbac import can
+    if plan.created_by_id!=actor.pk and not can(actor,'accounts.manage'):
         raise ValidationError('이 발주예정서를 확정할 권한이 없습니다.')
     if plan.orders.exists():
         return list(plan.orders.all())

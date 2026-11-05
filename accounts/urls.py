@@ -16,3 +16,11 @@ urlpatterns += [
     path('recovery/reset/done/',PasswordCompleteView.as_view(),name='password_reset_complete'),
     path('recovery/reset/<uidb64>/<token>/',PasswordConfirmView.as_view(),name='password_reset_confirm'),
 ]
+from . import access_views
+urlpatterns += [
+    path('manage/', access_views.users, name='account_admin_users'),
+    path('manage/permissions/', access_views.matrix, name='account_admin_matrix'),
+    path('manage/audit/', access_views.logs, name='account_admin_audit'),
+    path('manage/users/<int:pk>/', access_views.detail, name='account_admin_detail'),
+    path('manage/api/users/<int:pk>/', access_views.api, name='account_admin_api'),
+]

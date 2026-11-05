@@ -1,0 +1,58 @@
+{
+  "mode": "auto",
+  "deliveryMode": "disabled",
+  "targetEligible": [
+    true,
+    true
+  ],
+  "targetApprovalEvents": 2,
+  "approvalAuditExists": true,
+  "existingAccountCount": 8,
+  "newExternalRegistrationsDuringTask": 1,
+  "newAccountsWithoutPrivilegedFlags": true,
+  "identityPasswordEmailLegacyRoleFlagsUnchanged": true,
+  "activatedConfirmedPendingAccounts": 2,
+  "otherInactiveAccountsPreserved": true,
+  "realTargetPasswordsNotRequestedOrTested": true,
+  "protectedContainersUnchanged": [
+    "my-capstone",
+    "my-capstone-sprint7",
+    "snp-presentation",
+    "snp-ui-preview-db-1",
+    "snp-ui-preview-recovery-cache-1"
+  ],
+  "sprintFinalUnchanged": true,
+  "httpLoginStatus": {
+    "8000": 200,
+    "8007": 200,
+    "8010": 200,
+    "8011": 200
+  },
+  "previewServices": [
+    {
+      "service": "db",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "proxy",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "recovery-cache",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "recovery-mail",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "web",
+      "state": "running",
+      "health": "healthy"
+    }
+  ]
+}

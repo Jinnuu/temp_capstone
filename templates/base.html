@@ -23,6 +23,7 @@
       <button type="submit" aria-label="식재료 검색">검색</button>
     </form>
     <div class="snp-account">
+      {% if snp_admin %}<a href="{% url 'account_admin_users' %}">사용자 관리</a>{% endif %}
       {% if user.is_authenticated %}<span><strong>{{ user.name|default:user.username }}</strong><small>{{ user.get_role_display }}</small></span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="snp-text-button">로그아웃</button></form>{% else %}<a href="{% url 'login' %}">로그인</a><a href="{% url 'signup' %}">가입 신청</a>{% endif %}
     </div>
     <div class="snp-appearance">{% include 'ui/mode_switcher.html' %}<a class="snp-compare-link" href="{% url 'ui_compare' %}">나란히 비교</a></div>
@@ -41,6 +42,7 @@
 </div>
 <noscript><p>JavaScript가 꺼져 있어 레퍼런스형으로 표시됩니다. 폼 업무는 그대로 사용할 수 있습니다.</p></noscript>
 <script type="module" src="{% static 'ui/build/snp-ui.js' %}"></script>
+{% if snp_readonly %}<script>document.querySelectorAll('main form[method=post], main form[method=POST]').forEach(function(form){form.querySelectorAll('input,select,textarea,button').forEach(function(field){field.disabled=true;});form.addEventListener('submit',function(event){event.preventDefault();});});</script><p class="snp-readonly-note" role="note">현재 역할은 이 화면의 조회만 허용합니다.</p>{% endif %}
 {% block extra_js %}{% endblock %}
 </body>
 </html>

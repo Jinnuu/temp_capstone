@@ -51,3 +51,5 @@ EMAIL_USE_TLS = os.environ.get('SNP_SMTP_TLS','1') == '1'
 EMAIL_USE_SSL = os.environ.get('SNP_SMTP_SSL','0') == '1'
 EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = os.environ.get('SNP_DEFAULT_FROM_EMAIL','')
+# Explicit guard used by the operator-only confirmed-signup command.
+SNP_UI_PREVIEW = True

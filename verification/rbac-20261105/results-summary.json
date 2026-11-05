@@ -1,0 +1,51 @@
+{
+  "uniqueDjangoCases": 218,
+  "newApprovalRbacCases": 25,
+  "existingDjangoCases": 193,
+  "databases": {
+    "sqlite": {
+      "discovered": 218,
+      "passed": 215,
+      "skipped": 3,
+      "failed": 0,
+      "errors": 0,
+      "djangoCheck": "PASS",
+      "migrationDrift": "NONE",
+      "migrate": "PASS"
+    },
+    "mariadb": {
+      "discovered": 218,
+      "passed": 218,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "djangoCheck": "PASS",
+      "migrationDrift": "NONE",
+      "migrate": "PASS"
+    }
+  },
+  "javascript": {
+    "uiModeTests": 6,
+    "smartOrderTests": 4
+  },
+  "browserScenarios": {
+    "dietitianBusiness": {
+      "passed": true,
+      "checkpoints": 21
+    },
+    "adminRbac": {
+      "passed": true,
+      "checkpoints": 11
+    },
+    "recovery": {
+      "passed": true,
+      "checkpoints": 10
+    },
+    "publicHttps": {
+      "passed": true,
+      "checkpoints": 13
+    }
+  },
+  "actualExternalSmtpDelivery": "NOT_CONFIGURED_NOT_VERIFIED",
+  "ownerPasswordLoginForTwoTargetAccounts": "NOT_PERFORMED"
+}

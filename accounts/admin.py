@@ -1,13 +1,28 @@
+"""Account access changes use the audited application console, not raw field edits."""
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import User
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.models import Group
+from .models import User, AccessAudit, AccessPolicy
+
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    # 관리자 목록 화면에서 역할(role)과 이름도 보이게 추가
-    list_display = ('username', 'name', 'role', 'email', 'is_staff')
-    
-    # 상세 수정 화면에 필드 추가
-    fieldsets = UserAdmin.fieldsets + (
-        ('추가 정보', {'fields': ('role', 'name', 'phone_number')}),
-    )
+    list_display = ('username', 'name', 'role', 'account_state', 'is_active')
+    fieldsets = UserAdmin.fieldsets + (('추가 정보', {'fields': ('role', 'name', 'phone_number', 'account_state')}),)
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+admin.site.unregister(Group)
+@admin.register(Group)
+class ProtectedGroupAdmin(GroupAdmin):
+    def has_change_permission(self, request, obj=None): return False
+    def has_add_permission(self, request): return False
+    def has_delete_permission(self, request, obj=None): return False

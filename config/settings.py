@@ -55,6 +55,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "accounts.context_processors.access_context",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -116,3 +117,10 @@ ACCOUNT_RECOVERY_REDIS_URL = os.environ.get('ACCOUNT_RECOVERY_REDIS_URL','redis:
 ACCOUNT_RECOVERY_BASE_URL = 'https://ui.jinnuu.site'
 ACCOUNT_RECOVERY_TIMEOUT = 1800
 PASSWORD_RESET_TIMEOUT = 1800
+
+# Production retains approval unless explicitly configured otherwise.
+ACCOUNT_APPROVAL_MODE = os.environ.get('ACCOUNT_APPROVAL_MODE', 'manual')
+if ACCOUNT_APPROVAL_MODE not in ('auto', 'manual'):
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured('ACCOUNT_APPROVAL_MODE must be auto or manual')
+AUTHENTICATION_BACKENDS = ['accounts.backends.ApprovalBackend']

@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "mailTransport": "isolated SMTP capture; not external recipient delivery",
+  "steps": [
+    "wrong password rejected",
+    "correct inactive password remains blocked with approval explanation",
+    "active login and POST logout",
+    "all three modes across login signup and both recovery forms",
+    "CSRF-less recovery request rejected",
+    "test SMTP received identity mail; proof POST reveals both IDs once only",
+    "unknown address gets same response and no mail",
+    "test SMTP password links; weak password rejected and strong password saved",
+    "used reset link cannot be reused",
+    "new password authenticates"
+  ],
+  "pageErrors": []
+}

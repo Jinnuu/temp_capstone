@@ -11,7 +11,8 @@ class ApprovalAuthenticationForm(AuthenticationForm):
         password = self.cleaned_data.get('password')
         if username and password:
             user = get_user_model()._default_manager.filter(**{get_user_model().USERNAME_FIELD: username}).first()
-            if user and not user.is_active:
+            from .rbac import account_can_login
+            if user and not account_can_login(user):
                 # Verify without a setter: even a legacy inactive hash is preserved.
                 from django.contrib.auth.hashers import check_password
                 if check_password(password, user.password):

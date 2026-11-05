@@ -1,0 +1,848 @@
+[
+  {
+    "route": "ui/compare/",
+    "name": "ui_compare",
+    "GET": "dashboard.read",
+    "POST": "dashboard.read"
+  },
+  {
+    "route": "admin/",
+    "name": "admin:index",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/login/",
+    "name": "admin:login",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/logout/",
+    "name": "admin:logout",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/password_change/",
+    "name": "admin:password_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/password_change/done/",
+    "name": "admin:password_change_done",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/autocomplete/",
+    "name": "admin:autocomplete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/jsi18n/",
+    "name": "admin:jsi18n",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/r/<path:content_type_id>/<path:object_id>/",
+    "name": "admin:view_on_site",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/<id>/password/",
+    "name": "admin:auth_user_password_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/",
+    "name": "admin:accounts_user_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/add/",
+    "name": "admin:accounts_user_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/<path:object_id>/history/",
+    "name": "admin:accounts_user_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/<path:object_id>/delete/",
+    "name": "admin:accounts_user_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/accounts/user/<path:object_id>/change/",
+    "name": "admin:accounts_user_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/auth/group/",
+    "name": "admin:auth_group_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/auth/group/add/",
+    "name": "admin:auth_group_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/history/",
+    "name": "admin:auth_group_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/delete/",
+    "name": "admin:auth_group_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/change/",
+    "name": "admin:auth_group_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/menu/",
+    "name": "admin:meals_menu_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/menu/add/",
+    "name": "admin:meals_menu_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/menu/<path:object_id>/history/",
+    "name": "admin:meals_menu_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/menu/<path:object_id>/delete/",
+    "name": "admin:meals_menu_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/menu/<path:object_id>/change/",
+    "name": "admin:meals_menu_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/dietplan/",
+    "name": "admin:meals_dietplan_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/dietplan/add/",
+    "name": "admin:meals_dietplan_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/dietplan/<path:object_id>/history/",
+    "name": "admin:meals_dietplan_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/dietplan/<path:object_id>/delete/",
+    "name": "admin:meals_dietplan_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/meals/dietplan/<path:object_id>/change/",
+    "name": "admin:meals_dietplan_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/ingredient/",
+    "name": "admin:inventory_ingredient_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/ingredient/add/",
+    "name": "admin:inventory_ingredient_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/ingredient/<path:object_id>/history/",
+    "name": "admin:inventory_ingredient_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/ingredient/<path:object_id>/delete/",
+    "name": "admin:inventory_ingredient_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/ingredient/<path:object_id>/change/",
+    "name": "admin:inventory_ingredient_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/inventorylog/",
+    "name": "admin:inventory_inventorylog_changelist",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/inventorylog/add/",
+    "name": "admin:inventory_inventorylog_add",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/inventorylog/<path:object_id>/history/",
+    "name": "admin:inventory_inventorylog_history",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/inventorylog/<path:object_id>/delete/",
+    "name": "admin:inventory_inventorylog_delete",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/inventory/inventorylog/<path:object_id>/change/",
+    "name": "admin:inventory_inventorylog_change",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "admin/^(?P<app_label>accounts|auth|meals|inventory)/$",
+    "name": "admin:app_list",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "",
+    "name": "home",
+    "GET": "dashboard.read",
+    "POST": "dashboard.read"
+  },
+  {
+    "route": "docs/",
+    "name": "docs_index",
+    "GET": "reports.read",
+    "POST": "reports.read"
+  },
+  {
+    "route": "accounts/login/",
+    "name": "login",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/logout/",
+    "name": "logout",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/signup/",
+    "name": "signup",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/username/",
+    "name": "username_recovery",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/password/",
+    "name": "password_reset",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/requested/",
+    "name": "recovery_requested",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/username/confirm/",
+    "name": "username_recovery_confirm",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/username/confirm/<str:token>/",
+    "name": "username_confirm",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/reset/done/",
+    "name": "password_reset_complete",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/recovery/reset/<uidb64>/<token>/",
+    "name": "password_reset_confirm",
+    "GET": "public",
+    "POST": "public + CSRF/form checks"
+  },
+  {
+    "route": "accounts/manage/",
+    "name": "account_admin_users",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "accounts/manage/permissions/",
+    "name": "account_admin_matrix",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "accounts/manage/audit/",
+    "name": "account_admin_audit",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "accounts/manage/users/<int:pk>/",
+    "name": "account_admin_detail",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "accounts/manage/api/users/<int:pk>/",
+    "name": "account_admin_api",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "inventory/ingredients/",
+    "name": "inventory:ingredient_list",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/ingredients/create/",
+    "name": "inventory:ingredient_create",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/ingredients/upload/",
+    "name": "inventory:ingredient_upload",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/upload/",
+    "name": "inventory:ingredient_upload_legacy",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/log/create/",
+    "name": "inventory:inventory_log_create",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/ingredients/<int:pk>/adjust/",
+    "name": "inventory:ingredient_stock_adjust",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/reports/weekly/",
+    "name": "inventory:weekly_inventory_report",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/reports/monthly/",
+    "name": "inventory:monthly_inventory_report",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/reports/export/excel/",
+    "name": "inventory:export_inventory_excel",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/docs/inventory-status/",
+    "name": "inventory:doc_inventory_status",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "inventory/ingredients/<int:pk>/update/",
+    "name": "inventory:ingredient_update",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "meals/",
+    "name": "meals:meal_home",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/menu_create/",
+    "name": "meals:menu_create",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/menu_list/",
+    "name": "meals:menu_list",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/recipe_create/",
+    "name": "meals:recipe_create",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/menu/upload-excel/",
+    "name": "meals:recipe_upload_page",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/recipe/upload-excel/",
+    "name": "meals:recipe_upload_api",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan_create/",
+    "name": "meals:mealplan_create",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan/monthly/",
+    "name": "meals:monthly_mealplan_create",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan/weekly/",
+    "name": "meals:weekly_mealplan_create",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan/upload/",
+    "name": "meals:mealplan_bulk_upload",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan_list/",
+    "name": "meals:mealplan_list",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/document/weekly/",
+    "name": "meals:weekly_meal_plan_document",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/document/monthly/",
+    "name": "meals:monthly_meal_plan_document",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/document/weekly/export/",
+    "name": "meals:export_weekly_mealplan_excel",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/ingredients/search/",
+    "name": "meals:search_ingredients_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/menu/<int:menu_id>/recipes/",
+    "name": "meals:get_menu_recipes_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/menus/search/",
+    "name": "meals:search_menus_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/menus/add/",
+    "name": "meals:add_diet_menu_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/menus/remove/",
+    "name": "meals:remove_diet_menu_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/menus/<int:menu_id>/edit/",
+    "name": "meals:menu_update",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/menus/<int:menu_id>/delete/",
+    "name": "meals:menu_delete",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/deduct_inventory/",
+    "name": "meals:deduct_inventory",
+    "GET": "inventory.write",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "meals/document/weekly-recipe/",
+    "name": "meals:weekly_recipe_report",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/document/menu-overview/",
+    "name": "meals:doc_menu_overview",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/api/diet-menu/<int:diet_menu_id>/delete/",
+    "name": "meals:delete_diet_menu_api",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/mealplan/bulk-delete/",
+    "name": "meals:bulk_delete_mealplans",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "meals/cooking/",
+    "name": "meals:cooking_index",
+    "GET": "cooking.read",
+    "POST": "cooking.write"
+  },
+  {
+    "route": "meals/cooking/<int:pk>/",
+    "name": "meals:cooking_detail",
+    "GET": "cooking.read",
+    "POST": "cooking.write"
+  },
+  {
+    "route": "forecasting/",
+    "name": "forecasting:forecasting_home",
+    "GET": "forecast.write",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/calendar/",
+    "name": "forecasting:prediction_calendar",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/predict/",
+    "name": "forecasting:prediction_create",
+    "GET": "forecast.write",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/results/",
+    "name": "forecasting:prediction_list",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/results/<int:prediction_id>/",
+    "name": "forecasting:prediction_result",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/requirement/",
+    "name": "forecasting:ingredient_requirement",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/weekly-forecast-report/",
+    "name": "forecasting:weekly_forecast_report",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "forecasting/export-weekly-forecast-excel/",
+    "name": "forecasting:export_weekly_forecast_excel",
+    "GET": "forecast.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "procurement/",
+    "name": "procurement:home",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/orders/",
+    "name": "procurement:order_list",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/create/",
+    "name": "procurement:order_create",
+    "GET": "procurement.write",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/create-smart/",
+    "name": "procurement:order_from_mealplan",
+    "GET": "procurement.write",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/orders/<int:pk>/",
+    "name": "procurement:order_detail",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/orders/<int:pk>/status/",
+    "name": "procurement:order_status_update",
+    "GET": "procurement.write",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/weekly-report/",
+    "name": "procurement:weekly_procurement_report",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/vendor-report/",
+    "name": "procurement:vendor_procurement_report",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/daily-report/",
+    "name": "procurement:daily_inspection_report",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/weekly-report/excel/",
+    "name": "procurement:export_weekly_procurement_excel",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/vendor-report/excel/",
+    "name": "procurement:export_vendor_procurement_excel",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/daily-report/excel/",
+    "name": "procurement:export_daily_inspection_excel",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/docs/purchase-requisition/",
+    "name": "procurement:doc_purchase_requisition",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/docs/inspection-log/",
+    "name": "procurement:doc_inspection_log",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/workflow/",
+    "name": "procurement:workflow",
+    "GET": "procurement.read",
+    "POST": "forecast.write"
+  },
+  {
+    "route": "procurement/workflow/preview/",
+    "name": "procurement:workflow_preview",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/workflow/plans/<int:pk>/",
+    "name": "procurement:workflow_plan",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/workflow/inspections/",
+    "name": "procurement:workflow_inspections",
+    "GET": "inspection.read",
+    "POST": "inspection.write"
+  },
+  {
+    "route": "procurement/workflow/inspections/<int:pk>/",
+    "name": "procurement:workflow_inspection",
+    "GET": "inspection.read",
+    "POST": "inspection.write"
+  },
+  {
+    "route": "procurement/workflow/transactions/",
+    "name": "procurement:workflow_transaction",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "procurement/workflow/ledger/",
+    "name": "procurement:workflow_ledger",
+    "GET": "inventory.read",
+    "POST": "inventory.write"
+  },
+  {
+    "route": "procurement/workflow/settlement/",
+    "name": "procurement:workflow_settlement",
+    "GET": "reports.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/workflow/specs/",
+    "name": "procurement:workflow_specs",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/workflow/specs/<int:pk>/",
+    "name": "procurement:workflow_spec_edit",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/workflow/suppliers/",
+    "name": "procurement:workflow_suppliers",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "procurement/workflow/suppliers/<int:pk>/",
+    "name": "procurement:workflow_supplier_edit",
+    "GET": "accounts.manage",
+    "POST": "accounts.manage"
+  },
+  {
+    "route": "procurement/workflow/categories/",
+    "name": "procurement:workflow_categories",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/workflow/recipes/",
+    "name": "procurement:workflow_recipes",
+    "GET": "meals.read",
+    "POST": "meals.write"
+  },
+  {
+    "route": "procurement/workflow/recipes/<int:pk>/",
+    "name": "procurement:workflow_recipe_edit",
+    "GET": "meals.write",
+    "POST": "meals.write"
+  },
+  {
+    "route": "procurement/suppliers/",
+    "name": "procurement:supplier_list",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/suppliers/create/",
+    "name": "procurement:supplier_create",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/suppliers/<int:pk>/update/",
+    "name": "procurement:supplier_update",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/suppliers/<int:pk>/delete/",
+    "name": "procurement:supplier_delete",
+    "GET": "catalog.write",
+    "POST": "catalog.write"
+  },
+  {
+    "route": "procurement/docs/monthly-settlement/",
+    "name": "procurement:doc_monthly_settlement",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/monthly-settlement/",
+    "name": "procurement:monthly_settlement_view",
+    "GET": "procurement.read",
+    "POST": "procurement.write"
+  },
+  {
+    "route": "procurement/docs/cooking-instruction/",
+    "name": "procurement:doc_cooking_instruction",
+    "GET": "cooking.read",
+    "POST": "cooking.write"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "backupPrivateAndIgnored": true,
+  "backupBytes": 63679,
+  "backupSha256": "832f9c5d83eb5cd1683a3e327d4cee8c747bc359314c7f32dbf51b2b95ecec6f",
+  "restoreIntoSeparateTmpfsMariaDB": true,
+  "restoredAccounts": 8,
+  "restoredMigrationRecords": 48,
+  "restoredSnapshotMigrated": true,
+  "identityEmailPasswordLegacyRoleFlagsPreserved": true,
+  "oldInactiveNotAutoClassified": true
+}

@@ -1,0 +1,46 @@
+{
+  "purpose": "isolated RBAC and auth verification only",
+  "network": "snp-rbac-tests-20261105",
+  "containers": [
+    {
+      "name": "snp-rbac-test-proxy-20261105",
+      "id": "fc40ae0bc16c0edf15825308f26f3b991ab82e1c3e4acb3a4412a9b6f9f840d5",
+      "image": "snp-ui-preview-proxy:three-modes",
+      "mountType": []
+    },
+    {
+      "name": "snp-rbac-test-app-20261105",
+      "id": "40d21806583b2d074851dc2338800cae05d026283832332a68cc899fffd1cb4a",
+      "image": "snp-ui-preview-web:three-modes",
+      "mountType": [
+        {
+          "destination": "/workspace",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "snp-rbac-test-mail-20261105",
+      "id": "8dea3da9fd27a257ddce1dc04535800793adf7ec549d7adf4a4775e9edfbc5cf",
+      "image": "python:3.10-slim",
+      "mountType": [
+        {
+          "destination": "/mail_capture.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "snp-rbac-test-cache-20261105",
+      "id": "81814b91058ba57c3070950435bed9313cd3d814debf1abc12287fa2e3139684",
+      "image": "redis:7-alpine",
+      "mountType": []
+    },
+    {
+      "name": "snp-rbac-test-db-20261105",
+      "id": "22a8d757f2a90f58927ee9bec0d956c8af459f88728cb3433e14566ffaf8d853",
+      "image": "mariadb:10.6",
+      "mountType": []
+    }
+  ]
+}

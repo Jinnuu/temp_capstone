@@ -54,7 +54,8 @@ class SignUpForm(UserCreationForm):
         user.name = user.username[:50]
         user.is_active = False
         if commit:
-            user.save()
+            from .access_service import register
+            register(user)
         return user
 
 
@@ -66,5 +67,6 @@ class SignUpView(CreateView):
     
 
     def form_valid(self, form):
-        messages.info(self.request, '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.')
+        from .rbac import approval_mode
+        messages.info(self.request, '가입이 완료되었습니다. 바로 로그인할 수 있습니다.' if approval_mode()=='auto' else '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.')
         return super().form_valid(form)

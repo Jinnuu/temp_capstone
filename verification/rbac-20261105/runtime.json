@@ -1,0 +1,1 @@
+{"python": "3.12.13", "django": "6.0.3", "approvalMode": "auto", "debug": false, "mailMode": "disabled", "authBackend": ["accounts.backends.ApprovalBackend"]}

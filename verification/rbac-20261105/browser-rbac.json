@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "steps": [
+    "auto signup, no admin approval and successful login",
+    "admin search/detail shows default dietitian only",
+    "ordinary account cannot read admin UI or invoke admin API directly",
+    "saved multiple roles, reread and immediate meal-write denial in existing session",
+    "cook role edits and reloads real cooking instruction",
+    "suspension blocks old session and correct-password login",
+    "restore retains account; viewer can download but cannot edit",
+    "three UI modes: list, detail, matrix, audit render and retain mode",
+    "administrator self suspension rejected visibly",
+    "audit screen records successes and blocked access without password",
+    "POST logout remains functional after role changes"
+  ],
+  "pageErrors": [],
+  "environment": "task-only SQLite, synthetic accounts"
+}

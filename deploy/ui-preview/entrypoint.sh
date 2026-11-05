@@ -3,4 +3,5 @@ set -eu
 python -B manage.py check
 python -B manage.py migrate --noinput
 python -B seed_preview.py
+python -B manage.py sync_access_policy
 exec "$@"
