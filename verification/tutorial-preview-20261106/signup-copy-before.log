@@ -1,0 +1,17 @@
+Found 1 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F
+======================================================================
+FAIL: test_public_policy_signup_page_never_promises_immediate_access (integration_tests.test_tutorial.NutritionistTutorialTests.test_public_policy_signup_page_never_promises_immediate_access)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 111, in test_public_policy_signup_page_never_promises_immediate_access
+    self.assertTrue('회원가입 후 바로 로그인' not in r.content.decode(), 'Approval-required signup must not promise immediate access; response omitted')
+AssertionError: False is not true : Approval-required signup must not promise immediate access; response omitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.104s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...

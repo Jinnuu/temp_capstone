@@ -1,0 +1,9 @@
+
+> snp-ui-three-modes@0.1.0 build
+> tsc --noEmit && vite build
+
+src/guide.ts(17,18): error TS18047: 'guide' is possibly 'null'.
+src/guide.ts(18,14): error TS18047: 'guide' is possibly 'null'.
+src/guide.ts(19,18): error TS18047: 'guide' is possibly 'null'.
+src/guide.ts(20,14): error TS18047: 'guide' is possibly 'null'.
+src/guide.ts(21,14): error TS18047: 'guide' is possibly 'null'.

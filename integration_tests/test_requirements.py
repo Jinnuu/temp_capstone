@@ -51,7 +51,7 @@ class RequirementWorkflows(TestCase):
     def test_ai_absent_manual_confirmation_and_ui(self):
         response=self.client.post(reverse('procurement:workflow'),{'plan':self.plan.pk,'manual':350,'final':350,'confirm':'on'})
         self.assertEqual(response.status_code,302);self.plan.refresh_from_db();self.assertEqual(self.plan.final_headcount,350)
-        self.assertContains(self.client.get(reverse('procurement:workflow')),'미생성 / 수동 입력 가능')
+        self.assertContains(self.client.get(reverse('procurement:workflow_headcounts')),'미생성 / 수동 입력 가능')
 
     def test_final_confirmation_overrides_ai(self):
         from forecasting.models import AttendancePrediction

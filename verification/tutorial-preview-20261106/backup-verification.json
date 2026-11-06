@@ -1,0 +1,12 @@
+{
+  "backup_bytes": 79085,
+  "backup_sha256": "42dc9524793be595ffd6720d94a5c45eaef8a7a6a7818b21e48285a68dad713e",
+  "consistent_source_before_after": true,
+  "table_count": 37,
+  "accounts": 9,
+  "main_pk": 1,
+  "private_backup_not_versioned": true,
+  "restore_verified": true,
+  "all_table_fingerprints_equal": true,
+  "rename_seed_and_reverse_rollback_rehearsed": true
+}

@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "main": {
+    "pk": 1,
+    "username": "admin",
+    "active": true,
+    "staff": true,
+    "superuser": true,
+    "state": "ACTIVE"
+  },
+  "accounts": 9,
+  "main_count": 1,
+  "verify_admin_count": 0,
+  "public_signup_pending_required": true,
+  "guide_headcount_and_plan_entries_rendered_readonly": true,
+  "signup_copy_matches_policy": true,
+  "mail_mode": "disabled",
+  "source_hashes": {
+    "accounts/access_service.py": "eed55820eaf6603c3940583a9119dfacd582bd58aa96f003ba7b7486634023d6",
+    "accounts/preview_bootstrap.py": "d595dcf62259b8b15f110f8443df54ce51ecf98b800569cab38e599974de45c8",
+    "accounts/rbac.py": "465094ac43ba75cfd98e21bc263ac76fbb50848f994c457356ac320f16f4c51c",
+    "procurement/supplier_views.py": "e0a04256258eed20e4e7feb351abee137e10e102200ff49975566d144db756de",
+    "procurement/workflow_views.py": "4512f1c67d88985f576c2e29c1dd0d6a3f6d42e46b02458d25565edbe93f01af",
+    "procurement/tutorial.py": "9d9fc94cb629c9fcd03ebc40de2a2460679ee251144ea41e284969c7d732d261",
+    "procurement/money.py": "28fda2f4b2e7347013c288fcd81c45ed99746c8177cdd44f83911246fbe35b95",
+    "forecasting/services/reporting.py": "92ca901af641d463a463eecd5dda275d1aa3279e6ec47aab1214b440fe52d178",
+    "meals/change_policy.py": "e6c76fb55b084a9a57d3b7c183c688fccf85daadd880d644959a9bf4f800e574",
+    "templates/workflow/tutorial.html": "86ed085d1c6f31f5064d902924eefad4a2138779f36cf5a0dd9e9a501da3a545",
+    "templates/workflow/headcounts.html": "125c9e46ac9097dd9b11c3974831624a6e4760bbd689ad46498f106578810c2b",
+    "templates/accounts/signup.html": "9e06ce5d006f0da7a742cd3b98059601e10a911c7d2890f0e870804efcb269c9",
+    "static/ui/build/snp-ui.js": "49e6c0c50cf8f9edf6cf8fdd940326dd1ba7687db1317ef94b148cbf7ee788d1",
+    "static/ui/build/snp-ui.css": "bbbf85ae862ee26bc9ca19223f5f3d63eaf1d4a4fbff9ef1fc96cd4950fb3244"
+  },
+  "real_account_login_attempted": false,
+  "business_mutations_attempted": false
+}

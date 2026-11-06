@@ -1,0 +1,6 @@
+{% extends 'workflow/base.html' %}
+{% block title %}저장한 발주예정서{% endblock %}
+{% block content %}<h1>저장한 발주예정서</h1>
+<p>최근 30개 예정서입니다. 변경된 식단·식수·규격은 재검토 후 최신 데이터로 확인하세요.</p>
+<p><a href="{% url 'procurement:workflow' %}">영양사 업무 가이드</a> · <a href="{% url 'procurement:workflow_preview' %}">발주예정서 작성</a></p>
+<table class="table"><thead><tr><th>번호</th><th>대상 기간</th><th>상태</th><th>확인 사항</th></tr></thead><tbody>{% for plan in plans %}<tr><td><a href="{% url 'procurement:workflow_plan' plan.pk %}">#{{ plan.pk }}</a></td><td>{{ plan.start_date }} ~ {{ plan.end_date }}</td><td>{{ plan.status }}</td><td>{% if plan.needs_review %}<strong>변경됨 · 재검토 필요</strong>{% else %}상세에서 확인{% endif %}</td></tr>{% empty %}<tr><td colspan="4">저장한 발주예정서가 없습니다.</td></tr>{% endfor %}</tbody></table>{% endblock %}

@@ -11,12 +11,12 @@
                 <div class="text-center mb-4">
                     <span class="text-uppercase small fw-bold text-primary">Account</span>
                     <h1 class="h2 fw-bold mt-2 mb-2">회원가입</h1>
-                    <p class="text-muted mb-0">{% if account_approval_mode == 'auto' %}회원가입 후 바로 로그인하여 업무 화면을 이용할 수 있습니다.{% else %}계정 가입을 신청하세요. 관리자 승인 후 업무 화면을 이용할 수 있습니다.{% endif %}</p>
+                    <p class="text-muted mb-0">{% if not public_signup_requires_approval %}회원가입 후 바로 로그인하여 업무 화면을 이용할 수 있습니다.{% else %}계정 가입을 신청하세요. 관리자 승인 후 업무 화면을 이용할 수 있습니다.{% endif %}</p>
                 </div>
 
                 <form method="post" novalidate>
                     <fieldset class="fresh-signup-types"><legend>가입 유형</legend>{{ form.signup_type }}{{ form.signup_type.errors }}</fieldset>
-                    <details class="fresh-supplier-fields"><summary>공급업체 가입 정보 (공급업체 선택 시 필수)</summary><p>가입 후 로그인할 수 있지만, 소속 확인 전에는 발주 정보에 접근할 수 없습니다.</p><p>{{ form.company_name.label_tag }} {{ form.company_name }} {{ form.company_name.errors }}</p><p>{{ form.contact_name.label_tag }} {{ form.contact_name }} {{ form.contact_name.errors }}</p><p>{{ form.contact_phone.label_tag }} {{ form.contact_phone }} {{ form.contact_phone.errors }}</p></details>
+                    <details class="fresh-supplier-fields"><summary>공급업체 가입 정보 (공급업체 선택 시 필수)</summary><p>{% if public_signup_requires_approval %}계정 승인 후 로그인할 수 있으며, 별도로 업체 소속 확인이 필요합니다.{% else %}가입 후 로그인할 수 있지만, 소속 확인 전에는 발주 정보에 접근할 수 없습니다.{% endif %}</p><p>{{ form.company_name.label_tag }} {{ form.company_name }} {{ form.company_name.errors }}</p><p>{{ form.contact_name.label_tag }} {{ form.contact_name }} {{ form.contact_name.errors }}</p><p>{{ form.contact_phone.label_tag }} {{ form.contact_phone }} {{ form.contact_phone.errors }}</p></details>
                     {% csrf_token %}
 
                     <div class="mb-3">

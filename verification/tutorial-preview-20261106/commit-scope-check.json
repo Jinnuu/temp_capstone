@@ -1,0 +1,6 @@
+{
+  "reviewed_staged_files": 148,
+  "private_backup_env_secrets_reference_docs_models_and_user_helper_excluded": true,
+  "credential_signature_findings": 0,
+  "limitations": "Pattern and explicit scope checks are not a proof against every possible secret."
+}

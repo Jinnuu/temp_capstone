@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Alert from 'bootstrap/js/dist/alert';
 import './ui.css';
+import {initGuide} from './guide';
 import {greenBrand} from './brand';
 
 const modes=['reference','green','civic'] as const;
@@ -73,7 +74,7 @@ document.querySelectorAll<HTMLElement>('.alert[data-dismissible],.alert-dismissi
 // Comparison frames load the very same Django views/data and never persist their mode.
 const compareSelect=document.querySelector<HTMLSelectElement>('#snp-compare-page');
 compareSelect?.addEventListener('change',()=>{
- const allowed=['/','/procurement/workflow/','/inventory/ingredients/','/meals/mealplan/weekly/','/procurement/workflow/ledger/','/meals/cooking/'];
+ const allowed=['/','/procurement/workflow/','/procurement/workflow/headcounts/','/inventory/ingredients/','/meals/mealplan/weekly/','/procurement/workflow/ledger/','/meals/cooking/'];
  if(!allowed.includes(compareSelect.value))return;
  document.querySelectorAll<HTMLIFrameElement>('[data-snp-preview-mode]').forEach(frame=>frame.src=compareSelect.value+'?snp_preview=1');
 });
@@ -86,3 +87,5 @@ if(supplierFields&&signupTypes.length){
  const updateSignup=()=>{const supplier=Array.from(signupTypes).some(input=>input.checked&&input.value==='SUPPLIER');supplierFields.open=supplier;};
  signupTypes.forEach(input=>input.addEventListener('change',updateSignup));updateSignup();
 }
+
+initGuide();

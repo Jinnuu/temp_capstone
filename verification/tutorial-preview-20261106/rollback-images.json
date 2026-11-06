@@ -1,0 +1,10 @@
+{
+  "web": {
+    "image_id": "sha256:6ef0ff608cf86acec9caf014811ad5e166b2095cb5dfd12112fd29c37c5a718c",
+    "rollback_tag": "snp-ui-preview-web:pre-tutorial-3236e07"
+  },
+  "proxy": {
+    "image_id": "sha256:545c0da80b05a7de929667c999fd8db73fe5ecda4891a3198a6cb3bc5cd2e407",
+    "rollback_tag": "snp-ui-preview-proxy:pre-tutorial-3236e07"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "steps": [
+    "old bookmark opens six-step guide without operational headcount form",
+    "previous-next and reading acknowledgement persist separately across reload",
+    "keyboard Home and End change steps without completing them",
+    "six explicit acknowledgements reach100 percent with no POST or business API calls",
+    "guide opens preserved independent headcount function and keeps reading progress on return",
+    "saved procurement plans remain reachable with detail links",
+    "restart clears only this user reading progress",
+    "Green Civic Reference desktop and mobile guide layouts have no body overflow",
+    "missing photograph does not block guide controls or content",
+    "different login on shared browser does not inherit another user reading progress",
+    "viewer receives authorized reading links and read-only headcounts",
+    "cook guide hides forecast and procurement links but exposes cooking",
+    "ordinary supplier stays in portal and cannot open internal guide",
+    "blocked browser storage preserves current-page navigation and visible explanation",
+    "without JavaScript all six native details and real work links remain readable"
+  ],
+  "pageErrors": [],
+  "scope": "task SQLite only; progress is local reading state"
+}

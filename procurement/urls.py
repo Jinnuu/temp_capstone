@@ -26,6 +26,8 @@ urlpatterns = [
 
 urlpatterns += [
     path("workflow/", workflow.hub, name="workflow"),
+    path("workflow/headcounts/", workflow.headcounts, name="workflow_headcounts"),
+    path("workflow/plans/", workflow.saved_plans, name="workflow_plans"),
     path("workflow/preview/", workflow.preview, name="workflow_preview"),
     path("workflow/plans/<int:pk>/", workflow.plan_detail, name="workflow_plan"),
     path("workflow/inspections/", workflow.inspections, name="workflow_inspections"),

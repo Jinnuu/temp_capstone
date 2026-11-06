@@ -1,0 +1,284 @@
+{
+  "passed": true,
+  "unchanged_protected_containers": [
+    "/my-capstone",
+    "/my-capstone-sprint7",
+    "/snp-presentation",
+    "/snp-ui-preview-db-1",
+    "/snp-ui-preview-recovery-cache-1"
+  ],
+  "updated_preview_containers": [
+    {
+      "Id": "57156b705d71f4e08f62c679b7dfbe04682643f22f333b670244fa01c8c9fe60",
+      "Name": "/snp-ui-preview-web-1",
+      "Image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+      "StartedAt": "2026-11-06T01:27:57.364459886Z",
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+          "Destination": "/run/secrets/db_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/demo_password",
+          "Destination": "/run/secrets/demo_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+          "Destination": "/run/secrets/django_secret",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/preview_admin_password",
+          "Destination": "/run/secrets/preview_admin_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+          "Destination": "/run/secrets/recovery_cache_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+          "Destination": "/run/secrets/smtp_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Networks": {
+        "snp-ui-preview_preview": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "snp-ui-preview-web-1",
+            "web"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+          "EndpointID": "80555af04a1e32fc0d0c7475095ecadfd171fcc8a97432f80ae10c8bd76f29ad",
+          "Gateway": "",
+          "IPAddress": "192.168.80.3",
+          "MacAddress": "b6:60:48:68:94:1a",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "snp-ui-preview-web-1",
+            "web",
+            "57156b705d71"
+          ]
+        }
+      }
+    },
+    {
+      "Id": "43f0078a0fc4981d9035ec9efb40972c75f3c3f16c42524758eb41c27a34ddb8",
+      "Name": "/snp-ui-preview-proxy-1",
+      "Image": "sha256:ea99e00453499951e2f3047946f885fec9c7ccb204a4024e56c429a5868af719",
+      "StartedAt": "2026-11-06T01:28:33.555967579Z",
+      "Mounts": [],
+      "Networks": {
+        "snp-ui-preview_ingress": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "snp-ui-preview-proxy-1",
+            "proxy"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "8d7b308ac0b591ea1d10b59343a0aabb8da69b79f3c8ff87b101dad7a16d85d5",
+          "EndpointID": "859421f33f45a99f4b4bffc6cbaba551b84758ce49bedb0b4b67f99a8ee4839b",
+          "Gateway": "192.168.96.1",
+          "IPAddress": "192.168.96.3",
+          "MacAddress": "d6:41:3f:bc:a3:33",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "snp-ui-preview-proxy-1",
+            "proxy",
+            "43f0078a0fc4"
+          ]
+        },
+        "snp-ui-preview_preview": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "snp-ui-preview-proxy-1",
+            "proxy"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+          "EndpointID": "09cdf227d057afddb52e1739d3447f9a2990b179f07631d7e4cc4fe1866d4739",
+          "Gateway": "",
+          "IPAddress": "192.168.80.6",
+          "MacAddress": "c2:29:06:09:25:de",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "snp-ui-preview-proxy-1",
+            "proxy",
+            "43f0078a0fc4"
+          ]
+        }
+      }
+    },
+    {
+      "Id": "86d620356898d49328fcdcea1e56d0e0499ff231b04680c4c59c763627ce6b26",
+      "Name": "/snp-ui-preview-recovery-mail-1",
+      "Image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+      "StartedAt": "2026-11-06T01:27:57.361878844Z",
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+          "Destination": "/run/secrets/db_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+          "Destination": "/run/secrets/django_secret",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+          "Destination": "/run/secrets/recovery_cache_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+          "Destination": "/run/secrets/smtp_password",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Networks": {
+        "snp-ui-preview_ingress": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "snp-ui-preview-recovery-mail-1",
+            "recovery-mail"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "8d7b308ac0b591ea1d10b59343a0aabb8da69b79f3c8ff87b101dad7a16d85d5",
+          "EndpointID": "1776c7102c9017655a54060f9f15fbacc93b3d2734532518ff3a0be95824d048",
+          "Gateway": "192.168.96.1",
+          "IPAddress": "192.168.96.2",
+          "MacAddress": "36:79:0a:5b:ae:6b",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "snp-ui-preview-recovery-mail-1",
+            "recovery-mail",
+            "86d620356898"
+          ]
+        },
+        "snp-ui-preview_preview": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "snp-ui-preview-recovery-mail-1",
+            "recovery-mail"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "c6c046382448bd818243c647660768581458f20ab29ed073dfbd5738fdc7024b",
+          "EndpointID": "208e61580956176d02ed81ba02db8e40f46109ba2df219267a249503486ba1b6",
+          "Gateway": "",
+          "IPAddress": "192.168.80.5",
+          "MacAddress": "7e:66:1e:e5:01:7e",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "snp-ui-preview-recovery-mail-1",
+            "recovery-mail",
+            "86d620356898"
+          ]
+        }
+      }
+    }
+  ],
+  "preview_health": [
+    {
+      "service": "web",
+      "id": "57156b705d71f4e08f62c679b7dfbe04682643f22f333b670244fa01c8c9fe60",
+      "image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+      "health": "healthy"
+    },
+    {
+      "service": "proxy",
+      "id": "43f0078a0fc4981d9035ec9efb40972c75f3c3f16c42524758eb41c27a34ddb8",
+      "image": "sha256:ea99e00453499951e2f3047946f885fec9c7ccb204a4024e56c429a5868af719",
+      "health": "healthy"
+    },
+    {
+      "service": "recovery-mail",
+      "id": "86d620356898d49328fcdcea1e56d0e0499ff231b04680c4c59c763627ce6b26",
+      "image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+      "health": "healthy"
+    },
+    {
+      "service": "db",
+      "id": "8241a958a52fa5c36b2b21eaeb0c2bf6c9470a628aa731f2e2da01a30dad3244",
+      "image": "sha256:6055d4ee6a6045626442cafe4feaf7419e878c65baf3af658265e24114af1cd7",
+      "health": "healthy"
+    },
+    {
+      "service": "recovery-cache",
+      "id": "8649463dd9fa5862904a9c6dd6b2e998ca1e0f74d5a351e63a959da10213b0d5",
+      "image": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+      "health": "healthy"
+    }
+  ],
+  "only_environment_key_changed": "SNP_PUBLIC_SIGNUP_REQUIRES_APPROVAL",
+  "existing_user_script_metadata_preserved": true,
+  "sprint_final": "133b950221bd9cc1effaa51539abf7f88bb095c1",
+  "http_login_get": {
+    "8000": 200,
+    "8007": 200,
+    "8010": 200,
+    "8011": 200
+  },
+  "no_other_project_or_tunnel_operations": true,
+  "protected_services_have_no_bind_to_edited_checkout": true
+}

@@ -1,0 +1,5 @@
+{
+  "stage": "asset-snp-ui.css",
+  "name": "AssertionError",
+  "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST',\n+   'POST'\n+ ]\n- []\n"
+}

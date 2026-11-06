@@ -1,0 +1,9 @@
+{% extends 'workflow/base.html' %}
+{% block title %}예상·최종 식수 관리{% endblock %}
+{% block content %}{% load access_tags %}
+<h1>예상·최종 식수 관리</h1>
+<p>AI 참고값·수동 예상값·최종 확정 인원을 구분하세요. AI가 없어도 수동으로 확정할 수 있습니다.</p>
+<p>{% if 'procurement:workflow_preview'|can_access:user %}<a href="{% url 'procurement:workflow_preview' %}">발주예정서 작성</a> · {% endif %}<a href="{% url 'procurement:workflow' %}">영양사 업무 가이드</a> · <a href="{% url 'procurement:workflow_plans' %}">저장한 발주예정서</a></p>
+{% if 'forecast.write' in snp_caps %}<h2>예상 식수 입력·최종 확정</h2><form method="post" class="card p-3 mb-3">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">식수 저장</button></form>{% else %}<p>조회 전용입니다. 식수 변경은 권한 있는 영양사에게 요청하세요.</p>{% endif %}
+<div class="table-responsive"><table class="table"><thead><tr><th>날짜·식사</th><th>직접 예상</th><th>AI 참고</th><th>최종 확정</th><th>확정 시점</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row.plan }}</td><td>{{ row.plan.headcount }}</td><td>{% if row.prediction %}{{ row.prediction.predicted_count }}명{% else %}미생성 / 수동 입력 가능{% endif %}</td><td>{{ row.plan.final_headcount|default_if_none:'미확정' }}</td><td>{{ row.plan.headcount_confirmed_at|default:'-' }}</td></tr>{% empty %}<tr><td colspan="5">식단을 먼저 작성하세요.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,5 +1,7 @@
 # SNP 현업 개선 백로그
 
+> 최신 적용 상태(2026-11-06): 사용자 승인으로 Phase1+튜토리얼을 Preview에 배포했다. 실제 최고관리자는 **동일 PK1의 admin**, 기존 비밀번호/9계정/업무 데이터는 보존했고 공개 신규 가입은 승인 필요다. 아래의 미배포·승인 대기·verify-admin 표기는 해당 시점의 이력이다. 최신 실행/보존 결과는 [Preview 배포 보고서](NUTRITIONIST_PREVIEW_DEPLOYMENT.md), 화면은 [튜토리얼 개편](NUTRITIONIST_TUTORIAL_REDESIGN.md), 후속은 [Phase2 설계](NUTRITIONIST_PHASE2_PLAN.md)를 따른다.
+
 > 2026-11-06 후속 구현: 아래 본문은 최초 읽기 전용 감사/계획 이력이다. 이후 UI 브랜치에서 Phase 0/1 코드를 수정·격리 검증했다. **실제 Preview는 미배포이며 계정/정책은 그대로다.** 최신 결과는 [구현 보고서](NUTRITIONIST_IMPLEMENTATION_REPORT.md), [테스트 보고서](NUTRITIONIST_TEST_REPORT.md), [운영 준비도](NUTRITIONIST_OPERATION_READINESS.md) 및 이 문서 끝의 후속 상태를 따른다.
 
 조사일: 2026-11-06 KST. 기준: `feature/ui-redesign-three-modes` / `3ad73a8bb2caadfe6e9fc0e628f814fbcc9e3617`.

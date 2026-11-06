@@ -13,6 +13,7 @@ from django.db import transaction
 from django.db.models import Sum, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_GET, require_http_methods
 
 from forecasting.models import AttendancePrediction
 from inventory.models import Ingredient, IngredientCategory, InventoryLog, SupplySpecification, StockLot
@@ -32,14 +33,28 @@ def _errors(form, exc):
 
 
 @login_required
+@require_http_methods(['GET', 'POST'])
 def hub(request):
+    # Preserve old integrations/bookmarks: POST still reaches the original service.
+    if request.method == 'POST':
+        return headcounts(request)
+    from .tutorial import steps_for
+    return render(request, 'workflow/tutorial.html', {
+        'steps': steps_for(request.user),
+        'progress_key': f'snp.guide.nutritionist.v1.{request.user.pk}',
+    })
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def headcounts(request):
     headcount=HeadcountForm(request.POST or None)
     if request.method=='POST' and headcount.is_valid():
         data=headcount.cleaned_data
         try:
             save_headcount(data['plan'].pk,data['manual'],data['final'] if data['confirm'] else None)
             messages.success(request,'식수를 저장했습니다. 변경된 발주예정서는 다시 생성하세요.')
-            return redirect('procurement:workflow')
+            return redirect('procurement:workflow_headcounts')
         except ValidationError as exc:
             _errors(headcount,exc)
     rows=[]
@@ -48,7 +63,13 @@ def hub(request):
         key={'조식':'breakfast','중식':'lunch','석식':'dinner'}.get(plan.meal_type)
         prediction=AttendancePrediction.objects.filter(prediction_date=plan.target_date,meal_type=key).first()
         rows.append({'plan':plan,'prediction':prediction})
-    return render(request,'workflow/hub.html',{'form':headcount,'rows':rows,'plans':ProcurementPlan.objects.order_by('-id')[:30]})
+    return render(request,'workflow/headcounts.html',{'form':headcount,'rows':rows})
+
+
+@login_required
+@require_GET
+def saved_plans(request):
+    return render(request, 'workflow/saved_plans.html', {'plans': ProcurementPlan.objects.order_by('-id')[:30]})
 
 
 @login_required

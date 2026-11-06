@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "steps": [
+    "new supplier cannot log in before explicit MAIN account approval; membership remains separate",
+    "supplier signup and login succeed; unverified membership cannot see any orders",
+    "MAIN_ADMIN verifies explicit company affiliation without overwriting legacy owner",
+    "company A list, JSON, detail and export cannot expose company B order ID",
+    "acknowledge, accept, schedule 8kg, prepare, dispatch and owned-order Excel/print",
+    "dietitian sees supplier schedule and explicitly inspects delivered 8kg, accepted 7kg",
+    "supplier sees actual accepted amount; no post-inspection editing",
+    "admin application alone gives no admin rights; MAIN_ADMIN explicitly approves SUB_ADMIN",
+    "supplier SUB_ADMIN can switch workspaces but cannot manage MAIN_ADMIN, approvals or native admin",
+    "MAIN_ADMIN revokes only SUB_ADMIN; supplier portal membership and account persist",
+    "Green and Civic: 9 screens each at 1920x1080 and 390x844, 36 screenshots; no body overflow",
+    "Reference mode remains available",
+    "failed photograph request preserves banner layout and data"
+  ],
+  "pageErrors": [],
+  "scenario": "isolated synthetic supplier/admin/dietitian with real forms and downloads"
+}

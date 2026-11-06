@@ -3,7 +3,7 @@ from django.urls import reverse
 
 
 PREVIEW_ROUTES = (
-    'home', 'procurement:workflow', 'inventory:ingredient_list',
+    'home', 'procurement:workflow', 'procurement:workflow_headcounts', 'inventory:ingredient_list',
     'meals:weekly_mealplan_create', 'procurement:workflow_ledger', 'meals:cooking_index',
 )
 

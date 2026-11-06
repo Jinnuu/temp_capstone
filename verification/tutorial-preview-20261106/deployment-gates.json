@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "candidate_django_cases": 325,
+  "sqlite_skip": 4,
+  "mariadb_all_pass": true,
+  "backup_restore_and_rollback_verified": true,
+  "latest_live_rows_still_match_backup": true,
+  "existing_accounts": 9,
+  "expected_main_pk": 1,
+  "target_username_available": true,
+  "new_signup_approval_opt_in_prepared": true,
+  "actual_rename_not_yet_run": true
+}

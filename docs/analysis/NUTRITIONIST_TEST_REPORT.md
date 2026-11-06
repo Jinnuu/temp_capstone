@@ -1,5 +1,7 @@
 # SNP 현업 고도화 테스트 보고서
 
+> 최신 적용 상태(2026-11-06): 사용자 승인으로 Phase1+튜토리얼을 Preview에 배포했다. 실제 최고관리자는 **동일 PK1의 admin**, 기존 비밀번호/9계정/업무 데이터는 보존했고 공개 신규 가입은 승인 필요다. 아래의 미배포·승인 대기·verify-admin 표기는 해당 시점의 이력이다. 최신 실행/보존 결과는 [Preview 배포 보고서](NUTRITIONIST_PREVIEW_DEPLOYMENT.md), 화면은 [튜토리얼 개편](NUTRITIONIST_TUTORIAL_REDESIGN.md), 후속은 [Phase2 설계](NUTRITIONIST_PHASE2_PLAN.md)를 따른다.
+
 2026-11-06 KST, 시작 HEAD `3ad73a8`, UI 리디자인 브랜치의 Phase 0/1 작업 코드 기준. 아래는 이번에 **새로 실행한** 결과다. 실서비스 계정/DB를 변경하는 업무 테스트는 수행하지 않았다.
 
 ## 환경과 격리
@@ -39,7 +41,7 @@
 | Green/Civic 시각/반응형 | 9화면×2모드×2뷰포트=36PNG 재촬영, 추가 개선 화면4PNG | `portal-screenshots/`, `green/civic-dashboard.png`, `green/civic-mobile.png` |
 | 확대/키보드 smoke | 2모드 CSS zoom200%, 본문 overflow 없음·Tab으로 조작 요소 접근 | `accessibility-smoke.json`, `*-css-zoom200.png` |
 
-기존 기준은 260개 고유 Django 테스트이고 이번 신규는 **47개**다. 309개를 두 DB에서 반복한 것이며 618개 고유 테스트가 아니다. 브라우저21/12/8은 단계·검증 지점 수이고 Django 케이스 수에 합산하지 않는다. 확대 smoke는 브라우저 native zoom 설정과 다르며 전체 화면·대비·스크린리더·WCAG 인수 검사가 아니다.
+기존 기준은 260개 고유 Django 테스트이고 이번 신규는 **49개**다. 309개를 두 DB에서 반복한 것이며 618개 고유 테스트가 아니다. 브라우저21/12/8은 단계·검증 지점 수이고 Django 케이스 수에 합산하지 않는다. 확대 smoke는 브라우저 native zoom 설정과 다르며 전체 화면·대비·스크린리더·WCAG 인수 검사가 아니다.
 
 SQLite skip4개는 기존 DB 행 잠금/경합 테스트다. 같은 검사는 MariaDB에서 실행됐다. 새 요구를 통과시키려고 기존 테스트를 삭제하거나 기대값을 낮추지 않았다.
 

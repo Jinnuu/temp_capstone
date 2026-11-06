@@ -3,7 +3,7 @@
 {% block content %}
 <h1>세 가지 업무 화면 비교</h1>
 <p>같은 Django 화면과 데이터를 세 가지 레이아웃으로 비교합니다. 비교 창은 조회 전용이며, 실제 입력과 저장은 각 모드의 일반 화면에서 진행하세요.</p>
-<div class="snp-comparison-toolbar"><label for="snp-compare-page">비교할 화면</label><select id="snp-compare-page"><option value="/">운영현황</option><option value="/procurement/workflow/">최종 식수 확정</option><option value="/inventory/ingredients/">재고 현황</option><option value="/meals/mealplan/weekly/">주간 식단</option><option value="/procurement/workflow/ledger/">수불현황</option><option value="/meals/cooking/">조리지시서</option></select></div>
+<div class="snp-comparison-toolbar"><label for="snp-compare-page">비교할 화면</label><select id="snp-compare-page"><option value="/">운영현황</option><option value="/procurement/workflow/">영양사 업무 가이드</option><option value="/procurement/workflow/headcounts/">최종 식수 확정</option><option value="/inventory/ingredients/">재고 현황</option><option value="/meals/mealplan/weekly/">주간 식단</option><option value="/procurement/workflow/ledger/">수불현황</option><option value="/meals/cooking/">조리지시서</option></select></div>
 <div class="snp-comparison-grid">
   <section class="snp-comparison-pane"><h2>MODE 1 · 레퍼런스형</h2><div class="snp-comparison-viewport"><iframe src="/?snp_preview=1" data-snp-preview-mode="reference" title="레퍼런스형 실제 운영현황" sandbox="allow-scripts allow-same-origin allow-downloads" loading="lazy"></iframe></div></section>
   <section class="snp-comparison-pane"><h2>MODE 2 · 그린형</h2><div class="snp-comparison-viewport"><iframe src="/?snp_preview=1" data-snp-preview-mode="green" title="그린형 실제 운영현황" sandbox="allow-scripts allow-same-origin allow-downloads" loading="lazy"></iframe></div></section>

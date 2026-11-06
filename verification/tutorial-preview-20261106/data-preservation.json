@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "account_count_before": 9,
+  "account_count_after": 9,
+  "main_pk_unchanged": 1,
+  "username_before": "verify-admin",
+  "username_after": "admin",
+  "same_password_email_personal_fields_flags_groups_and_links": true,
+  "all_existing_table_rows_preserved": true,
+  "tables_compared": 37,
+  "only_expected_changes": [
+    "User PK1 username",
+    "one account.username_changed audit event"
+  ],
+  "old_audit_rows_and_labels_preserved": true,
+  "new_audit_events": 1,
+  "secret_file_contents_preserved": true,
+  "deployed_source_matches_checkout": true,
+  "no_actual_user_login_or_business_writes": true,
+  "business_table_counts_before_after": {
+    "accounts_user": {
+      "before": 9,
+      "after": 9
+    },
+    "meals_menu": {
+      "before": 5,
+      "after": 5
+    },
+    "meals_recipe": {
+      "before": 4,
+      "after": 4
+    },
+    "meals_dietplan": {
+      "before": 4,
+      "after": 4
+    },
+    "procurement_purchaseorder": {
+      "before": 2,
+      "after": 2
+    },
+    "procurement_orderitem": {
+      "before": 2,
+      "after": 2
+    },
+    "procurement_goodsinspection": {
+      "before": 2,
+      "after": 2
+    },
+    "inventory_inventorylog": {
+      "before": 6,
+      "after": 6
+    },
+    "inventory_stocklot": {
+      "before": 3,
+      "after": 3
+    },
+    "inventory_stockallocation": {
+      "before": 3,
+      "after": 3
+    },
+    "procurement_suppliermembership": {
+      "before": 2,
+      "after": 2
+    },
+    "meals_cookinginstruction": {
+      "before": 1,
+      "after": 1
+    }
+  },
+  "final_readonly_public_checks_did_not_change_existing_rows": true
+}

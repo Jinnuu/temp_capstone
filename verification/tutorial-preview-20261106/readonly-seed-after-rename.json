@@ -1,0 +1,1 @@
+{"passed": true, "write_statements_executed": 0, "accounts_before": 9, "accounts_after": 9, "verify_admin_recreated": false, "readonly_sql_statement_counts": {"SELECT": 12}}

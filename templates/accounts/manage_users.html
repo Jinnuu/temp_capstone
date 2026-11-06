@@ -1,4 +1,4 @@
-{% extends 'base.html' %}{% block title %}사용자 관리 | SNP{% endblock %}{% block content %}
+{% extends 'base.html' %}{% block title %}사용자 관리 | SNP{% endblock %}{% block content %}<p>공개 신규 가입: <strong>{% if public_signup_requires_approval %}관리자 승인 필요{% else %}자동 승인{% endif %}</strong>. 계정 승인과 업체 소속 확인, 관리자 권한 심사는 각각 별도입니다.</p>
 <h1>사용자 및 역할 관리</h1>
 <p><a href="{% url 'account_admin_matrix' %}">역할별 권한</a> · <a href="{% url 'account_admin_audit' %}">감사 로그</a></p>
 <p>가입 승인 정책: <strong>{{ approval_mode }}</strong> (환경 설정으로 관리). 기존 상태 확인 필요 계정은 자동 승인하지 않습니다.</p>

@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "removed_task_containers": [
+    {
+      "name": "snp-tutorial-browser-proxy-20261106",
+      "id": "1689ddc91ae5",
+      "anonymous_volumes": []
+    },
+    {
+      "name": "snp-tutorial-browser-20261106",
+      "id": "941cde83b526",
+      "anonymous_volumes": []
+    },
+    {
+      "name": "snp-tutorial-cache-20261106",
+      "id": "25b7bf03eebf",
+      "anonymous_volumes": []
+    },
+    {
+      "name": "snp-tutorial-db-20261106",
+      "id": "095d5e84e4fe",
+      "anonymous_volumes": []
+    }
+  ],
+  "removed_task_network": "snp-tutorial-tests-20261106",
+  "isolated_restore_database_removed_with_tmpfs_container": true,
+  "private_backup_and_rollback_images_retained": true,
+  "no_preview_or_original_resources_removed": true
+}

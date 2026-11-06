@@ -1,0 +1,228 @@
+Found 14 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_accesspolicy_user_access_revision_user_account_state_and_more... OK
+  Applying accounts.0003_initialize_access_roles... OK
+  Applying accounts.0004_adminrolerequest_announcement... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying procurement.0010_supplierdeliveryline_supplierfulfillment_and_more... OK
+  Applying procurement.0011_initialize_portal_roles... OK
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_anonymous_cannot_open_guide (integration_tests.test_tutorial.NutritionistTutorialTests.test_anonymous_cannot_open_guide) ... ok
+test_cook_can_read_relevant_guide_without_forecast_or_procurement_buttons (integration_tests.test_tutorial.NutritionistTutorialTests.test_cook_can_read_relevant_guide_without_forecast_or_procurement_buttons) ... FAIL
+test_every_rendered_step_link_is_authorized_and_connected (integration_tests.test_tutorial.NutritionistTutorialTests.test_every_rendered_step_link_is_authorized_and_connected) ... ERROR
+test_guide_get_has_no_business_writes (integration_tests.test_tutorial.NutritionistTutorialTests.test_guide_get_has_no_business_writes) ... ok
+test_independent_headcount_screen_preserves_save_reload (integration_tests.test_tutorial.NutritionistTutorialTests.test_independent_headcount_screen_preserves_save_reload) ... ERROR
+test_legacy_post_still_saves_without_reimplementing_logic (integration_tests.test_tutorial.NutritionistTutorialTests.test_legacy_post_still_saves_without_reimplementing_logic) ... ERROR
+test_native_details_and_faq_work_without_javascript (integration_tests.test_tutorial.NutritionistTutorialTests.test_native_details_and_faq_work_without_javascript) ... FAIL
+test_new_entries_are_linked_in_navigation_and_guide (integration_tests.test_tutorial.NutritionistTutorialTests.test_new_entries_are_linked_in_navigation_and_guide) ... ERROR
+test_old_url_is_six_step_guide_without_headcount_form (integration_tests.test_tutorial.NutritionistTutorialTests.test_old_url_is_six_step_guide_without_headcount_form) ... FAIL
+test_plan_list_post_never_confirms_orders (integration_tests.test_tutorial.NutritionistTutorialTests.test_plan_list_post_never_confirms_orders) ... ERROR
+test_progress_namespace_is_per_user_not_business_state (integration_tests.test_tutorial.NutritionistTutorialTests.test_progress_namespace_is_per_user_not_business_state) ... ERROR
+test_saved_plans_are_accessible_with_review_state (integration_tests.test_tutorial.NutritionistTutorialTests.test_saved_plans_are_accessible_with_review_state) ... ERROR
+test_supplier_keeps_separate_portal_and_cannot_use_internal_guide (integration_tests.test_tutorial.NutritionistTutorialTests.test_supplier_keeps_separate_portal_and_cannot_use_internal_guide) ... ERROR
+test_viewer_sees_read_links_but_not_write_entries (integration_tests.test_tutorial.NutritionistTutorialTests.test_viewer_sees_read_links_but_not_write_entries) ... ERROR
+
+======================================================================
+ERROR: test_every_rendered_step_link_is_authorized_and_connected (integration_tests.test_tutorial.NutritionistTutorialTests.test_every_rendered_step_link_is_authorized_and_connected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 103, in test_every_rendered_step_link_is_authorized_and_connected
+    for step in response.context['steps']:
+                ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/utils.py", line 84, in __getitem__
+    raise KeyError(key)
+KeyError: 'steps'
+
+======================================================================
+ERROR: test_independent_headcount_screen_preserves_save_reload (integration_tests.test_tutorial.NutritionistTutorialTests.test_independent_headcount_screen_preserves_save_reload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 37, in test_independent_headcount_screen_preserves_save_reload
+    url=reverse('procurement:workflow_headcounts')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_headcounts' not found. 'workflow_headcounts' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_legacy_post_still_saves_without_reimplementing_logic (integration_tests.test_tutorial.NutritionistTutorialTests.test_legacy_post_still_saves_without_reimplementing_logic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 45, in test_legacy_post_still_saves_without_reimplementing_logic
+    self.assertRedirects(r,reverse('procurement:workflow_headcounts'))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_headcounts' not found. 'workflow_headcounts' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_new_entries_are_linked_in_navigation_and_guide (integration_tests.test_tutorial.NutritionistTutorialTests.test_new_entries_are_linked_in_navigation_and_guide)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 56, in test_new_entries_are_linked_in_navigation_and_guide
+    self.assertContains(r,reverse(name))
+                          ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_headcounts' not found. 'workflow_headcounts' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_plan_list_post_never_confirms_orders (integration_tests.test_tutorial.NutritionistTutorialTests.test_plan_list_post_never_confirms_orders)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 98, in test_plan_list_post_never_confirms_orders
+    self.assertEqual(self.client.post(reverse('procurement:workflow_plans'),{}).status_code,405)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_plans' not found. 'workflow_plans' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_progress_namespace_is_per_user_not_business_state (integration_tests.test_tutorial.NutritionistTutorialTests.test_progress_namespace_is_per_user_not_business_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 85, in test_progress_namespace_is_per_user_not_business_state
+    first=self.client.get(reverse('procurement:workflow')).context['progress_key']
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/utils.py", line 84, in __getitem__
+    raise KeyError(key)
+KeyError: 'progress_key'
+
+======================================================================
+ERROR: test_saved_plans_are_accessible_with_review_state (integration_tests.test_tutorial.NutritionistTutorialTests.test_saved_plans_are_accessible_with_review_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 50, in test_saved_plans_are_accessible_with_review_state
+    r=self.client.get(reverse('procurement:workflow_plans'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_plans' not found. 'workflow_plans' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_supplier_keeps_separate_portal_and_cannot_use_internal_guide (integration_tests.test_tutorial.NutritionistTutorialTests.test_supplier_keeps_separate_portal_and_cannot_use_internal_guide)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 78, in test_supplier_keeps_separate_portal_and_cannot_use_internal_guide
+    self.assertEqual(self.client.get(reverse(name)).status_code,403)
+                                     ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'workflow_headcounts' not found. 'workflow_headcounts' is not a valid view function or pattern name.
+
+======================================================================
+ERROR: test_viewer_sees_read_links_but_not_write_entries (integration_tests.test_tutorial.NutritionistTutorialTests.test_viewer_sees_read_links_but_not_write_entries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 61, in test_viewer_sees_read_links_but_not_write_entries
+    urls={link['url'] for step in r.context['steps'] for link in step['links']}
+                                  ~~~~~~~~~^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/test/utils.py", line 84, in __getitem__
+    raise KeyError(key)
+KeyError: 'steps'
+
+======================================================================
+FAIL: test_cook_can_read_relevant_guide_without_forecast_or_procurement_buttons (integration_tests.test_tutorial.NutritionistTutorialTests.test_cook_can_read_relevant_guide_without_forecast_or_procurement_buttons)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 69, in test_cook_can_read_relevant_guide_without_forecast_or_procurement_buttons
+    r=self.client.get(reverse('procurement:workflow'));self.assertEqual(r.status_code,200)
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_native_details_and_faq_work_without_javascript (integration_tests.test_tutorial.NutritionistTutorialTests.test_native_details_and_faq_work_without_javascript)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 92, in test_native_details_and_faq_work_without_javascript
+    self.assertContains(r,'data-guide-step',count=6)
+AssertionError: 0 != 6 : Found 0 instances of 'data-guide-step' (expected 6) in the following response
+[isolated HTML response omitted to avoid storing temporary CSRF tokens]
+
+======================================================================
+FAIL: test_old_url_is_six_step_guide_without_headcount_form (integration_tests.test_tutorial.NutritionistTutorialTests.test_old_url_is_six_step_guide_without_headcount_form)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/integration_tests/test_tutorial.py", line 25, in test_old_url_is_six_step_guide_without_headcount_form
+    self.assertContains(r,'영양사 업무 가이드')
+AssertionError: False is not true : Couldn't find '영양사 업무 가이드' in the following response
+[isolated HTML response omitted to avoid storing temporary CSRF tokens]
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.598s
+
+FAILED (failures=3, errors=9)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

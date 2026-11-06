@@ -1,0 +1,12 @@
+{
+  "stage": "asset-snp-ui.css",
+  "steps": [
+    "public HTTPS login form renders without submitting credentials",
+    "green persists across signup/login/reload; approval-required copy verified",
+    "civic persists across signup/login/reload; approval-required copy verified",
+    "reference persists across signup/login/reload; approval-required copy verified",
+    "anonymous guide/headcount/plans/admin routes retain authentication redirects",
+    "anonymous CSRF cookie is Secure over Cloudflare HTTPS; values never recorded",
+    "public JS/CSS bytes match tested build with new cache version"
+  ]
+}

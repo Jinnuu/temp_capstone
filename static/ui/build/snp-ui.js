@@ -447,28 +447,128 @@ var e = Object.create, t = Object.defineProperty, n = Object.getOwnPropertyDescr
 		}
 		return n.enableDismissTrigger(s, "close"), r.defineJQueryPlugin(s), s;
 	}));
-})))(), 1), v = {
+})))(), 1), v = (e) => Number.isInteger(e) && e >= 1 && e <= 6;
+function y(e) {
+	if (!e || typeof e != "object" || Array.isArray(e) || !v(e.current)) return {
+		current: 1,
+		completed: []
+	};
+	let t = Array.isArray(e.completed) ? [...new Set(e.completed.filter(v))].sort((e, t) => e - t) : [];
+	return {
+		current: e.current,
+		completed: t
+	};
+}
+function b(e) {
+	let t = y(e);
+	return y({
+		...t,
+		completed: [...t.completed, t.current]
+	});
+}
+function x(e, t) {
+	let n = y(e);
+	return {
+		...n,
+		current: Math.max(1, Math.min(6, n.current + (t === -1 ? -1 : 1)))
+	};
+}
+function S(e) {
+	return Math.round(y(e).completed.length / 6 * 100);
+}
+function C(e) {
+	return /^\d+$/.test(e) ? `snp.guide.nutritionist.v1.${e}` : null;
+}
+// src/guide.ts
+function w() {
+	let e = document.querySelector("[data-guide]");
+	e && T(e);
+}
+function T(e) {
+	let t = document.documentElement.dataset.snpPreview === "true", n = C(e.dataset.progressKey?.split(".").pop() || ""), r = y(null), i = !0, a = e.querySelector("[data-guide-status]");
+	if (!t && n) try {
+		let e = localStorage.getItem(n);
+		e && (r = y(JSON.parse(e)));
+	} catch {
+		i = !1;
+	}
+	let o = Array.from(e.querySelectorAll("[data-guide-step]")), s = Array.from(e.querySelectorAll("[data-guide-go]"));
+	function c() {
+		if (!t && n) try {
+			localStorage.setItem(n, JSON.stringify(r));
+		} catch {
+			i = !1;
+		}
+	}
+	function l(n = !1) {
+		let c = r.current;
+		for (let e of o) {
+			let t = Number(e.dataset.guideStep) === c;
+			e.open = t, e.classList.toggle("is-current", t);
+		}
+		for (let e of s) {
+			let t = Number(e.dataset.guideGo);
+			e.toggleAttribute("data-read", r.completed.includes(t)), t === c ? e.setAttribute("aria-current", "step") : e.removeAttribute("aria-current");
+		}
+		let l = e.querySelector("[data-guide-progress]");
+		l && (l.value = r.completed.length);
+		let u = e.querySelector("[data-guide-progress-text]");
+		u && (u.textContent = `읽은 단계 ${r.completed.length} / 6 (${S(r)}%)`);
+		let d = e.querySelector("[data-guide-prev]");
+		d && (d.disabled = t || c === 1);
+		let f = e.querySelector("[data-guide-next]");
+		f && (f.disabled = t || c === 6);
+		let p = e.querySelector("[data-guide-read]");
+		p && (p.setAttribute("aria-pressed", String(r.completed.includes(c))), p.textContent = r.completed.includes(c) ? "이 단계 읽음 표시됨" : "이 단계 읽음 표시"), a && (a.textContent = i ? `${c}단계 안내입니다. 읽음 표시는 실제 업무를 저장하거나 확정하지 않습니다.` : "브라우저 저장을 사용할 수 없어 현재 화면에서만 진행합니다. 업무 메뉴는 정상 이용할 수 있습니다."), n && o[c - 1]?.querySelector("h2")?.focus();
+	}
+	function u(e) {
+		r = y({
+			...r,
+			current: e
+		}), c(), l(!0);
+	}
+	for (let e of s) e.addEventListener("click", () => u(Number(e.dataset.guideGo))), e.addEventListener("keydown", (e) => {
+		[
+			"ArrowLeft",
+			"ArrowRight",
+			"Home",
+			"End"
+		].includes(e.key) && (e.preventDefault(), u(e.key === "Home" ? 1 : e.key === "End" ? 6 : x(r, e.key === "ArrowLeft" ? -1 : 1).current), s[r.current - 1]?.focus());
+	});
+	for (let e of o) e.querySelector("summary")?.addEventListener("click", (t) => {
+		t.preventDefault();
+		let n = Number(e.dataset.guideStep);
+		n === r.current ? e.open = !e.open : u(n);
+	});
+	e.querySelector("[data-guide-prev]")?.addEventListener("click", () => u(x(r, -1).current)), e.querySelector("[data-guide-next]")?.addEventListener("click", () => u(x(r, 1).current)), e.querySelector("[data-guide-read]")?.addEventListener("click", () => {
+		r = b(r), c(), l();
+	}), e.querySelector("[data-guide-reset]")?.addEventListener("click", () => {
+		r = y(null), c(), l(!0);
+	}), l();
+}
+// src/brand.ts
+var E = {
 	status: "confirmed",
 	source: "사용자 확인: 영양사 프로그램 ZIP의 업무형 구조에 초록색 적용. 별도 포스터 없음.",
 	accent: "#286447",
 	accentText: "#24553d"
-}, y = [
+}, D = [
 	"reference",
 	"green",
 	"civic"
-], b = (e) => typeof e == "string" && y.includes(e), x = {
+], O = (e) => typeof e == "string" && D.includes(e), k = {
 	reference: "레퍼런스형",
 	green: "그린형",
 	civic: "공공기관형"
-}, S = document.documentElement, C = S.dataset.snpPreview === "true", w = b(S.dataset.snpMode) ? S.dataset.snpMode : "reference";
-S.dataset.greenStatus = v.status, v.status === "confirmed" && v.accent && v.accentText && (S.style.setProperty("--green-accent", v.accent), S.style.setProperty("--green-accent-text", v.accentText));
-function T(e, t) {
-	w = e, S.dataset.snpMode = e, document.querySelectorAll("[data-ui-mode]").forEach((t) => {
+}, A = document.documentElement, j = A.dataset.snpPreview === "true", M = O(A.dataset.snpMode) ? A.dataset.snpMode : "reference";
+A.dataset.greenStatus = E.status, E.status === "confirmed" && E.accent && E.accentText && (A.style.setProperty("--green-accent", E.accent), A.style.setProperty("--green-accent-text", E.accentText));
+function N(e, t) {
+	M = e, A.dataset.snpMode = e, document.querySelectorAll("[data-ui-mode]").forEach((t) => {
 		let n = t.dataset.uiMode === e;
 		t.setAttribute("aria-pressed", String(n));
 	});
-	let n = `${x[e]}로 전환했습니다. 입력 중인 내용은 유지됩니다.`;
-	if (t && !C) try {
+	let n = `${k[e]}로 전환했습니다. 입력 중인 내용은 유지됩니다.`;
+	if (t && !j) try {
 		localStorage.setItem("snp.ui.mode.v1", e);
 	} catch {
 		n += " 현재 브라우저에서는 선택을 저장할 수 없습니다.";
@@ -476,10 +576,10 @@ function T(e, t) {
 	let r = document.querySelector("#snp-mode-status");
 	r && (r.textContent = n);
 }
-T(w, !1), document.querySelectorAll("[data-ui-mode]").forEach((e) => {
+N(M, !1), document.querySelectorAll("[data-ui-mode]").forEach((e) => {
 	e.addEventListener("click", () => {
 		let t = e.dataset.uiMode;
-		b(t) && T(t, !0);
+		O(t) && N(t, !0);
 	}), e.addEventListener("keydown", (e) => {
 		if (![
 			"ArrowLeft",
@@ -488,59 +588,61 @@ T(w, !1), document.querySelectorAll("[data-ui-mode]").forEach((e) => {
 			"End"
 		].includes(e.key)) return;
 		e.preventDefault();
-		let t = y.indexOf(w), n = e.key === "Home" ? y[0] : e.key === "End" ? y[2] : y[(t + (e.key === "ArrowRight" ? 1 : 2)) % 3];
-		T(n, !0), document.querySelector(`[data-ui-mode="${n}"]`)?.focus();
+		let t = D.indexOf(M), n = e.key === "Home" ? D[0] : e.key === "End" ? D[2] : D[(t + (e.key === "ArrowRight" ? 1 : 2)) % 3];
+		N(n, !0), document.querySelector(`[data-ui-mode="${n}"]`)?.focus();
 	});
 }), window.addEventListener("storage", (e) => {
-	!C && e.key === "snp.ui.mode.v1" && b(e.newValue) && T(e.newValue, !1);
+	!j && e.key === "snp.ui.mode.v1" && O(e.newValue) && N(e.newValue, !1);
 });
-var E = document.querySelector("#snp-nav-toggle"), D = document.querySelector("#snp-navigation");
-function O() {
-	S.dataset.mobileNav = "false", E?.setAttribute("aria-expanded", "false");
+var P = document.querySelector("#snp-nav-toggle"), F = document.querySelector("#snp-navigation");
+function I() {
+	A.dataset.mobileNav = "false", P?.setAttribute("aria-expanded", "false");
 }
-E?.addEventListener("click", () => {
-	let e = S.dataset.mobileNav !== "true";
-	S.dataset.mobileNav = String(e), E.setAttribute("aria-expanded", String(e));
+P?.addEventListener("click", () => {
+	let e = A.dataset.mobileNav !== "true";
+	A.dataset.mobileNav = String(e), P.setAttribute("aria-expanded", String(e));
 }), document.addEventListener("keydown", (e) => {
-	e.key === "Escape" && S.dataset.mobileNav === "true" && (O(), E?.focus());
-}), D?.addEventListener("click", (e) => {
-	e.target.closest("a") && O();
+	e.key === "Escape" && A.dataset.mobileNav === "true" && (I(), P?.focus());
+}), F?.addEventListener("click", (e) => {
+	e.target.closest("a") && I();
 });
-var k = window.location.pathname;
+var L = window.location.pathname;
 document.querySelectorAll(".snp-navigation a").forEach((e) => {
-	new URL(e.href).pathname === k && (e.setAttribute("aria-current", "page"), e.closest("details")?.setAttribute("open", ""));
+	new URL(e.href).pathname === L && (e.setAttribute("aria-current", "page"), e.closest("details")?.setAttribute("open", ""));
 });
-var A = document.querySelectorAll(".snp-nav details");
-document.querySelector(".snp-nav details[open]") || A[0]?.setAttribute("open", ""), A.forEach((e) => {
+var R = document.querySelectorAll(".snp-nav details");
+document.querySelector(".snp-nav details[open]") || R[0]?.setAttribute("open", ""), R.forEach((e) => {
 	e.addEventListener("pointerenter", () => {
-		w === "reference" && window.innerWidth > 960 && (e.open = !0);
+		M === "reference" && window.innerWidth > 960 && (e.open = !0);
 	}), e.addEventListener("pointerleave", () => {
-		w === "reference" && window.innerWidth > 960 && !e.contains(document.activeElement) && (e.open = !1);
+		M === "reference" && window.innerWidth > 960 && !e.contains(document.activeElement) && (e.open = !1);
 	});
 });
-var j = document.querySelector("#snp-workspace"), M = j?.querySelector("h1"), N = document.querySelector("#snp-current-page");
-N && (N.textContent = M?.textContent?.trim() || document.title.split("|")[0].trim()), j && (j.querySelectorAll("table").forEach((e, t) => {
+var z = document.querySelector("#snp-workspace"), B = z?.querySelector("h1"), V = document.querySelector("#snp-current-page");
+V && (V.textContent = B?.textContent?.trim() || document.title.split("|")[0].trim()), z && (z.querySelectorAll("table").forEach((e, t) => {
 	if (e.parentElement?.closest("table") || e.parentElement?.classList.contains("snp-table-frame")) return;
 	let n = document.createElement("div");
-	n.className = "snp-table-frame", n.tabIndex = 0, n.setAttribute("role", "region"), n.setAttribute("aria-label", `${M?.textContent?.trim() || "업무"} 표 ${t + 1} 가로 스크롤`), e.before(n), n.append(e);
-}), j.querySelectorAll(".errorlist").forEach((e) => e.setAttribute("role", "alert")), C && (j.querySelectorAll("input,select,textarea,button").forEach((e) => e.disabled = !0), j.addEventListener("submit", (e) => e.preventDefault(), !0), document.addEventListener("click", (e) => {
+	n.className = "snp-table-frame", n.tabIndex = 0, n.setAttribute("role", "region"), n.setAttribute("aria-label", `${B?.textContent?.trim() || "업무"} 표 ${t + 1} 가로 스크롤`), e.before(n), n.append(e);
+}), z.querySelectorAll(".errorlist").forEach((e) => e.setAttribute("role", "alert")), j && (z.querySelectorAll("input,select,textarea,button").forEach((e) => e.disabled = !0), z.addEventListener("submit", (e) => e.preventDefault(), !0), document.addEventListener("click", (e) => {
 	e.target.closest("a") && e.preventDefault();
 }, !0))), document.querySelectorAll(".alert[data-dismissible],.alert-dismissible").forEach((e) => _.default.getOrCreateInstance(e));
-var P = document.querySelector("#snp-compare-page");
-P?.addEventListener("change", () => {
+var H = document.querySelector("#snp-compare-page");
+H?.addEventListener("change", () => {
 	[
 		"/",
 		"/procurement/workflow/",
+		"/procurement/workflow/headcounts/",
 		"/inventory/ingredients/",
 		"/meals/mealplan/weekly/",
 		"/procurement/workflow/ledger/",
 		"/meals/cooking/"
-	].includes(P.value) && document.querySelectorAll("[data-snp-preview-mode]").forEach((e) => e.src = P.value + "?snp_preview=1");
+	].includes(H.value) && document.querySelectorAll("[data-snp-preview-mode]").forEach((e) => e.src = H.value + "?snp_preview=1");
 });
-var F = document.querySelector(".fresh-supplier-fields"), I = document.querySelectorAll("input[name=signup_type]");
-if (F && I.length) {
+var U = document.querySelector(".fresh-supplier-fields"), W = document.querySelectorAll("input[name=signup_type]");
+if (U && W.length) {
 	let e = () => {
-		F.open = Array.from(I).some((e) => e.checked && e.value === "SUPPLIER");
+		U.open = Array.from(W).some((e) => e.checked && e.value === "SUPPLIER");
 	};
-	I.forEach((t) => t.addEventListener("change", e)), e();
+	W.forEach((t) => t.addEventListener("change", e)), e();
 }
+w();

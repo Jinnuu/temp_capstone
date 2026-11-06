@@ -22,6 +22,10 @@ def approval_mode():
     return mode
 
 
+def public_signup_requires_approval():
+    return approval_mode() != 'auto' or getattr(settings, 'ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL', False)
+
+
 def account_can_login(user):
     return bool(user and user.is_active and (not user.rbac_managed or user.account_state=='ACTIVE'))
 
@@ -55,7 +59,8 @@ def can(user,cap):return cap in capabilities(user)
 
 # Endpoint-specific exceptions keep headcount confirmation separate from purchasing.
 SPECIAL={
- 'procurement:workflow':('procurement.read','forecast.write'),
+ 'procurement:workflow':('dashboard.read','forecast.write'),
+ 'procurement:workflow_headcounts':('forecast.read','forecast.write'),
  'procurement:workflow_inspections':('inspection.read','inspection.write'),
  'procurement:workflow_inspection':('inspection.read','inspection.write'),
  'procurement:workflow_transaction':('inventory.read','inventory.write'),

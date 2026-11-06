@@ -1,0 +1,1 @@
+{"passed": true, "restored_accounts": 9, "same_pk_credentials_roles_and_flags": true, "seed_did_not_recreate_old_username": true, "rename_rollback_verified": true, "schema_migration_applied_without_account_drift": true, "real_preview_writes": false}

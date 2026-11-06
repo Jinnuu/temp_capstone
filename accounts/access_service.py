@@ -6,7 +6,7 @@ from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from contextlib import contextmanager
 from .models import User,AccessAudit,AccessPolicy
-from .rbac import PREFIX,ROLE_LABELS,roles,can,account_can_login,approval_mode,is_main,is_admin_identity
+from .rbac import PREFIX,ROLE_LABELS,roles,can,account_can_login,approval_mode,is_main,is_admin_identity,public_signup_requires_approval
 
 
 class AccessRejected(ValidationError):pass
@@ -76,7 +76,7 @@ def set_roles(user,names):
 def register(user, signup_type="DIETITIAN"):
     with transaction.atomic():
         user.rbac_managed=True
-        automatic = approval_mode() == 'auto' and not getattr(settings, 'ACCOUNT_PUBLIC_SIGNUP_REQUIRES_APPROVAL', False)
+        automatic = not public_signup_requires_approval()
         user.account_state='ACTIVE' if automatic else 'PENDING'
         user.is_active=user.account_state=='ACTIVE'
         user.save();set_roles(user,{signup_type})

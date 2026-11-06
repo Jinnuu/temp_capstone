@@ -11,3 +11,6 @@ docs/reference
 
 # Read-only third-party reference, not a runtime asset.
 DOREMI.png
+
+# User-local credential helper is not an image input.
+change_password.sh

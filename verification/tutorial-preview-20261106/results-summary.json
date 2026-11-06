@@ -1,0 +1,42 @@
+{
+  "base_commit": "3236e07f2bf218993ab1f686d3034260b760efb4",
+  "branch": "feature/ui-redesign-three-modes",
+  "django_unique": 325,
+  "django_new": 16,
+  "sqlite": {
+    "pass": 321,
+    "skip": 4,
+    "fail": 0,
+    "error": 0
+  },
+  "mariadb": {
+    "pass": 325,
+    "skip": 0,
+    "fail": 0,
+    "error": 0
+  },
+  "javascript": {
+    "pass": 17,
+    "new": 7,
+    "fail": 0
+  },
+  "browser_checkpoints": {
+    "business": 21,
+    "portal": 13,
+    "guide": 15,
+    "public_readonly": 7
+  },
+  "actual_admin": {
+    "pk": 1,
+    "username": "admin",
+    "password_changed": false
+  },
+  "actual_accounts": 9,
+  "public_signup_requires_approval": true,
+  "actual_deployment": true,
+  "schema_migrations_added": 0,
+  "real_user_login_attempted": false,
+  "real_signup_or_business_mutations_attempted": false,
+  "only_authorized_username_and_audit_writes": true,
+  "remote_push": false
+}
