@@ -175,3 +175,54 @@ class SupplierFulfillment(models.Model):
 class SupplierDeliveryLine(models.Model):
     order_item = models.OneToOneField(OrderItem, on_delete=models.PROTECT, related_name='delivery_plan')
     planned_quantity = models.DecimalField(max_digits=18, decimal_places=6)
+
+
+class DeliveryBatch(models.Model):
+    """Supplier-declared delivery round. Existing GoodsInspection stays intact."""
+    order = models.ForeignKey(PurchaseOrder, on_delete=models.PROTECT, related_name='delivery_batches')
+    sequence = models.PositiveIntegerField()
+    request_key = models.UUIDField(unique=True)
+    expected_date = models.DateField()
+    contact = models.CharField(max_length=100)
+    notes = models.CharField(max_length=1000, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['order', 'sequence'], name='unique_delivery_round')]
+        ordering = ['sequence']
+
+
+class DeliveryBatchLine(models.Model):
+    batch = models.ForeignKey(DeliveryBatch, on_delete=models.PROTECT, related_name='lines')
+    order_item = models.ForeignKey(OrderItem, on_delete=models.PROTECT, related_name='batch_lines')
+    planned_quantity = models.DecimalField(max_digits=18, decimal_places=6)
+    base_unit = models.CharField(max_length=20)
+    specification = models.CharField(max_length=200)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['batch', 'order_item'], name='unique_batch_item'),
+            models.CheckConstraint(condition=models.Q(planned_quantity__gt=0), name='positive_batch_quantity'),
+        ]
+
+
+class DeliveryReceipt(models.Model):
+    """Append-only buyer inspection. Original incoming log is never overwritten."""
+    line = models.OneToOneField(DeliveryBatchLine, on_delete=models.PROTECT, related_name='receipt')
+    actual_date = models.DateField()
+    delivered_quantity = models.DecimalField(max_digits=18, decimal_places=6)
+    accepted_quantity = models.DecimalField(max_digits=18, decimal_places=6)
+    specification = models.CharField(max_length=200)
+    notes = models.CharField(max_length=1000, blank=True)
+    expiration_date = models.DateField(null=True, blank=True)
+    inspected_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    inspected_at = models.DateTimeField(auto_now_add=True)
+    inventory_log = models.OneToOneField('inventory.InventoryLog', null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(condition=models.Q(delivered_quantity__gte=0), name='receipt_delivered_nonnegative'),
+            models.CheckConstraint(condition=models.Q(accepted_quantity__gte=0), name='receipt_accepted_nonnegative'),
+            models.CheckConstraint(condition=models.Q(accepted_quantity__lte=models.F('delivered_quantity')), name='receipt_accepted_within_delivery'),
+        ]

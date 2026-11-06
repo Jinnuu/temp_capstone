@@ -223,7 +223,11 @@ def inspect_item(item_id,actor,delivered,accepted,condition,specification,notes=
     from accounts.rbac import can
     if getattr(actor,'role',None)=='SUPPLIER' and not can(actor,'inspection.write'):
         raise ValidationError('공급업체 계정은 검수 합격량을 확정할 수 없습니다.')
+    order_id=OrderItem.objects.values_list('purchase_order_id',flat=True).get(pk=item_id)
+    PurchaseOrder.objects.select_for_update().get(pk=order_id)
     item=OrderItem.objects.select_for_update().select_related('purchase_order','ingredient').get(pk=item_id)
+    if item.batch_lines.exists():
+        raise ValidationError('납품 회차가 등록된 품목은 회차별 검수 화면에서 처리하세요.')
     # Matching duplicate submissions are idempotent; differing edits require a correction workflow.
     delivered=quantity(delivered,'납품량');accepted=quantity(accepted,'합격량')
     if max(delivered.as_tuple().exponent * -1,accepted.as_tuple().exponent * -1)>6:

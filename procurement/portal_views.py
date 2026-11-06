@@ -66,10 +66,13 @@ def portal_detail(request,pk):
             messages.error(request,'입력값을 확인하세요.' if isinstance(exc,ValueError) else ' '.join(exc.messages))
             status=409 if getattr(exc,'code','')=='conflict' else 400
             order=get_object_or_404(own_orders(request),pk=pk)
+    from .deliveries import progress
+    for item in order.items.all():
+        item.delivery_progress=progress(item)
     current=getattr(order,'fulfillment',None)
     state=current.state if current else 'NEW'
     allowed_states=sorted(TRANSITIONS[state]|({state} if state not in ('DISPATCHED','REJECTED') else set()))
-    if order.status not in ('대기','승인') or order.needs_review or order.items.filter(inspection__isnull=False).exists():allowed_states=[]
+    if order.status not in ('대기','승인') or order.needs_review or order.delivery_batches.exists() or order.items.filter(inspection__isnull=False).exists():allowed_states=[]
     if request.GET.get('format')=='json' and request.method=='GET':
         return JsonResponse({'id':order.pk,'state':None if current is None and order.status in ('완료','배송완료') else state,'buyer_status':order.status,'revision':current.revision if current else 0,'items':[{'id':i.pk,'name':i.ingredient.name,'quantity':str(i.purchase_quantity),'unit':i.purchase_unit,'base_quantity':str(i.required_qty),'base_unit':i.ingredient.unit} for i in order.items.all()]})
     return render(request,'portal/detail.html',{'order':order,'fulfillment':current,'allowed_states':[(value,label) for value,label in SupplierFulfillment._meta.get_field('state').choices if value in allowed_states],'today':timezone.localdate()},status=status)

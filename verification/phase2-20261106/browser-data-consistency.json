@@ -1,0 +1,16 @@
+{
+  "order_status": "완료",
+  "progress": {
+    "accepted": "100.000000",
+    "delivered": "105.000000",
+    "rejected": "5.000000",
+    "remaining": "0",
+    "reserved": "0",
+    "available": "0"
+  },
+  "stock": "100.000000",
+  "incoming_log_count": 3,
+  "lot_remaining": "100.000000",
+  "legacy_inspection_count": 0,
+  "receipt_count": 3
+}

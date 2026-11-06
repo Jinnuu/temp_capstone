@@ -1,0 +1,25 @@
+{
+  "new_delivery_tables_present": false,
+  "counts": {
+    "accounts_user": 9,
+    "procurement_purchaseorder": 2,
+    "procurement_orderitem": 2,
+    "procurement_goodsinspection": 2,
+    "inventory_inventorylog": 6
+  },
+  "columns": {
+    "procurement_goodsinspection": [
+      "id",
+      "inspected_at",
+      "delivered_qty",
+      "accepted_qty",
+      "condition",
+      "specification",
+      "notes",
+      "expiration_date",
+      "inspected_by_id",
+      "inventory_log_id",
+      "order_item_id"
+    ]
+  }
+}

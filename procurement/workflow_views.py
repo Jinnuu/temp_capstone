@@ -20,7 +20,7 @@ from inventory.models import Ingredient, IngredientCategory, InventoryLog, Suppl
 from meals.models import DietPlan, Menu, Recipe
 from accounts.supplier_identity import eligible_order_accounts
 from accounts.access_service import protect_supplier_target, supplier_account_change
-from .models import ProcurementPlan, GoodsInspection, PurchaseOrder, OrderItem
+from .models import ProcurementPlan, GoodsInspection, PurchaseOrder, OrderItem, DeliveryReceipt
 from .workflow import (build_preview, create_plan, confirm_orders, inspect_item, record_inventory,
                        save_headcount, invalidate_plans, current_stock)
 from .workflow_forms import (HeadcountForm, PreviewForm, SpecificationForm, SupplierForm,
@@ -126,12 +126,18 @@ def inspections(request):
     supplier=request.GET.get('supplier','')
     if supplier:
         orders=orders.filter(supplier_id=int(supplier)) if supplier.isdigit() else orders.none()
+    from .deliveries import progress
+    for order in orders:
+        for item in order.items.all():
+            item.delivery_progress=progress(item)
     return render(request,'workflow/inspections.html',{'orders':orders,'target_date':target,'suppliers':get_user_model().objects.filter(purchase_orders__isnull=False).distinct().order_by('name')})
 
 
 @login_required
 def inspection(request,pk):
     item=get_object_or_404(OrderItem.objects.select_related('ingredient','purchase_order__supplier'),pk=pk)
+    if item.batch_lines.exists():
+        return redirect('procurement:delivery_order',pk=item.purchase_order_id)
     existing=GoodsInspection.objects.filter(order_item=item).first()
     initial={'delivered':item.required_qty,'accepted':item.required_qty,'specification':item.spec_snapshot or item.ingredient.spec or ''}
     if existing:
@@ -278,7 +284,7 @@ def settlement(request):
     except ValueError:
         messages.error(request,'올바른 연월을 선택하세요.');start=timezone.localdate().replace(day=1);end=date(start.year,start.month,calendar.monthrange(start.year,start.month)[1])
     rows=[]
-    suppliers=get_user_model().objects.filter(Q(purchase_orders__items__target_date__range=(start,end))|Q(purchase_orders__items__inspection__inspected_at__date__range=(start,end))).distinct().order_by('name')
+    suppliers=get_user_model().objects.filter(Q(purchase_orders__items__target_date__range=(start,end))|Q(purchase_orders__items__inspection__inspected_at__date__range=(start,end))|Q(purchase_orders__delivery_batches__lines__receipt__inspected_at__date__range=(start,end))).distinct().order_by('name')
     selected=request.GET.get('supplier')
     if selected and selected.isdigit():suppliers=suppliers.filter(pk=int(selected))
     for supplier in suppliers:
@@ -286,5 +292,9 @@ def settlement(request):
         inspections=GoodsInspection.objects.filter(order_item__purchase_order__supplier=supplier,inspected_at__date__range=(start,end)).select_related('order_item')
         ordered=sum((recorded_amount(item) for item in items), Decimal('0'))
         inspected_value=sum((accepted_amount(x.order_item, x.accepted_qty) for x in inspections if x.order_item.required_qty),Decimal('0'))
-        rows.append({'supplier':supplier,'ordered_amount':ordered,'inspected_amount':inspected_value,'uninspected':items.filter(inspection__isnull=True).count()})
+        receipts=DeliveryReceipt.objects.filter(line__batch__order__supplier=supplier,inspected_at__date__range=(start,end)).select_related('line__order_item')
+        inspected_value+=sum((accepted_amount(x.line.order_item,x.accepted_quantity) for x in receipts),Decimal('0'))
+        from .deliveries import progress
+        incomplete=sum(1 for item in items if progress(item)['remaining']>0)
+        rows.append({'supplier':supplier,'ordered_amount':ordered,'inspected_amount':inspected_value,'uninspected':incomplete})
     return render(request,'workflow/settlement.html',{'rows':rows,'start':start,'end':end,'suppliers':eligible_order_accounts().filter(role='SUPPLIER').order_by('name')})

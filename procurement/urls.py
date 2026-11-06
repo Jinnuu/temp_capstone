@@ -63,3 +63,9 @@ urlpatterns += [
  path('portal/orders/<int:pk>/export/',portal_views.portal_export,name='portal_export'),
  path('supplier-memberships/',portal_views.membership_reviews,name='membership_reviews'),
 ]
+
+from . import delivery_views
+urlpatterns += [
+    path('orders/<int:pk>/deliveries/', delivery_views.buyer_order, name='delivery_order'),
+    path('portal/orders/<int:pk>/deliveries/', delivery_views.supplier_order, name='portal_deliveries'),
+]

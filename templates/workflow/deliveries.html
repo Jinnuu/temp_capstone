@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% block content %}
+<h1>회차별 납품·검수 · 발주 #{{ order.pk }}</h1>
+<p>{{ order.supplier.name }} · 구매자 상태: <strong>{{ order.status }}</strong></p>
+<p>모든 납품·검수 수량은 식재료 재고 기준 단위입니다. 포장 수량과 구분하세요. 합격량만 입고되며, 불합격량은 미납 잔량에 남습니다.</p>
+<p>초과 납품·기존 단건 검수 재개·검수 정정·사후 반품은 별도 처리 정책 확인이 필요합니다. 이 화면에서는 기존 기록을 덮어쓰거나 재고를 자동 역차감하지 않습니다.</p>
+<div class="table-responsive"><table class="table"><thead><tr><th>품목</th><th>발주 포장량</th><th>발주 기준량</th><th>누적 실납</th><th>합격</th><th>불합격</th><th>미납 잔량</th><th>미검수 예정량</th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.ingredient.name }}</td><td>{{ item.purchase_quantity }} {{ item.purchase_unit }} ({{ item.purchase_spec }})</td><td>{{ item.required_qty }} {{ item.ingredient.unit }}</td><td>{{ item.delivery_progress.delivered }}</td><td>{{ item.delivery_progress.accepted }}</td><td>{{ item.delivery_progress.rejected }}</td><td>{{ item.delivery_progress.remaining }}</td><td>{{ item.delivery_progress.reserved }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% if supplier_view and order.status != '완료' and order.status != '배송완료' %}
+<section class="fresh-panel"><h2>새 납품 회차 등록</h2><p>발주를 수락한 뒤 등록할 수 있습니다. 납품하지 않는 품목은 빈칸으로 두세요. 등록한 회차의 정정·취소는 아직 지원하지 않습니다.</p><form method="post">{% csrf_token %}<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>납품 예정일 <input type="date" name="expected_date" min="{{ today|date:'Y-m-d' }}" required></label><label>납품 담당자 <input name="contact" maxlength="100" required></label>
+{% for item in items %}<label>{{ item.ingredient.name }} ({{ item.ingredient.unit }}, 추가 예정 가능 {{ item.delivery_progress.available }}) <input name="q_{{ item.pk }}" type="number" min="0.000001" max="{{ item.delivery_progress.available }}" step="0.000001"></label>{% endfor %}
+<label>비고 <textarea name="notes" maxlength="1000"></textarea></label><button type="submit">회차 등록</button></form></section>{% endif %}
+{% for batch in batches %}<section class="fresh-panel"><h2>{{ batch.sequence }}회차 · 예정 {{ batch.expected_date|date:'Y-m-d' }}</h2><p>납품 담당: {{ batch.contact }} · 등록 {{ batch.created_at|date:'Y-m-d H:i' }} · {{ batch.notes }}</p>
+{% for line in batch.lines.all %}<h3>{{ line.order_item.ingredient.name }} · 예정 {{ line.planned_quantity }} {{ line.base_unit }}</h3>
+{% if line.receipt %}<p><strong>검수 완료</strong> · 실제 납품일 {{ line.receipt.actual_date|date:'Y-m-d' }} · 실납 {{ line.receipt.delivered_quantity }} · 합격 {{ line.receipt.accepted_quantity }} {{ line.base_unit }} · 규격 {{ line.receipt.specification }} · {{ line.receipt.notes }}</p>
+{% elif not supplier_view and can_inspect %}<form method="post">{% csrf_token %}<input name="line" type="hidden" value="{{ line.pk }}">
+<label>실제 납품일 <input type="date" name="actual_date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></label>
+<label>실제 납품량 ({{ line.base_unit }}) <input type="number" name="delivered" min="0" max="{{ line.planned_quantity }}" step="0.000001" required></label>
+<label>합격량 ({{ line.base_unit }}) <input type="number" name="accepted" min="0" max="{{ line.planned_quantity }}" step="0.000001" required></label>
+<label>실제 규격 <input name="specification" value="{{ line.specification }}" maxlength="200" required></label>
+<label>유통기한 <input type="date" name="expiration"></label><label>수량 차이·불합격 사유/비고 <textarea name="notes" maxlength="1000"></textarea></label><button type="submit">검수 확정 · 합격량 입고</button></form>
+{% else %}<p><strong>구매자 검수 대기</strong></p>{% endif %}{% endfor %}</section>{% empty %}<p>아직 등록한 납품 회차가 없습니다. 기존 단건 검수 이력은 기존 검수 메뉴에서 확인하세요.</p>{% endfor %}
+{% endblock %}

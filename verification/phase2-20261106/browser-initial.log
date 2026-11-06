@@ -1,0 +1,10 @@
+locator.getAttribute: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('main a[href^="/procurement/portal/orders/"]').filter({ hasText: '상세' }).first()[22m
+
+    at /home/woohyeak/sprint7-integration/verification/phase2-20261106/browser-deliveries.cjs:18:115 {
+  log: [
+    `  - waiting for locator('main a[href^="/procurement/portal/orders/"]').filter({ hasText: '상세' }).first()`
+  ],
+  name: 'TimeoutError'
+}

@@ -1,0 +1,102 @@
+Found 31 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Operations to perform:
+  Synchronize unmigrated apps: humanize, messages, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, forecasting, inventory, meals, procurement, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_accesspolicy_user_access_revision_user_account_state_and_more... OK
+  Applying accounts.0003_initialize_access_roles... OK
+  Applying accounts.0004_adminrolerequest_announcement... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying inventory.0001_initial... OK
+  Applying meals.0001_initial... OK
+  Applying forecasting.0001_initial... OK
+  Applying forecasting.0002_attendanceprediction... OK
+  Applying inventory.0002_ingredient_category_ingredient_total_amount_and_more... OK
+  Applying inventory.0003_ingredient_spec... OK
+  Applying inventory.0004_ingredient_current_stock_inventorylog_description_and_more... OK
+  Applying inventory.0005_remove_ingredient_current_stock... OK
+  Applying inventory.0006_ingredient_description... OK
+  Applying inventory.0007_alter_inventorylog_transaction_date... OK
+  Applying inventory.0008_ingredientcategory_supplyspecification... OK
+  Applying inventory.0009_alter_inventorylog_quantity... OK
+  Applying inventory.0010_stocklot_stockallocation... OK
+  Applying inventory.0011_supplyspecification_order_increment... OK
+  Applying meals.0002_menu_category_alter_dietplan_meal_type_and_more... OK
+  Applying meals.0003_dietplan_headcount_dietplan_is_served... OK
+  Applying meals.0004_dietplan_final_headcount_and_more... OK
+  Applying meals.0005_cookinginstruction... OK
+  Applying meals.0006_cookinginstruction_line_notes... OK
+  Applying procurement.0001_initial... OK
+  Applying procurement.0002_alter_purchaseorder_status... OK
+  Applying procurement.0003_remove_orderitem_unique_order_ingredient_and_more... OK
+  Applying procurement.0004_remove_orderitem_unique_order_ingredient_date_and_more... OK
+  Applying procurement.0005_alter_purchaseorder_status... OK
+  Applying procurement.0006_orderitem_order_unit_orderitem_package_quantity_and_more... OK
+  Applying procurement.0007_alter_goodsinspection_accepted_qty_and_more... OK
+  Applying procurement.0008_procurementplanline_order_increment_and_more... OK
+  Applying procurement.0005_supplier... OK
+  Applying procurement.0009_merge_supplier_workflow... OK
+  Applying procurement.0010_supplierdeliveryline_supplierfulfillment_and_more... OK
+  Applying procurement.0011_initialize_portal_roles... OK
+  Applying procurement.0012_suppliermembership_registered_via_portal... OK
+  Applying procurement.0013_repeated_deliveries... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_100kg_60_then40_then5_rejected_redelivery (integration_tests.test_deliveries.RepeatedDeliveries.test_100kg_60_then40_then5_rejected_redelivery) ... ok
+test_acceptance_above_delivered_or_planned_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_acceptance_above_delivered_or_planned_rejected) ... ok
+test_closed_order_duplicate_receipt_still_idempotent (integration_tests.test_deliveries.RepeatedDeliveries.test_closed_order_duplicate_receipt_still_idempotent) ... ok
+test_csrf_required (integration_tests.test_deliveries.RepeatedDeliveries.test_csrf_required) ... ok
+test_difference_requires_reason (integration_tests.test_deliveries.RepeatedDeliveries.test_difference_requires_reason) ... ok
+test_expired_goods_not_accepted (integration_tests.test_deliveries.RepeatedDeliveries.test_expired_goods_not_accepted) ... ok
+test_foreign_item_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_foreign_item_rejected) ... ok
+test_foreign_supplier_web_idor (integration_tests.test_deliveries.RepeatedDeliveries.test_foreign_supplier_web_idor) ... ok
+test_future_actual_date_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_future_actual_date_rejected) ... ok
+test_inspection_different_resubmit_preserves_original (integration_tests.test_deliveries.RepeatedDeliveries.test_inspection_different_resubmit_preserves_original) ... ok
+test_inspection_idempotent_no_duplicate_incoming (integration_tests.test_deliveries.RepeatedDeliveries.test_inspection_idempotent_no_duplicate_incoming) ... ok
+test_invalid_dates_and_contact_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_invalid_dates_and_contact_rejected) ... ok
+test_invalid_quantities_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_invalid_quantities_rejected) ... ok
+test_key_conflicting_payload_rejected (integration_tests.test_deliveries.RepeatedDeliveries.test_key_conflicting_payload_rejected) ... ok
+test_legacy_data_not_reopened_or_recredited (integration_tests.test_deliveries.RepeatedDeliveries.test_legacy_data_not_reopened_or_recredited) ... ok
+test_legacy_inspection_after_schedule_blocked (integration_tests.test_deliveries.RepeatedDeliveries.test_legacy_inspection_after_schedule_blocked) ... ok
+test_nonaccepted_order_cannot_schedule (integration_tests.test_deliveries.RepeatedDeliveries.test_nonaccepted_order_cannot_schedule) ... ok
+test_old_inspection_url_redirects_to_rounds (integration_tests.test_deliveries.RepeatedDeliveries.test_old_inspection_url_redirects_to_rounds) ... ok
+test_other_supplier_service_idor (integration_tests.test_deliveries.RepeatedDeliveries.test_other_supplier_service_idor) ... ok
+test_rejected_quantity_available_for_new_delivery (integration_tests.test_deliveries.RepeatedDeliveries.test_rejected_quantity_available_for_new_delivery) ... ok
+test_reservation_prevents_overcommit (integration_tests.test_deliveries.RepeatedDeliveries.test_reservation_prevents_overcommit) ... ok
+test_review_flag_blocks_receipt (integration_tests.test_deliveries.RepeatedDeliveries.test_review_flag_blocks_receipt) ... ok
+test_schedule_idempotent_no_duplicate_round (integration_tests.test_deliveries.RepeatedDeliveries.test_schedule_idempotent_no_duplicate_round) ... ok
+test_settlement_includes_split_receipts_once (integration_tests.test_deliveries.RepeatedDeliveries.test_settlement_includes_split_receipts_once) ... ok
+test_supplier_buyer_page_and_inspection_post_denied (integration_tests.test_deliveries.RepeatedDeliveries.test_supplier_buyer_page_and_inspection_post_denied) ... ok
+test_supplier_cannot_inspect_even_with_sub_admin (integration_tests.test_deliveries.RepeatedDeliveries.test_supplier_cannot_inspect_even_with_sub_admin) ... ok
+test_unit_change_blocks_receipt (integration_tests.test_deliveries.RepeatedDeliveries.test_unit_change_blocks_receipt) ... ok
+test_unverified_supplier_cannot_schedule (integration_tests.test_deliveries.RepeatedDeliveries.test_unverified_supplier_cannot_schedule) ... ok
+test_viewer_read_only (integration_tests.test_deliveries.RepeatedDeliveries.test_viewer_read_only) ... ok
+test_web_supplier_create_buyer_inspect_and_reread (integration_tests.test_deliveries.RepeatedDeliveries.test_web_supplier_create_buyer_inspect_and_reread) ... ok
+test_zero_delivered_releases_reservation_without_stock (integration_tests.test_deliveries.RepeatedDeliveries.test_zero_delivered_releases_reservation_without_stock) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.914s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

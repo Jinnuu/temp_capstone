@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "steps": [
+    "supplier registers 60kg and rereads pending inspection",
+    "buyer inspects 55/60kg and rereads immutable receipt",
+    "supplier registers 40kg and rereads pending inspection",
+    "buyer inspects 40/40kg and rereads immutable receipt",
+    "supplier registers 5kg and rereads pending inspection",
+    "buyer inspects 5/5kg and rereads immutable receipt",
+    "20 explicit 5kg packages; delivered105 accepted100 rejected5 remaining0 completed",
+    "all three modes persist; desktop supplier/buyer and mobile buyer screenshots",
+    "cross-company IDOR404; supplier buyer-inspection403",
+    "weekly ledger includes synthetic ingredient"
+  ],
+  "pageErrors": [],
+  "serverErrors": [],
+  "scope": "new task-only MariaDB; synthetic users and orders"
+}

@@ -59,6 +59,7 @@ def can(user,cap):return cap in capabilities(user)
 
 # Endpoint-specific exceptions keep headcount confirmation separate from purchasing.
 SPECIAL={
+ 'procurement:delivery_order':('inspection.read','inspection.write'),
  'procurement:workflow':('dashboard.read','forecast.write'),
  'procurement:workflow_headcounts':('forecast.read','forecast.write'),
  'procurement:workflow_inspections':('inspection.read','inspection.write'),

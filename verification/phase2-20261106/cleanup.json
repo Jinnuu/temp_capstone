@@ -1,0 +1,10 @@
+{
+  "task": "phase2-20261106",
+  "removed_containers": [
+    "/snp-phase2-browser-20261106",
+    "/snp-phase2-cache-20261106",
+    "/snp-phase2-db-20261106"
+  ],
+  "removed_network": "snp-phase2-tests-20261106",
+  "database_storage": "task tmpfs only; no existing volumes removed"
+}

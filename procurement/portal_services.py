@@ -86,6 +86,8 @@ def update_fulfillment(actor, order_id, *, state, revision, delivery_date=None, 
             row=SupplierFulfillment.objects.select_for_update().filter(order=order).first()
             current=row.state if row else 'NEW';current_revision=row.revision if row else 0
             if revision!=current_revision:raise AccessRejected('다른 요청이 먼저 저장됐습니다. 새로고침하세요.',code='conflict')
+            if order.delivery_batches.exists():
+                raise AccessRejected('납품 회차 등록 후에는 회차별 화면에서 이력을 확인하세요.')
             if order.status in ('완료','배송완료') or order.items.filter(inspection__isnull=False).exists():
                 raise AccessRejected('검수가 시작된 발주는 공급업체가 수정할 수 없습니다.')
             if order.needs_review or order.status not in ('대기','승인'):
