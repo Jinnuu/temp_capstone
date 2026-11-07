@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "steps": [
+    "legacy v1 current4/read1,2,3 restored unchanged, one step visible",
+    "next focuses heading without auto-completion; explicit reading persists on reload",
+    "full step list supports keyboard Home/End/Enter and closes on selection",
+    "all six titles/curry examples/optional explanations and actual work links checked with back navigation",
+    "guide reading, reset, navigation and work-link GETs generated zero business POST requests",
+    "all modes desktop/mobile; all six mobile steps no horizontal overflow and large navigation controls",
+    "shared browser separates reading progress by user",
+    "viewer primary links fall back to allowed read screen",
+    "cook cannot see forecast action, but can open cooking work",
+    "ordinary supplier remains in separate portal",
+    "blocked storage still permits navigation with visible warning",
+    "without JS all six explanations and work links readable, inert controls hidden"
+  ],
+  "pageErrors": [],
+  "serverErrors": [],
+  "scope": "isolated MariaDB; synthetic accounts only; no work data fixtures or writes"
+}

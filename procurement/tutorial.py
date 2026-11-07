@@ -1,54 +1,75 @@
-"""Static onboarding, filtered with the same server policy as real endpoints."""
+"""Beginner-only educational content. No business data or practice fixtures.
+
+Keep the six numeric IDs and v1 reading-state namespace stable. These routes are
+available in the deployed Preview; local Phase 2-A delivery routes are deliberately
+not advertised here. Add future capability content only after deployment.
+"""
 from django.urls import reverse
 from accounts.rbac import can, required_capability
 
 STEPS = [
-    {'number':1,'title':'식단 계획','why':'식단과 1인분 레시피가 식재료 소요량의 기준이 됩니다.',
-     'tasks':'일간·주간 식단을 작성하고 메뉴에 재료와 기준량을 연결합니다. 필요한 경우 기존 파일 업로드를 사용합니다.',
-     'inputs':'급식 날짜, 조식·중식·석식, 메뉴, 재료별 1인량과 기준 단위',
-     'result':'날짜·식사별 식단과 연결된 레시피',
-     'next':'다음 단계에서 같은 날짜·식사의 식수를 확인하고 확정합니다.',
-     'warning':'사용 완료된 식단과 연결 레시피는 덮어쓸 수 없습니다. 영양성분·알레르기 자동 검증을 제공한다고 가정하지 마세요.',
-     'routes':[('meals:weekly_mealplan_create','주간 식단 작성'),('meals:mealplan_list','식단표 조회'),('meals:menu_list','메뉴·레시피 관리'),('meals:recipe_upload_page','레시피 파일 업로드'),('inventory:ingredient_upload','식재료 파일 업로드')]},
-    {'number':2,'title':'AI 식수 예측 및 최종 식수 확정','why':'예측은 참고값이고 발주량의 기준은 영양사가 최종 확정한 인원입니다.',
-     'tasks':'AI 결과와 수동 예상 식수를 비교하고 식사별 최종 식수를 저장합니다. AI가 실패해도 수동 업무를 계속할 수 있습니다.',
-     'inputs':'날짜·식사, 수동 예상 인원, 최종 확정 인원',
-     'result':'예상 식수·최종 확정 식수와 확정 시각',
-     'next':'최종 식수가 확정되면 레시피와 결합해 발주 소요량을 계산합니다.',
-     'warning':'AI 예측·수동 예상·최종 확정·실측은 다릅니다. 미생성 / 수동 입력 가능 상태와 실제 0명을 구분합니다. 실측 입력 화면과 현재 DB 메뉴의 AI 입력 연결은 후속 범위입니다.',
-     'routes':[('forecasting:prediction_create','AI 예측 실행'),('forecasting:prediction_list','AI 예측 결과 조회'),('procurement:workflow_headcounts','예상·최종 식수 관리'),('forecasting:weekly_forecast_report','예측·실측 보고서')]},
-    {'number':3,'title':'식재료 소요량 계산 및 발주','why':'필요량과 재고, 납품 포장을 구분해야 부족하거나 중복된 발주를 줄일 수 있습니다.',
-     'tasks':'확정 식수와 1인량을 합산하고 재고·안전재고를 반영합니다. 납품규격을 확인한 뒤 발주예정서를 저장하고 업체별 구매발주서를 확정합니다.',
-     'inputs':'계산 기간, 최종 식수, 레시피, 실제 업체·납품규격, 필요한 수량 조정',
-     'result':'재료 소요량·발주 포장 수량, 저장한 예정서, 업체별 구매발주서',
-     'next':'발주 목록에서 업체와 납품 예정 정보를 확인하고 검수를 준비합니다.',
-     'warning':'35kg을 7통으로 환산하려면 5kg/통의 명시 규격이 필요합니다. 날짜별 묶음·금요일/주말 계산을 확인하세요. 재검토 표시가 있으면 최신 데이터로 다시 검토합니다. 취소·재발주 완결은 후속입니다.',
-     'routes':[('procurement:workflow_preview','소요량·발주예정서'),('procurement:workflow_plans','저장한 발주예정서'),('procurement:order_list','발주 목록'),('procurement:vendor_procurement_report','업체별 구매발주서'),('procurement:workflow_specs','납품규격 관리')]},
-    {'number':4,'title':'공급업체 납품 확인 및 검수','why':'공급업체의 수락·출고와 구매자의 실제 합격 입고는 서로 다른 업무입니다.',
-     'tasks':'구매자 화면에서 업체의 수주·납품 예정 정보를 확인합니다. 실제 물품의 수량·규격·상태·기한을 확인해 합격량을 저장합니다.',
-     'inputs':'실제 납품량, 검수 합격량, 확인 규격, 상태, 수량 차이 사유와 유통기한',
-     'result':'검수 기록과 합격 수량만큼의 입고',
-     'next':'재고와 수불에서 입고량을 확인하고 조리·사용 업무로 이동합니다.',
-     'warning':'공급업체 출고만으로 재고가 증가하지 않습니다. 같은 검수의 중복 제출은 추가 입고를 만들지 않습니다. 반복 분납·검수 정정·반품/재배송은 아직 완결되지 않았습니다.',
-     'routes':[('procurement:workflow_inspections','납품·검수 관리'),('procurement:daily_inspection_report','급식물품 검수일지'),('procurement:supplier_list','공급업체 현황')]},
-    {'number':5,'title':'재고 및 조리 관리','why':'조리 지시와 실제 재고 사용을 나눠 기록해야 필요량과 잔량을 대사할 수 있습니다.',
-     'tasks':'입고·사용·폐기·조정 내역과 주간 수불을 확인합니다. 날짜·식사별 조리지시서를 조회하고 현장 지시·비고를 저장해 Excel 또는 인쇄로 전달합니다.',
-     'inputs':'재고 기준 단위의 실제 거래량·일자·사유, 조리 지시·재료별 비고',
-     'result':'재고 로그·수불현황, 저장한 조리지시서와 출력 문서',
-     'next':'월말 정산 자료에서 발주·검수 금액과 사용 흐름을 대조합니다.',
-     'warning':'조리지시서 메모 저장이나 Excel 다운로드는 재고를 자동 차감하지 않습니다. 실제 사용은 별도 기록합니다. 조리 담당자별 작업 완료와 불변 발행본 이력은 후속 범위입니다.',
-     'routes':[('inventory:ingredient_list','재고 현황'),('procurement:workflow_transaction','선입고·사용·폐기·조정 기록'),('procurement:workflow_ledger','주간 수불현황'),('meals:cooking_index','조리지시서 조회·수정·출력')]},
-    {'number':6,'title':'정산 및 운영 분석','why':'발주와 실제 검수 합격량을 대조해 월별 운영 자료를 검토합니다.',
-     'tasks':'기간과 업체를 선택해 발주 금액·검수 합격 비례금액·미검수 품목을 확인하고 관련 문서를 출력합니다.',
-     'inputs':'조회 월·기간, 업체, 확인할 발주·검수·수불 내역',
-     'result':'월간 검토용 정산 자료와 업무 문서',
-     'next':'누락된 입력이나 재검토 사항을 확인하고 다음 기간의 식단 계획을 준비합니다.',
-     'warning':'발주 대상일과 검수 확정일의 월 기준이 다를 수 있습니다. 세금 기준이 없으면 지급액은 미확정입니다. 회계 마감·세금계산서 대사·식수당 원가를 완료 기능으로 안내하지 않습니다.',
-     'routes':[('procurement:workflow_settlement','월말 정산 검토'),('procurement:doc_monthly_settlement','월간 발주 정산서'),('docs_index','문서·보고서 모음')]},
+    {'number': 1, 'title': '어떤 음식을 만들까요?',
+     'sentence': '먼저 언제, 어떤 음식을 만들지 정해요.',
+     'example': '11월 10일 점심에 카레라이스를 만들기로 했어요.',
+     'scene_title': '11월 10일 · 점심', 'scene_detail': '오늘의 메뉴는 카레라이스',
+     'instructions': ['「주간 식단 작성」에서 날짜와 점심 칸을 찾아요.', '메뉴 검색에 카레라이스를 입력하고 후보를 누르면 바로 저장돼요. 메뉴가 없다면 먼저 메뉴·레시피 관리에서 등록해요.'],
+     'next': '메뉴를 정했어요. 이제 몇 명이 먹을지 생각해 볼까요?',
+     'term': '식단은 날짜별 음식 계획, 레시피는 음식에 들어가는 재료와 1인분 양이에요.',
+     'learn': '메뉴에는 재료별 1인분 양과 단위가 연결되어 있어야 해요. 이 예시의 날짜는 설명용이므로 실제 작업할 날짜를 선택하세요. 사용 완료된 식단은 덮어쓰지 못할 수 있어요.',
+     'routes': [('meals:weekly_mealplan_create', '주간 식단 작성'), ('meals:mealplan_list', '식단표 조회'), ('meals:menu_list', '메뉴·레시피 관리'), ('meals:recipe_upload_page', '레시피 파일 업로드'), ('inventory:ingredient_upload', '식재료 파일 업로드')]},
+    {'number': 2, 'title': '몇 명이 먹을까요?',
+     'sentence': '식사할 사람 수를 예상하고, 준비할 최종 인원을 정해요.',
+     'example': '카레라이스를 먹을 사람이 100명이라고 예상했어요. 확인 후 최종 인원도 100명으로 정해요.',
+     'scene_title': '준비할 사람 수 · 100명', 'scene_detail': 'AI는 참고 → 마지막 결정은 영양사',
+     'instructions': ['「예상·최종 식수 관리」에서 날짜와 식사를 선택해요.', '예상 인원과 최종 인원을 입력하고 확정 여부를 확인한 뒤 「식수 저장」을 눌러요.'],
+     'next': '100명으로 정했어요. 이 인원에게 필요한 재료의 양을 알아볼까요?',
+     'term': '식수는 식사하는 사람 수예요. AI 예측, 직접 예상, 최종 확정, 실제로 먹은 인원은 서로 달라요.',
+     'learn': 'AI 예측 결과는 참고값이에요. 예측이 없어도 직접 예상하고 최종 인원을 정할 수 있어요. 발주에는 최종 확정 인원을 사용해요. 실제 인원(실측)을 입력하지 않았다면 예측 오차도 알 수 없어요.',
+     'routes': [('procurement:workflow_headcounts', '예상·최종 식수 관리'), ('forecasting:prediction_list', 'AI 예측 결과 조회'), ('forecasting:prediction_create', 'AI 예측 실행'), ('forecasting:weekly_forecast_report', '예측·실측 보고서')]},
+    {'number': 3, 'title': '어떤 재료가 얼마나 필요할까요?',
+     'sentence': '필요한 재료의 양을 보고, 부족한 만큼 공급업체에 주문해요.',
+     'example': '교육용 카레 예시에서 감자 3kg, 당근 2kg, 양파 2kg이 필요하다고 해 볼게요. 이미 가진 양을 확인하고 부족분을 주문해요.',
+     'scene_title': '교육용 재료 예시', 'scene_detail': '감자 3kg · 당근 2kg · 양파 2kg',
+     'instructions': ['「소요량·발주예정서」에서 기간을 고르고 「미리보기」를 눌러요.', '수량과 실제 포장규격을 확인하고 「발주예정서 저장」을 눌러요. 저장한 문서에서 「업체별 구매발주서 확정·저장」을 눌러 주문을 확정해요.'],
+     'next': '주문을 확인했어요. 재료가 도착하면 수량과 상태를 살펴봐요.',
+     'term': '소요량은 필요한 재료의 양, 발주는 공급업체에 재료를 주문하는 일이에요.',
+     'learn': '예시 수량은 실제 레시피나 영양 기준이 아닙니다. 실제 계산에는 등록한 레시피와 최종 인원, 재고를 사용해요. 포장 수량은 등록한 실제 규격으로만 계산해요. 예를 들어 5kg/통이 등록되어 있을 때만 kg을 통으로 바꿀 수 있어요.',
+     'routes': [('procurement:workflow_preview', '소요량·발주예정서'), ('procurement:workflow_plans', '저장한 발주예정서'), ('procurement:order_list', '발주 목록'), ('procurement:vendor_procurement_report', '업체별 구매발주서'), ('procurement:workflow_specs', '납품규격 관리')]},
+    {'number': 4, 'title': '주문한 재료가 잘 도착했나요?',
+     'sentence': '도착한 재료의 수량과 상태를 확인하고, 사용할 수 있는 양만 등록해요.',
+     'example': '카레용 감자 3kg이 도착했어요. 수량과 상태가 괜찮다면 합격량을 3kg으로 기록해요.',
+     'scene_title': '도착한 감자 · 3kg', 'scene_detail': '수량·상태 확인 → 합격한 양만 재고로',
+     'instructions': ['「납품·검수 관리」에서 주문한 품목의 「검수 기록·확인」을 눌러요.', '실제 납품량, 합격량, 규격과 상태를 확인한 뒤 「저장·확정」을 눌러요. 차이가 있으면 사유도 적어요.'],
+     'next': '사용할 수 있는 재료를 확인했어요. 이제 조리를 준비해 볼까요?',
+     'term': '검수는 도착한 재료의 수량과 상태 확인, 입고는 확인한 재료를 재고에 등록하는 일이에요.',
+     'learn': '업체가 출고했다고 재고가 바로 늘지는 않아요. 구매자가 합격량을 저장해야 반영돼요. 잘못 검수했거나 여러 번 나누어 납품하는 경우에는 담당자에게 확인하세요. 공개 Preview의 정정·반품 절차는 아직 완성되지 않았어요.',
+     'routes': [('procurement:workflow_inspections', '납품·검수 관리'), ('procurement:daily_inspection_report', '급식물품 검수일지'), ('procurement:supplier_list', '공급업체 현황')]},
+    {'number': 5, 'title': '이제 음식을 준비해 볼까요?',
+     'sentence': '재료와 조리할 양을 확인하고, 조리할 사람에게 준비 내용을 전달해요.',
+     'example': '100명분 카레라이스의 조리지시서를 확인해요. 감자·당근·양파가 준비됐는지 보고 조리할 때 필요한 메모를 남겨요.',
+     'scene_title': '카레라이스 · 100명분 준비', 'scene_detail': '재료 확인 → 조리지시서 전달',
+     'instructions': ['「조리지시서 조회·수정·출력」에서 날짜와 식사를 골라요.', '재료의 양과 메모를 확인한 뒤 필요한 내용을 저장하거나 Excel·인쇄로 전달해요. 실제 재료 사용량은 별도 재고 기록에 남겨요.'],
+     'next': '조리 준비를 마쳤어요. 마지막으로 오늘의 기록을 확인해요.',
+     'term': '조리지시서는 어떤 음식을 얼마나 준비할지 전달하는 문서예요.',
+     'learn': '조리지시서를 저장하거나 Excel로 받는 것만으로 재고가 줄지 않아요. 실제 사용량은 「선입고·사용·폐기·조정 기록」에서 별도로 남겨요. 사용량 입력도 실제 업무 기록이므로 확인 후 저장하세요.',
+     'routes': [('meals:cooking_index', '조리지시서 조회·수정·출력'), ('inventory:ingredient_list', '재고 현황'), ('procurement:workflow_transaction', '선입고·사용·폐기·조정 기록'), ('procurement:workflow_ledger', '주간 수불현황')]},
+    {'number': 6, 'title': '오늘 급식은 어떻게 마무리할까요?',
+     'sentence': '주문한 재료, 들어온 재료, 사용한 재료와 금액을 돌아봐요.',
+     'example': '100명분 카레 급식이 끝났어요. 감자가 얼마나 들어오고 사용됐는지, 주문·납품 금액에 확인할 내용은 없는지 살펴봐요.',
+     'scene_title': '오늘 기록 돌아보기', 'scene_detail': '주문 → 도착 → 사용 → 금액 확인',
+     'instructions': ['「월말 정산 검토」에서 확인할 월과 업체를 골라 조회해요.', '「주간 수불현황」에서 재료가 들어오고 사용된 기록도 확인해요. 빠진 내용은 해당 업무 메뉴에서 확인하세요.'],
+     'next': '전체 흐름을 살펴봤어요. 다음 급식도 음식 계획부터 같은 순서로 시작하면 돼요.',
+     'term': '수불은 재료가 들어오고 사용된 기록, 정산은 주문·납품 금액을 확인하는 일이에요.',
+     'learn': '정산 화면은 검토용 자료예요. 세금 기준이 없으면 최종 지급액은 아직 정해지지 않아요. 이 가이드를 다 읽어도 실제 주문·검수는 처리되지 않아요.',
+     'routes': [('procurement:workflow_settlement', '월말 정산 검토'), ('procurement:workflow_ledger', '주간 수불현황'), ('procurement:doc_monthly_settlement', '월간 발주 정산서'), ('docs_index', '문서·보고서 모음')]},
 ]
 
 
 def steps_for(user):
-    return [{**{key:value for key,value in step.items() if key!='routes'},
-             'links':[{'url':reverse(name),'label':label} for name,label in step['routes']
-                      if can(user,required_capability(name,'GET'))]} for step in STEPS]
+    result = []
+    for step in STEPS:
+        links = [{'url': reverse(name), 'label': label} for name, label in step['routes']
+                 if can(user, required_capability(name, 'GET'))]
+        result.append({**{key: value for key, value in step.items() if key != 'routes'},
+                       'links': links, 'primary': links[0] if links else None})
+    return result

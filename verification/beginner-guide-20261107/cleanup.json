@@ -1,0 +1,10 @@
+{
+  "task": "beginner-guide-20261107",
+  "removed_containers": [
+    "/snp-beginner-browser-20261107",
+    "/snp-beginner-cache-20261107",
+    "/snp-beginner-db-20261107"
+  ],
+  "removed_network": "snp-beginner-tests-20261107",
+  "storage": "task tmpfs only, no existing volumes removed"
+}

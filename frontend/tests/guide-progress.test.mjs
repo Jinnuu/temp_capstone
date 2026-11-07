@@ -27,3 +27,14 @@ test('100 percent requires six explicit reading acknowledgements',()=>{
 test('storage namespaces are user scoped without usernames',()=>{
  assert.notEqual(progressKey('1'),progressKey('2'));assert.equal(progressKey(''),null);assert.equal(progressKey('admin'),null);
 });
+test('existing v1 reading progress survives the beginner content redesign',()=>{
+ const old=JSON.parse('{"current":4,"completed":[1,2,3]}');
+ assert.deepEqual(normalizeProgress(old),old);
+ assert.equal(progressKey('27'),'snp.guide.nutritionist.v1.27');
+ assert.equal(percentage(old),50);
+});
+test('opening work links or selecting a step cannot imply reading completion',()=>{
+ const state=normalizeProgress({current:3,completed:[1]});
+ assert.deepEqual(move(state,1),{current:4,completed:[1]});
+ assert.equal(percentage(state),17);
+});

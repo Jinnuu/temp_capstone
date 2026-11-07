@@ -1,0 +1,11 @@
+{
+  "unchanged": true,
+  "service_count": 8,
+  "compared": [
+    "container id",
+    "image id",
+    "start time",
+    "mount metadata",
+    "port bindings"
+  ]
+}

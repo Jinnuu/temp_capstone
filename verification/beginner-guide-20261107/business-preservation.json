@@ -1,0 +1,6 @@
+{
+  "unchanged": true,
+  "model_count": 26,
+  "scope": "isolated browser database; business model counts and ordered row-content hashes",
+  "no_business_fixtures": true
+}

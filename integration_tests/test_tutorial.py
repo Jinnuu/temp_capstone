@@ -122,3 +122,43 @@ class NutritionistTutorialTests(TestCase):
                     u=User.objects.get(username=data['username']);self.assertFalse(u.is_active);self.assertEqual(u.account_state,'PENDING')
                     self.assertFalse(u.is_superuser);self.assertFalse(self.client.login(username=u.username,password=data['password1']))
         self.user.refresh_from_db();self.assertTrue(self.user.is_active)
+
+    def test_beginner_titles_and_one_continuous_educational_story(self):
+        r=self.client.get(reverse('procurement:workflow'))
+        expected=['어떤 음식을 만들까요?','몇 명이 먹을까요?','어떤 재료가 얼마나 필요할까요?',
+                  '주문한 재료가 잘 도착했나요?','이제 음식을 준비해 볼까요?','오늘 급식은 어떻게 마무리할까요?']
+        self.assertEqual([s['title'] for s in r.context['steps']],expected)
+        for step in r.context['steps']:
+            self.assertTrue(step['sentence'])
+            self.assertTrue(step['example'])
+            self.assertTrue(step['instructions'])
+            self.assertIn('카레',step['example'])
+        self.assertContains(r,'교육용 예시')
+        self.assertContains(r,'실제 레시피나 영양 기준이 아닙니다')
+
+    def test_beginner_guide_has_primary_action_and_optional_depth(self):
+        r=self.client.get(reverse('procurement:workflow'))
+        self.assertContains(r,'data-guide-more',count=6)
+        self.assertContains(r,'data-guide-try',count=6)
+        self.assertContains(r,'전체 6단계 보기')
+        self.assertContains(r,'실제 업무 화면')
+        self.assertNotContains(r,'/deliveries/')
+        self.assertContains(r,'연습 데이터를 자동으로 만들지 않습니다')
+        for step in r.context['steps']:
+            self.assertIn(step['primary'],step['links'])
+
+    def test_beginner_primary_links_are_filtered_for_limited_roles(self):
+        for role in ('VIEWER','COOK'):
+            self.client.force_login(self.role_user(role))
+            steps=self.client.get(reverse('procurement:workflow')).context['steps']
+            for step in steps:
+                if step['primary']:
+                    self.assertIn(step['primary'],step['links'])
+                    self.assertEqual(self.client.get(step['primary']['url']).status_code,200)
+                else:self.assertEqual(step['links'],[])
+
+    def test_beginner_guidance_matches_real_button_labels(self):
+        r=self.client.get(reverse('procurement:workflow'))
+        for label in ('식수 저장','미리보기','발주예정서 저장','저장·확정'):
+            self.assertContains(r,label)
+        self.assertEqual(self.plan.headcount,120)

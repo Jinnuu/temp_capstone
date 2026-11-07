@@ -1,0 +1,209 @@
+[
+  {
+    "name": "/my-capstone",
+    "id": "af87f930cc3d71df0416e2620d2af53186b8f76eeeafcf892a7653b209190cba",
+    "image": "sha256:19badeda32155f84d93d22097b7da4404a10cd6188b15a12ae9790e78131afbb",
+    "started": "2026-09-05T02:38:46.467089255Z",
+    "mounts": [],
+    "ports": {
+      "8000/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8000"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "8000"
+        }
+      ]
+    }
+  },
+  {
+    "name": "/my-capstone-sprint7",
+    "id": "1c7f76154122eea9e3b86ef6b2ab8a29b07b4731254ff803664f81f4ccef66bd",
+    "image": "sha256:8b128d4a45565b0a80c623b923c83d0441632ecfd759fb20f768be0da91947b3",
+    "started": "2026-09-05T02:38:46.436661546Z",
+    "mounts": [],
+    "ports": {
+      "8000/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8007"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "8007"
+        }
+      ]
+    }
+  },
+  {
+    "name": "/snp-presentation",
+    "id": "6288dfabbd22746023e281107ddfb9f27ae25f2009536afb9861b047bd55f9c3",
+    "image": "sha256:a4eebcfde418886215df694c29d592e8742b9fdb54d3b3cfb9acd8871fca140a",
+    "started": "2026-10-18T15:39:31.331904543Z",
+    "mounts": [],
+    "ports": {
+      "8000/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "8010"
+        }
+      ]
+    }
+  },
+  {
+    "name": "/snp-ui-preview-web-1",
+    "id": "57156b705d71f4e08f62c679b7dfbe04682643f22f333b670244fa01c8c9fe60",
+    "image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+    "started": "2026-11-06T01:27:57.364459886Z",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/demo_password",
+        "Destination": "/run/secrets/demo_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+        "Destination": "/run/secrets/django_secret",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/preview_admin_password",
+        "Destination": "/run/secrets/preview_admin_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+        "Destination": "/run/secrets/smtp_password",
+        "RW": false
+      }
+    ],
+    "ports": {}
+  },
+  {
+    "name": "/snp-ui-preview-proxy-1",
+    "id": "43f0078a0fc4981d9035ec9efb40972c75f3c3f16c42524758eb41c27a34ddb8",
+    "image": "sha256:ea99e00453499951e2f3047946f885fec9c7ccb204a4024e56c429a5868af719",
+    "started": "2026-11-06T01:28:33.555967579Z",
+    "mounts": [],
+    "ports": {
+      "80/tcp": null,
+      "8080/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8011"
+        }
+      ]
+    }
+  },
+  {
+    "name": "/snp-ui-preview-db-1",
+    "id": "8241a958a52fa5c36b2b21eaeb0c2bf6c9470a628aa731f2e2da01a30dad3244",
+    "image": "sha256:6055d4ee6a6045626442cafe4feaf7419e878c65baf3af658265e24114af1cd7",
+    "started": "2026-11-04T18:57:13.430932197Z",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_root_password",
+        "Destination": "/run/secrets/db_root_password",
+        "RW": false
+      },
+      {
+        "Type": "volume",
+        "Name": "snp-ui-preview_preview_db",
+        "Source": "/var/lib/docker/volumes/snp-ui-preview_preview_db/_data",
+        "Destination": "/var/lib/mysql",
+        "RW": true
+      }
+    ],
+    "ports": {
+      "3306/tcp": null
+    }
+  },
+  {
+    "name": "/snp-ui-preview-recovery-cache-1",
+    "id": "8649463dd9fa5862904a9c6dd6b2e998ca1e0f74d5a351e63a959da10213b0d5",
+    "image": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "started": "2026-11-05T07:26:09.996291993Z",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "RW": false
+      }
+    ],
+    "ports": {
+      "6379/tcp": null
+    }
+  },
+  {
+    "name": "/snp-ui-preview-recovery-mail-1",
+    "id": "86d620356898d49328fcdcea1e56d0e0499ff231b04680c4c59c763627ce6b26",
+    "image": "sha256:6ce4556a8f301cf8c14020379b858113b0ac6e8218fd3bb64e2713f0350e7644",
+    "started": "2026-11-06T01:27:57.361878844Z",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/db_password",
+        "Destination": "/run/secrets/db_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/django_secret",
+        "Destination": "/run/secrets/django_secret",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/recovery_cache_password",
+        "Destination": "/run/secrets/recovery_cache_password",
+        "RW": false
+      },
+      {
+        "Type": "bind",
+        "Name": null,
+        "Source": "/home/woohyeak/sprint7-integration/.ui-preview/smtp_password",
+        "Destination": "/run/secrets/smtp_password",
+        "RW": false
+      }
+    ],
+    "ports": {}
+  }
+]

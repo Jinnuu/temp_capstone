@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: restores only a valid saved appearance
+ok 1 - restores only a valid saved appearance
+  ---
+  duration_ms: 2.43139
+  type: 'test'
+  ...
+# Subtest: invalid stored values cannot create an arbitrary class
+ok 2 - invalid stored values cannot create an arbitrary class
+  ---
+  duration_ms: 0.875919
+  type: 'test'
+  ...
+# Subtest: blocked storage still renders the reference screen
+ok 3 - blocked storage still renders the reference screen
+  ---
+  duration_ms: 0.957878
+  type: 'test'
+  ...
+# Subtest: comparison frame overrides appearance without reading parent selection
+ok 4 - comparison frame overrides appearance without reading parent selection
+  ---
+  duration_ms: 1.457468
+  type: 'test'
+  ...
+# Subtest: invalid frame parameters do not enable preview mode
+ok 5 - invalid frame parameters do not enable preview mode
+  ---
+  duration_ms: 1.483459
+  type: 'test'
+  ...
+# Subtest: fresh browser uses the reference appearance
+ok 6 - fresh browser uses the reference appearance
+  ---
+  duration_ms: 0.925585
+  type: 'test'
+  ...
+# Subtest: malformed progress resets to a safe reading state
+ok 7 - malformed progress resets to a safe reading state
+  ---
+  duration_ms: 2.222735
+  type: 'test'
+  ...
+# Subtest: completion is a distinct bounded set of step integers
+ok 8 - completion is a distinct bounded set of step integers
+  ---
+  duration_ms: 0.373844
+  type: 'test'
+  ...
+# Subtest: unknown fields and business values never enter stored state
+ok 9 - unknown fields and business values never enter stored state
+  ---
+  duration_ms: 0.217731
+  type: 'test'
+  ...
+# Subtest: previous next do not complete any business or reading task
+ok 10 - previous next do not complete any business or reading task
+  ---
+  duration_ms: 0.424471
+  type: 'test'
+  ...
+# Subtest: reading acknowledgement is idempotent and remains local state
+ok 11 - reading acknowledgement is idempotent and remains local state
+  ---
+  duration_ms: 0.389202
+  type: 'test'
+  ...
+# Subtest: 100 percent requires six explicit reading acknowledgements
+ok 12 - 100 percent requires six explicit reading acknowledgements
+  ---
+  duration_ms: 0.335037
+  type: 'test'
+  ...
+# Subtest: storage namespaces are user scoped without usernames
+ok 13 - storage namespaces are user scoped without usernames
+  ---
+  duration_ms: 0.555653
+  type: 'test'
+  ...
+# Subtest: existing v1 reading progress survives the beginner content redesign
+ok 14 - existing v1 reading progress survives the beginner content redesign
+  ---
+  duration_ms: 0.270998
+  type: 'test'
+  ...
+# Subtest: opening work links or selecting a step cannot imply reading completion
+ok 15 - opening work links or selecting a step cannot imply reading completion
+  ---
+  duration_ms: 0.513887
+  type: 'test'
+  ...
+# Subtest: batch serving reserves safety stock once across repeated ingredients
+ok 16 - batch serving reserves safety stock once across repeated ingredients
+  ---
+  duration_ms: 2.31631
+  type: 'test'
+  ...
+# Subtest: each ingredient starts from its own real stock
+ok 17 - each ingredient starts from its own real stock
+  ---
+  duration_ms: 0.378565
+  type: 'test'
+  ...
+# Subtest: reapplying a different headcount starts from real stock
+ok 18 - reapplying a different headcount starts from real stock
+  ---
+  duration_ms: 0.560566
+  type: 'test'
+  ...
+# Subtest: fractional quantities remain stable to two decimal places
+ok 19 - fractional quantities remain stable to two decimal places
+  ---
+  duration_ms: 0.420214
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 101.046565

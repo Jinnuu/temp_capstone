@@ -485,66 +485,68 @@ function w() {
 	e && T(e);
 }
 function T(e) {
-	let t = document.documentElement.dataset.snpPreview === "true", n = C(e.dataset.progressKey?.split(".").pop() || ""), r = y(null), i = !0, a = e.querySelector("[data-guide-status]");
-	if (!t && n) try {
-		let e = localStorage.getItem(n);
-		e && (r = y(JSON.parse(e)));
+	e.dataset.guideEnhanced = "true";
+	let t = e.querySelector("[data-guide-index]"), n = document.documentElement.dataset.snpPreview === "true", r = C(e.dataset.progressKey?.split(".").pop() || ""), i = y(null), a = !0, o = e.querySelector("[data-guide-status]");
+	if (!n && r) try {
+		let e = localStorage.getItem(r);
+		e && (i = y(JSON.parse(e)));
 	} catch {
-		i = !1;
+		a = !1;
 	}
-	let o = Array.from(e.querySelectorAll("[data-guide-step]")), s = Array.from(e.querySelectorAll("[data-guide-go]"));
-	function c() {
-		if (!t && n) try {
-			localStorage.setItem(n, JSON.stringify(r));
+	let s = Array.from(e.querySelectorAll("[data-guide-step]")), c = Array.from(e.querySelectorAll("[data-guide-go]"));
+	function l() {
+		if (!n && r) try {
+			localStorage.setItem(r, JSON.stringify(i));
 		} catch {
-			i = !1;
+			a = !1;
 		}
 	}
-	function l(n = !1) {
-		let c = r.current;
-		for (let e of o) {
-			let t = Number(e.dataset.guideStep) === c;
-			e.open = t, e.classList.toggle("is-current", t);
-		}
+	function u(t = !1) {
+		let r = i.current;
+		e.dataset.guideStorage = a ? "ok" : "blocked";
 		for (let e of s) {
+			let t = Number(e.dataset.guideStep) === r;
+			e.hidden = !t, e.open = t, e.classList.toggle("is-current", t);
+		}
+		for (let e of c) {
 			let t = Number(e.dataset.guideGo);
-			e.toggleAttribute("data-read", r.completed.includes(t)), t === c ? e.setAttribute("aria-current", "step") : e.removeAttribute("aria-current");
+			e.toggleAttribute("data-read", i.completed.includes(t)), t === r ? e.setAttribute("aria-current", "step") : e.removeAttribute("aria-current");
 		}
 		let l = e.querySelector("[data-guide-progress]");
-		l && (l.value = r.completed.length);
+		l && (l.value = i.completed.length);
 		let u = e.querySelector("[data-guide-progress-text]");
-		u && (u.textContent = `읽은 단계 ${r.completed.length} / 6 (${S(r)}%)`);
+		u && (u.textContent = `읽은 단계 ${i.completed.length} / 6 (${S(i)}%)`);
 		let d = e.querySelector("[data-guide-prev]");
-		d && (d.disabled = t || c === 1);
+		d && (d.disabled = n || r === 1);
 		let f = e.querySelector("[data-guide-next]");
-		f && (f.disabled = t || c === 6);
+		f && (f.disabled = n || r === 6);
 		let p = e.querySelector("[data-guide-read]");
-		p && (p.setAttribute("aria-pressed", String(r.completed.includes(c))), p.textContent = r.completed.includes(c) ? "이 단계 읽음 표시됨" : "이 단계 읽음 표시"), a && (a.textContent = i ? `${c}단계 안내입니다. 읽음 표시는 실제 업무를 저장하거나 확정하지 않습니다.` : "브라우저 저장을 사용할 수 없어 현재 화면에서만 진행합니다. 업무 메뉴는 정상 이용할 수 있습니다."), n && o[c - 1]?.querySelector("h2")?.focus();
+		p && (p.setAttribute("aria-pressed", String(i.completed.includes(r))), p.textContent = i.completed.includes(r) ? "이해했어요 ✓" : "이해했어요"), o && (o.textContent = a ? i.completed.length === 6 ? "6단계를 모두 읽었어요. 실제 업무는 각 화면에서 확인하고 저장하세요." : `${r}단계예요. 읽었다면 이해했어요를 눌러 주세요.` : "브라우저 저장을 사용할 수 없어 현재 화면에서만 진행합니다. 업무 메뉴는 정상 이용할 수 있습니다."), t && s[r - 1]?.querySelector("h2")?.focus();
 	}
-	function u(e) {
-		r = y({
-			...r,
+	function d(e, n = !1) {
+		i = y({
+			...i,
 			current: e
-		}), c(), l(!0);
+		}), l(), t && !n && (t.open = !1), u(!n);
 	}
-	for (let e of s) e.addEventListener("click", () => u(Number(e.dataset.guideGo))), e.addEventListener("keydown", (e) => {
+	for (let e of c) e.addEventListener("click", () => d(Number(e.dataset.guideGo))), e.addEventListener("keydown", (e) => {
 		[
 			"ArrowLeft",
 			"ArrowRight",
 			"Home",
 			"End"
-		].includes(e.key) && (e.preventDefault(), u(e.key === "Home" ? 1 : e.key === "End" ? 6 : x(r, e.key === "ArrowLeft" ? -1 : 1).current), s[r.current - 1]?.focus());
+		].includes(e.key) && (e.preventDefault(), d(e.key === "Home" ? 1 : e.key === "End" ? 6 : x(i, e.key === "ArrowLeft" ? -1 : 1).current, !0), c[i.current - 1]?.focus());
 	});
-	for (let e of o) e.querySelector("summary")?.addEventListener("click", (t) => {
+	for (let e of s) e.querySelector("summary")?.addEventListener("click", (t) => {
 		t.preventDefault();
 		let n = Number(e.dataset.guideStep);
-		n === r.current ? e.open = !e.open : u(n);
+		n === i.current ? e.open = !e.open : d(n);
 	});
-	e.querySelector("[data-guide-prev]")?.addEventListener("click", () => u(x(r, -1).current)), e.querySelector("[data-guide-next]")?.addEventListener("click", () => u(x(r, 1).current)), e.querySelector("[data-guide-read]")?.addEventListener("click", () => {
-		r = b(r), c(), l();
+	e.querySelector("[data-guide-prev]")?.addEventListener("click", () => d(x(i, -1).current)), e.querySelector("[data-guide-next]")?.addEventListener("click", () => d(x(i, 1).current)), e.querySelector("[data-guide-read]")?.addEventListener("click", () => {
+		i = b(i), l(), u();
 	}), e.querySelector("[data-guide-reset]")?.addEventListener("click", () => {
-		r = y(null), c(), l(!0);
-	}), l();
+		i = y(null), l(), t && (t.open = !1), u(!0);
+	}), u();
 }
 // src/brand.ts
 var E = {

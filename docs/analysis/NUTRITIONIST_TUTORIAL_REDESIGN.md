@@ -1,3 +1,5 @@
+> 2026-11-07 후속: [초보자용 재설계 및 최신 검증](NUTRITIONIST_BEGINNER_TUTORIAL.md)을 참조하세요. 아래는 이전 배포 당시 기록입니다. 신규 가이드는 로컬·격리 환경만 검증했고 Preview에 배포하지 않았습니다.
+
 # 영양사 업무 가이드 개편
 
 2026-11-06 KST. 시작HEAD3236e07, feature/ui-redesign-three-modes. 이 문서의 계획은 구현/검증 결과로 후속 갱신한다. 기존 change_password.sh는 보존하고 실행하지 않는다.

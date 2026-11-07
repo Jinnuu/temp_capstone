@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(box.height>=44)
+
+    at /home/woohyeak/sprint7-integration/verification/beginner-guide-20261107/browser-guide.cjs:32:263 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
